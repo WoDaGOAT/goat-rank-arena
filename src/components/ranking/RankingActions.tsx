@@ -10,6 +10,9 @@ interface RankingActionsProps {
   saveLabel: string;
 }
 
+const commonButtonStyle =
+  "h-[44px] px-6 rounded-full font-semibold text-lg leading-[44px] flex items-center justify-center py-0";
+
 const RankingActions: React.FC<RankingActionsProps> = ({
   categoryId,
   disabled,
@@ -19,7 +22,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
     <Button
       asChild
       size="lg"
-      className="bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] rounded-full h-[44px] px-6 font-semibold text-lg shadow"
+      className={`bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] shadow ${commonButtonStyle}`}
     >
       <Link to={categoryId ? `/category/${categoryId}` : "/"}>
         Cancel
@@ -29,7 +32,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
       size="lg"
       variant="cta"
       disabled={disabled}
-      className="rounded-full h-[44px]"
+      className={`${commonButtonStyle} ${disabled ? "bg-white text-[#A2A2A2] shadow-none border-0" : ""}`}
     >
       <Save className="mr-2 h-5 w-5" />
       {saveLabel}
@@ -38,3 +41,4 @@ const RankingActions: React.FC<RankingActionsProps> = ({
 );
 
 export default RankingActions;
+
