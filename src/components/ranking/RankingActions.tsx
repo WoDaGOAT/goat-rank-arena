@@ -19,7 +19,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
     <Button
       asChild
       size="lg"
-      className="bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] rounded-full"
+      className="bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] rounded-full h-[44px] px-6 font-semibold text-lg shadow"
     >
       <Link to={categoryId ? `/category/${categoryId}` : "/"}>
         Cancel
@@ -38,3 +38,4 @@ const RankingActions: React.FC<RankingActionsProps> = ({
 );
 
 export default RankingActions;
+
