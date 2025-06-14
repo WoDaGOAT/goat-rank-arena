@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
+import LoginDialog from '@/components/auth/LoginDialog';
 
 type Profile = Database['public']['Tables']['profiles']['Row'] & {
   country?: string | null;
@@ -15,6 +16,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   refetchUser: () => Promise<void>;
+  openLoginDialog: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   refetchUser: async () => {},
+  openLoginDialog: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -30,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   const fetchUserAndProfile = useCallback(async () => {
     setLoading(true);
@@ -78,15 +82,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [fetchUserAndProfile]);
 
+  const openLoginDialog = () => setIsLoginDialogOpen(true);
+
   const value = {
     user,
     session,
     profile,
     loading,
     refetchUser: fetchUserAndProfile,
+    openLoginDialog,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+      <LoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

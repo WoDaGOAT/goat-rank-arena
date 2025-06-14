@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
@@ -8,13 +9,18 @@ import { ChevronLeft, Users, Info, TrendingUp, Heart, MessageSquare } from "luci
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Database } from "@/integrations/supabase/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SocialActions } from "@/components/category/SocialActions";
 import CommentSection from "@/components/category/CommentSection";
 import { useAuth } from "@/contexts/AuthContext";
 
-type DbCategory = Database['public']['Tables']['categories']['Row'];
+type DbCategory = {
+    id: string;
+    name: string;
+    description: string | null;
+    image_url: string | null;
+    created_at: string;
+};
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
