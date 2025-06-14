@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -44,12 +45,13 @@ const Navbar = () => {
                   Categories
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[400px] md:grid-cols-2 lg:w-[500px]">
+                  <ul className="grid w-[300px] gap-3 p-4 md:w-[400px] md:grid-cols-2 lg:w-[500px] bg-blue-800 text-white rounded-lg shadow-lg">
                     {mockCategories.map((category) => (
                       <ListItem
                         key={category.id}
                         to={`/category/${category.id}`}
                         title={category.name}
+                        className="text-white hover:bg-blue-700"
                       >
                         {category.description.substring(0, 70) + (category.description.length > 70 ? "..." : "")}
                       </ListItem>
@@ -64,12 +66,13 @@ const Navbar = () => {
                   Main Category A
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg">
                     {newCategoryItems.map((item) => (
                       <ListItem
                         key={`a-${item.id}`}
                         to="#"
                         title={item.title}
+                        className="text-white hover:bg-blue-700"
                       >
                         {item.description}
                       </ListItem>
@@ -84,12 +87,13 @@ const Navbar = () => {
                   Main Category B
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg">
                     {newCategoryItems.map((item) => (
                       <ListItem
                         key={`b-${item.id}`}
                         to="#"
                         title={item.title}
+                        className="text-white hover:bg-blue-700"
                       >
                         {item.description}
                       </ListItem>
@@ -104,12 +108,13 @@ const Navbar = () => {
                   Main Category C
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg">
                     {newCategoryItems.map((item) => (
                       <ListItem
                         key={`c-${item.id}`}
                         to="#"
                         title={item.title}
+                        className="text-white hover:bg-blue-700"
                       >
                         {item.description}
                       </ListItem>
@@ -148,13 +153,14 @@ const ListItem = React.forwardRef<
           ref={ref}
           to={to || "#"} // Ensure 'to' has a default value
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            // Menu link style, force white text, improve hover for new bg
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors focus:bg-blue-700 focus:text-white",
             className
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none text-foreground">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug">
             {children}
           </p>
         </Link>
@@ -165,3 +171,4 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
+
