@@ -1,9 +1,21 @@
 
 import LoginDialog from "@/components/auth/LoginDialog";
 import SignupDialog from "@/components/auth/SignupDialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import UserMenu from "./UserMenu";
 
 const AuthButtons = () => {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return <div className="h-9 w-24 animate-pulse rounded-md bg-white/10" />;
+    }
+
+    if (user) {
+        return <UserMenu />;
+    }
+
     return (
         <div className="flex items-center gap-2 md:gap-4 ml-2">
             {/* SIGN UP Button */}
