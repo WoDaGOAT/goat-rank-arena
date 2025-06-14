@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 
 const UserProfilePage = () => {
   const { user, profile, loading, refetchUser } = useAuth();
@@ -20,6 +20,7 @@ const UserProfilePage = () => {
   const [country, setCountry] = useState('');
   const [favoriteSports, setFavoriteSports] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const availableSports = ["Football", "Basketball", "Tennis", "Formula 1", "MMA"];
 
@@ -73,6 +74,59 @@ const UserProfilePage = () => {
     );
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) return;
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    try {
+      // First, remove old avatar if it exists
+      if (profile?.avatar_url) {
+          const oldAvatarPath = profile.avatar_url.split('/').pop();
+          if(oldAvatarPath) {
+            await supabase.storage.from('avatars').remove([oldAvatarPath]);
+          }
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+      
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+      
+      if (updateError) {
+        throw updateError;
+      }
+
+      toast.success("Avatar updated successfully!");
+      await refetchUser();
+
+    } catch (error: any) {
+      toast.error(error.message || "Failed to upload avatar.");
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -87,10 +141,30 @@ const UserProfilePage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={profile?.avatar_url || undefined} alt={name} />
-                  <AvatarFallback>{name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <div className="relative group">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={profile?.avatar_url || undefined} alt={name} />
+                    <AvatarFallback>{name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <label 
+                    htmlFor="avatar-upload" 
+                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-8 w-8 text-white animate-spin" />
+                    ) : (
+                      <ImageIcon className="h-8 w-8 text-white" />
+                    )}
+                  </label>
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    className="hidden"
+                    accept="image/png, image/jpeg, image/gif"
+                    onChange={handleAvatarUpload}
+                    disabled={isUploading}
+                  />
+                </div>
                 <div>
                   <h2 className="text-xl font-semibold">{name || user.email}</h2>
                   <p className="text-gray-400">{user.email}</p>
