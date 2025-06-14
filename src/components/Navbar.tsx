@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -36,7 +35,8 @@ const Navbar = () => {
           wodagoat
         </Link>
 
-        <div className="flex items-center space-x-2 md:space-x-4"> {/* Adjusted space for more items */}
+        {/* Centered Navigation Menu */}
+        <div className="flex-grow flex justify-center">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -120,11 +120,14 @@ const Navbar = () => {
 
             </NavigationMenuList>
           </NavigationMenu>
+        </div>
 
-          <Button variant="outline" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
+        {/* Auth Buttons on the right */}
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <Button variant="default"> {/* Changed variant and removed custom classes */}
             Log In
           </Button>
-          <Button variant="secondary" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+          <Button variant="default"> {/* Changed variant and removed custom classes */}
             Sign Up
           </Button>
         </div>
@@ -162,4 +165,3 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
-
