@@ -29,7 +29,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
       size="lg"
       variant="cta"
       disabled={disabled}
-      className="rounded-full"
+      className="rounded-full h-[44px]"
     >
       <Save className="mr-2 h-5 w-5" />
       {saveLabel}
@@ -38,4 +38,3 @@ const RankingActions: React.FC<RankingActionsProps> = ({
 );
 
 export default RankingActions;
-
