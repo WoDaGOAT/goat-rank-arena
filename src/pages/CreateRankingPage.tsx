@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,27 +8,6 @@ import { useEffect, useState } from "react";
 import { Category, Athlete } from "@/types";
 import { ChevronLeft, Save, Search, Plus, X, GripVertical } from "lucide-react";
 import Navbar from "@/components/Navbar";
-
-// Mock larger athlete database - in real app this would come from API
-const allAthletes: Athlete[] = [
-  // Keep existing athletes from category
-  { id: "1", name: "Lionel Messi", rank: 1, points: 95, movement: "neutral" },
-  { id: "2", name: "Cristiano Ronaldo", rank: 2, points: 94, movement: "up" },
-  { id: "3", name: "Kylian Mbappé", rank: 3, points: 92, movement: "down" },
-  { id: "4", name: "Erling Haaland", rank: 4, points: 90, movement: "up" },
-  { id: "5", name: "Neymar Jr.", rank: 5, points: 89, movement: "neutral" },
-  // Add more athletes for demonstration
-  { id: "6", name: "Kevin De Bruyne", rank: 6, points: 88, movement: "up" },
-  { id: "7", name: "Robert Lewandowski", rank: 7, points: 87, movement: "down" },
-  { id: "8", name: "Mohamed Salah", rank: 8, points: 86, movement: "neutral" },
-  { id: "9", name: "Virgil van Dijk", rank: 9, points: 85, movement: "up" },
-  { id: "10", name: "Sadio Mané", rank: 10, points: 84, movement: "down" },
-  { id: "11", name: "Luka Modrić", rank: 11, points: 83, movement: "neutral" },
-  { id: "12", name: "Karim Benzema", rank: 12, points: 82, movement: "up" },
-  { id: "13", name: "N'Golo Kanté", rank: 13, points: 81, movement: "down" },
-  { id: "14", name: "Bruno Fernandes", rank: 14, points: 80, movement: "up" },
-  { id: "15", name: "Harry Kane", rank: 15, points: 79, movement: "neutral" },
-];
 
 interface SelectedAthlete extends Athlete {
   userPoints: number;
@@ -242,7 +222,7 @@ const CreateRankingPage = () => {
                   >
                     <div className="flex items-center gap-3">
                       <img
-                        src={`https://images.unsplash.com/photo-1493962853295-0fd70327578a?w=400&h=225&fit=crop&q=80`}
+                        src={`https://images.unsplash.com/${athlete.imageUrl}?w=400&h=225&fit=crop&q=80`}
                         alt={athlete.name}
                         className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
                       />
@@ -302,7 +282,7 @@ const CreateRankingPage = () => {
                       </div>
                       
                       <img
-                        src={`https://images.unsplash.com/photo-1493962853295-0fd70327578a?w=400&h=225&fit=crop&q=80`}
+                        src={`https://images.unsplash.com/${athlete.imageUrl}?w=400&h=225&fit=crop&q=80`}
                         alt={athlete.name}
                         className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
                       />
