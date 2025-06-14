@@ -54,19 +54,25 @@ const NavMenu = () => {
     const { data: allCategories, isLoading, isError } = useQuery<Category[]>({
         queryKey: ['categories'],
         queryFn: async () => {
+          console.log('Fetching categories...');
           const { data, error } = await supabase.from('categories').select('*');
           if (error) {
             console.error('Error fetching categories:', error);
             toast.error("Failed to load navigation categories.");
             throw new Error(error.message);
           }
+          console.log('Fetched categories:', data);
           return data || [];
         },
         retry: 1,
+        staleTime: 0, // Always refetch
+        refetchOnMount: true,
     });
     
     const menuItems = React.useMemo(() => {
         if (!allCategories) return [];
+        
+        console.log('Processing categories for menu:', allCategories);
         
         const categoriesById = new Map(allCategories.map(c => [c.id, { ...c, children: [] as Category[] }]));
       
@@ -92,6 +98,7 @@ const NavMenu = () => {
         const desiredOrder = ['GOAT', 'Current GOAT', 'GOAT of my Time', 'Competitions'];
         rootCategories.sort((a, b) => desiredOrder.indexOf(a.name) - desiredOrder.indexOf(b.name));
       
+        console.log('Processed menu items:', rootCategories);
         return rootCategories;
     }, [allCategories]);
 
@@ -135,7 +142,7 @@ const NavMenu = () => {
             menuItems.map((item) => (
              <NavigationMenuItem key={item.id}>
                 <NavigationMenuTrigger className={triggerClassName}>
-                  {item.name}
+                  {item.name} {item.children && item.children.length > 0 && `(${item.children.length})`}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                     {(item.children && item.children.length > 0) ? (
