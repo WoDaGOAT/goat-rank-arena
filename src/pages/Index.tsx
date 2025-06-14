@@ -12,8 +12,8 @@ const Index = () => {
         className="min-h-screen"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
-        {/* HERO HEADER - now styled to match Navbar */}
-        <header className="bg-black text-primary-foreground py-16 px-4 text-center shadow-md">
+        {/* HERO HEADER - reduced height, transparent to show gradient */}
+        <header className="bg-transparent text-primary-foreground py-8 px-4 text-center shadow-md">
           <div className="container mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight leading-tight">
               Welcome to wodagoat!
