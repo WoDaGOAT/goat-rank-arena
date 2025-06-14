@@ -19,8 +19,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
     <Button
       asChild
       size="lg"
-      // Custom soft red background and white text for Cancel
-      className="bg-[#FFD6DA] text-[#AD2637] hover:bg-[#FFC1C9] border-none shadow-sm"
+      className="bg-[#FFD6DA] text-[#AD2637] hover:bg-[#FFC1C9] border-none shadow-sm rounded-full min-w-[135px] h-11 px-6 py-2 text-lg font-semibold"
     >
       <Link to={categoryId ? `/category/${categoryId}` : "/"}>
         Cancel
