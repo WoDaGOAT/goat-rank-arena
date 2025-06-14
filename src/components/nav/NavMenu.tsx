@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -9,7 +8,6 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { mockCategories } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 
 // ListItem component as used in Shadcn examples, adapted for react-router Link
@@ -59,26 +57,6 @@ const NavMenu = () => {
     <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
       <NavigationMenu>
         <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className={triggerClassName}>
-              Categories
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[400px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[500px] bg-black text-white rounded-lg shadow-lg z-40">
-                {mockCategories.map((category) => (
-                  <ListItem
-                    key={category.id}
-                    to={`/category/${category.id}`}
-                    title={category.name}
-                    className="text-white hover:bg-gray-800"
-                  >
-                    {category.description.substring(0, 70) +
-                      (category.description.length > 70 ? "..." : "")}
-                  </ListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger className={triggerClassName}>
               GOAT
