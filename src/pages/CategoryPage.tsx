@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { mockCategories, getCategoryById } from "@/data/mockData"; // Using mock data
 import { useEffect, useState } from "react";
 import { Category } from "@/types";
-import { ChevronLeft, Users, PlusCircle, Info } from "lucide-react"; // Added Info icon
+import { ChevronLeft, Users, PlusCircle, Info, TrendingUp } from "lucide-react"; // Added TrendingUp
 import Navbar from "@/components/Navbar";
 
 const CategoryPage = () => {
@@ -60,11 +60,17 @@ const CategoryPage = () => {
           {/* Right Column: Category Info & CTA */}
           <div className="w-full md:w-1/3 lg:w-2/5 space-y-6">
             <div className="p-6 bg-card rounded-lg shadow-md border border-border">
-              <h2 className="text-xl font-semibold text-foreground mb-3">Activity</h2>
-              <div className="flex items-center text-muted-foreground mb-4">
-                  <Users className="w-5 h-5 mr-2 text-primary" />
-                  <span className="font-medium">{category.userRankingCount.toLocaleString()} user rankings submitted</span>
+              <h2 className="text-xl font-semibold text-foreground mb-3 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-primary" />
+                Activity Snapshot
+              </h2>
+              <div className="text-center py-4">
+                <p className="text-4xl font-bold text-primary mb-1">{category.userRankingCount.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">User Rankings Submitted</p>
               </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Join the community and share your ranking!
+              </p>
             </div>
 
             <div className="p-6 bg-card rounded-lg shadow-md border border-border">
