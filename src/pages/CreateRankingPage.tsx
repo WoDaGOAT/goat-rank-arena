@@ -2,8 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getCategoryById, allAthletes } from "@/data/mockData";
-import { useEffect, useState } from "react";
+import { allAthletes } from "@/data/mockAthletes";
+import { useState } from "react";
 import { Category, Athlete } from "@/types";
 import { ChevronLeft, Save, Search, Plus, X, GripVertical } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -11,6 +11,8 @@ import RankingDetailsForm from "@/components/ranking/RankingDetailsForm";
 import AthleteSearch from "@/components/ranking/AthleteSearch";
 import RankingList from "@/components/ranking/RankingList";
 import RankingActions from "@/components/ranking/RankingActions";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 interface SelectedAthlete extends Athlete {
   userPoints: number;
@@ -18,20 +20,35 @@ interface SelectedAthlete extends Athlete {
 
 const CreateRankingPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const [category, setCategory] = useState<Category | undefined>(undefined);
+  const { data: category, isLoading: isLoadingCategory } = useQuery<Category | null>({
+    queryKey: ['category', categoryId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('id', categoryId || "")
+        .single();
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+      if (!data) return null;
+      return {
+        id: data.id,
+        name: data.name,
+        description: data.description || "",
+        userRankingCount: 0,
+        leaderboard: [],
+      };
+    },
+    enabled: !!categoryId,
+  });
+
   const [rankingTitle, setRankingTitle] = useState("");
   const [rankingDescription, setRankingDescription] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAthletes, setSelectedAthletes] = useState<SelectedAthlete[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [selectedLetter, setSelectedLetter] = useState<string>("");
-
-  useEffect(() => {
-    if (categoryId) {
-      const foundCategory = getCategoryById(categoryId);
-      setCategory(foundCategory);
-    }
-  }, [categoryId]);
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -99,6 +116,17 @@ const CreateRankingPage = () => {
   const handleDragEnd = () => {
     setDraggedIndex(null);
   };
+
+  if (isLoadingCategory) {
+    return (
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 text-center text-white">
+          <p>Loading category...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!category) {
     return (
@@ -168,7 +196,7 @@ const CreateRankingPage = () => {
           </div>
 
           <RankingActions
-            categoryId={categoryId}
+            categoryId={categoryId!}
             disabled={selectedAthletes.length < 10}
             saveLabel={`Save Ranking (${selectedAthletes.length} athletes)`}
           />

@@ -1,10 +1,6 @@
-
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
-import { getCategoryById } from "@/data/mockData";
-import { useEffect, useState } from "react";
-import { Category } from "@/types";
 import { ChevronLeft, Users, Info, TrendingUp, Heart, MessageSquare } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SocialActions } from "@/components/category/SocialActions";
 import CommentSection from "@/components/category/CommentSection";
 import { useAuth } from "@/contexts/AuthContext";
+import { allAthletes } from "@/data/mockAthletes";
 
 type DbCategory = {
     id: string;
@@ -71,16 +68,7 @@ const CategoryPage = () => {
     enabled: !!categoryId
   });
 
-  // For now, let's keep using mock data for leaderboard
-  const [category, setCategory] = useState<Category | undefined>(undefined);
-  useEffect(() => {
-    if (categoryId) {
-      const foundCategory = getCategoryById(categoryId);
-      setCategory(foundCategory);
-    }
-  }, [categoryId]);
-
-  if (isLoadingCategory || (categoryId && !category)) {
+  if (isLoadingCategory || isLoadingLikes) {
      return (
       <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
@@ -97,7 +85,7 @@ const CategoryPage = () => {
     );
   }
 
-  if (!dbCategory || !category) {
+  if (!dbCategory) {
     return (
       <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
@@ -147,7 +135,7 @@ const CategoryPage = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column: Leaderboard */}
           <div className="w-full lg:w-2/3 xl:w-3/5">
-            <GlobalLeaderboard athletes={category.leaderboard} categoryName="Global Leaderboard" />
+            <GlobalLeaderboard athletes={allAthletes} categoryName="Global Leaderboard" />
           </div>
 
           {/* Right Column: Category Info & CTA */}
