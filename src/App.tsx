@@ -6,7 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import CategoryPage from "./pages/CategoryPage"; // Import CategoryPage
+import CategoryPage from "./pages/CategoryPage";
+import CreateRankingPage from "./pages/CreateRankingPage";
 
 const queryClient = new QueryClient();
 
@@ -16,11 +17,10 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        {/* Navbar can be placed here if it should be on all pages, or within specific page components */}
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/category/:categoryId" element={<CategoryPage />} /> {/* ADDED ROUTE */}
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/category/:categoryId" element={<CategoryPage />} />
+          <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
