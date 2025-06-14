@@ -7,7 +7,11 @@ const Index = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-background min-h-screen">
+      {/* Apply category-page background gradient */}
+      <div
+        className="min-h-screen"
+        style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
+      >
         {/* HERO HEADER - now styled to match Navbar */}
         <header className="bg-black text-primary-foreground py-16 px-4 text-center shadow-md">
           <div className="container mx-auto">
