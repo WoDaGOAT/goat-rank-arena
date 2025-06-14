@@ -294,6 +294,298 @@ const allFootballPlayers: Athlete[] = [
       { name: "UEFA European Championship", type: "international" }
     ],
     positions: ["Striker", "Forward"]
+  },
+  {
+    id: "zidane",
+    rank: 13,
+    name: "Zinedine Zidane",
+    imageUrl: "photo-1493962853295-0fd70327578a",
+    points: 14000,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1972-06-23",
+    isActive: false,
+    countryOfOrigin: "France",
+    nationality: "French",
+    clubs: [
+      { name: "Cannes", country: "France", league: "Ligue 1", yearsActive: "1989-1992" },
+      { name: "Bordeaux", country: "France", league: "Ligue 1", yearsActive: "1992-1996" },
+      { name: "Juventus", country: "Italy", league: "Serie A", yearsActive: "1996-2001" },
+      { name: "Real Madrid", country: "Spain", league: "La Liga", yearsActive: "2001-2006" }
+    ],
+    competitions: [
+      { name: "FIFA World Cup", type: "international" },
+      { name: "UEFA Champions League", type: "continental" }
+    ],
+    positions: ["Attacking Midfielder"]
+  },
+  {
+    id: "ronaldinho",
+    rank: 14,
+    name: "Ronaldinho",
+    imageUrl: "photo-1466721591366-2d5fba72006d",
+    points: 13900,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1980-03-21",
+    isActive: false,
+    countryOfOrigin: "Brazil",
+    nationality: "Brazilian",
+    clubs: [
+      { name: "Grêmio", country: "Brazil", league: "Campeonato Brasileiro", yearsActive: "1998-2001" },
+      { name: "Paris Saint-Germain", country: "France", league: "Ligue 1", yearsActive: "2001-2003" },
+      { name: "Barcelona", country: "Spain", league: "La Liga", yearsActive: "2003-2008" },
+      { name: "AC Milan", country: "Italy", league: "Serie A", yearsActive: "2008-2011" }
+    ],
+    competitions: [
+      { name: "FIFA World Cup", type: "international" },
+      { name: "UEFA Champions League", type: "continental" }
+    ],
+    positions: ["Attacking Midfielder", "Forward"]
+  },
+  {
+    id: "ronaldo-nazario",
+    rank: 15,
+    name: "Ronaldo Nazário",
+    imageUrl: "photo-1452378174528-3090a4bba7b2",
+    points: 14400,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1976-09-22",
+    isActive: false,
+    countryOfOrigin: "Brazil",
+    nationality: "Brazilian",
+    clubs: [
+      { name: "Cruzeiro", country: "Brazil", league: "Campeonato Brasileiro", yearsActive: "1993-1994" },
+      { name: "PSV", country: "Netherlands", league: "Eredivisie", yearsActive: "1994-1996" },
+      { name: "Barcelona", country: "Spain", league: "La Liga", yearsActive: "1996-1997" },
+      { name: "Inter Milan", country: "Italy", league: "Serie A", yearsActive: "1997-2002" },
+      { name: "Real Madrid", country: "Spain", league: "La Liga", yearsActive: "2002-2007" }
+    ],
+    competitions: [{ name: "FIFA World Cup", type: "international" }],
+    positions: ["Striker"]
+  },
+  {
+    id: "thierry-henry",
+    rank: 16,
+    name: "Thierry Henry",
+    imageUrl: "photo-1441057206919-63d19fac2369",
+    points: 13500,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1977-08-17",
+    isActive: false,
+    countryOfOrigin: "France",
+    nationality: "French",
+    clubs: [
+        { name: "AS Monaco", country: "France", league: "Ligue 1", yearsActive: "1994-1999" },
+        { name: "Juventus", country: "Italy", league: "Serie A", yearsActive: "1999" },
+        { name: "Arsenal", country: "England", league: "Premier League", yearsActive: "1999-2007" },
+        { name: "Barcelona", country: "Spain", league: "La Liga", yearsActive: "2007-2010" }
+    ],
+    competitions: [
+        { name: "FIFA World Cup", type: "international" },
+        { name: "UEFA Champions League", type: "continental" }
+    ],
+    positions: ["Striker", "Left Winger"]
+  },
+  {
+    id: "xavi",
+    rank: 17,
+    name: "Xavi Hernández",
+    imageUrl: "photo-1518877593221-1f28583780b4",
+    points: 13400,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1980-01-25",
+    isActive: false,
+    countryOfOrigin: "Spain",
+    nationality: "Spanish",
+    clubs: [
+        { name: "Barcelona", country: "Spain", league: "La Liga", yearsActive: "1998-2015" },
+        { name: "Al Sadd", country: "Qatar", league: "Qatar Stars League", yearsActive: "2015-2019" }
+    ],
+    competitions: [
+        { name: "FIFA World Cup", type: "international" },
+        { name: "UEFA Champions League", type: "continental" }
+    ],
+    positions: ["Central Midfielder"]
+  },
+  {
+    id: "iniesta",
+    rank: 18,
+    name: "Andrés Iniesta",
+    imageUrl: "photo-1469041797191-50ace28483c3",
+    points: 13450,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1984-05-11",
+    isActive: false,
+    countryOfOrigin: "Spain",
+    nationality: "Spanish",
+    clubs: [
+        { name: "Barcelona", country: "Spain", league: "La Liga", yearsActive: "2002-2018" },
+        { name: "Vissel Kobe", country: "Japan", league: "J1 League", yearsActive: "2018-2023" }
+    ],
+    competitions: [
+        { name: "FIFA World Cup", type: "international" },
+        { name: "UEFA Champions League", type: "continental" }
+    ],
+    positions: ["Central Midfielder", "Attacking Midfielder"]
+  },
+  {
+    id: "modric",
+    rank: 19,
+    name: "Luka Modrić",
+    imageUrl: "photo-1493962853295-0fd70327578a",
+    points: 11200,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1985-09-09",
+    isActive: true,
+    countryOfOrigin: "Croatia",
+    nationality: "Croatian",
+    clubs: [
+      { name: "Dinamo Zagreb", country: "Croatia", league: "Prva HNL", yearsActive: "2003-2008" },
+      { name: "Tottenham Hotspur", country: "England", league: "Premier League", yearsActive: "2008-2012" },
+      { name: "Real Madrid", country: "Spain", league: "La Liga", yearsActive: "2012-present" }
+    ],
+    competitions: [
+      { name: "UEFA Champions League", type: "continental" },
+      { name: "FIFA World Cup", type: "international" }
+    ],
+    positions: ["Central Midfielder"]
+  },
+  {
+    id: "salah",
+    rank: 20,
+    name: "Mohamed Salah",
+    imageUrl: "mohamed-salah",
+    points: 10700,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1992-06-15",
+    isActive: true,
+    countryOfOrigin: "Egypt",
+    nationality: "Egyptian",
+    clubs: [
+      { name: "FC Basel", country: "Switzerland", league: "Swiss Super League", yearsActive: "2012-2014" },
+      { name: "Chelsea", country: "England", league: "Premier League", yearsActive: "2014-2016" },
+      { name: "AS Roma", country: "Italy", league: "Serie A", yearsActive: "2016-2017" },
+      { name: "Liverpool", country: "England", league: "Premier League", yearsActive: "2017-present" }
+    ],
+    competitions: [
+      { name: "UEFA Champions League", type: "continental" },
+      { name: "Premier League", type: "domestic" }
+    ],
+    positions: ["Right Winger", "Forward"]
+  },
+  {
+    id: "van-dijk",
+    rank: 21,
+    name: "Virgil van Dijk",
+    imageUrl: "virgil-van-dijk",
+    points: 9800,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1991-07-08",
+    isActive: true,
+    countryOfOrigin: "Netherlands",
+    nationality: "Dutch",
+    clubs: [
+      { name: "Groningen", country: "Netherlands", league: "Eredivisie", yearsActive: "2011-2013" },
+      { name: "Celtic", country: "Scotland", league: "Scottish Premiership", yearsActive: "2013-2015" },
+      { name: "Southampton", country: "England", league: "Premier League", yearsActive: "2015-2018" },
+      { name: "Liverpool", country: "England", league: "Premier League", yearsActive: "2018-present" }
+    ],
+    competitions: [
+      { name: "UEFA Champions League", type: "continental" },
+      { name: "Premier League", type: "domestic" }
+    ],
+    positions: ["Centre-Back"]
+  },
+  {
+    id: "ramos",
+    rank: 22,
+    name: "Sergio Ramos",
+    imageUrl: "photo-1466721591366-2d5fba72006d",
+    points: 10900,
+    movement: "down" as AthleteMovement,
+    dateOfBirth: "1986-03-30",
+    isActive: true,
+    countryOfOrigin: "Spain",
+    nationality: "Spanish",
+    clubs: [
+      { name: "Sevilla", country: "Spain", league: "La Liga", yearsActive: "2004-2005" },
+      { name: "Real Madrid", country: "Spain", league: "La Liga", yearsActive: "2005-2021" },
+      { name: "Paris Saint-Germain", country: "France", league: "Ligue 1", yearsActive: "2021-2023" },
+      { name: "Sevilla", country: "Spain", league: "La Liga", yearsActive: "2023-present" }
+    ],
+    competitions: [
+      { name: "FIFA World Cup", type: "international" },
+      { name: "UEFA Champions League", type: "continental" }
+    ],
+    positions: ["Centre-Back", "Right-Back"]
+  },
+  {
+    id: "kane",
+    rank: 23,
+    name: "Harry Kane",
+    imageUrl: "photo-1452378174528-3090a4bba7b2",
+    points: 10600,
+    movement: "up" as AthleteMovement,
+    dateOfBirth: "1993-07-28",
+    isActive: true,
+    countryOfOrigin: "England",
+    nationality: "English",
+    clubs: [
+      { name: "Tottenham Hotspur", country: "England", league: "Premier League", yearsActive: "2009-2023" },
+      { name: "Bayern Munich", country: "Germany", league: "Bundesliga", yearsActive: "2023-present" }
+    ],
+    competitions: [
+      { name: "Premier League", type: "domestic" },
+      { name: "Bundesliga", type: "domestic" },
+      { name: "UEFA Champions League", type: "continental" }
+    ],
+    positions: ["Striker"]
+  },
+  {
+    id: "griezmann",
+    rank: 24,
+    name: "Antoine Griezmann",
+    imageUrl: "photo-1441057206919-63d19fac2369",
+    points: 10300,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1991-03-21",
+    isActive: true,
+    countryOfOrigin: "France",
+    nationality: "French",
+    clubs: [
+        { name: "Real Sociedad", country: "Spain", league: "La Liga", yearsActive: "2009-2014" },
+        { name: "Atlético Madrid", country: "Spain", league: "La Liga", yearsActive: "2014-2019" },
+        { name: "Barcelona", country: "Spain", league: "La Liga", yearsActive: "2019-2022" },
+        { name: "Atlético Madrid", country: "Spain", league: "La Liga", yearsActive: "2022-present" }
+    ],
+    competitions: [
+        { name: "FIFA World Cup", type: "international" },
+        { name: "UEFA Europa League", type: "continental" }
+    ],
+    positions: ["Forward", "Attacking Midfielder"]
+  },
+  {
+    id: "suarez",
+    rank: 25,
+    name: "Luis Suárez",
+    imageUrl: "photo-1518877593221-1f28583780b4",
+    points: 11000,
+    movement: "down" as AthleteMovement,
+    dateOfBirth: "1987-01-24",
+    isActive: true,
+    countryOfOrigin: "Uruguay",
+    nationality: "Uruguayan",
+    clubs: [
+        { name: "Ajax", country: "Netherlands", league: "Eredivisie", yearsActive: "2007-2011" },
+        { name: "Liverpool", country: "England", league: "Premier League", yearsActive: "2011-2014" },
+        { name: "Barcelona", country: "Spain", league: "La Liga", yearsActive: "2014-2020" },
+        { name: "Atlético Madrid", country: "Spain", league: "La Liga", yearsActive: "2020-2022" },
+        { name: "Inter Miami", country: "USA", league: "MLS", yearsActive: "2024-present" }
+    ],
+    competitions: [
+        { name: "UEFA Champions League", type: "continental" },
+        { name: "Copa America", type: "international" }
+    ],
+    positions: ["Striker"]
   }
 ];
 
