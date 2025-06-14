@@ -41,6 +41,7 @@ const CreateRankingPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAthletes, setSelectedAthletes] = useState<SelectedAthlete[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [selectedLetter, setSelectedLetter] = useState<string>("");
 
   useEffect(() => {
     if (categoryId) {
@@ -49,10 +50,15 @@ const CreateRankingPage = () => {
     }
   }, [categoryId]);
 
-  const filteredAthletes = allAthletes.filter(athlete =>
-    athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    !selectedAthletes.some(selected => selected.id === athlete.id)
-  );
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  const filteredAthletes = allAthletes.filter(athlete => {
+    const matchesSearch = athlete.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLetter = selectedLetter === "" || athlete.name.charAt(0).toUpperCase() === selectedLetter;
+    const notSelected = !selectedAthletes.some(selected => selected.id === athlete.id);
+    
+    return matchesSearch && matchesLetter && notSelected;
+  });
 
   const addAthlete = (athlete: Athlete) => {
     const newPosition = selectedAthletes.length + 1;
@@ -193,6 +199,40 @@ const CreateRankingPage = () => {
                 />
               </div>
 
+              {/* Alphabetical Filter */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-white text-sm font-medium">Filter by letter:</span>
+                  <Button
+                    onClick={() => setSelectedLetter("")}
+                    size="sm"
+                    variant={selectedLetter === "" ? "default" : "outline"}
+                    className={selectedLetter === "" 
+                      ? "bg-blue-600 hover:bg-blue-700 text-white h-8 px-2" 
+                      : "border-white/40 text-white hover:bg-white/10 h-8 px-2"
+                    }
+                  >
+                    All
+                  </Button>
+                </div>
+                <div className="grid grid-cols-13 gap-1">
+                  {alphabet.map((letter) => (
+                    <Button
+                      key={letter}
+                      onClick={() => setSelectedLetter(letter)}
+                      size="sm"
+                      variant={selectedLetter === letter ? "default" : "outline"}
+                      className={selectedLetter === letter 
+                        ? "bg-blue-600 hover:bg-blue-700 text-white h-8 w-8 p-0 text-xs" 
+                        : "border-white/40 text-white hover:bg-white/10 h-8 w-8 p-0 text-xs"
+                      }
+                    >
+                      {letter}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
               {/* Search Results */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredAthletes.slice(0, 10).map((athlete) => (
@@ -223,6 +263,11 @@ const CreateRankingPage = () => {
                 {searchTerm && filteredAthletes.length === 0 && (
                   <div className="text-center py-8 text-gray-400">
                     No athletes found matching "{searchTerm}"
+                  </div>
+                )}
+                {selectedLetter && !searchTerm && filteredAthletes.length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    No athletes found starting with "{selectedLetter}"
                   </div>
                 )}
               </div>
