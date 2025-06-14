@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -30,7 +29,7 @@ const Navbar = () => {
   const triggerClassName = "bg-primary hover:bg-primary/90 data-[active]:bg-primary/90 data-[state=open]:bg-primary/90 text-primary-foreground hover:text-primary-foreground focus:text-primary-foreground focus:bg-primary/90";
 
   return (
-    <nav className="bg-primary text-primary-foreground p-4 shadow-md">
+    <nav className="bg-black text-primary-foreground p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
           wodagoat
@@ -171,4 +170,3 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
-
