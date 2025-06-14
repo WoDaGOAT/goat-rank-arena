@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
@@ -40,11 +39,17 @@ const CategoryPage = () => {
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <Button asChild variant="outline" className="mb-6 border-white text-white hover:bg-white hover:text-indigo-900">
-          <Link to="/">
-            <ChevronLeft className="mr-2 h-4 w-4" /> Back to All Categories
-          </Link>
-        </Button>
+        <div className="mb-8">
+          <Button 
+            asChild 
+            size="lg"
+            className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 shadow-lg transition-all duration-200 font-semibold"
+          >
+            <Link to="/">
+              <ChevronLeft className="mr-2 h-5 w-5" /> Back to All Categories
+            </Link>
+          </Button>
+        </div>
 
         <header className="mb-8">
             <h1 className="text-4xl font-extrabold text-white mb-2">{category.name}</h1>
