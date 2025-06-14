@@ -1,5 +1,8 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,6 +12,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ListItem component as used in Shadcn examples, adapted for react-router Link
 const ListItem = React.forwardRef<
@@ -36,116 +40,103 @@ const ListItem = React.forwardRef<
 });
 ListItem.displayName = "ListItem";
 
+interface Category {
+    id: string;
+    name: string;
+    description: string | null;
+    parent_id: string | null;
+    children?: Category[];
+}
+
 const NavMenu = () => {
-    const loremIpsumDescription =
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    const { data: allCategories, isLoading } = useQuery<Category[]>({
+        queryKey: ['categories'],
+        queryFn: async () => {
+          const { data, error } = await supabase.from('categories').select('*');
+          if (error) {
+            console.error('Error fetching categories:', error);
+            // toast.error("Failed to load navigation categories.");
+            return [];
+          }
+          return data || [];
+        },
+    });
+    
+    const menuItems = React.useMemo(() => {
+        if (!allCategories) return [];
+        
+        const categoriesById = new Map(allCategories.map(c => [c.id, { ...c, children: [] as Category[] }]));
+      
+        const rootCategories: (Category & { children: Category[] })[] = [];
+      
+        allCategories.forEach(category => {
+          if (category.parent_id) {
+            const parent = categoriesById.get(category.parent_id);
+            if (parent) {
+              const childWithChildren = categoriesById.get(category.id);
+              if (childWithChildren) {
+                parent.children.push(childWithChildren);
+              }
+            }
+          } else {
+            const rootCategory = categoriesById.get(category.id);
+            if (rootCategory) {
+              rootCategories.push(rootCategory);
+            }
+          }
+        });
+        
+        const desiredOrder = ['GOAT', 'Current GOAT', 'GOAT of my Time', 'Competitions'];
+        rootCategories.sort((a, b) => desiredOrder.indexOf(a.name) - desiredOrder.indexOf(b.name));
+      
+        return rootCategories;
+    }, [allCategories]);
 
-  const newCategoryItems = [
-    { id: "item1", title: "Sub-Category 1", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "item2", title: "Sub-Category 2", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "item3", title: "Sub-Category 3", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "item4", title: "Sub-Category 4", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "item5", title: "Sub-Category 5", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "item6", title: "Sub-Category 6", description: loremIpsumDescription.substring(0, 70) + "..." },
-  ];
-
-  const goatCategoryItems = [
-    { id: "goat-footballer", title: "GOAT Footballer", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-goalkeeper", title: "GOAT Goalkeeper", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-defender", title: "GOAT Defender", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-midfielder", title: "GOAT Midfielder", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-attacker", title: "GOAT Attacker", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-free-kick", title: "GOAT Free-Kick Taker", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-finisher", title: "GOAT Finisher", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-dribbler", title: "GOAT Dribbler", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-playmaker", title: "GOAT Playmaker", description: loremIpsumDescription.substring(0, 70) + "..." },
-    { id: "goat-leader", title: "GOAT Leader / Captain", description: loremIpsumDescription.substring(0, 70) + "..." },
-  ];
-
-  const triggerClassName =
+    const triggerClassName =
     "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-none cursor-pointer rounded-none shadow-none border-none " +
     "text-xs md:text-base whitespace-nowrap";
+
+    if (isLoading) {
+        return (
+            <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
+                <div className="flex flex-nowrap items-center justify-center gap-0 md:gap-4 min-w-0 px-4">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <Skeleton key={index} className="h-8 w-24 bg-gray-700" />
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
   return (
     <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
       <NavigationMenu>
         <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className={triggerClassName}>
-              GOAT
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
-                {goatCategoryItems.map((item) => (
-                  <ListItem
-                    key={`goat-${item.id}`}
-                    to="#"
-                    title={item.title}
-                    className="text-white hover:bg-gray-800"
-                  >
-                    {item.description}
-                  </ListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className={triggerClassName}>
-              Current GOAT
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
-                {newCategoryItems.map((item) => (
-                  <ListItem
-                    key={`current-goat-${item.id}`}
-                    to="#"
-                    title={item.title}
-                    className="text-white hover:bg-gray-800"
-                  >
-                    {item.description}
-                  </ListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className={triggerClassName}>
-              GOAT of my Time
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
-                {newCategoryItems.map((item) => (
-                  <ListItem
-                    key={`my-time-goat-${item.id}`}
-                    to="#"
-                    title={item.title}
-                    className="text-white hover:bg-gray-800"
-                  >
-                    {item.description}
-                  </ListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className={triggerClassName}>
-              Competitions
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
-                {newCategoryItems.map((item) => (
-                  <ListItem
-                    key={`competitions-${item.id}`}
-                    to="#"
-                    title={item.title}
-                    className="text-white hover:bg-gray-800"
-                  >
-                    {item.description}
-                  </ListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
+          {menuItems.map((item) => (
+             <NavigationMenuItem key={item.id}>
+                <NavigationMenuTrigger className={triggerClassName}>
+                  {item.name}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                    {(item.children && item.children.length > 0) ? (
+                        <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
+                            {item.children.map((subItem) => (
+                            <ListItem
+                                key={subItem.id}
+                                to={`/category/${subItem.id}`}
+                                title={subItem.name}
+                                className="text-white hover:bg-gray-800"
+                            >
+                                {subItem.description}
+                            </ListItem>
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="w-[180px] p-4 text-center text-gray-400 bg-black text-white rounded-lg shadow-lg z-40">No sub-categories defined.</div>
+                    )}
+                </NavigationMenuContent>
+             </NavigationMenuItem>
+          ))}
         </NavigationMenuList>
       </NavigationMenu>
     </div>
