@@ -1,0 +1,15 @@
+
+{
+  "appId": "app.lovable.86459532a8d04229bc411423d739b917",
+  "appName": "goat-rank-arena",
+  "webDir": "dist",
+  "server": {
+    "url": "https://86459532-a8d0-4229-bc41-1423d739b917.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
