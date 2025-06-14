@@ -30,7 +30,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
     <Button
       variant="cta"
       disabled={disabled}
-      className={`${commonButtonStyle} disabled:h-[44px] ${disabled ? "bg-white text-[#A2A2A2] shadow-none border-0" : ""}`}
+      className={`${commonButtonStyle} disabled:h-[44px] disabled:text-black`}
     >
       <Save className="mr-2 h-5 w-5" />
       {saveLabel}
