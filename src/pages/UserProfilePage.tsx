@@ -22,7 +22,7 @@ const UserProfilePage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const availableSports = ["Football", "Basketball", "Tennis", "Formula 1", "MMA"];
+  const availableSports = ["American Football", "Baseball", "Basketball", "Boxe", "Cricket", "F1", "MMA", "Soccer", "Tennis"].sort();
 
   useEffect(() => {
     if (profile) {
