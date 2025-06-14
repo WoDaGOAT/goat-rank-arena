@@ -21,7 +21,7 @@ const CategoryPage = () => {
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950">
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
         <div className="container mx-auto px-4 py-8 text-center">
           <h1 className="text-3xl font-bold text-white mb-4">Category Not Found</h1>
@@ -37,7 +37,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <Button asChild variant="outline" className="mb-6 border-white text-white hover:bg-white hover:text-indigo-900">
