@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -66,7 +65,6 @@ const Navbar = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              {/* Main Category A */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={triggerClassName}>
                   Main Category A
@@ -86,7 +84,6 @@ const Navbar = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              {/* Main Category B */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={triggerClassName}>
                   Main Category B
@@ -106,7 +103,6 @@ const Navbar = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              {/* Main Category C */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={triggerClassName}>
                   Main Category C
@@ -136,15 +132,15 @@ const Navbar = () => {
           <Link
             to="/signup"
             className={cn(
-              // Responsive size tweaks: text-base at md, text-xs below
-              "flex items-center justify-center rounded-md md:rounded-[13px] border border-white bg-[#388BFF] font-bold transition-colors shadow px-3 md:px-8 py-1.5 md:py-3 hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300",
-              "text-xs md:text-xl whitespace-nowrap leading-none",
+              // Reduced size: smaller font, less padding, smaller border radius
+              "flex items-center justify-center rounded-[10px] border border-white bg-[#388BFF] font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300",
+              "text-sm md:text-base whitespace-nowrap leading-none",
               "tracking-wide",
-              "min-w-[56px] min-h-[36px]"
+              "min-w-[40px] min-h-[30px]"
             )}
             style={{ letterSpacing: "1px" }}
           >
-            <span className="block">{/* prevent wrapping at all sizes */}
+            <span className="block">
               <span className="hidden md:inline">SIGN&nbsp;UP</span>
               <span className="inline md:hidden">SIGN UP</span>
             </span>
@@ -153,10 +149,10 @@ const Navbar = () => {
           <Link
             to="/login"
             className={cn(
-              "flex items-center justify-center rounded-md md:rounded-[13px] border border-[#388BFF] bg-gray-200 text-black font-bold transition-colors shadow px-3 md:px-8 py-1.5 md:py-3 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300",
-              "text-xs md:text-xl whitespace-nowrap leading-none",
+              "flex items-center justify-center rounded-[10px] border border-[#388BFF] bg-gray-200 text-black font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300",
+              "text-sm md:text-base whitespace-nowrap leading-none",
               "tracking-wide",
-              "min-w-[56px] min-h-[36px]"
+              "min-w-[40px] min-h-[30px]"
             )}
             style={{ letterSpacing: "1px" }}
           >
@@ -198,4 +194,3 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
-
