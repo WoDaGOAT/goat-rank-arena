@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -206,25 +207,25 @@ const CreateRankingPage = () => {
                   <Button
                     onClick={() => setSelectedLetter("")}
                     size="sm"
-                    variant={selectedLetter === "" ? "default" : "outline"}
+                    variant="outline"
                     className={selectedLetter === "" 
-                      ? "bg-blue-600 hover:bg-blue-700 text-white h-8 px-2" 
-                      : "border-white/40 text-white hover:bg-white/10 h-8 px-2"
+                      ? "bg-white/20 border-white text-white hover:bg-white/30 h-8 px-2" 
+                      : "bg-transparent border-white text-white hover:bg-white/10 h-8 px-2"
                     }
                   >
                     All
                   </Button>
                 </div>
-                <div className="grid grid-cols-13 gap-1">
+                <div className="flex flex-wrap gap-1">
                   {alphabet.map((letter) => (
                     <Button
                       key={letter}
                       onClick={() => setSelectedLetter(letter)}
                       size="sm"
-                      variant={selectedLetter === letter ? "default" : "outline"}
+                      variant="outline"
                       className={selectedLetter === letter 
-                        ? "bg-blue-600 hover:bg-blue-700 text-white h-8 w-8 p-0 text-xs" 
-                        : "border-white/40 text-white hover:bg-white/10 h-8 w-8 p-0 text-xs"
+                        ? "bg-white/20 border-white text-white hover:bg-white/30 h-8 w-8 p-0 text-xs" 
+                        : "bg-transparent border-white text-white hover:bg-white/10 h-8 w-8 p-0 text-xs"
                       }
                     >
                       {letter}
