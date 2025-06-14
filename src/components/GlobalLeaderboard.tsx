@@ -1,4 +1,3 @@
-
 import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +10,7 @@ interface GlobalLeaderboardProps {
 
 const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) => {
   return (
-    <Card className="w-full shadow-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-2 border-primary/20">
+    <Card className="max-w-2xl mx-auto shadow-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-2 border-primary/20">
       <CardHeader className="border-b border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5"></div>
         <div className="relative flex items-center gap-3">
