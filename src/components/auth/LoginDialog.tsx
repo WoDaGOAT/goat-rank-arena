@@ -16,14 +16,20 @@ import { toast } from "sonner";
 import SocialLogins from "./SocialLogins";
 
 interface LoginDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const LoginDialog = ({ children }: LoginDialogProps) => {
+const LoginDialog = ({ children, open: controlledOpen, onOpenChange: setControlledOpen }: LoginDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+
+  const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const onOpenChange = isControlled ? setControlledOpen : setInternalOpen;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,13 +43,15 @@ const LoginDialog = ({ children }: LoginDialogProps) => {
       toast.error(error.message);
     } else {
       toast.success("Logged in successfully!");
-      setOpen(false);
+      if (onOpenChange) {
+        onOpenChange(false);
+      }
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-700">
         <DialogHeader>
           <DialogTitle>Log In</DialogTitle>
