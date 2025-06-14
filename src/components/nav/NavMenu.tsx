@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import {
   NavigationMenu,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 // ListItem component as used in Shadcn examples, adapted for react-router Link
 const ListItem = React.forwardRef<
@@ -49,17 +49,19 @@ interface Category {
 }
 
 const NavMenu = () => {
-    const { data: allCategories, isLoading } = useQuery<Category[]>({
+    const queryClient = useQueryClient();
+    const { data: allCategories, isLoading, isError } = useQuery<Category[]>({
         queryKey: ['categories'],
         queryFn: async () => {
           const { data, error } = await supabase.from('categories').select('*');
           if (error) {
             console.error('Error fetching categories:', error);
-            // toast.error("Failed to load navigation categories.");
-            return [];
+            toast.error("Failed to load navigation categories.");
+            throw new Error(error.message);
           }
           return data || [];
         },
+        retry: 1,
     });
     
     const menuItems = React.useMemo(() => {
@@ -108,11 +110,28 @@ const NavMenu = () => {
         );
     }
 
+    if (isError) {
+        return (
+            <div className="flex-grow flex justify-center items-center min-w-0 overflow-x-auto">
+                <div className="text-red-500 text-xs md:text-sm px-4 text-center">
+                    Could not load categories.
+                    <button 
+                        onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
+                        className="ml-2 underline hover:text-red-400 transition-colors"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
   return (
     <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
       <NavigationMenu>
         <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
-          {menuItems.map((item) => (
+          {menuItems.length > 0 ? (
+            menuItems.map((item) => (
              <NavigationMenuItem key={item.id}>
                 <NavigationMenuTrigger className={triggerClassName}>
                   {item.name}
@@ -136,7 +155,12 @@ const NavMenu = () => {
                     )}
                 </NavigationMenuContent>
              </NavigationMenuItem>
-          ))}
+            ))
+          ) : (
+            <div className="text-gray-400 text-xs md:text-sm px-4">
+                No categories found.
+            </div>
+          )}
         </NavigationMenuList>
       </NavigationMenu>
     </div>
