@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -6,7 +7,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  // navigationMenuTriggerStyle, // Not directly used for custom styled triggers
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { mockCategories } from "@/data/mockData";
@@ -26,7 +26,8 @@ const Navbar = () => {
     { id: "item6", title: "Sub-Category 6", description: loremIpsumDescription.substring(0, 70) + "..." },
   ];
 
-  const triggerClassName = "bg-primary hover:bg-primary/90 data-[active]:bg-primary/90 data-[state=open]:bg-primary/90 text-primary-foreground hover:text-primary-foreground focus:text-primary-foreground focus:bg-primary/90";
+  // Simplified trigger: just white text, no button styling
+  const triggerClassName = "bg-transparent text-white hover:text-gray-100 focus:text-gray-100 px-4 py-2 font-medium transition-none cursor-pointer rounded-none shadow-none";
 
   return (
     <nav className="bg-black text-primary-foreground p-4 shadow-md">
@@ -121,20 +122,12 @@ const Navbar = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-
             </NavigationMenuList>
           </NavigationMenu>
         </div>
 
         {/* Auth Buttons on the right */}
-        <div className="flex items-center space-x-2 md:space-x-4">
-          <Button variant="default"> {/* Changed variant and removed custom classes */}
-            Log In
-          </Button>
-          <Button variant="default"> {/* Changed variant and removed custom classes */}
-            Sign Up
-          </Button>
-        </div>
+        {/* Removed Log In and Sign Up buttons as per request */}
       </div>
     </nav>
   );
@@ -150,9 +143,8 @@ const ListItem = React.forwardRef<
       <NavigationMenuLink asChild>
         <Link
           ref={ref}
-          to={to || "#"} // Ensure 'to' has a default value
+          to={to || "#"}
           className={cn(
-            // Menu link style, force white text, improve hover for new bg
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors focus:bg-blue-700 focus:text-white",
             className
           )}
@@ -170,3 +162,4 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
+
