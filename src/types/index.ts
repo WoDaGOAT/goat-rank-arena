@@ -41,6 +41,20 @@ export interface Category {
   leaderboard: Athlete[];
 }
 
+// New type for comments with user profile information
+export interface CommentWithUser {
+  id: string;
+  comment: string;
+  created_at: string;
+  parent_comment_id: string | null;
+  user_id: string;
+  profiles: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
 // Placeholder images (keys from provided list)
 export const placeholderImages: Record<string, string> = {
   "lionel-messi": "photo-1493962853295-0fd70327578a",

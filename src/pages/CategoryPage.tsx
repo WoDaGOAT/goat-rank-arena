@@ -1,16 +1,72 @@
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
-import { mockCategories, getCategoryById } from "@/data/mockData"; // Using mock data
+import { getCategoryById } from "@/data/mockData";
 import { useEffect, useState } from "react";
 import { Category } from "@/types";
-import { ChevronLeft, Users, PlusCircle, Info, TrendingUp } from "lucide-react"; // Added TrendingUp
+import { ChevronLeft, Users, Info, TrendingUp, Heart, MessageSquare } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { Database } from "@/integrations/supabase/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SocialActions } from "@/components/category/SocialActions";
+import CommentSection from "@/components/category/CommentSection";
+import { useAuth } from "@/contexts/AuthContext";
+
+type DbCategory = Database['public']['Tables']['categories']['Row'];
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const [category, setCategory] = useState<Category | undefined>(undefined);
+  const { user } = useAuth();
+  
+  // Fetch category data from Supabase
+  const { data: dbCategory, isLoading: isLoadingCategory } = useQuery<DbCategory | null>({
+    queryKey: ['category', categoryId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('id', categoryId || "")
+        .single();
+      if (error && error.code !== 'PGRST116') { // Ignore 'exact one row' error if not found
+        throw error;
+      }
+      return data;
+    },
+    enabled: !!categoryId,
+  });
 
+  // Fetch likes data
+  const { data: likesData, isLoading: isLoadingLikes } = useQuery({
+    queryKey: ['categoryLikes', categoryId],
+    queryFn: async () => {
+      const { count, error: countError } = await supabase
+        .from('category_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', categoryId || "");
+      
+      if (countError) throw countError;
+
+      let isLiked = false;
+      if (user) {
+        const { data: likeData, error: likeError } = await supabase
+          .from('category_likes')
+          .select('id')
+          .eq('category_id', categoryId || "")
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (likeError) throw likeError;
+        isLiked = !!likeData;
+      }
+
+      return { count: count || 0, isLiked };
+    },
+    enabled: !!categoryId
+  });
+
+  // For now, let's keep using mock data for leaderboard
+  const [category, setCategory] = useState<Category | undefined>(undefined);
   useEffect(() => {
     if (categoryId) {
       const foundCategory = getCategoryById(categoryId);
@@ -18,7 +74,24 @@ const CategoryPage = () => {
     }
   }, [categoryId]);
 
-  if (!category) {
+  if (isLoadingCategory || (categoryId && !category)) {
+     return (
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+            <Skeleton className="h-12 w-48 mb-8" />
+            <Skeleton className="h-10 w-3/4 mb-2" />
+            <Skeleton className="h-6 w-1/2 mb-8" />
+            <div className="flex flex-col md:flex-row gap-8">
+                <div className="w-full md:w-2/3 lg:w-3/5"><Skeleton className="h-96 w-full" /></div>
+                <div className="w-full md:w-1/3 lg:w-2/5 space-y-6"><Skeleton className="h-48 w-full" /></div>
+            </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dbCategory || !category) {
     return (
       <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
@@ -51,36 +124,31 @@ const CategoryPage = () => {
           </Button>
         </div>
 
-        <header className="mb-8">
-            <h1 className="text-4xl font-extrabold text-white mb-2">{category.name}</h1>
-            <p className="text-lg text-gray-300">{category.description}</p>
+        <header className="mb-4">
+            <h1 className="text-4xl font-extrabold text-white mb-2">{dbCategory.name}</h1>
+            <p className="text-lg text-gray-300">{dbCategory.description}</p>
         </header>
         
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="mb-8">
+            <SocialActions 
+                categoryId={categoryId!} 
+                initialLikes={likesData?.count ?? 0}
+                isLiked={likesData?.isLiked ?? false}
+                categoryName={dbCategory.name}
+            />
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column: Leaderboard */}
-          <div className="w-full md:w-2/3 lg:w-3/5">
+          <div className="w-full lg:w-2/3 xl:w-3/5">
             <GlobalLeaderboard athletes={category.leaderboard} categoryName="Global Leaderboard" />
           </div>
 
           {/* Right Column: Category Info & CTA */}
-          <div className="w-full md:w-1/3 lg:w-2/5 space-y-6">
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20">
+          <div className="w-full lg:w-1/3 xl:w-2/5 space-y-6">
+             <div className="p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20">
               <h2 className="text-xl font-semibold text-white mb-3 flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2 text-blue-300" />
-                Activity Snapshot
-              </h2>
-              <div className="text-center py-4">
-                <p className="text-4xl font-bold text-blue-300 mb-1">{category.userRankingCount.toLocaleString()}</p>
-                <p className="text-sm text-gray-300">User Rankings Submitted</p>
-              </div>
-              <p className="text-xs text-gray-400 text-center mt-2">
-                Join the community and share your ranking!
-              </p>
-            </div>
-
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20">
-              <h2 className="text-xl font-semibold text-white mb-3 flex items-center">
-                <Info className="w-5 h-5 mr-2 text-blue-300" />
                 How to Participate
               </h2>
               <p className="text-gray-300 mb-4">
@@ -88,11 +156,16 @@ const CategoryPage = () => {
               </p>
               <Button asChild size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 <Link to={`/category/${categoryId}/create-ranking`}>
-                  <PlusCircle className="mr-2 h-5 w-5" /> Create Your Ranking
+                  <Users className="mr-2 h-5 w-5" /> Create Your Ranking
                 </Link>
               </Button>
             </div>
           </div>
+        </div>
+        
+        {/* Full-width Comment Section */}
+        <div className="mt-8">
+            <CommentSection categoryId={categoryId!} />
         </div>
       </div>
     </div>
