@@ -19,7 +19,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
     <Button
       asChild
       size="lg"
-      className="bg-[#FFD6DA] text-[#AD2637] hover:bg-[#FFC1C9] border-none shadow-sm rounded-full"
+      className="bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] rounded-full"
     >
       <Link to={categoryId ? `/category/${categoryId}` : "/"}>
         Cancel
@@ -29,6 +29,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
       size="lg"
       variant="cta"
       disabled={disabled}
+      className="rounded-full"
     >
       <Save className="mr-2 h-5 w-5" />
       {saveLabel}
