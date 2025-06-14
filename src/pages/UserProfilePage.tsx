@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileForm from "@/components/profile/ProfileForm";
 import RankingActivity from "@/components/profile/RankingActivity";
+import { useQuery } from "@tanstack/react-query";
 
 const UserProfilePage = () => {
   const { user, profile, loading, refetchUser } = useAuth();
@@ -20,6 +22,25 @@ const UserProfilePage = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const availableSports = ["American Football", "Baseball", "Basketball", "Boxe", "Cricket", "F1", "MMA", "Soccer", "Tennis"].sort();
+
+  const { data: likedCategories, isLoading: isLoadingLikedCategories } = useQuery({
+    queryKey: ['likedCategories', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('category_likes')
+        .select(`categories (id, name)`)
+        .eq('user_id', user.id);
+
+      if (error) {
+        toast.error("Failed to fetch liked leaderboards.");
+        console.error('Error fetching liked categories:', error);
+        return [];
+      }
+      return data.map(item => item.categories).filter(Boolean) as { id: string, name: string | null }[];
+    },
+    enabled: !!user && !loading,
+  });
 
   useEffect(() => {
     if (profile) {
@@ -157,7 +178,7 @@ const UserProfilePage = () => {
                   availableSports={availableSports}
                 />
                 
-                <RankingActivity />
+                <RankingActivity likedCategories={likedCategories} isLoading={isLoadingLikedCategories} />
               </div>
 
               <div className="flex justify-end pt-6">
