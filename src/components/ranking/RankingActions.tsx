@@ -21,7 +21,6 @@ const RankingActions: React.FC<RankingActionsProps> = ({
   <div className="flex justify-end gap-4 mt-8">
     <Button
       asChild
-      size="lg"
       className={`bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] shadow ${commonButtonStyle}`}
     >
       <Link to={categoryId ? `/category/${categoryId}` : "/"}>
@@ -29,10 +28,9 @@ const RankingActions: React.FC<RankingActionsProps> = ({
       </Link>
     </Button>
     <Button
-      size="lg"
       variant="cta"
       disabled={disabled}
-      className={`${commonButtonStyle} ${disabled ? "bg-white text-[#A2A2A2] shadow-none border-0" : ""}`}
+      className={`${commonButtonStyle} disabled:h-[44px] ${disabled ? "bg-white text-[#A2A2A2] shadow-none border-0" : ""}`}
     >
       <Save className="mr-2 h-5 w-5" />
       {saveLabel}
@@ -41,4 +39,3 @@ const RankingActions: React.FC<RankingActionsProps> = ({
 );
 
 export default RankingActions;
-
