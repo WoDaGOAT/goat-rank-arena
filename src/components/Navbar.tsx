@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -131,25 +132,38 @@ const Navbar = () => {
 
         {/* Auth Buttons on the right */}
         <div className="flex items-center gap-1 md:gap-4 ml-2">
+          {/* SIGN UP Button */}
           <Link
             to="/signup"
             className={cn(
-              "rounded-[9px] md:rounded-[13px] border border-white bg-blue-600 text-white font-semibold px-3 py-1 md:px-6 md:py-2 transition-colors shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300",
-              "text-xs md:text-base",
+              // Responsive size tweaks: text-base at md, text-xs below
+              "flex items-center justify-center rounded-md md:rounded-[13px] border border-white bg-[#388BFF] font-bold transition-colors shadow px-3 md:px-8 py-1.5 md:py-3 hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300",
+              "text-xs md:text-xl whitespace-nowrap leading-none",
+              "tracking-wide",
+              "min-w-[56px] min-h-[36px]"
             )}
             style={{ letterSpacing: "1px" }}
           >
-            SIGN UP
+            <span className="block">{/* prevent wrapping at all sizes */}
+              <span className="hidden md:inline">SIGN&nbsp;UP</span>
+              <span className="inline md:hidden">SIGN UP</span>
+            </span>
           </Link>
+          {/* LOG IN Button */}
           <Link
             to="/login"
             className={cn(
-              "rounded-[9px] md:rounded-[13px] border border-blue-500 bg-gray-200 text-black font-semibold px-3 py-1 md:px-6 md:py-2 transition-colors shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300",
-              "text-xs md:text-base"
+              "flex items-center justify-center rounded-md md:rounded-[13px] border border-[#388BFF] bg-gray-200 text-black font-bold transition-colors shadow px-3 md:px-8 py-1.5 md:py-3 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300",
+              "text-xs md:text-xl whitespace-nowrap leading-none",
+              "tracking-wide",
+              "min-w-[56px] min-h-[36px]"
             )}
             style={{ letterSpacing: "1px" }}
           >
-            LOG IN
+            <span className="block">
+              <span className="hidden md:inline">LOG&nbsp;IN</span>
+              <span className="inline md:hidden">LOG IN</span>
+            </span>
           </Link>
         </div>
       </div>
@@ -184,3 +198,4 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
+
