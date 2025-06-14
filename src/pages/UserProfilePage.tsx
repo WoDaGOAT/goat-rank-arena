@@ -1,17 +1,14 @@
 import Navbar from "@/components/Navbar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Image as ImageIcon, Loader2 } from 'lucide-react';
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfileForm from "@/components/profile/ProfileForm";
+import RankingActivity from "@/components/profile/RankingActivity";
 
 const UserProfilePage = () => {
   const { user, profile, loading, refetchUser } = useAuth();
@@ -140,83 +137,27 @@ const UserProfilePage = () => {
               <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <div className="relative group">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={profile?.avatar_url || undefined} alt={name} />
-                    <AvatarFallback>{name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <label 
-                    htmlFor="avatar-upload" 
-                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    {isUploading ? (
-                      <Loader2 className="h-8 w-8 text-white animate-spin" />
-                    ) : (
-                      <ImageIcon className="h-8 w-8 text-white" />
-                    )}
-                  </label>
-                  <input
-                    type="file"
-                    id="avatar-upload"
-                    className="hidden"
-                    accept="image/png, image/jpeg, image/gif"
-                    onChange={handleAvatarUpload}
-                    disabled={isUploading}
-                  />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold">{name || user.email}</h2>
-                  <p className="text-gray-400">{user.email}</p>
-                </div>
-              </div>
-
+              <ProfileHeader
+                profile={profile}
+                user={user}
+                name={name}
+                isUploading={isUploading}
+                handleAvatarUpload={handleAvatarUpload}
+              />
+              
               <div className="space-y-6">
-                <div className="space-y-4">
-                    <h3 className="text-xl font-semibold border-b border-gray-600 pb-2">Basic Info</h3>
-                    <div>
-                      <Label htmlFor="name-profile">Display Name</Label>
-                      <Input id="name-profile" value={name} onChange={(e) => setName(e.target.value)} className="bg-white/10 border-gray-600 focus:border-blue-500" />
-                    </div>
-                    <div>
-                      <Label htmlFor="email-profile">Email</Label>
-                      <Input id="email-profile" type="email" value={user.email || ''} readOnly className="bg-white/10 border-gray-600 cursor-not-allowed" />
-                    </div>
-                    <div>
-                      <Label htmlFor="country-profile">Country</Label>
-                      <Input id="country-profile" value={country} onChange={(e) => setCountry(e.target.value)} className="bg-white/10 border-gray-600 focus:border-blue-500" placeholder="e.g. United States" />
-                    </div>
-                    <div>
-                      <Label>Favorite Sport(s)</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2">
-                        {availableSports.map(sport => (
-                          <div key={sport} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`sport-${sport}`}
-                              checked={favoriteSports.includes(sport)}
-                              onCheckedChange={() => handleSportChange(sport)}
-                              className="border-gray-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
-                            />
-                            <Label htmlFor={`sport-${sport}`} className="font-normal cursor-pointer">{sport}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                     <div>
-                      <Label>Date Joined</Label>
-                      <p className="text-gray-300 pt-2">{user.created_at ? format(new Date(user.created_at), 'MMMM d, yyyy') : 'N/A'}</p>
-                    </div>
-                </div>
-
-                <div className="space-y-4 pt-4">
-                    <h3 className="text-xl font-semibold border-b border-gray-600 pb-2">Ranking Activity</h3>
-                    <div className="text-gray-400">
-                        <p>Total Rankings Submitted: 0</p>
-                        <p>Categories Voted In: None</p>
-                        <p>Last Ranking Submitted: N/A</p>
-                        <p className="text-sm mt-2 italic">(Ranking features are coming soon!)</p>
-                    </div>
-                </div>
+                <ProfileForm
+                  name={name}
+                  setName={setName}
+                  country={country}
+                  setCountry={setCountry}
+                  user={user}
+                  favoriteSports={favoriteSports}
+                  handleSportChange={handleSportChange}
+                  availableSports={availableSports}
+                />
+                
+                <RankingActivity />
               </div>
 
               <div className="flex justify-end pt-6">
