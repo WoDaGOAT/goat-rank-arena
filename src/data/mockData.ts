@@ -2,7 +2,6 @@ import { Category, Athlete, AthleteMovement } from "@/types";
 
 // Comprehensive football players database with detailed information
 const allFootballPlayers: Athlete[] = [
-  // Legends (1960s-1980s)
   {
     id: "pele",
     rank: 1,
@@ -121,8 +120,6 @@ const allFootballPlayers: Athlete[] = [
     ],
     positions: ["Attacking Midfielder", "Forward"]
   },
-
-  // Modern Era (2000s-Present)
   {
     id: "messi",
     rank: 6,
@@ -248,8 +245,6 @@ const allFootballPlayers: Athlete[] = [
     ],
     positions: ["Left Winger", "Right Winger", "Attacking Midfielder", "Forward"]
   },
-
-  // Add more players with similar detailed structure...
   {
     id: "debruyne",
     rank: 11,
