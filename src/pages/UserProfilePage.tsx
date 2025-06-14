@@ -37,7 +37,15 @@ const UserProfilePage = () => {
         console.error('Error fetching liked categories:', error);
         return [];
       }
-      return data.map(item => item.categories).filter(Boolean) as { id: string, name: string | null }[];
+      if (!data) {
+        return [];
+      }
+      // The relationship might be incorrectly typed as one-to-many, causing a nested array.
+      // .flat() will correct this structure if needed.
+      return data
+        .map(item => item.categories)
+        .flat()
+        .filter(Boolean) as { id: string, name: string | null }[];
     },
     enabled: !!user && !loading,
   });

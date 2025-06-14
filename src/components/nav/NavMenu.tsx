@@ -24,7 +24,7 @@ const ListItem = React.forwardRef<
           ref={ref}
           to={to || "#"}
           className={cn(
-            "block select-none space-y-1 rounded-md p-2 md:p-3 leading-none no-underline outline-none transition-colors focus:bg-blue-700 focus:text-white text-xs md:text-sm",
+            "block select-none space-y-1 rounded-md p-2 md:p-3 leading-none no-underline outline-none transition-colors focus:bg-gray-700 focus:text-white text-xs md:text-sm",
             className
           )}
           {...props}
@@ -64,13 +64,13 @@ const NavMenu = () => {
               Categories
             </NavigationMenuTrigger>
             <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[400px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[500px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
+              <ul className="grid w-[180px] gap-2 p-2 md:w-[400px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[500px] bg-black text-white rounded-lg shadow-lg z-40">
                 {mockCategories.map((category) => (
                   <ListItem
                     key={category.id}
                     to={`/category/${category.id}`}
                     title={category.name}
-                    className="text-white hover:bg-blue-700"
+                    className="text-white hover:bg-gray-800"
                   >
                     {category.description.substring(0, 70) +
                       (category.description.length > 70 ? "..." : "")}
@@ -81,16 +81,16 @@ const NavMenu = () => {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger className={triggerClassName}>
-              Main Category A
+              GOAT
             </NavigationMenuTrigger>
             <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
+              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
                 {newCategoryItems.map((item) => (
                   <ListItem
-                    key={`a-${item.id}`}
+                    key={`goat-${item.id}`}
                     to="#"
                     title={item.title}
-                    className="text-white hover:bg-blue-700"
+                    className="text-white hover:bg-gray-800"
                   >
                     {item.description}
                   </ListItem>
@@ -100,16 +100,16 @@ const NavMenu = () => {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger className={triggerClassName}>
-              Main Category B
+              Current GOAT
             </NavigationMenuTrigger>
             <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
+              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
                 {newCategoryItems.map((item) => (
                   <ListItem
-                    key={`b-${item.id}`}
+                    key={`current-goat-${item.id}`}
                     to="#"
                     title={item.title}
-                    className="text-white hover:bg-blue-700"
+                    className="text-white hover:bg-gray-800"
                   >
                     {item.description}
                   </ListItem>
@@ -119,16 +119,35 @@ const NavMenu = () => {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger className={triggerClassName}>
-              Main Category C
+              GOAT of my Time
             </NavigationMenuTrigger>
             <NavigationMenuContent>
-              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
+              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
                 {newCategoryItems.map((item) => (
                   <ListItem
-                    key={`c-${item.id}`}
+                    key={`my-time-goat-${item.id}`}
                     to="#"
                     title={item.title}
-                    className="text-white hover:bg-blue-700"
+                    className="text-white hover:bg-gray-800"
+                  >
+                    {item.description}
+                  </ListItem>
+                ))}
+              </ul>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className={triggerClassName}>
+              Competitions
+            </NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
+                {newCategoryItems.map((item) => (
+                  <ListItem
+                    key={`competitions-${item.id}`}
+                    to="#"
+                    title={item.title}
+                    className="text-white hover:bg-gray-800"
                   >
                     {item.description}
                   </ListItem>
