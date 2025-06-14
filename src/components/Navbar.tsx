@@ -16,7 +16,7 @@ const Navbar = () => {
   const loremIpsumDescription =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
-  // Dummy data for the new dropdowns
+  // Dummy data for dropdowns
   const newCategoryItems = [
     { id: "item1", title: "Sub-Category 1", description: loremIpsumDescription.substring(0, 70) + "..." },
     { id: "item2", title: "Sub-Category 2", description: loremIpsumDescription.substring(0, 70) + "..." },
@@ -28,27 +28,29 @@ const Navbar = () => {
 
   // Category trigger text, white with no button styling
   const triggerClassName =
-    "bg-transparent text-white hover:text-blue-300 focus:text-blue-300 px-4 py-2 font-medium transition-none cursor-pointer rounded-none shadow-none";
+    "bg-transparent text-white hover:text-blue-300 focus:text-blue-300 px-2 md:px-4 py-2 font-medium transition-none cursor-pointer rounded-none shadow-none";
 
   return (
-    <nav className="bg-black text-primary-foreground p-4 shadow-md">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="bg-black text-primary-foreground p-2 sm:p-3 md:p-4 shadow-md w-full">
+      <div className="container mx-auto flex flex-wrap md:flex-nowrap items-center justify-between gap-2">
+        {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold hover:opacity-80 transition-opacity"
+          className="text-2xl font-bold hover:opacity-80 transition-opacity whitespace-nowrap mb-2 md:mb-0"
         >
           wodagoat
         </Link>
+
         {/* Centered Navigation Menu */}
         <div className="flex-grow flex justify-center">
           <NavigationMenu>
-            <NavigationMenuList>
+            <NavigationMenuList className="flex flex-wrap justify-center gap-0 md:gap-1">
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={triggerClassName}>
                   Categories
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[400px] md:grid-cols-2 lg:w-[500px] bg-blue-800 text-white rounded-lg shadow-lg">
+                  <ul className="grid w-[220px] gap-3 p-3 md:w-[400px] md:grid-cols-2 lg:w-[500px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
                     {mockCategories.map((category) => (
                       <ListItem
                         key={category.id}
@@ -69,7 +71,7 @@ const Navbar = () => {
                   Main Category A
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg">
+                  <ul className="grid w-[220px] gap-3 p-3 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
                     {newCategoryItems.map((item) => (
                       <ListItem
                         key={`a-${item.id}`}
@@ -89,7 +91,7 @@ const Navbar = () => {
                   Main Category B
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg">
+                  <ul className="grid w-[220px] gap-3 p-3 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
                     {newCategoryItems.map((item) => (
                       <ListItem
                         key={`b-${item.id}`}
@@ -109,7 +111,7 @@ const Navbar = () => {
                   Main Category C
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg">
+                  <ul className="grid w-[220px] gap-3 p-3 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-blue-800 text-white rounded-lg shadow-lg z-40">
                     {newCategoryItems.map((item) => (
                       <ListItem
                         key={`c-${item.id}`}
@@ -126,18 +128,19 @@ const Navbar = () => {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
+
         {/* Auth Buttons on the right */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2 md:gap-4 mt-2 md:mt-0">
           <Link
             to="/signup"
-            className="rounded-[13px] border border-blue-500 bg-blue-600 text-white font-semibold text-base px-6 py-2 transition-colors shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="rounded-[13px] border border-white bg-blue-600 text-white font-semibold text-base px-5 py-1.5 md:px-6 md:py-2 transition-colors shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
             style={{ letterSpacing: "1px" }}
           >
             SIGN UP
           </Link>
           <Link
             to="/login"
-            className="rounded-[13px] border border-blue-500 bg-gray-200 text-black font-semibold text-base px-6 py-2 transition-colors shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="rounded-[13px] border border-blue-500 bg-gray-200 text-black font-semibold text-base px-5 py-1.5 md:px-6 md:py-2 transition-colors shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
             style={{ letterSpacing: "1px" }}
           >
             LOG IN
@@ -175,4 +178,3 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
-
