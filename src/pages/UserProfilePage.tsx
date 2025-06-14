@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -12,19 +11,16 @@ import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const UserProfilePage = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading, refetchUser } = useAuth();
   
   const [name, setName] = useState('');
-  const [bio, setBio] = useState("Sports enthusiast and GOAT debater.");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setName(user.user_metadata?.full_name || '');
-      // You can add more fields from user metadata here in the future
-      // setBio(user.user_metadata?.bio || "Sports enthusiast and GOAT debater.");
+    if (profile) {
+      setName(profile.full_name || '');
     }
-  }, [user]);
+  }, [profile]);
 
   if (loading) {
     return (
@@ -39,10 +35,12 @@ const UserProfilePage = () => {
   }
 
   const handleSaveChanges = async () => {
+    if (!user) return;
     setIsSaving(true);
-    const { data, error } = await supabase!.auth.updateUser({
-        data: { full_name: name, bio: bio }
-    })
+    const { error } = await supabase!
+        .from('profiles')
+        .update({ full_name: name })
+        .eq('id', user.id)
 
     setIsSaving(false);
 
@@ -50,8 +48,7 @@ const UserProfilePage = () => {
         toast.error(error.message);
     } else {
         toast.success("Profile updated successfully!");
-        // We can optimistically update the name in the auth context or force a refresh
-        setName(data.user.user_metadata.full_name);
+        await refetchUser();
     }
   };
 
@@ -70,7 +67,7 @@ const UserProfilePage = () => {
             <CardContent className="space-y-6">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={user.user_metadata?.avatar_url} alt={name} />
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={name} />
                   <AvatarFallback>{name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -87,10 +84,6 @@ const UserProfilePage = () => {
                 <div>
                   <Label htmlFor="email-profile">Email</Label>
                   <Input id="email-profile" type="email" defaultValue={user.email} readOnly className="bg-white/10 border-gray-600 cursor-not-allowed" />
-                </div>
-                <div>
-                  <Label htmlFor="bio-profile">Bio</Label>
-                  <Input id="bio-profile" value={bio} onChange={(e) => setBio(e.target.value)} className="bg-white/10 border-gray-600 focus:border-blue-500" />
                 </div>
               </div>
 

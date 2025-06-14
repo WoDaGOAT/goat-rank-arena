@@ -1,4 +1,3 @@
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +14,7 @@ import { toast } from "sonner";
 import { LogOut, User } from 'lucide-react';
 
 const UserMenu = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const handleLogout = async () => {
     const { error } = await supabase!.auth.signOut();
@@ -26,14 +25,14 @@ const UserMenu = () => {
     }
   };
 
-  const userInitial = user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
+  const userInitial = profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 focus:outline-none rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-black">
           <Avatar className="h-8 w-8 md:h-9 md:w-9">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
+            <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback className="bg-gray-700 text-white">{userInitial.toUpperCase()}</AvatarFallback>
           </Avatar>
         </button>
@@ -41,7 +40,7 @@ const UserMenu = () => {
       <DropdownMenuContent className="w-56 bg-gray-900 text-white border-gray-700" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user?.user_metadata?.full_name}</p>
+            <p className="text-sm font-medium leading-none">{profile?.full_name}</p>
             <p className="text-xs leading-none text-gray-400">{user?.email}</p>
           </div>
         </DropdownMenuLabel>
