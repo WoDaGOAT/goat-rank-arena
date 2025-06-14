@@ -8,13 +8,13 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
 import { mockCategories } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import React from "react";
 
 const Navbar = () => {
-  const loremIpsumDescription = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+  const loremIpsumDescription =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
   // Dummy data for the new dropdowns
   const newCategoryItems = [
@@ -26,16 +26,19 @@ const Navbar = () => {
     { id: "item6", title: "Sub-Category 6", description: loremIpsumDescription.substring(0, 70) + "..." },
   ];
 
-  // Simplified trigger: just white text, no button styling
-  const triggerClassName = "bg-transparent text-white hover:text-gray-100 focus:text-gray-100 px-4 py-2 font-medium transition-none cursor-pointer rounded-none shadow-none";
+  // Category trigger text, white with no button styling
+  const triggerClassName =
+    "bg-transparent text-white hover:text-blue-300 focus:text-blue-300 px-4 py-2 font-medium transition-none cursor-pointer rounded-none shadow-none";
 
   return (
     <nav className="bg-black text-primary-foreground p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
+        <Link
+          to="/"
+          className="text-2xl font-bold hover:opacity-80 transition-opacity"
+        >
           wodagoat
         </Link>
-
         {/* Centered Navigation Menu */}
         <div className="flex-grow flex justify-center">
           <NavigationMenu>
@@ -53,13 +56,13 @@ const Navbar = () => {
                         title={category.name}
                         className="text-white hover:bg-blue-700"
                       >
-                        {category.description.substring(0, 70) + (category.description.length > 70 ? "..." : "")}
+                        {category.description.substring(0, 70) +
+                          (category.description.length > 70 ? "..." : "")}
                       </ListItem>
                     ))}
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-
               {/* Main Category A */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={triggerClassName}>
@@ -80,7 +83,6 @@ const Navbar = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-
               {/* Main Category B */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={triggerClassName}>
@@ -101,7 +103,6 @@ const Navbar = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-
               {/* Main Category C */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={triggerClassName}>
@@ -125,9 +126,23 @@ const Navbar = () => {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-
         {/* Auth Buttons on the right */}
-        {/* Removed Log In and Sign Up buttons as per request */}
+        <div className="flex items-center space-x-4">
+          <Link
+            to="/signup"
+            className="rounded-[13px] border border-blue-500 bg-blue-600 text-white font-semibold text-base px-6 py-2 transition-colors shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            style={{ letterSpacing: "1px" }}
+          >
+            SIGN UP
+          </Link>
+          <Link
+            to="/login"
+            className="rounded-[13px] border border-blue-500 bg-gray-200 text-black font-semibold text-base px-6 py-2 transition-colors shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            style={{ letterSpacing: "1px" }}
+          >
+            LOG IN
+          </Link>
+        </div>
       </div>
     </nav>
   );
@@ -151,9 +166,7 @@ const ListItem = React.forwardRef<
           {...props}
         >
           <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug">
-            {children}
-          </p>
+          <p className="line-clamp-2 text-sm leading-snug">{children}</p>
         </Link>
       </NavigationMenuLink>
     </li>
