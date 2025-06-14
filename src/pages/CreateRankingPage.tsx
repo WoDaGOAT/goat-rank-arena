@@ -1,9 +1,8 @@
-
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getCategoryById } from "@/data/mockData";
+import { getCategoryById, allAthletes } from "@/data/mockData";
 import { useEffect, useState } from "react";
 import { Category, Athlete } from "@/types";
 import { ChevronLeft, Save, Search, Plus, X, GripVertical } from "lucide-react";
@@ -153,7 +152,7 @@ const CreateRankingPage = () => {
 
         <header className="mb-8">
           <h1 className="text-4xl font-extrabold text-white mb-2">Create Your Ranking</h1>
-          <p className="text-lg text-gray-300">Search and select athletes, then rank them with custom points</p>
+          <p className="text-lg text-gray-300">Search from over 60 football legends and modern stars - from Pelé to Mbappé</p>
         </header>
 
         <div className="max-w-6xl mx-auto">
@@ -187,7 +186,7 @@ const CreateRankingPage = () => {
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Left Column: Search & Add Athletes */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 p-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Search Athletes</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">Search Athletes ({allAthletes.length} available)</h2>
               
               {/* Search Input */}
               <div className="relative mb-4">
