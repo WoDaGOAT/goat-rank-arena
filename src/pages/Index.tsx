@@ -8,12 +8,13 @@ const Index = () => {
     <>
       <Navbar />
       <div className="bg-background min-h-screen">
-        <header className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-20 px-4 text-center shadow-lg">
+        {/* HERO HEADER - now styled to match Navbar */}
+        <header className="bg-black text-primary-foreground py-16 px-4 text-center shadow-md">
           <div className="container mx-auto">
-            <h1 className="text-5xl md:text-6xl font-extrabold mb-4 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight leading-tight">
               Welcome to wodagoat!
             </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl mb-8 max-w-3xl mx-auto text-primary-foreground/80 font-medium">
               The ultimate platform for sports fans to rank their favorite athletes and contribute to the global GOAT debate.
             </p>
             {/* You can add a primary CTA here if needed */}
@@ -21,7 +22,7 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-10">
             Choose a Category & Join the Debate
           </h2>
           {mockCategories.length > 0 ? (
