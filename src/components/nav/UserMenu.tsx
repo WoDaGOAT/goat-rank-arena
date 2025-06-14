@@ -18,7 +18,7 @@ const UserMenu = () => {
   const { user } = useAuth();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase!.auth.signOut();
     if (error) {
       toast.error("Failed to log out: " + error.message);
     } else {

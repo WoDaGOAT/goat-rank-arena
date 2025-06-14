@@ -40,7 +40,7 @@ const UserProfilePage = () => {
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
-    const { data, error } = await supabase.auth.updateUser({
+    const { data, error } = await supabase!.auth.updateUser({
         data: { full_name: name, bio: bio }
     })
 
