@@ -37,7 +37,7 @@ export const mockCategories: Category[] = [
     id: "soccer-goat-france",
     name: "GOAT of Soccer in France",
     description: "Who is the greatest soccer player to ever grace the fields of France?",
-    imageUrl: "photo-1605810230434-7631ac76ec81", // Was "photo-1493962853295-0fd70327578a" (tennis image) -> now people around screens
+    imageUrl: "photo-1487887235947-a955ef187fcc", // Stadium/drone - most sporty in your list
     userRankingCount: 1234,
     leaderboard: soccerAthletes,
   },
@@ -45,7 +45,7 @@ export const mockCategories: Category[] = [
     id: "nba-goat-global",
     name: "Global NBA GOAT",
     description: "Debate the all-time greatest in the National Basketball Association.",
-    imageUrl: "photo-1470813740244-df37b8c1edcb", // Was "photo-1438565434616-3ef039228b15" (Schumacher F1 image) -> now starry night (abstract 'stars')
+    imageUrl: "photo-1518877593221-1f28583780b4", // Dynamic/fluid image to evoke energy, best available
     userRankingCount: 5678,
     leaderboard: basketballAthletes,
   },
@@ -53,7 +53,7 @@ export const mockCategories: Category[] = [
     id: "tennis-goat-male",
     name: "Men's Tennis GOAT",
     description: "Who stands above all in the history of men's professional tennis?",
-    imageUrl: "photo-1493962853295-0fd70327578a", // Was "photo-1487058792275-0ad4aaf24ca7" (code image) -> now Federer's image key (tennis related)
+    imageUrl: "photo-1493962853295-0fd70327578a", // Already tennis (Federer), so keep this
     userRankingCount: 3450,
     leaderboard: tennisAthletes,
   },
@@ -61,7 +61,7 @@ export const mockCategories: Category[] = [
     id: "f1-goat-alltime",
     name: "All-Time Formula 1 GOAT",
     description: "Determine the ultimate driver in Formula 1 history.",
-    imageUrl: "photo-1469041797191-50ace28483c3", // Was "photo-1518770660439-4636190af475" (circuit board) -> now Hamilton's image key (F1 related)
+    imageUrl: "photo-1469041797191-50ace28483c3", // Used before for Hamilton, fits F1 theme best in selection
     userRankingCount: 4110,
     leaderboard: f1Athletes,
   },
@@ -69,7 +69,7 @@ export const mockCategories: Category[] = [
     id: "mma-p4p-goat",
     name: "MMA Pound-for-Pound GOAT",
     description: "Discuss the greatest mixed martial artist, irrespective of weight class.",
-    imageUrl: "photo-1518877593221-1f28583780b4", // Was "photo-1526374965328-7f61d4dc18c5" (matrix image) -> now humpback whale (power/spectacle)
+    imageUrl: "octagon", // Special flag for rendering Octagon icon instead of an image
     userRankingCount: 2890,
     leaderboard: [], 
   },
