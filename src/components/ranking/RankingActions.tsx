@@ -18,9 +18,9 @@ const RankingActions: React.FC<RankingActionsProps> = ({
   <div className="flex justify-end gap-4 mt-8">
     <Button
       asChild
-      variant="outline"
       size="lg"
-      className="border-white/40 text-white hover:bg-white/10"
+      // Custom soft red background and white text for Cancel
+      className="bg-[#FFD6DA] text-[#AD2637] hover:bg-[#FFC1C9] border-none shadow-sm"
     >
       <Link to={categoryId ? `/category/${categoryId}` : "/"}>
         Cancel
@@ -38,3 +38,4 @@ const RankingActions: React.FC<RankingActionsProps> = ({
 );
 
 export default RankingActions;
+
