@@ -7,14 +7,28 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle, // Import this if you want to style a Link like a trigger
+  // navigationMenuTriggerStyle, // Not directly used for custom styled triggers
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { mockCategories } from "@/data/mockData"; // Assuming mockCategories is exported from here
-import { cn } from "@/lib/utils"; // For cn utility if using ListItem component approach
-import React from "react"; // Import React for ListItem
+import { mockCategories } from "@/data/mockData";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 const Navbar = () => {
+  const loremIpsumDescription = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+  // Dummy data for the new dropdowns
+  const newCategoryItems = [
+    { id: "item1", title: "Sub-Category 1", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "item2", title: "Sub-Category 2", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "item3", title: "Sub-Category 3", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "item4", title: "Sub-Category 4", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "item5", title: "Sub-Category 5", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "item6", title: "Sub-Category 6", description: loremIpsumDescription.substring(0, 70) + "..." },
+  ];
+
+  const triggerClassName = "bg-primary hover:bg-primary/90 data-[active]:bg-primary/90 data-[state=open]:bg-primary/90 text-primary-foreground hover:text-primary-foreground focus:text-primary-foreground focus:bg-primary/90";
+
   return (
     <nav className="bg-primary text-primary-foreground p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
@@ -22,11 +36,11 @@ const Navbar = () => {
           wodagoat
         </Link>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4"> {/* Adjusted space for more items */}
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-primary hover:bg-primary/90 data-[active]:bg-primary/90 data-[state=open]:bg-primary/90 text-primary-foreground hover:text-primary-foreground focus:text-primary-foreground focus:bg-primary/90">
+                <NavigationMenuTrigger className={triggerClassName}>
                   Categories
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -43,16 +57,67 @@ const Navbar = () => {
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-              {/* You can add more top-level navigation items here if needed */}
-              {/* Example:
+
+              {/* Main Category A */}
               <NavigationMenuItem>
-                <Link to="/about" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()  + " bg-primary hover:bg-primary/90 data-[active]:bg-primary/90 data-[state=open]:bg-primary/90 text-primary-foreground hover:text-primary-foreground focus:text-primary-foreground focus:bg-primary/90"}>
-                    About
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuTrigger className={triggerClassName}>
+                  Main Category A
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    {newCategoryItems.map((item) => (
+                      <ListItem
+                        key={`a-${item.id}`}
+                        to="#"
+                        title={item.title}
+                      >
+                        {item.description}
+                      </ListItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
               </NavigationMenuItem>
-              */}
+
+              {/* Main Category B */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={triggerClassName}>
+                  Main Category B
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    {newCategoryItems.map((item) => (
+                      <ListItem
+                        key={`b-${item.id}`}
+                        to="#"
+                        title={item.title}
+                      >
+                        {item.description}
+                      </ListItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Main Category C */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={triggerClassName}>
+                  Main Category C
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[300px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    {newCategoryItems.map((item) => (
+                      <ListItem
+                        key={`c-${item.id}`}
+                        to="#"
+                        title={item.title}
+                      >
+                        {item.description}
+                      </ListItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -78,7 +143,7 @@ const ListItem = React.forwardRef<
       <NavigationMenuLink asChild>
         <Link
           ref={ref}
-          to={to}
+          to={to || "#"} // Ensure 'to' has a default value
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
@@ -97,3 +162,4 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default Navbar;
+
