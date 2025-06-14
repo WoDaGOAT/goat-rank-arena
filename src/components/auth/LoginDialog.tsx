@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import SocialLogins from "./SocialLogins";
 
 interface LoginDialogProps {
   children: React.ReactNode;
@@ -65,6 +66,7 @@ const LoginDialog = ({ children }: LoginDialogProps) => {
             {loading ? "Logging In..." : "Log In"}
           </Button>
         </form>
+        <SocialLogins />
       </DialogContent>
     </Dialog>
   );

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import SocialLogins from "./SocialLogins";
 
 interface SignupDialogProps {
   children: React.ReactNode;
@@ -45,6 +46,7 @@ const SignupDialog = ({ children }: SignupDialogProps) => {
         data: {
           full_name: name,
         },
+        emailRedirectTo: window.location.origin,
       },
     });
     setLoading(false);
@@ -90,6 +92,7 @@ const SignupDialog = ({ children }: SignupDialogProps) => {
             {loading ? "Creating Account..." : "Create Account"}
         </Button>
         </form>
+        <SocialLogins />
       </DialogContent>
     </Dialog>
   );
