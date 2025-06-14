@@ -13,23 +13,23 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
   // Show special octagon icon for MMA, else the Unsplash image
   const showOctagon = category.imageUrl === "octagon";
   return (
-    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <CardHeader>
-        {showOctagon ? (
-          <div className="flex items-center justify-center w-full h-48 bg-zinc-100 dark:bg-zinc-800 mb-4 rounded-t-md">
-            <Octagon className="w-20 h-20 text-primary" strokeWidth={1.5} />
-          </div>
-        ) : (
-          category.imageUrl && (
-            <img 
-              src={getPlaceholderImageUrl(category.imageUrl)} 
-              alt={category.name} 
-              className="w-full h-48 object-cover mb-4 rounded-t-md"
-            />
-          )
-        )}
+    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col bg-white/5 border-white/10 text-white">
+      <CardHeader className="flex-grow">
+        <div className="relative w-full h-48 mb-4 rounded-t-md overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+          {showOctagon ? (
+            <div className="flex items-center justify-center w-full h-full">
+              <Octagon className="w-20 h-20 text-primary" strokeWidth={1.5} />
+            </div>
+          ) : (
+             <img 
+                src={getPlaceholderImageUrl(category.imageUrl)} 
+                alt={category.name} 
+                className="w-full h-full object-cover"
+              />
+          )}
+        </div>
         <CardTitle className="text-2xl font-semibold text-primary">{category.name}</CardTitle>
-        <CardDescription>{category.description}</CardDescription>
+        <CardDescription className="text-primary-foreground/80 h-12">{category.description}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center text-muted-foreground">
