@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -18,7 +19,11 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md",
         ghost: "hover:bg-accent hover:text-accent-foreground rounded-md",
         link: "text-primary underline-offset-4 hover:underline rounded-md",
-        cta: "bg-[#388BFF] text-white rounded-full px-6 py-2 font-semibold text-lg shadow transition-colors hover:bg-[#1485ff] active:bg-[#066cd9] disabled:bg-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed",
+        cta:
+          // Normal (enabled) style
+          "bg-[#388BFF] text-white rounded-full px-6 py-2 font-semibold text-lg shadow transition-colors hover:bg-[#1485ff] active:bg-[#066cd9] " +
+          // Disabled state override (use Figma spec)
+          "disabled:bg-white disabled:text-[#A2A2A2] disabled:shadow-none disabled:rounded-[12px] disabled:border-0 disabled:h-[36px] disabled:min-w-[58px] disabled:font-semibold disabled:opacity-100",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -55,3 +60,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button"
 
 export { Button, buttonVariants }
+
