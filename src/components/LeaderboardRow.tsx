@@ -27,16 +27,16 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
   };
 
   const getRankStyle = () => {
-    if (position === 1) return "bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/10 border-l-4 border-l-yellow-400";
-    if (position === 2) return "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800/20 dark:to-gray-700/10 border-l-4 border-l-gray-400";
-    if (position === 3) return "bg-gradient-to-r from-amber-100 to-amber-50 dark:from-amber-900/20 dark:to-amber-800/10 border-l-4 border-l-amber-600";
-    return "hover:bg-secondary/30";
+    if (position === 1) return "bg-gradient-to-r from-yellow-500/10 to-yellow-400/5 border-l-4 border-l-yellow-400";
+    if (position === 2) return "bg-gradient-to-r from-gray-500/10 to-gray-400/5 border-l-4 border-l-gray-400";
+    if (position === 3) return "bg-gradient-to-r from-amber-500/10 to-amber-400/5 border-l-4 border-l-amber-600";
+    return "hover:bg-white/5";
   };
 
   const getMovementBadge = () => {
     if (athlete.movement === "up") {
       return (
-        <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs px-2 py-0.5">
+        <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2 py-0.5">
           <ArrowUp className="w-3 h-3 mr-1" />
           Rising
         </Badge>
@@ -44,14 +44,14 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
     }
     if (athlete.movement === "down") {
       return (
-        <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs px-2 py-0.5">
+        <Badge variant="secondary" className="bg-red-500/20 text-red-300 border-red-500/30 text-xs px-2 py-0.5">
           <ArrowDown className="w-3 h-3 mr-1" />
           Falling
         </Badge>
       );
     }
     return (
-      <Badge variant="outline" className="text-xs px-2 py-0.5 opacity-60">
+      <Badge variant="outline" className="text-xs px-2 py-0.5 bg-white/10 text-gray-300 border-white/30">
         <Minus className="w-3 h-3 mr-1" />
         Stable
       </Badge>
@@ -63,7 +63,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
       {/* Rank */}
       <div className="flex items-center justify-center">
         {getRankIcon() || (
-          <span className="text-lg font-bold text-foreground">{position}</span>
+          <span className="text-lg font-bold text-white">{position}</span>
         )}
       </div>
       
@@ -72,10 +72,10 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
         <img
           src={getPlaceholderImageUrl(athlete.imageUrl)}
           alt={athlete.name}
-          className="w-10 h-10 rounded-full object-cover border-2 border-primary/30 shadow-md"
+          className="w-10 h-10 rounded-full object-cover border-2 border-white/30 shadow-md"
         />
         {position <= 3 && (
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
             <span className="text-white text-xs font-bold">{position}</span>
           </div>
         )}
@@ -83,11 +83,11 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
       
       {/* Name */}
       <div>
-        <div className="font-semibold text-foreground text-sm leading-tight">
+        <div className="font-semibold text-white text-sm leading-tight">
           {athlete.name}
         </div>
         {position <= 3 && (
-          <div className="text-xs text-muted-foreground mt-0.5">
+          <div className="text-xs text-gray-300 mt-0.5">
             {position === 1 ? "Champion" : position === 2 ? "Runner-up" : "3rd Place"}
           </div>
         )}
@@ -100,10 +100,10 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
       
       {/* Points */}
       <div className="text-right">
-        <div className="text-lg font-bold text-primary">
+        <div className="text-lg font-bold text-blue-300">
           {athlete.points.toLocaleString()}
         </div>
-        <div className="text-xs text-muted-foreground">pts</div>
+        <div className="text-xs text-gray-300">pts</div>
       </div>
     </div>
   );
