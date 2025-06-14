@@ -10,6 +10,7 @@ import {
 import { mockCategories } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import React from "react";
+import { User } from "lucide-react";
 
 const Navbar = () => {
   const loremIpsumDescription =
@@ -127,7 +128,15 @@ const Navbar = () => {
         </div>
 
         {/* Auth Buttons on the right */}
-        <div className="flex items-center gap-1 md:gap-4 ml-2">
+        <div className="flex items-center gap-2 md:gap-4 ml-2">
+          {/* Profile Icon */}
+          <Link
+            to="/profile"
+            className="text-white hover:opacity-80 transition-opacity p-1.5 rounded-full hover:bg-white/10"
+            aria-label="User Profile"
+          >
+            <User className="h-5 w-5 md:h-6 md:w-6" />
+          </Link>
           {/* SIGN UP Button */}
           <Link
             to="/signup"
