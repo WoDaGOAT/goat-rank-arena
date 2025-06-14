@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,13 +27,13 @@ const ListItem = React.forwardRef<
           ref={ref}
           to={to || "#"}
           className={cn(
-            "block select-none space-y-1 rounded-md p-2 md:p-3 leading-none no-underline outline-none transition-colors focus:bg-gray-700 focus:text-white text-xs md:text-sm",
+            "block select-none space-y-1 rounded-md p-2 md:p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-800 focus:bg-gray-700 focus:text-white text-xs md:text-sm",
             className
           )}
           {...props}
         >
           <div className="text-xs md:text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-xs md:text-sm leading-snug">{children}</p>
+          <p className="line-clamp-2 text-xs md:text-sm leading-snug text-gray-300">{children}</p>
         </Link>
       </NavigationMenuLink>
     </li>
@@ -138,20 +139,20 @@ const NavMenu = () => {
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                     {(item.children && item.children.length > 0) ? (
-                        <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
+                        <ul className="grid w-[300px] gap-2 p-3 md:w-[600px] md:gap-3 md:p-4 md:grid-cols-2 lg:w-[700px] lg:grid-cols-2 bg-black text-white rounded-lg shadow-lg border border-gray-800 z-50">
                             {item.children.map((subItem) => (
                             <ListItem
                                 key={subItem.id}
                                 to={`/category/${subItem.id}`}
                                 title={subItem.name}
-                                className="text-white hover:bg-gray-800"
+                                className="text-white hover:bg-gray-800 border border-gray-700 rounded-md"
                             >
                                 {subItem.description}
                             </ListItem>
                             ))}
                         </ul>
                     ) : (
-                        <div className="w-[180px] p-4 text-center text-gray-400 bg-black text-white rounded-lg shadow-lg z-40">No sub-categories defined.</div>
+                        <div className="w-[300px] p-4 text-center text-gray-400 bg-black text-white rounded-lg shadow-lg border border-gray-800 z-50">No sub-categories defined.</div>
                     )}
                 </NavigationMenuContent>
              </NavigationMenuItem>
