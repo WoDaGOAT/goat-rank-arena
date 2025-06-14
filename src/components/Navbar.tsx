@@ -10,6 +10,8 @@ import {
 import { mockCategories } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import React from "react";
+import LoginDialog from "./auth/LoginDialog";
+import SignupDialog from "./auth/SignupDialog";
 import { User } from "lucide-react";
 
 const Navbar = () => {
@@ -129,47 +131,41 @@ const Navbar = () => {
 
         {/* Auth Buttons on the right */}
         <div className="flex items-center gap-2 md:gap-4 ml-2">
-          {/* Profile Icon */}
-          <Link
-            to="/profile"
-            className="text-white hover:opacity-80 transition-opacity p-1.5 rounded-full hover:bg-white/10"
-            aria-label="User Profile"
-          >
-            <User className="h-5 w-5 md:h-6 md:w-6" />
-          </Link>
           {/* SIGN UP Button */}
-          <Link
-            to="/signup"
-            className={cn(
-              // Reduced size: smaller font, less padding, smaller border radius
-              "flex items-center justify-center rounded-[10px] border border-white bg-[#388BFF] font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300",
-              "text-sm md:text-base whitespace-nowrap leading-none",
-              "tracking-wide",
-              "min-w-[40px] min-h-[30px]"
-            )}
-            style={{ letterSpacing: "1px" }}
-          >
-            <span className="block">
-              <span className="hidden md:inline">SIGN&nbsp;UP</span>
-              <span className="inline md:hidden">SIGN UP</span>
-            </span>
-          </Link>
+          <SignupDialog>
+            <button
+              className={cn(
+                // Reduced size: smaller font, less padding, smaller border radius
+                "flex items-center justify-center rounded-[10px] border border-white bg-[#388BFF] font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300",
+                "text-sm md:text-base whitespace-nowrap leading-none",
+                "tracking-wide",
+                "min-w-[40px] min-h-[30px]"
+              )}
+              style={{ letterSpacing: "1px" }}
+            >
+              <span className="block">
+                <span className="hidden md:inline">SIGN&nbsp;UP</span>
+                <span className="inline md:hidden">SIGN UP</span>
+              </span>
+            </button>
+          </SignupDialog>
           {/* LOG IN Button */}
-          <Link
-            to="/login"
-            className={cn(
-              "flex items-center justify-center rounded-[10px] border border-[#388BFF] bg-gray-200 text-black font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300",
-              "text-sm md:text-base whitespace-nowrap leading-none",
-              "tracking-wide",
-              "min-w-[40px] min-h-[30px]"
-            )}
-            style={{ letterSpacing: "1px" }}
-          >
-            <span className="block">
-              <span className="hidden md:inline">LOG&nbsp;IN</span>
-              <span className="inline md:hidden">LOG IN</span>
-            </span>
-          </Link>
+          <LoginDialog>
+            <button
+              className={cn(
+                "flex items-center justify-center rounded-[10px] border border-[#388BFF] bg-gray-200 text-black font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300",
+                "text-sm md:text-base whitespace-nowrap leading-none",
+                "tracking-wide",
+                "min-w-[40px] min-h-[30px]"
+              )}
+              style={{ letterSpacing: "1px" }}
+            >
+              <span className="block">
+                <span className="hidden md:inline">LOG&nbsp;IN</span>
+                <span className="inline md:hidden">LOG IN</span>
+              </span>
+            </button>
+          </LoginDialog>
         </div>
       </div>
     </nav>
