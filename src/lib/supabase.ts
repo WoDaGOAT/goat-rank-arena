@@ -1,15 +1,13 @@
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { supabase as integrationClient } from '@/integrations/supabase/client';
+import { SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// The auto-generated client from the integration.
+export const supabase: SupabaseClient = integrationClient;
 
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
+// A flag to check if Supabase is configured, used in App.tsx.
+export const isSupabaseConfigured: boolean = !!supabase;
 
-export let supabase: SupabaseClient | null = null;
-
-if (isSupabaseConfigured) {
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
-} else {
-  console.error("Supabase credentials not found. Please configure them in your environment.");
+if (!isSupabaseConfigured) {
+  console.error("Supabase client could not be initialized. Please check your Supabase integration.");
 }
