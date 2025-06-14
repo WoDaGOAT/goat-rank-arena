@@ -4,7 +4,10 @@ import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
+type Profile = Database['public']['Tables']['profiles']['Row'] & {
+  country?: string | null;
+  favorite_sports?: string[] | null;
+};
 
 interface AuthContextType {
   user: User | null;

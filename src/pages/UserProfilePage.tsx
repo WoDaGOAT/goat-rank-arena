@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -9,16 +10,24 @@ import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const UserProfilePage = () => {
   const { user, profile, loading, refetchUser } = useAuth();
   
   const [name, setName] = useState('');
+  const [country, setCountry] = useState('');
+  const [favoriteSports, setFavoriteSports] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  const availableSports = ["Football", "Basketball", "Tennis", "Formula 1", "MMA"];
 
   useEffect(() => {
     if (profile) {
       setName(profile.full_name || '');
+      setCountry(profile.country || '');
+      setFavoriteSports(profile.favorite_sports || []);
     }
   }, [profile]);
 
@@ -39,7 +48,11 @@ const UserProfilePage = () => {
     setIsSaving(true);
     const { error } = await supabase!
         .from('profiles')
-        .update({ full_name: name })
+        .update({ 
+          full_name: name,
+          country: country,
+          favorite_sports: favoriteSports,
+        })
         .eq('id', user.id)
 
     setIsSaving(false);
@@ -50,6 +63,14 @@ const UserProfilePage = () => {
         toast.success("Profile updated successfully!");
         await refetchUser();
     }
+  };
+
+  const handleSportChange = (sport: string) => {
+    setFavoriteSports(prev => 
+      prev.includes(sport) 
+        ? prev.filter(s => s !== sport)
+        : [...prev, sport]
+    );
   };
 
   return (
@@ -71,23 +92,60 @@ const UserProfilePage = () => {
                   <AvatarFallback>{name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="text-xl font-semibold">{name}</h2>
+                  <h2 className="text-xl font-semibold">{name || user.email}</h2>
                   <p className="text-gray-400">{user.email}</p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name-profile">Name</Label>
-                  <Input id="name-profile" value={name} onChange={(e) => setName(e.target.value)} className="bg-white/10 border-gray-600 focus:border-blue-500" />
+              <div className="space-y-6">
+                <div className="space-y-4">
+                    <h3 className="text-xl font-semibold border-b border-gray-600 pb-2">Basic Info</h3>
+                    <div>
+                      <Label htmlFor="name-profile">Display Name</Label>
+                      <Input id="name-profile" value={name} onChange={(e) => setName(e.target.value)} className="bg-white/10 border-gray-600 focus:border-blue-500" />
+                    </div>
+                    <div>
+                      <Label htmlFor="email-profile">Email</Label>
+                      <Input id="email-profile" type="email" value={user.email || ''} readOnly className="bg-white/10 border-gray-600 cursor-not-allowed" />
+                    </div>
+                    <div>
+                      <Label htmlFor="country-profile">Country</Label>
+                      <Input id="country-profile" value={country} onChange={(e) => setCountry(e.target.value)} className="bg-white/10 border-gray-600 focus:border-blue-500" placeholder="e.g. United States" />
+                    </div>
+                    <div>
+                      <Label>Favorite Sport(s)</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2">
+                        {availableSports.map(sport => (
+                          <div key={sport} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`sport-${sport}`}
+                              checked={favoriteSports.includes(sport)}
+                              onCheckedChange={() => handleSportChange(sport)}
+                              className="border-gray-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                            />
+                            <Label htmlFor={`sport-${sport}`} className="font-normal cursor-pointer">{sport}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                     <div>
+                      <Label>Date Joined</Label>
+                      <p className="text-gray-300 pt-2">{user.created_at ? format(new Date(user.created_at), 'MMMM d, yyyy') : 'N/A'}</p>
+                    </div>
                 </div>
-                <div>
-                  <Label htmlFor="email-profile">Email</Label>
-                  <Input id="email-profile" type="email" defaultValue={user.email} readOnly className="bg-white/10 border-gray-600 cursor-not-allowed" />
+
+                <div className="space-y-4 pt-4">
+                    <h3 className="text-xl font-semibold border-b border-gray-600 pb-2">Ranking Activity</h3>
+                    <div className="text-gray-400">
+                        <p>Total Rankings Submitted: 0</p>
+                        <p>Categories Voted In: None</p>
+                        <p>Last Ranking Submitted: N/A</p>
+                        <p className="text-sm mt-2 italic">(Ranking features are coming soon!)</p>
+                    </div>
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-6">
                 <Button variant="cta" onClick={handleSaveChanges} disabled={isSaving}>
                   {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
