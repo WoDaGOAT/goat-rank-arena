@@ -49,6 +49,19 @@ const NavMenu = () => {
     { id: "item6", title: "Sub-Category 6", description: loremIpsumDescription.substring(0, 70) + "..." },
   ];
 
+  const goatCategoryItems = [
+    { id: "goat-footballer", title: "GOAT Footballer", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-goalkeeper", title: "GOAT Goalkeeper", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-defender", title: "GOAT Defender", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-midfielder", title: "GOAT Midfielder", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-attacker", title: "GOAT Attacker", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-free-kick", title: "GOAT Free-Kick Taker", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-finisher", title: "GOAT Finisher", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-dribbler", title: "GOAT Dribbler", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-playmaker", title: "GOAT Playmaker", description: loremIpsumDescription.substring(0, 70) + "..." },
+    { id: "goat-leader", title: "GOAT Leader / Captain", description: loremIpsumDescription.substring(0, 70) + "..." },
+  ];
+
   const triggerClassName =
     "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-none cursor-pointer rounded-none shadow-none border-none " +
     "text-xs md:text-base whitespace-nowrap";
@@ -63,7 +76,7 @@ const NavMenu = () => {
             </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid w-[180px] gap-2 p-2 md:w-[500px] md:gap-3 md:p-3 md:grid-cols-2 lg:w-[600px] bg-black text-white rounded-lg shadow-lg z-40">
-                {newCategoryItems.map((item) => (
+                {goatCategoryItems.map((item) => (
                   <ListItem
                     key={`goat-${item.id}`}
                     to="#"
