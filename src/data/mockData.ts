@@ -75,11 +75,57 @@ const allFootballPlayers: Athlete[] = [
     ],
     positions: ["Forward", "Attacking Midfielder", "Midfielder"]
   },
+  {
+    id: "beckenbauer",
+    rank: 4,
+    name: "Franz Beckenbauer",
+    imageUrl: "photo-1441057206919-63d19fac2369",
+    points: 14200,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1945-09-11",
+    dateOfDeath: "2024-01-07",
+    isActive: false,
+    countryOfOrigin: "Germany",
+    nationality: "German",
+    clubs: [
+      { name: "Bayern Munich", country: "Germany", league: "Bundesliga", yearsActive: "1964-1977" },
+      { name: "New York Cosmos", country: "USA", league: "NASL", yearsActive: "1977-1980" }
+    ],
+    competitions: [
+      { name: "FIFA World Cup", type: "international" },
+      { name: "European Cup", type: "continental" },
+      { name: "Bundesliga", type: "domestic" }
+    ],
+    positions: ["Sweeper", "Centre-Back", "Defensive Midfielder"]
+  },
+  {
+    id: "zico",
+    rank: 5,
+    name: "Zico",
+    imageUrl: "photo-1493962853295-0fd70327578a",
+    points: 13800,
+    movement: "neutral" as AthleteMovement,
+    dateOfBirth: "1953-03-03",
+    isActive: false,
+    countryOfOrigin: "Brazil",
+    nationality: "Brazilian",
+    clubs: [
+      { name: "Flamengo", country: "Brazil", league: "Campeonato Brasileiro", yearsActive: "1971-1983" },
+      { name: "Udinese", country: "Italy", league: "Serie A", yearsActive: "1983-1985" },
+      { name: "Kashima Antlers", country: "Japan", league: "J-League", yearsActive: "1991-1994" }
+    ],
+    competitions: [
+      { name: "FIFA World Cup", type: "international" },
+      { name: "Copa Libertadores", type: "continental" },
+      { name: "Campeonato Brasileiro", type: "domestic" }
+    ],
+    positions: ["Attacking Midfielder", "Forward"]
+  },
 
   // Modern Era (2000s-Present)
   {
     id: "messi",
-    rank: 4,
+    rank: 6,
     name: "Lionel Messi",
     imageUrl: "lionel-messi",
     points: 15500,
@@ -103,7 +149,7 @@ const allFootballPlayers: Athlete[] = [
   },
   {
     id: "cristiano",
-    rank: 5,
+    rank: 7,
     name: "Cristiano Ronaldo",
     imageUrl: "cristiano-ronaldo",
     points: 15200,
@@ -130,7 +176,7 @@ const allFootballPlayers: Athlete[] = [
   },
   {
     id: "mbappe",
-    rank: 6,
+    rank: 8,
     name: "Kylian Mbappé",
     imageUrl: "kylian-mbappe",
     points: 11500,
@@ -154,7 +200,7 @@ const allFootballPlayers: Athlete[] = [
   },
   {
     id: "haaland",
-    rank: 7,
+    rank: 9,
     name: "Erling Haaland",
     imageUrl: "erling-haaland",
     points: 10200,
@@ -179,7 +225,7 @@ const allFootballPlayers: Athlete[] = [
   },
   {
     id: "neymar",
-    rank: 8,
+    rank: 10,
     name: "Neymar Jr.",
     imageUrl: "neymar-jr",
     points: 11800,
@@ -206,7 +252,7 @@ const allFootballPlayers: Athlete[] = [
   // Add more players with similar detailed structure...
   {
     id: "debruyne",
-    rank: 9,
+    rank: 11,
     name: "Kevin De Bruyne",
     imageUrl: "kevin-de-bruyne",
     points: 10800,
@@ -230,7 +276,7 @@ const allFootballPlayers: Athlete[] = [
   },
   {
     id: "lewandowski",
-    rank: 10,
+    rank: 12,
     name: "Robert Lewandowski",
     imageUrl: "robert-lewandowski",
     points: 10500,
