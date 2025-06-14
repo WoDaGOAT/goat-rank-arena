@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -234,7 +233,8 @@ const CreateRankingPage = () => {
                     <Button
                       onClick={() => addAthlete(athlete)}
                       size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      variant="cta"
+                      className="min-w-[80px]"
                     >
                       <Plus className="w-4 h-4 mr-1" /> Add
                     </Button>
@@ -333,8 +333,8 @@ const CreateRankingPage = () => {
             </Button>
             <Button 
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={selectedAthletes.length === 0}
+              variant="cta"
+              disabled={selectedAthletes.length < 10}
             >
               <Save className="mr-2 h-5 w-5" />
               Save Ranking ({selectedAthletes.length} athletes)
