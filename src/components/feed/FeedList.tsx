@@ -1,28 +1,10 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import FeedItemRenderer, { FeedItemType } from './FeedItemRenderer';
+import FeedItemRenderer from './FeedItemRenderer';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
+import { useFeed } from '@/hooks/useFeed';
 
 const FeedList = () => {
-  const { data: feedItems, isLoading } = useQuery<FeedItemType[]>({
-    queryKey: ['feedItems'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('feed_items')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error) {
-        toast.error('Failed to load the feed.');
-        console.error('Error fetching feed items:', error);
-        return [];
-      }
-      return data as FeedItemType[];
-    },
-  });
+  const { data: feedItems, isLoading } = useFeed();
 
   return (
     <div className="space-y-4">
