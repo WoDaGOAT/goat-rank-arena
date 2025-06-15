@@ -1,9 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import FriendItem from './FriendItem';
 import { Users } from 'lucide-react';
@@ -44,7 +42,17 @@ const FriendsList = () => {
         console.error('Error fetching friends:', error);
         return [];
       }
-      return data as Friendship[];
+      if (!data) return [];
+      
+      const formattedData = data.map(f => {
+        return {
+          ...f,
+          requester: (Array.isArray(f.requester) ? f.requester[0] : f.requester) as Profile,
+          receiver: (Array.isArray(f.receiver) ? f.receiver[0] : f.receiver) as Profile,
+        };
+      }).filter(f => f.requester && f.receiver);
+
+      return formattedData;
     },
     enabled: !!user,
   });
@@ -78,14 +86,12 @@ const FriendsList = () => {
   }) || [];
 
   return (
-    <Card className="bg-transparent border-none shadow-none">
-      <CardHeader className="p-0 pb-4">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Users className="w-5 h-5" />
-          Friends
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
+    <div className="pt-4">
+      <h3 className="text-xl font-semibold pb-4 flex items-center gap-2">
+        <Users className="w-5 h-5" />
+        Friends
+      </h3>
+      <div>
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-12 w-full bg-gray-700/50 rounded-md" />
@@ -106,8 +112,8 @@ const FriendsList = () => {
         ) : (
           <p className="text-gray-400 text-sm">You haven't added any friends yet.</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
