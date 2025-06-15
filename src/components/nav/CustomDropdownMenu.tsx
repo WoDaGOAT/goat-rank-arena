@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,7 +65,7 @@ const CustomDropdownMenu = () => {
         return rootCategories;
     }, [allCategories]);
 
-    // Close dropdown when clicking outside
+    // Close dropdown when clicking outside or scrolling
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const isClickInsideAnyDropdown = Object.values(dropdownRefs.current).some(ref => 
@@ -78,8 +77,16 @@ const CustomDropdownMenu = () => {
             }
         };
 
+        const handleScroll = () => {
+            setOpenDropdown(null);
+        };
+
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            window.removeEventListener('scroll', handleScroll);
+        };
     }, []);
 
     const handleDropdownToggle = (itemId: string, hasChildren: boolean) => {
@@ -152,7 +159,11 @@ const CustomDropdownMenu = () => {
                             </button>
                             
                             {hasChildren && isOpen && (
-                                <div className="absolute top-full left-0 mt-1 z-50 min-w-[320px] md:min-w-[400px]">
+                                <div className="fixed z-[9999] mt-1 min-w-[320px] md:min-w-[400px]" 
+                                     style={{
+                                         top: `${(dropdownRefs.current[item.id]?.getBoundingClientRect().bottom || 0) + window.scrollY}px`,
+                                         left: `${dropdownRefs.current[item.id]?.getBoundingClientRect().left || 0}px`
+                                     }}>
                                     <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 p-2">
                                             {item.children.map((subItem) => (
