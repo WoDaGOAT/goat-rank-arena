@@ -18,7 +18,7 @@ const Navbar = () => {
           <div className="flex items-center gap-8">
             <Logo />
             <Link to="/feed" className="text-sm font-medium transition-colors hover:text-primary">
-                Home
+                Feed
             </Link>
             <NavMenu />
           </div>
