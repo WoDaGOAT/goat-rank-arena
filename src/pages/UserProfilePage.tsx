@@ -17,6 +17,7 @@ import { useProfileUpdater } from "@/hooks/useProfileUpdater";
 import { useAvatarUploader } from "@/hooks/useAvatarUploader";
 import { useUserQuizAttempts } from "@/hooks/useUserQuizAttempts";
 import QuizActivity from "@/components/profile/QuizActivity";
+import Footer from "@/components/Footer";
 
 const UserProfilePage = () => {
   const { user, profile, loading } = useAuth();
@@ -51,10 +52,10 @@ const UserProfilePage = () => {
     <>
       <Navbar />
       <div
-        className="min-h-screen"
+        className="min-h-screen flex flex-col"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 py-12 flex-grow">
           <Card className="max-w-2xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
@@ -107,6 +108,7 @@ const UserProfilePage = () => {
             </CardContent>
           </Card>
         </main>
+        <Footer />
       </div>
     </>
   );

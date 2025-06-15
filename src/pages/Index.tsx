@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Category } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const { data: categories, isLoading, isError } = useQuery<Category[]>({
@@ -54,12 +55,10 @@ const Index = () => {
   return (
     <>
       <Navbar />
-      {/* Apply category-page background gradient */}
       <div
-        className="min-h-screen"
+        className="min-h-screen flex flex-col"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
-        {/* HERO HEADER - reduced height, transparent to show gradient */}
         <header className="bg-transparent text-primary-foreground py-8 px-4 text-center shadow-md">
           <div className="container mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight leading-tight">
@@ -68,11 +67,10 @@ const Index = () => {
             <p className="text-base sm:text-lg md:text-xl mb-8 max-w-3xl mx-auto text-primary-foreground/80 font-medium">
               The ultimate platform for sports fans to rank their favorite athletes and contribute to the global GOAT debate.
             </p>
-            {/* You can add a primary CTA here if needed */}
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 py-12 flex-grow">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-10">
                 Explore GOAT Debates
             </h2>
@@ -104,9 +102,7 @@ const Index = () => {
             )}
         </main>
 
-        <footer className="py-8 text-center text-muted-foreground border-t border-border mt-12">
-          <p>&copy; {new Date().getFullYear()} wodagoat. All rights reserved.</p>
-        </footer>
+        <Footer />
       </div>
     </>
   );

@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldAlert, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddUserDialog from "@/components/admin/AddUserDialog";
+import Footer from "@/components/Footer";
 
 const UserManagementPage = () => {
   const { isAdmin, loading } = useAuth();
@@ -40,9 +41,9 @@ const UserManagementPage = () => {
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen">
+    <div className="bg-background text-foreground min-h-screen flex flex-col">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-4xl font-bold">User Management</h1>
@@ -59,6 +60,7 @@ const UserManagementPage = () => {
           {renderContent()}
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

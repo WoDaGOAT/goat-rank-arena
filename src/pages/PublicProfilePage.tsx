@@ -1,4 +1,3 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import Footer from '@/components/Footer';
 
 const PublicProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -82,10 +82,10 @@ const PublicProfilePage = () => {
     <>
       <Navbar />
       <div
-        className="min-h-screen"
+        className="min-h-screen flex flex-col"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 py-12 flex-grow">
           <Card className="max-w-2xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
@@ -95,6 +95,7 @@ const PublicProfilePage = () => {
             </CardContent>
           </Card>
         </main>
+        <Footer />
       </div>
     </>
   );

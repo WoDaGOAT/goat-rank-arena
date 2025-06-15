@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import QuizLeaderboard from "@/components/quiz/QuizLeaderboard";
 import { Swords, Trophy } from "lucide-react";
+import Footer from "@/components/Footer";
 
 const fetchTodaysQuiz = async () => {
   const today = new Date().toISOString().split('T')[0];
@@ -134,10 +134,10 @@ const QuizPage = () => {
     <>
       <Navbar />
       <div
-        className="min-h-screen py-12 px-4"
+        className="min-h-screen py-12 px-4 flex flex-col"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
-        <main className="container mx-auto">
+        <main className="container mx-auto flex-grow">
             <div className="flex justify-center mb-8 gap-4">
                 <Button onClick={() => setView('quiz')} variant={view === 'quiz' ? 'default' : 'outline'} className="w-48">
                     <Swords className="mr-2 h-4 w-4" />
@@ -150,6 +150,7 @@ const QuizPage = () => {
             </div>
             {view === 'quiz' ? renderContent() : <QuizLeaderboard />}
         </main>
+        <Footer />
       </div>
     </>
   );
