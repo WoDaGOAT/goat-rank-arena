@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import RankingActivity from "@/components/profile/RankingActivity";
 import { useQuery } from "@tanstack/react-query";
 import UserCommentsActivity from "@/components/profile/UserCommentsActivity";
 import { UserComment } from "@/types";
+import FriendsList from "@/components/profile/FriendsList";
 
 const UserProfilePage = () => {
   const { user, profile, loading, refetchUser } = useAuth();
@@ -229,6 +229,10 @@ const UserProfilePage = () => {
                 <RankingActivity likedCategories={likedCategories} isLoading={isLoadingLikedCategories} />
 
                 <UserCommentsActivity userComments={userComments} isLoading={isLoadingUserComments} />
+
+                <div className="border-t border-gray-700"></div>
+
+                <FriendsList />
               </div>
 
               <div className="flex justify-end pt-6">
