@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -138,8 +139,9 @@ const CustomDropdownMenu = () => {
                                 className={`
                                     flex items-center gap-1 px-2 md:px-4 py-1 md:py-2 
                                     text-xs md:text-base font-medium text-white 
-                                    hover:text-gray-300 transition-colors duration-200
-                                    ${isOpen ? 'text-white' : ''}
+                                    transition-colors duration-200 rounded-md
+                                    hover:bg-gray-800
+                                    ${isOpen ? 'bg-gray-800' : ''}
                                 `}
                                 disabled={!hasChildren}
                             >
