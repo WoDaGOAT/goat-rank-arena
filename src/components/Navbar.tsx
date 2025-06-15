@@ -36,7 +36,7 @@ const Navbar = () => {
                 to="/quiz"
                 className="bg-transparent focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group"
               >
-                <FileQuestion className="h-5 w-5" />
+                <FileQuestion className="h-5 w-5 text-fuchsia-500 transition-all group-hover:text-cyan-500 group-hover:[filter:brightness(1.2)]" />
                 <span className="font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent transition-all group-hover:[filter:brightness(1.2)]">
                   Quiz
                 </span>
