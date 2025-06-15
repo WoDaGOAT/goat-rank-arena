@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
@@ -25,11 +26,26 @@ const Index = () => {
         throw new Error(parentError?.message || "Parent category not found");
       }
 
-      // Now, fetch up to 9 subcategories of 'GOAT'
+      const soccerCategories = [
+        "Football/Soccer GOAT",
+        "GOAT Footballer",
+        "GOAT Goalkeeper",
+        "GOAT Defender",
+        "GOAT Midfielder",
+        "GOAT Attacker",
+        "GOAT Free-Kick Taker",
+        "GOAT Finisher",
+        "GOAT Dribbler",
+        "GOAT Playmaker",
+        "GOAT Leader / Captain",
+      ];
+
+      // Now, fetch up to 9 subcategories of 'GOAT' that are soccer-related
       const { data, error } = await supabase
         .from("categories")
         .select("*")
         .eq("parent_id", parentCategory.id)
+        .in("name", soccerCategories)
         .order("name")
         .limit(9);
 
