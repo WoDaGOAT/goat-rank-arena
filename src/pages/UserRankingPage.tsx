@@ -3,7 +3,18 @@ import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, BarChart3 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { format } from "date-fns";
+import RankedAthleteRow from "@/components/feed/items/RankedAthleteRow";
+import UserHoverCard from "@/components/profile/UserHoverCard";
 
 const UserRankingPage = () => {
   const { rankingId } = useParams<{ rankingId: string }>();
@@ -45,12 +56,92 @@ const UserRankingPage = () => {
     <>
       <Navbar />
       <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
-        <main className="container mx-auto px-4 py-12">
-            <h1 className="text-4xl font-bold">{ranking.title}</h1>
-            <p className="mt-4 text-gray-400">If you see this, the page is loading correctly.</p>
-            <pre className="mt-4 bg-gray-800 p-4 rounded-md overflow-x-auto">
-                <code>{JSON.stringify(ranking, null, 2)}</code>
-            </pre>
+        <main className="container mx-auto px-4 py-8">
+           <div className="mb-6">
+            <Button asChild variant="outline" className="border-white/50 text-white/80 hover:bg-white/10 hover:text-white">
+              <Link to={`/feed`}>
+                <ChevronLeft /> Back to Feed
+              </Link>
+            </Button>
+          </div>
+
+          <header className="mb-8">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl flex items-center gap-3">
+              <BarChart3 className="h-10 w-10 text-blue-400" />
+              {ranking.title}
+            </h1>
+            <p className="mt-2 text-lg text-gray-400">
+              Created on {format(new Date(ranking.created_at), "MMMM d, yyyy")}
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Card className="bg-white/5 border-white/10 text-white">
+                <CardHeader>
+                  <CardTitle>Ranked Athletes</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    See who made the cut in this ranking.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="flex flex-col">
+                    {ranking.athletes.length > 0 ? (
+                      ranking.athletes.map((athlete) => (
+                        <RankedAthleteRow key={athlete.id} athlete={athlete} />
+                      ))
+                    ) : (
+                      <p className="p-6 text-gray-400">No athletes have been ranked yet.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <aside className="space-y-8">
+              <Card className="bg-white/5 border-white/10 text-white">
+                <CardHeader>
+                  <CardTitle>About this Ranking</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {ranking.description ? (
+                    <p className="text-gray-300">{ranking.description}</p>
+                  ) : (
+                    <p className="text-gray-400 italic">No description provided.</p>
+                  )}
+
+                  {ranking.profiles && (
+                    <div className="flex items-center gap-4 pt-2">
+                        <UserHoverCard user={{ id: ranking.user_id, full_name: ranking.profiles.full_name, avatar_url: ranking.profiles.avatar_url }}>
+                            <Avatar>
+                                <AvatarImage src={ranking.profiles.avatar_url || undefined} />
+                                <AvatarFallback>{ranking.profiles.full_name?.charAt(0) || 'A'}</AvatarFallback>
+                            </Avatar>
+                        </UserHoverCard>
+                      <div>
+                        <p className="text-sm text-gray-400">Created by</p>
+                        <UserHoverCard user={{ id: ranking.user_id, full_name: ranking.profiles.full_name, avatar_url: ranking.profiles.avatar_url }}>
+                            <Link to={`/user/${ranking.user_id}`} className="font-semibold text-white hover:underline">
+                                {ranking.profiles.full_name || 'Anonymous User'}
+                            </Link>
+                        </UserHoverCard>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {ranking.categories && (
+                    <div className="!mt-6">
+                      <p className="text-sm text-gray-400 mb-2">Category</p>
+                      <Link to={`/category/${ranking.category_id}`} className="inline-block px-3 py-1 text-sm font-medium bg-blue-500/20 text-blue-300 rounded-full hover:bg-blue-500/40 transition-colors">
+                        {ranking.categories.name || 'Uncategorized'}
+                      </Link>
+                    </div>
+                  )}
+
+                </CardContent>
+              </Card>
+            </aside>
+          </div>
         </main>
       </div>
     </>
