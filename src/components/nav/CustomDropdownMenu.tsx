@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -156,11 +155,7 @@ const CustomDropdownMenu = () => {
                             </button>
                             
                             {hasChildren && isOpen && (
-                                <div className="fixed z-[9999] mt-1 min-w-[640px] md:min-w-[800px]" 
-                                     style={{
-                                         top: `${(dropdownRefs.current[item.id]?.getBoundingClientRect().bottom || 0) + window.scrollY}px`,
-                                         left: `${dropdownRefs.current[item.id]?.getBoundingClientRect().left || 0}px`
-                                     }}>
+                                <div className="absolute top-full left-0 z-[9999] mt-2 min-w-[640px] md:min-w-[800px]">
                                     <div className="bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-0 p-2">
                                             {item.children.map((subItem) => (
