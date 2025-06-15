@@ -7,6 +7,7 @@ import Logo from "./nav/Logo";
 import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import { Link } from "react-router-dom";
+import { Rss, FileQuestion } from "lucide-react";
 
 const Navbar = () => {
   const { user, loading } = useAuth();
@@ -26,15 +27,17 @@ const Navbar = () => {
             <div className="flex items-center gap-2 md:gap-4 text-base font-medium">
               <Link
                 to="/feed"
-                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none"
+                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
               >
-                Feed
+                <Rss className="h-5 w-5" />
+                <span>Feed</span>
               </Link>
               <Link
                 to="/quiz"
-                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none"
+                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
               >
-                Quiz
+                <FileQuestion className="h-5 w-5" />
+                <span>Quiz</span>
               </Link>
 
               <div className="h-6 w-px bg-gray-700 mx-2 hidden md:block" />
