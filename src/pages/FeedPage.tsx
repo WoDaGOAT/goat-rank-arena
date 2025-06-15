@@ -1,12 +1,14 @@
+
 import Navbar from "@/components/Navbar";
 import FeedList from "@/components/feed/FeedList";
+import Footer from "@/components/Footer";
 
 const FeedPage = () => {
   return (
     <>
       <Navbar />
       <div
-        className="min-h-screen"
+        className="min-h-screen flex flex-col"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
         <header className="bg-transparent text-primary-foreground py-8 px-4 text-center shadow-md">
@@ -17,15 +19,13 @@ const FeedPage = () => {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 py-12 flex-grow">
           <div className="max-w-3xl mx-auto">
             <FeedList />
           </div>
         </main>
 
-        <footer className="py-8 text-center text-muted-foreground border-t border-border mt-12">
-          <p>&copy; {new Date().getFullYear()} wodagoat. All rights reserved.</p>
-        </footer>
+        <Footer />
       </div>
     </>
   );

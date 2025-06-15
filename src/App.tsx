@@ -17,6 +17,8 @@ import QuizPage from "./pages/QuizPage";
 import UserRankingPage from "./pages/UserRankingPage";
 import CreateQuizPage from "./pages/admin/CreateQuizPage";
 import UserManagementPage from "./pages/admin/UserManagementPage";
+import GdprPage from "./pages/GdprPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,8 @@ const App = () => {
               <Route path="/profile" element={<UserProfilePage />} />
               <Route path="/user/:userId" element={<PublicProfilePage />} />
               <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+              <Route path="/gdpr" element={<GdprPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
