@@ -219,6 +219,7 @@ export type Database = {
           favorite_sports: string[] | null
           full_name: string | null
           id: string
+          status: Database["public"]["Enums"]["user_status"]
           updated_at: string | null
         }
         Insert: {
@@ -227,6 +228,7 @@ export type Database = {
           favorite_sports?: string[] | null
           full_name?: string | null
           id: string
+          status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string | null
         }
         Update: {
@@ -235,6 +237,7 @@ export type Database = {
           favorite_sports?: string[] | null
           full_name?: string | null
           id?: string
+          status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string | null
         }
         Relationships: []
@@ -516,6 +519,24 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      delete_comment_as_admin: {
+        Args: { p_comment_id: string }
+        Returns: undefined
+      }
+      get_all_comments_for_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          comment_id: string
+          comment_text: string
+          created_at: string
+          user_id: string
+          user_full_name: string
+          user_avatar_url: string
+          user_status: Database["public"]["Enums"]["user_status"]
+          category_id: string
+          category_name: string
+        }[]
+      }
       get_all_users_with_roles: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -536,6 +557,10 @@ export type Database = {
           quizzes_completed: number
         }[]
       }
+      get_user_status: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["Enums"]["user_status"]
+      }
       is_admin: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -544,6 +569,13 @@ export type Database = {
         Args: {
           p_user_id: string
           p_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: undefined
+      }
+      set_user_status: {
+        Args: {
+          p_user_id: string
+          p_status: Database["public"]["Enums"]["user_status"]
         }
         Returns: undefined
       }
@@ -561,6 +593,7 @@ export type Database = {
         | "new_category"
         | "new_friend_request"
         | "friend_request_accepted"
+      user_status: "active" | "banned"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -690,6 +723,7 @@ export const Constants = {
         "new_friend_request",
         "friend_request_accepted",
       ],
+      user_status: ["active", "banned"],
     },
   },
 } as const
