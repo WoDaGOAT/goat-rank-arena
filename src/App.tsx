@@ -1,8 +1,10 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CategoryPage from "./pages/CategoryPage";
@@ -37,30 +39,32 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/feed" element={<FeedPage />} />
-              <Route path="/quiz" element={<QuizPage />} />
-              <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
-              <Route path="/admin/users" element={<UserManagementPage />} />
-              <Route path="/category/:categoryId" element={<CategoryPage />} />
-              <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
-              <Route path="/profile" element={<UserProfilePage />} />
-              <Route path="/user/:userId" element={<PublicProfilePage />} />
-              <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/gdpr" element={<GdprPage />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
+      <HelmetProvider>
+        <TooltipProvider>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/feed" element={<FeedPage />} />
+                <Route path="/quiz" element={<QuizPage />} />
+                <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
+                <Route path="/admin/users" element={<UserManagementPage />} />
+                <Route path="/category/:categoryId" element={<CategoryPage />} />
+                <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
+                <Route path="/profile" element={<UserProfilePage />} />
+                <Route path="/user/:userId" element={<PublicProfilePage />} />
+                <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/gdpr" element={<GdprPage />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </TooltipProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 };

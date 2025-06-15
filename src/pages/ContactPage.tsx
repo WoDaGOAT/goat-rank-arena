@@ -2,10 +2,15 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/contact/ContactForm";
+import { Helmet } from "react-helmet-async";
 
 const ContactPage = () => {
   return (
     <>
+      <Helmet>
+        <title>Contact Us | Wodagoat</title>
+        <meta name="description" content="Have a question, suggestion, or feedback? Get in touch with the Wodagoat team. We would love to hear from you!" />
+      </Helmet>
       <Navbar />
       <div
         className="min-h-screen flex flex-col"

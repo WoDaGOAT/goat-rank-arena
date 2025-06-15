@@ -1,14 +1,8 @@
-User-agent: Googlebot
-Allow: /
 
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
+# Allow all friendly robots to crawl the site.
 User-agent: *
 Allow: /
+
+# Sitemap location
+# You can generate a sitemap.xml file and place it in the public directory.
+Sitemap: /sitemap.xml

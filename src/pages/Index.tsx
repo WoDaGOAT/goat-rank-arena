@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +7,7 @@ import { Category } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
+import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   const { data: categories, isLoading, isError } = useQuery<Category[]>({
@@ -65,6 +67,10 @@ const Index = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Wodagoat - Rank the GOATs of Sports</title>
+        <meta name="description" content="The ultimate platform for sports fans to rank their favorite athletes, debate the GOATs, and see global leaderboards for sports like Football, Cricket, Tennis, and more." />
+      </Helmet>
       <Navbar />
       <div
         className="min-h-screen flex flex-col"
