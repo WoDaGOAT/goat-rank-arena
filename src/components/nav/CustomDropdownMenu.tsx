@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -146,16 +145,11 @@ const CustomDropdownMenu = () => {
                             >
                                 <span>{item.name}</span>
                                 {hasChildren && (
-                                    <>
-                                        <ChevronDown 
-                                            className={`w-3 h-3 md:w-4 md:h-4 transition-transform duration-200 ${
-                                                isOpen ? 'rotate-180' : ''
-                                            }`} 
-                                        />
-                                        <span className="text-xs text-gray-400">
-                                            ({item.children.length})
-                                        </span>
-                                    </>
+                                    <ChevronDown 
+                                        className={`w-3 h-3 md:w-4 md:h-4 transition-transform duration-200 ${
+                                            isOpen ? 'rotate-180' : ''
+                                        }`} 
+                                    />
                                 )}
                             </button>
                             
