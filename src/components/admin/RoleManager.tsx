@@ -16,7 +16,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database['public']['Enums']['app_role'];
 
-const ALL_ROLES: AppRole[] = ['admin', 'moderator', 'user'];
+const ALL_ROLES: AppRole[] = ['admin', 'user'];
 
 interface RoleManagerProps {
   userId: string;
