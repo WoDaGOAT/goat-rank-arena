@@ -1,72 +1,74 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import CategoryPage from "./pages/CategoryPage";
-import CreateRankingPage from "./pages/CreateRankingPage";
-import UserProfilePage from "./pages/UserProfilePage";
+import { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { HelmetProvider } from "react-helmet-async";
 import { isSupabaseConfigured } from "./lib/supabase";
-import FeedPage from "./pages/FeedPage";
-import PublicProfilePage from "./pages/PublicProfilePage";
-import QuizPage from "./pages/QuizPage";
-import UserRankingPage from "./pages/UserRankingPage";
-import CreateQuizPage from "./pages/admin/CreateQuizPage";
-import UserManagementPage from "./pages/admin/UserManagementPage";
-import GdprPage from "./pages/GdprPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import ContactPage from "./pages/ContactPage";
+import CommentManagementPage from "./pages/admin/CommentManagementPage";
 
-const queryClient = new QueryClient();
+const Index = lazy(() => import("./pages/Index"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const CreateRankingPage = lazy(() => import("./pages/CreateRankingPage"));
+const UserRankingPage = lazy(() => import("./pages/UserRankingPage"));
+const UserProfilePage = lazy(() => import("./pages/UserProfilePage"));
+const PublicProfilePage = lazy(() => import("./pages/PublicProfilePage"));
+const FeedPage = lazy(() => import("./pages/FeedPage"));
+const QuizPage = lazy(() => import("./pages/QuizPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const GdprPage = lazy(() => import("./pages/GdprPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
+const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage"));
 
-const App = () => {
+function App() {
   if (!isSupabaseConfigured) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
-        <div className="text-center p-8 bg-white/5 text-white border-gray-700 rounded-lg shadow-xl max-w-md mx-4">
-          <h1 className="text-2xl font-bold text-red-500">Configuration Error</h1>
-          <p className="mt-4 text-gray-300">Supabase credentials are not configured.</p>
-          <p className="mt-2 text-gray-400 text-sm">This can happen if the Supabase integration was not completed successfully. Please try reconnecting Supabase from the editor's integration panel.</p>
+      <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Supabase Not Configured</h1>
+          <p>Please check your Supabase integration settings.</p>
         </div>
       </div>
     );
   }
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <TooltipProvider>
-          <AuthProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/feed" element={<FeedPage />} />
-                <Route path="/quiz" element={<QuizPage />} />
-                <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
-                <Route path="/admin/users" element={<UserManagementPage />} />
-                <Route path="/category/:categoryId" element={<CategoryPage />} />
-                <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
-                <Route path="/profile" element={<UserProfilePage />} />
-                <Route path="/user/:userId" element={<PublicProfilePage />} />
-                <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/gdpr" element={<GdprPage />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </AuthProvider>
-        </TooltipProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <Router>
+        <AuthProvider>
+          <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+            <Navbar />
+            <main className="flex-grow">
+              <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-gray-900">Loading...</div>}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/category/:categoryId" element={<CategoryPage />} />
+                  <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
+                  <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                  <Route path="/profile" element={<UserProfilePage />} />
+                  <Route path="/users/:userId" element={<PublicProfilePage />} />
+                  <Route path="/feed" element={<FeedPage />} />
+                  <Route path="/quiz" element={<QuizPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/gdpr" element={<GdprPage />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                  <Route path="/admin/users" element={<UserManagementPage />} />
+                  <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
+                  <Route path="/admin/comments" element={<CommentManagementPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </main>
+            <Footer />
+          </div>
+          <SonnerToaster />
+        </AuthProvider>
+      </Router>
+    </HelmetProvider>
   );
-};
+}
 
 export default App;

@@ -63,6 +63,19 @@ export interface CommentWithUser {
   } | null;
 }
 
+// New type for the admin comment management view
+export interface AdminComment {
+  comment_id: string;
+  comment_text: string;
+  created_at: string;
+  user_id: string;
+  user_full_name: string | null;
+  user_avatar_url: string | null;
+  user_status: 'active' | 'banned';
+  category_id: string;
+  category_name: string | null;
+}
+
 // New type for notifications - using a discriminated union
 export type Notification =
   | {
