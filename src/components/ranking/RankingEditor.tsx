@@ -73,7 +73,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
       </div>
 
       <header className="mb-8">
-        <h1 className="text-4xl font-extrabold text-white mb-2">Create Your Ranking</h1>
+        <h1 className="text-4xl font-extrabold text-white mb-2">Create Your {category.name} Ranking</h1>
         <p className="text-lg text-gray-300">Search from over 200 football legends and modern stars - from Pelé to Mbappé</p>
       </header>
 

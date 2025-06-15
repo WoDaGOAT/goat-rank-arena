@@ -1,8 +1,8 @@
 
 import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Crown, Medal } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Trophy, Crown } from "lucide-react";
 
 interface GlobalLeaderboardProps {
   athletes: Athlete[];
@@ -20,9 +20,9 @@ const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) =
             <Trophy className="w-6 h-6 text-blue-300" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-white mb-1">
+            <h2 className="text-2xl font-bold text-white mb-1">
               {categoryName}
-            </CardTitle>
+            </h2>
             <p className="text-sm text-gray-300 font-medium">
               🎮 Live Rankings • Top 10 Champions
             </p>

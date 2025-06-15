@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useUserRanking } from "@/hooks/useUserRanking";
@@ -9,7 +8,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
@@ -84,7 +82,7 @@ const UserRankingPage = () => {
             <div className="lg:col-span-2">
               <Card className="bg-white/5 border-white/10 text-white">
                 <CardHeader>
-                  <CardTitle>Ranked Athletes</CardTitle>
+                  <h2 className="text-2xl font-semibold leading-none tracking-tight">Ranked Athletes</h2>
                   <CardDescription className="text-gray-400">
                     See who made the cut in this ranking.
                   </CardDescription>
@@ -106,7 +104,7 @@ const UserRankingPage = () => {
             <aside className="space-y-8">
               <Card className="bg-white/5 border-white/10 text-white">
                 <CardHeader>
-                  <CardTitle>About this Ranking</CardTitle>
+                  <h2 className="text-2xl font-semibold leading-none tracking-tight">About this Ranking</h2>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {ranking.description ? (
