@@ -85,8 +85,11 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
       queryClient.invalidateQueries({ queryKey: ['userRankings', user?.id] });
       navigate(`/category/${categoryId}`);
     },
-    onError: (error: Error) => {
-      if (error.message !== "User not authenticated" && error.message !== "Incorrect number of athletes") {
+    onError: (error: any) => {
+      // The error from a unique constraint violation has code '23505'
+      if (error?.code === '23505') {
+        toast.error("You have already submitted a ranking for this category.");
+      } else if (error.message !== "User not authenticated" && error.message !== "Incorrect number of athletes") {
          toast.error(error.message || "Failed to save ranking. Please try again.");
       }
     }
