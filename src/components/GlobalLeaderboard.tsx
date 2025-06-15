@@ -35,8 +35,8 @@ const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) =
           <div className="text-center">#</div>
           <div></div>
           <div>Player</div>
-          <div className="text-left">Trend</div>
-          <div className="text-right">Score</div>
+          <div className="text-center">Trend</div>
+          <div className="text-center">Score</div>
         </div>
         
         {/* Leaderboard rows */}
