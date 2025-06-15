@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Link } from "react-router-dom";
 import { BarChart3 } from "lucide-react";
 import RankedAthleteRow from './RankedAthleteRow';
+import UserHoverCard from "../../profile/UserHoverCard";
 
 export interface RankedAthlete {
   id: string;
@@ -37,6 +38,12 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const { author, ranking_title, ranking_description, category_id, category_name, athletes } = data;
   const userInitial = author?.full_name?.charAt(0) || '?';
 
+  const user = {
+    id: author.id,
+    full_name: author.full_name,
+    avatar_url: author.avatar_url,
+  };
+
   const sortedAthletes = athletes?.sort((a, b) => a.position - b.position);
 
   return (
@@ -50,8 +57,12 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
                   <AvatarImage src={author.avatar_url || undefined} />
                   <AvatarFallback className="bg-gray-700 text-xs">{userInitial.toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <p className="font-semibold text-sm text-gray-200">
-                  {author.full_name || "A user"}
+                <p className="text-sm text-gray-200">
+                  <UserHoverCard user={user}>
+                      <Link to={`/user/${user.id}`} className="font-semibold hover:underline">
+                          {author.full_name || "A user"}
+                      </Link>
+                  </UserHoverCard>
                   <span className="font-normal text-gray-400"> submitted a new ranking</span>
                 </p>
             </div>
