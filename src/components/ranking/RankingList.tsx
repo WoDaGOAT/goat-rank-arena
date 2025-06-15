@@ -49,7 +49,6 @@ const RankingList: React.FC<RankingListProps> = ({
             className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/20 cursor-move hover:bg-white/10 transition-colors group"
           >
             <GripVertical className="w-4 h-4 text-gray-400 group-hover:text-white" />
-            <div className="text-white font-bold text-lg w-8">{index + 1}</div>
             <img
               src={`https://images.unsplash.com/${athlete.imageUrl}?w=400&h=225&fit=crop&q=80`}
               alt={athlete.name}
@@ -57,7 +56,6 @@ const RankingList: React.FC<RankingListProps> = ({
             />
             <div className="flex-1">
               <div className="font-semibold text-white">{athlete.name}</div>
-              <div className="text-sm text-gray-300">Rank #{index + 1}</div>
             </div>
             <div className="flex items-center gap-2">
               <Input
