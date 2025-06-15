@@ -1,4 +1,3 @@
-
 export interface QuizAnswer {
   id: string;
   answer_text: string;
@@ -18,6 +17,16 @@ export interface Quiz {
   topic: string | null;
   active_date: string;
   quiz_questions: QuizQuestion[];
+}
+
+export interface UserQuizAttemptForProfile {
+  id: string;
+  score: number;
+  completed_at: string;
+  quizzes: {
+    title: string;
+    quiz_questions: { id: string }[];
+  } | null;
 }
 
 export interface UserAnswerSelection {

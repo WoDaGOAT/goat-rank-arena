@@ -15,6 +15,8 @@ import { useUserRankings } from "@/hooks/useUserRankings";
 import { useProfileForm } from "@/hooks/useProfileForm";
 import { useProfileUpdater } from "@/hooks/useProfileUpdater";
 import { useAvatarUploader } from "@/hooks/useAvatarUploader";
+import { useUserQuizAttempts } from "@/hooks/useUserQuizAttempts";
+import QuizActivity from "@/components/profile/QuizActivity";
 
 const UserProfilePage = () => {
   const { user, profile, loading } = useAuth();
@@ -29,6 +31,7 @@ const UserProfilePage = () => {
   const { data: likedCategories, isLoading: isLoadingLikedCategories } = useLikedCategories();
   const { data: userComments, isLoading: isLoadingUserComments } = useUserComments();
   const { data: userRankings, isLoading: isLoadingUserRankings } = useUserRankings();
+  const { data: quizAttempts, isLoading: isLoadingQuizAttempts } = useUserQuizAttempts();
 
   const availableSports = ["American Football", "Baseball", "Basketball", "Boxe", "Cricket", "F1", "MMA", "Soccer", "Tennis"].sort();
 
@@ -82,6 +85,11 @@ const UserProfilePage = () => {
                   isLoading={isLoadingLikedCategories}
                   userRankings={userRankings}
                   isLoadingUserRankings={isLoadingUserRankings}
+                />
+
+                <QuizActivity 
+                  quizAttempts={quizAttempts}
+                  isLoading={isLoadingQuizAttempts}
                 />
 
                 <UserCommentsActivity userComments={userComments} isLoading={isLoadingUserComments} />
