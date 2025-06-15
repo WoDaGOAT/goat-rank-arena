@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
+import { CommentWithUser } from "@/types";
 
 interface CommentFormProps {
   categoryId: string;
@@ -18,19 +19,35 @@ const CommentForm = ({ categoryId }: CommentFormProps) => {
   const queryClient = useQueryClient();
 
   const { mutate: addComment, isPending } = useMutation({
-    mutationFn: async (commentText: string) => {
+    mutationFn: async (commentText: string): Promise<CommentWithUser> => {
       if (!user) {
         openLoginDialog();
         throw new Error("User not authenticated");
       }
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("category_comments")
-        .insert({ user_id: user.id, category_id: categoryId, comment: commentText });
+        .insert({ user_id: user.id, category_id: categoryId, comment: commentText })
+        .select("*, profiles (id, full_name, avatar_url)")
+        .single();
+        
       if (error) throw error;
+      if (!data) throw new Error("Comment could not be created.");
+
+      return data as CommentWithUser;
     },
-    onSuccess: () => {
+    onSuccess: (newComment) => {
       setComment("");
-      queryClient.invalidateQueries({ queryKey: ["categoryComments", categoryId] });
+      queryClient.setQueryData<CommentWithUser[]>(["categoryComments", categoryId], (oldComments = []) => {
+        const augmentedComment = {
+          ...newComment,
+          profiles: newComment.profiles || {
+            id: user!.id,
+            full_name: user!.user_metadata?.full_name || 'Anonymous',
+            avatar_url: user!.user_metadata?.avatar_url || null,
+          }
+        };
+        return [augmentedComment, ...oldComments];
+      });
       toast.success("Comment posted!");
     },
     onError: (error) => {
