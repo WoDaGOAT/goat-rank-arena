@@ -8,7 +8,7 @@ import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 
 const NotificationBell = () => {
-    const { notifications, isLoading, unreadCount, markAllAsRead } = useNotifications();
+    const { notifications, isLoading, unreadCount, markAllAsRead, acceptFriendRequest, isAccepting, declineFriendRequest, isDeclining } = useNotifications();
     
     const handleOpenChange = (open: boolean) => {
         if (open && unreadCount > 0) {
@@ -38,7 +38,14 @@ const NotificationBell = () => {
                                <Skeleton className="h-16 w-full bg-gray-700" />
                             </div>
                         ) : notifications && notifications.length > 0 ? (
-                            notifications.map(n => <NotificationItem key={n.id} notification={n} />)
+                            notifications.map(n => <NotificationItem 
+                                key={n.id} 
+                                notification={n}
+                                acceptFriendRequest={acceptFriendRequest}
+                                declineFriendRequest={declineFriendRequest}
+                                isAccepting={isAccepting}
+                                isDeclining={isDeclining}
+                            />)
                         ) : (
                             <p className="text-center text-gray-400 py-8">You have no notifications.</p>
                         )}

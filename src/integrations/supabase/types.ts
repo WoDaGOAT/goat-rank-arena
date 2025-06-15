@@ -122,6 +122,48 @@ export type Database = {
           },
         ]
       }
+      friendships: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["friendship_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friendships_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friendships_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -203,7 +245,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      notification_type: "new_comment_reply" | "new_category"
+      friendship_status: "pending" | "accepted" | "declined" | "blocked"
+      notification_type:
+        | "new_comment_reply"
+        | "new_category"
+        | "new_friend_request"
+        | "friend_request_accepted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -320,7 +367,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      notification_type: ["new_comment_reply", "new_category"],
+      friendship_status: ["pending", "accepted", "declined", "blocked"],
+      notification_type: [
+        "new_comment_reply",
+        "new_category",
+        "new_friend_request",
+        "friend_request_accepted",
+      ],
     },
   },
 } as const

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,6 +50,52 @@ export const useNotifications = () => {
         }
     });
 
+    const { mutate: acceptFriendRequest, isPending: isAccepting } = useMutation({
+        mutationFn: async (friendshipId: string) => {
+            if (!user) throw new Error("User not authenticated");
+            const { error } = await supabase
+                .from('friendships')
+                .update({ status: 'accepted', updated_at: new Date().toISOString() })
+                .eq('id', friendshipId)
+                .eq('receiver_id', user.id);
+            
+            if (error) {
+                console.error("Error accepting friend request", error);
+                throw new Error("Could not accept friend request");
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+            toast.success("Friend request accepted!");
+        },
+        onError: (e: Error) => {
+            toast.error(e.message);
+        }
+    });
+
+    const { mutate: declineFriendRequest, isPending: isDeclining } = useMutation({
+        mutationFn: async (friendshipId: string) => {
+            if (!user) throw new Error("User not authenticated");
+            const { error } = await supabase
+                .from('friendships')
+                .delete()
+                .eq('id', friendshipId)
+                .eq('receiver_id', user.id);
+            
+            if (error) {
+                console.error("Error declining friend request", error);
+                throw new Error("Could not decline friend request");
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+            toast.info("Friend request declined.");
+        },
+        onError: (e: Error) => {
+            toast.error(e.message);
+        }
+    });
+
     // Realtime listener for new notifications
     useEffect(() => {
         if (!user) return;
@@ -72,6 +117,10 @@ export const useNotifications = () => {
                         toast.info(`${newNotification.data.replying_user_name} replied to your comment.`);
                     } else if (newNotification.type === 'new_category') {
                         toast.info(`A new category has been added: ${newNotification.data.category_name}`);
+                    } else if (newNotification.type === 'new_friend_request') {
+                        toast.info(`${newNotification.data.requester_name} sent you a friend request.`);
+                    } else if (newNotification.type === 'friend_request_accepted') {
+                        toast.info(`You are now friends with ${newNotification.data.receiver_name}.`);
                     }
                 }
             )
@@ -82,5 +131,5 @@ export const useNotifications = () => {
         };
     }, [user, queryClient]);
 
-    return { notifications, isLoading, unreadCount, markAllAsRead };
+    return { notifications, isLoading, unreadCount, markAllAsRead, acceptFriendRequest, isAccepting, declineFriendRequest, isDeclining };
 };
