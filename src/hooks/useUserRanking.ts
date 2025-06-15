@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import footballPlayers from '@/data/footballPlayers';
@@ -36,7 +35,6 @@ export const useUserRanking = (rankingId?: string) => {
           description,
           user_id,
           category_id,
-          profiles (full_name, avatar_url),
           categories (name)
         `)
         .eq('id', rankingId)
@@ -48,6 +46,20 @@ export const useUserRanking = (rankingId?: string) => {
       }
       
       if (!rankingData) return null;
+
+      let profileData = null;
+      if (rankingData.user_id) {
+          const { data, error: profileError } = await supabase
+              .from('profiles')
+              .select('full_name, avatar_url')
+              .eq('id', rankingData.user_id)
+              .maybeSingle();
+          
+          if (profileError) {
+              console.error(`Error fetching profile for user ${rankingData.user_id}:`, profileError);
+          }
+          profileData = data;
+      }
 
       const { data: athletesData, error: athletesError } = await supabase
         .from('ranking_athletes')
@@ -73,7 +85,7 @@ export const useUserRanking = (rankingId?: string) => {
       
       const rankingWithAthletes = {
           ...rankingData,
-          profiles: Array.isArray(rankingData.profiles) ? rankingData.profiles[0] : rankingData.profiles,
+          profiles: profileData,
           categories: Array.isArray(rankingData.categories) ? rankingData.categories[0] : rankingData.categories,
           athletes: hydratedAthletes,
       }
