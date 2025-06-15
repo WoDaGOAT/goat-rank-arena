@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,7 @@ import FeedPage from "./pages/FeedPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import QuizPage from "./pages/QuizPage";
 import UserRankingPage from "./pages/UserRankingPage";
+import CreateQuizPage from "./pages/admin/CreateQuizPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/feed" element={<FeedPage />} />
               <Route path="/quiz" element={<QuizPage />} />
+              <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
               <Route path="/category/:categoryId" element={<CategoryPage />} />
               <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
               <Route path="/profile" element={<UserProfilePage />} />
