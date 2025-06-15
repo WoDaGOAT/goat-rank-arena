@@ -31,12 +31,12 @@ const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) =
       </CardHeader>
       <CardContent className="p-0">
         {/* Header row */}
-        <div className="grid grid-cols-[50px_60px_1fr_100px_auto] gap-3 items-center px-4 py-3 bg-white/5 border-b border-white/20 text-xs font-bold text-gray-300 uppercase tracking-wide">
+        <div className="grid grid-cols-[50px_60px_1fr_110px_90px] gap-4 items-center px-4 py-3 bg-white/5 border-b border-white/20 text-xs font-bold text-gray-300 uppercase tracking-wide">
           <div className="text-center">#</div>
           <div></div>
           <div>Player</div>
-          <div className="text-center">Trend</div>
-          <div className="text-center">Score</div>
+          <div className="flex justify-center">Trend</div>
+          <div className="flex justify-center">Score</div>
         </div>
         
         {/* Leaderboard rows */}
