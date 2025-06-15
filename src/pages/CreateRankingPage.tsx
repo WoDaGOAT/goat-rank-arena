@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { allAthletes } from "@/data/mockAthletes";
+import allFootballPlayers from "@/data/footballPlayers";
 import { useState } from "react";
 import { Category, Athlete } from "@/types";
 import { ChevronLeft, Save, Search, Plus, X, GripVertical } from "lucide-react";
@@ -52,7 +52,7 @@ const CreateRankingPage = () => {
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-  const filteredAthletes = allAthletes.filter(athlete => {
+  const filteredAthletes = allFootballPlayers.filter(athlete => {
     const matchesSearch = athlete.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLetter = selectedLetter === "" || athlete.name.charAt(0).toUpperCase() === selectedLetter;
     const notSelected = !selectedAthletes.some(selected => selected.id === athlete.id);
@@ -163,7 +163,7 @@ const CreateRankingPage = () => {
 
         <header className="mb-8">
           <h1 className="text-4xl font-extrabold text-white mb-2">Create Your Ranking</h1>
-          <p className="text-lg text-gray-300">Search from over 60 football legends and modern stars - from Pelé to Mbappé</p>
+          <p className="text-lg text-gray-300">Search from over 200 football legends and modern stars - from Pelé to Mbappé</p>
         </header>
 
         <div className="max-w-6xl mx-auto">
@@ -176,7 +176,7 @@ const CreateRankingPage = () => {
 
           <div className="grid lg:grid-cols-2 gap-8">
             <AthleteSearch
-              allAthletes={allAthletes}
+              allAthletes={allFootballPlayers}
               filteredAthletes={filteredAthletes}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
