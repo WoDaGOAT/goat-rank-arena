@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,12 +27,13 @@ const FriendsList = () => {
     queryFn: async () => {
       if (!user) return [];
 
+      // Add `!` to get single objects instead of arrays for related tables.
       const { data, error } = await supabase
         .from('friendships')
         .select(`
           id,
-          requester:requester_id(id, full_name, avatar_url),
-          receiver:receiver_id(id, full_name, avatar_url)
+          requester:requester_id(id, full_name, avatar_url)!,
+          receiver:receiver_id(id, full_name, avatar_url)!
         `)
         .eq('status', 'accepted')
         .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
@@ -45,25 +45,12 @@ const FriendsList = () => {
       }
       if (!data) return [];
       
-      const formattedData: Friendship[] = data
-        .map(f => {
-          // Supabase returns related tables as an array, even for one-to-one.
-          const requester = Array.isArray(f.requester) ? f.requester[0] : f.requester;
-          const receiver = Array.isArray(f.receiver) ? f.receiver[0] : f.receiver;
-          
-          if (!requester || !receiver) {
-            return null;
-          }
+      // With the `!` hint, Supabase returns objects. We filter out any nulls.
+      const validFriendships = data.filter(
+        (f): f is Friendship => f.requester !== null && f.receiver !== null
+      );
 
-          return {
-            id: f.id,
-            requester,
-            receiver,
-          };
-        })
-        .filter((f): f is Friendship => f !== null);
-
-      return formattedData;
+      return validFriendships;
     },
     enabled: !!user,
   });
