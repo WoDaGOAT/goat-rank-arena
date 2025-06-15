@@ -12,7 +12,7 @@ export interface ProfileInfo {
 }
 
 export interface NewCommentFeedData {
-  author: ProfileInfo;
+  author: ProfileInfo | null;
   comment_text: string;
   category_id: string;
   category_name: string;
@@ -25,18 +25,22 @@ interface NewCommentFeedItemProps {
 
 const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
     const { author, comment_text, category_id, category_name } = data;
-    const sanitizedAuthorName = sanitize(author.full_name);
+    
+    const authorName = author?.full_name || 'Anonymous';
+    const authorAvatar = author?.avatar_url;
+    const sanitizedAuthorName = sanitize(authorName);
+
     return (
         <Card className="bg-white/5 text-white border-gray-700">
             <CardContent className="p-4">
                  <div className="flex items-start gap-4 mb-2">
                     <Avatar>
-                        <AvatarImage src={author.avatar_url || undefined} alt={sanitizedAuthorName || 'User'}/>
-                        <AvatarFallback>{sanitizedAuthorName?.charAt(0) || 'U'}</AvatarFallback>
+                        <AvatarImage src={authorAvatar || undefined} alt={sanitizedAuthorName || 'User'}/>
+                        <AvatarFallback>{sanitizedAuthorName?.charAt(0) || 'A'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                         <p>
-                            <span className="font-bold">{sanitizedAuthorName || 'Someone'}</span>
+                            <span className="font-bold">{sanitizedAuthorName}</span>
                             {' '} commented on {' '}
                             <Link to={`/category/${category_id}`} className="font-bold hover:underline text-blue-300">{sanitize(category_name)}</Link>
                         </p>
