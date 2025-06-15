@@ -12,44 +12,53 @@ const Navbar = () => {
   const { user, loading } = useAuth();
 
   return (
-    <nav className="bg-gray-900/95 backdrop-blur-sm text-gray-200 sticky top-0 z-50 border-b border-gray-700/50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-8">
-            <Logo />
-            <Link
-              to="/feed"
-              className="bg-transparent hover:bg-white/10 focus:bg-white/10 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 focus:outline-none"
-            >
-              Feed
-            </Link>
-            <Link
-              to="/quiz"
-              className="bg-transparent hover:bg-white/10 focus:bg-white/10 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 focus:outline-none"
-            >
-              Quiz
-            </Link>
-            <NavMenu />
-          </div>
-
-          <div className="flex items-center gap-2">
-            {loading ? (
-                <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-8 rounded-full bg-secondary" />
-                    <Skeleton className="h-8 w-20 bg-secondary" />
-                </div>
-            ) : user ? (
-              <>
-                <NotificationBell />
-                <UserMenu />
-              </>
-            ) : (
-              <AuthButtons />
-            )}
-          </div>
+    <header className="sticky top-0 z-50">
+      {/* Top bar for categories */}
+      <div className="bg-gray-800 text-white border-b border-gray-700/50">
+        <div className="container mx-auto px-4 h-12 flex items-center justify-center">
+          <NavMenu />
         </div>
       </div>
-    </nav>
+      
+      {/* Main navigation bar */}
+      <nav className="bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-8">
+              <Logo />
+              <Link
+                to="/feed"
+                className="bg-transparent hover:bg-white/10 focus:bg-white/10 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 focus:outline-none"
+              >
+                Feed
+              </Link>
+              <Link
+                to="/quiz"
+                className="bg-transparent hover:bg-white/10 focus:bg-white/10 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 focus:outline-none"
+              >
+                Quiz
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {loading ? (
+                  <div className="flex items-center gap-2">
+                      <Skeleton className="h-8 w-8 rounded-full bg-secondary" />
+                      <Skeleton className="h-8 w-20 bg-secondary" />
+                  </div>
+              ) : user ? (
+                <>
+                  <NotificationBell />
+                  <UserMenu />
+                </>
+              ) : (
+                <AuthButtons />
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
   );
 };
 
