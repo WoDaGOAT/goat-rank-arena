@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +23,7 @@ const FriendsList = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: friendships, isLoading } = useQuery({
+  const { data: friendships, isLoading } = useQuery<Friendship[]>({
     queryKey: ['friends', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -44,13 +45,23 @@ const FriendsList = () => {
       }
       if (!data) return [];
       
-      const formattedData = data.map(f => {
-        return {
-          ...f,
-          requester: (Array.isArray(f.requester) ? f.requester[0] : f.requester) as Profile,
-          receiver: (Array.isArray(f.receiver) ? f.receiver[0] : f.receiver) as Profile,
-        };
-      }).filter(f => f.requester && f.receiver);
+      const formattedData: Friendship[] = data
+        .map(f => {
+          // Supabase returns related tables as an array, even for one-to-one.
+          const requester = Array.isArray(f.requester) ? f.requester[0] : f.requester;
+          const receiver = Array.isArray(f.receiver) ? f.receiver[0] : f.receiver;
+          
+          if (!requester || !receiver) {
+            return null;
+          }
+
+          return {
+            id: f.id,
+            requester,
+            receiver,
+          };
+        })
+        .filter((f): f is Friendship => f !== null);
 
       return formattedData;
     },
