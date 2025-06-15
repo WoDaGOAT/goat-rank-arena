@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
@@ -8,14 +9,29 @@ import { toast } from "sonner";
 
 const Index = () => {
   const { data: categories, isLoading, isError } = useQuery<Category[]>({
-    queryKey: ["rootCategories"],
+    queryKey: ["featuredSubcategories"],
     queryFn: async () => {
-      // Fetch only parent categories (those without a parent_id)
+      // First, get the ID of the 'GOAT' parent category
+      const { data: parentCategory, error: parentError } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("name", "GOAT")
+        .is("parent_id", null)
+        .single();
+
+      if (parentError || !parentCategory) {
+        toast.error("Failed to load featured categories.");
+        console.error("Error fetching parent category for homepage:", parentError);
+        throw new Error(parentError?.message || "Parent category not found");
+      }
+
+      // Now, fetch up to 9 subcategories of 'GOAT'
       const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .is("parent_id", null)
-        .order("name");
+        .eq("parent_id", parentCategory.id)
+        .order("name")
+        .limit(9);
 
       if (error) {
         toast.error("Failed to load categories.");
@@ -29,7 +45,6 @@ const Index = () => {
         name: c.name,
         description: c.description || "No description provided.",
         imageUrl: c.image_url || undefined,
-        // userRankingCount will be properly implemented later
         userRankingCount: Math.floor(Math.random() * 5000) + 1000,
         leaderboard: [], // Not needed for the category card display
       }));
@@ -60,11 +75,11 @@ const Index = () => {
 
         <main className="container mx-auto px-4 py-12">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-10">
-                Choose a Category & Join the Debate
+                Explore GOAT Debates
             </h2>
             {isLoading && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {Array.from({ length: 3 }).map((_, i) => (
+                {Array.from({ length: 6 }).map((_, i) => (
                     <Skeleton key={i} className="h-[420px] w-full rounded-lg bg-white/5" />
                 ))}
                 </div>
