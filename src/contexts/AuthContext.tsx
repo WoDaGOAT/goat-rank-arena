@@ -5,7 +5,7 @@ import { Session, User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import LoginDialog from '@/components/auth/LoginDialog';
 
-type Profile = Database['public']['Tables']['profiles']['Row'] & {
+export type Profile = Database['public']['Tables']['profiles']['Row'] & {
   country?: string | null;
   favorite_sports?: string[] | null;
 };
