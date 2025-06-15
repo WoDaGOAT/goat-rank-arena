@@ -56,6 +56,25 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
         await supabase.from('user_rankings').delete().match({ id: rankingId });
         throw athletesError;
       }
+
+      const feedAthletes = selectedAthletes.map((athlete, index) => ({
+        id: athlete.id,
+        name: athlete.name,
+        imageUrl: athlete.imageUrl,
+        points: athlete.userPoints,
+        position: index + 1
+      }));
+
+      const { error: rpcError } = await supabase.rpc('create_new_ranking_feed_item', {
+        p_ranking_id: rankingId,
+        p_athletes: feedAthletes,
+      });
+
+      if (rpcError) {
+        // Not a critical error, just log it. The ranking is saved.
+        console.error('Failed to create feed item:', rpcError);
+      }
+
       return rankingId;
     },
     onSuccess: (rankingId) => {

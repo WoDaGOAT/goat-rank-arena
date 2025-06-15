@@ -332,7 +332,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_new_ranking_feed_item: {
+        Args: { p_ranking_id: string; p_athletes: Json }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
