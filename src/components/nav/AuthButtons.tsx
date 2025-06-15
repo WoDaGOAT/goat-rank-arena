@@ -39,7 +39,7 @@ const AuthButtons = () => {
             <LoginDialog>
                 <button
                     className={cn(
-                        "flex items-center justify-center rounded-[10px] border border-[#388BFF] bg-gray-200 text-black font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300",
+                        "flex items-center justify-center rounded-[10px] border border-[#388BFF] bg-transparent text-white font-bold transition-colors shadow px-4 md:px-6 py-1.5 md:py-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-300",
                         "text-sm md:text-base whitespace-nowrap leading-none",
                         "tracking-wide",
                         "min-w-[40px] min-h-[30px]"

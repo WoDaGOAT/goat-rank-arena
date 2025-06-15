@@ -12,7 +12,7 @@ const Navbar = () => {
   const { user, loading } = useAuth();
 
   return (
-    <nav className="bg-background/80 backdrop-blur-sm text-foreground sticky top-0 z-50 border-b border-border/50">
+    <nav className="bg-gray-900/95 backdrop-blur-sm text-gray-200 sticky top-0 z-50 border-b border-gray-700/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
