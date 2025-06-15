@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
@@ -58,7 +57,7 @@ const Index = () => {
       {/* Apply category-page background gradient */}
       <div
         className="min-h-screen"
-        style={{ background: "linear-gradient(135deg, hsl(280, 50%, 20%) 0%, hsl(260, 40%, 5%) 100%)" }}
+        style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
         {/* HERO HEADER - reduced height, transparent to show gradient */}
         <header className="bg-transparent text-primary-foreground py-8 px-4 text-center shadow-md">
