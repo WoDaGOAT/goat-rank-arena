@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import CreateRankingPage from "./pages/CreateRankingPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { isSupabaseConfigured } from "./lib/supabase";
+import FeedPage from "./pages/FeedPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +36,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/feed" element={<FeedPage />} />
               <Route path="/category/:categoryId" element={<CategoryPage />} />
               <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
               <Route path="/profile" element={<UserProfilePage />} />

@@ -6,6 +6,7 @@ import UserMenu from "./nav/UserMenu";
 import Logo from "./nav/Logo";
 import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const { user, loading } = useAuth();
@@ -17,6 +18,9 @@ const Navbar = () => {
           <div className="flex items-center gap-8">
             <Logo />
             <NavMenu />
+            <Link to="/feed" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                Feed
+            </Link>
           </div>
 
           <div className="flex items-center gap-2">
