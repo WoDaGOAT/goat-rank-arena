@@ -23,7 +23,7 @@ interface SelectedAthlete extends Athlete {
 
 const CreateRankingPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const { user } = useAuth();
+  const { user, openLoginDialog } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -60,7 +60,6 @@ const CreateRankingPage = () => {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!user) {
-        toast.error("You must be logged in to save a ranking.");
         throw new Error("User not authenticated");
       }
       if (selectedAthletes.length < 10) {
@@ -118,6 +117,15 @@ const CreateRankingPage = () => {
       }
     }
   });
+
+  const handleSaveRanking = () => {
+    if (!user) {
+      openLoginDialog();
+      toast.info("Please log in or sign up to save your ranking.");
+    } else {
+      saveMutation.mutate();
+    }
+  };
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -268,7 +276,7 @@ const CreateRankingPage = () => {
             categoryId={categoryId!}
             disabled={selectedAthletes.length < 10 || !rankingTitle.trim()}
             saveLabel={saveMutation.isPending ? "Saving..." : `Save Ranking (${selectedAthletes.length} athletes)`}
-            onSave={() => saveMutation.mutate()}
+            onSave={handleSaveRanking}
             isSaving={saveMutation.isPending}
           />
         </div>
