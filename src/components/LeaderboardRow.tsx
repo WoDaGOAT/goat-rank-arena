@@ -1,3 +1,4 @@
+
 import { Athlete, getPlaceholderImageUrl } from "@/types";
 import { ArrowUp, ArrowDown, Minus, Crown, Medal, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -104,7 +105,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
 
   return (
     <div
-      className={`grid grid-cols-[50px_60px_1fr_60px_80px] gap-3 items-center px-4 py-3 transition-all duration-200 ${getRankStyle()}`}
+      className={`grid grid-cols-[50px_60px_1fr_60px_auto] gap-3 items-center px-4 py-3 transition-all duration-200 ${getRankStyle()}`}
     >
       {/* Rank */}
       <div className="flex items-center justify-center">
@@ -136,11 +137,11 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
       <div className="flex justify-center">{getMovementBadge()}</div>
 
       {/* Points */}
-      <div className="text-right">
-        <div className="text-lg font-bold text-blue-300">
+      <div className="flex items-baseline justify-end gap-1">
+        <span className="text-lg font-bold text-blue-300">
           {athlete.points.toLocaleString()}
-        </div>
-        <div className="text-xs text-gray-300">pts</div>
+        </span>
+        <span className="text-xs text-gray-300">pts</span>
       </div>
     </div>
   );
