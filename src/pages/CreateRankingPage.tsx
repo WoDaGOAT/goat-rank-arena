@@ -61,9 +61,9 @@ const CreateRankingPage = () => {
       if (!user) {
         throw new Error("User not authenticated");
       }
-      if (selectedAthletes.length < 10) {
-        toast.error("You must select at least 10 athletes.");
-        throw new Error("Not enough athletes");
+      if (selectedAthletes.length !== 10) {
+        toast.error("You must have exactly 10 athletes in your ranking.");
+        throw new Error("Incorrect number of athletes");
       }
       if (!rankingTitle.trim()) {
         toast.error("Ranking title is required.");
@@ -111,7 +111,7 @@ const CreateRankingPage = () => {
       navigate(`/category/${categoryId}`);
     },
     onError: (error: Error) => {
-      if (error.message !== "User not authenticated" && error.message !== "Not enough athletes" && error.message !== "Title required") {
+      if (error.message !== "User not authenticated" && error.message !== "Incorrect number of athletes" && error.message !== "Title required") {
          toast.error(error.message || "Failed to save ranking. Please try again.");
       }
     }
@@ -137,6 +137,11 @@ const CreateRankingPage = () => {
   });
 
   const addAthlete = (athlete: Athlete) => {
+    if (selectedAthletes.length >= 10) {
+      toast.info("You can only rank up to 10 athletes.");
+      return;
+    }
+
     const newPosition = selectedAthletes.length + 1;
     const userPoints = Math.max(0, 100 - (newPosition - 1) * 5); // Points decrease by 5 for each position
     
@@ -259,6 +264,7 @@ const CreateRankingPage = () => {
               selectedLetter={selectedLetter}
               setSelectedLetter={setSelectedLetter}
               addAthlete={addAthlete}
+              numSelectedAthletes={selectedAthletes.length}
             />
 
             <RankingList
@@ -273,8 +279,8 @@ const CreateRankingPage = () => {
 
           <RankingActions
             categoryId={categoryId!}
-            disabled={selectedAthletes.length < 10}
-            saveLabel={saveMutation.isPending ? "Saving..." : `Save Ranking (${selectedAthletes.length} athletes)`}
+            disabled={selectedAthletes.length !== 10}
+            saveLabel={saveMutation.isPending ? "Saving..." : `Save Ranking (${selectedAthletes.length}/10)`}
             onSave={handleSaveRanking}
             isSaving={saveMutation.isPending}
           />

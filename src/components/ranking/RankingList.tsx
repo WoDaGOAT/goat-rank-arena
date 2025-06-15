@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { GripVertical, X, Search } from "lucide-react";
@@ -27,7 +28,7 @@ const RankingList: React.FC<RankingListProps> = ({
 }) => (
   <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 p-6">
     <h2 className="text-xl font-semibold text-white mb-4">
-      Your Ranking ({selectedAthletes.length} athletes)
+      Your Ranking ({selectedAthletes.length}/10 athletes)
     </h2>
     {selectedAthletes.length === 0 ? (
       <div className="text-center py-12 text-gray-400">

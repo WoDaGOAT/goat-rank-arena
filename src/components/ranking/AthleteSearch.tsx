@@ -13,6 +13,7 @@ interface AthleteSearchProps {
   selectedLetter: string;
   setSelectedLetter: (letter: string) => void;
   addAthlete: (athlete: Athlete) => void;
+  numSelectedAthletes: number;
 }
 
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -25,6 +26,7 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
   selectedLetter,
   setSelectedLetter,
   addAthlete,
+  numSelectedAthletes,
 }) => (
   <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 p-6">
     <h2 className="text-xl font-semibold text-white mb-4">
@@ -103,6 +105,7 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
             size="sm"
             variant="cta"
             className="min-w-[80px]"
+            disabled={numSelectedAthletes >= 10}
           >
             <Plus className="w-4 h-4 mr-1" /> Add
           </Button>
