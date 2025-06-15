@@ -12,52 +12,54 @@ const Navbar = () => {
   const { user, loading } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50">
-      {/* Top bar for categories */}
-      <div className="bg-gray-800 text-white border-b border-gray-700/50">
-        <div className="container mx-auto px-4 h-12 flex items-center justify-center">
-          <NavMenu />
+    <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50">
+      <div className="relative container mx-auto px-4">
+        {/* Logo absolutely positioned to span both rows */}
+        <div className="absolute left-4 top-1/2 -translate-y-1/2">
+          <Logo />
         </div>
-      </div>
-      
-      {/* Main navigation bar */}
-      <nav className="bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <Logo />
+
+        {/* Main content with padding to avoid logo */}
+        <div className="pl-28 md:pl-36 flex flex-col">
+          {/* Top Row: Links and Auth */}
+          <div className="flex items-center justify-end h-16">
+            <div className="flex items-center gap-2 md:gap-4 text-sm font-medium">
               <Link
                 to="/feed"
-                className="bg-transparent hover:bg-white/10 focus:bg-white/10 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 focus:outline-none"
+                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none"
               >
                 Feed
               </Link>
               <Link
                 to="/quiz"
-                className="bg-transparent hover:bg-white/10 focus:bg-white/10 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 focus:outline-none"
+                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none"
               >
                 Quiz
               </Link>
-            </div>
 
-            <div className="flex items-center gap-2">
+              <div className="h-6 w-px bg-gray-700 mx-2 hidden md:block" />
+
               {loading ? (
-                  <div className="flex items-center gap-2">
-                      <Skeleton className="h-8 w-8 rounded-full bg-secondary" />
-                      <Skeleton className="h-8 w-20 bg-secondary" />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-8 w-8 rounded-full bg-secondary" />
+                  <Skeleton className="h-8 w-20 bg-secondary" />
+                </div>
               ) : user ? (
-                <>
+                <div className="flex items-center gap-2">
                   <NotificationBell />
                   <UserMenu />
-                </>
+                </div>
               ) : (
                 <AuthButtons />
               )}
             </div>
           </div>
+          {/* Bottom Row: Categories */}
+          <div className="flex items-center justify-center h-12 border-t border-gray-700/50">
+            <NavMenu />
+          </div>
         </div>
-      </nav>
+      </div>
     </header>
   );
 };
