@@ -6,7 +6,7 @@ export interface QuizAnswer {
 }
 
 export interface QuizQuestion {
-  id: string;
+  id:string;
   question_text: string;
   order: number;
   quiz_answers: QuizAnswer[];

@@ -30,8 +30,9 @@ const fetchUserAttempt = async (userId: string, quizId: string) => {
         .select('*')
         .eq('user_id', userId)
         .eq('quiz_id', quizId)
-        .single();
-    if (error && error.code !== 'PGRST116') { // Ignore 'range not satisfiable' which means no rows found
+        .maybeSingle();
+    
+    if (error) {
         throw new Error(error.message);
     }
     return data as QuizAttempt | null;
@@ -98,7 +99,6 @@ const QuizPage = () => {
                 <div className="text-center text-white">
                     <h2 className="text-2xl font-bold mb-4">Ready for a Challenge?</h2>
                     <p className="text-lg text-gray-300 mb-6">Please log in or sign up to take the daily quiz.</p>
-                    {/* The AuthButtons will be in the Navbar, but an extra prompt here is good UX */}
                 </div>
             )
         }

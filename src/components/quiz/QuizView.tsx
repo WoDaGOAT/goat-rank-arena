@@ -24,7 +24,7 @@ const QuizView = ({ quiz, onSubmit }: QuizViewProps) => {
     onSubmit(selectedAnswers);
   };
   
-  const allQuestionsAnswered = questions.length === Object.keys(selectedAnswers).length;
+  const allQuestionsAnswered = questions.length > 0 && questions.length === Object.keys(selectedAnswers).length;
 
   return (
     <Card className="w-full max-w-3xl mx-auto bg-gray-800/60 border-gray-700 text-white">

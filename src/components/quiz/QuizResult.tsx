@@ -10,7 +10,7 @@ interface QuizResultProps {
 }
 
 const QuizResult = ({ score, totalQuestions }: QuizResultProps) => {
-  const percentage = Math.round((score / totalQuestions) * 100);
+  const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-gray-800/60 border-gray-700 text-white">

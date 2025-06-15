@@ -239,6 +239,139 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_answers: {
+        Row: {
+          answer_text: string
+          created_at: string
+          id: string
+          is_correct: boolean
+          question_id: string
+        }
+        Insert: {
+          answer_text: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_id: string
+        }
+        Update: {
+          answer_text?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_attempts: {
+        Row: {
+          answers: Json | null
+          completed_at: string
+          id: string
+          quiz_id: string
+          score: number
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string
+          id?: string
+          quiz_id: string
+          score: number
+          started_at: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          created_at: string
+          id: string
+          order: number
+          question_text: string
+          quiz_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order: number
+          question_text: string
+          quiz_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order?: number
+          question_text?: string
+          quiz_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          active_date: string
+          created_at: string
+          id: string
+          title: string
+          topic: string | null
+        }
+        Insert: {
+          active_date: string
+          created_at?: string
+          id?: string
+          title: string
+          topic?: string | null
+        }
+        Update: {
+          active_date?: string
+          created_at?: string
+          id?: string
+          title?: string
+          topic?: string | null
+        }
+        Relationships: []
+      }
       ranking_athletes: {
         Row: {
           athlete_id: string
