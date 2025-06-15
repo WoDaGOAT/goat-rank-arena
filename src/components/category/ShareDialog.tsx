@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Copy, Facebook, Twitter, Mail, Share } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // For brevity, I'm using Twitter icon for Telegram and Share icon for WhatsApp, as specific icons weren't available in the prompt's list
 import { FaWhatsapp as Whatsapp, FaTelegram as Telegram } from "react-icons/fa";
@@ -23,7 +23,13 @@ interface ShareDialogProps {
 }
 
 const SocialButton = ({ children, onClick, 'aria-label': ariaLabel, className }: { children: React.ReactNode, onClick: () => void, 'aria-label': string, className?: string }) => (
-    <Button size="icon" variant="outline" onClick={onClick} aria-label={ariaLabel} className={`h-12 w-12 rounded-full ${className}`}>
+    <Button 
+        size="icon" 
+        variant="outline" 
+        onClick={onClick} 
+        aria-label={ariaLabel} 
+        className={cn("h-12 w-12 rounded-full border-white/20 bg-white/10 text-white hover:bg-white/20", className)}
+    >
         {children}
     </Button>
 )
