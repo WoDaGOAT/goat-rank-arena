@@ -3,6 +3,7 @@ import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Trophy, Crown } from "lucide-react";
+import { sanitize } from "@/lib/sanitize";
 
 interface GlobalLeaderboardProps {
   athletes: Athlete[];
@@ -21,7 +22,7 @@ const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) =
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white mb-1">
-              {categoryName}
+              {sanitize(categoryName)}
             </h2>
             <p className="text-sm text-gray-300 font-medium">
               🎮 Live Rankings • Top 10 Champions

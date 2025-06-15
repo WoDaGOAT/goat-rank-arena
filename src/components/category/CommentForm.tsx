@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
 import { CommentWithUser } from "@/types";
+import { sanitize } from "@/lib/sanitize";
 
 interface CommentFormProps {
   categoryId: string;
@@ -50,7 +51,7 @@ const CommentForm = ({ categoryId }: CommentFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (comment.trim()) {
-      addComment(comment.trim());
+      addComment(sanitize(comment.trim()));
     }
   };
 

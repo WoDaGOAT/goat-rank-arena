@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
+import { sanitize } from "@/lib/sanitize";
 
 export interface ProfileInfo {
   id?: string;
@@ -24,19 +25,20 @@ interface NewCommentFeedItemProps {
 
 const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
     const { author, comment_text, category_id, category_name } = data;
+    const sanitizedAuthorName = sanitize(author.full_name);
     return (
         <Card className="bg-white/5 text-white border-gray-700">
             <CardContent className="p-4">
                  <div className="flex items-start gap-4 mb-2">
                     <Avatar>
-                        <AvatarImage src={author.avatar_url || undefined} alt={author.full_name || 'User'}/>
-                        <AvatarFallback>{author.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                        <AvatarImage src={author.avatar_url || undefined} alt={sanitizedAuthorName || 'User'}/>
+                        <AvatarFallback>{sanitizedAuthorName?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                         <p>
-                            <span className="font-bold">{author.full_name || 'Someone'}</span>
+                            <span className="font-bold">{sanitizedAuthorName || 'Someone'}</span>
                             {' '} commented on {' '}
-                            <Link to={`/category/${category_id}`} className="font-bold hover:underline text-blue-300">{category_name}</Link>
+                            <Link to={`/category/${category_id}`} className="font-bold hover:underline text-blue-300">{sanitize(category_name)}</Link>
                         </p>
                         <p className="text-xs text-gray-400">
                             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
@@ -44,7 +46,7 @@ const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
                     </div>
                 </div>
                 <div className="border-l-2 border-gray-700 pl-4 ml-5">
-                  <p className="text-gray-300 italic">"{comment_text}"</p>
+                  <p className="text-gray-300 italic">"{sanitize(comment_text)}"</p>
                 </div>
             </CardContent>
         </Card>

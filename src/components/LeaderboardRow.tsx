@@ -1,6 +1,7 @@
 import { Athlete, getPlaceholderImageUrl } from "@/types";
 import { ArrowUp, ArrowDown, Minus, Crown, Medal, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { sanitize } from "@/lib/sanitize";
 
 interface LeaderboardRowProps {
   athlete: Athlete;
@@ -102,6 +103,8 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
     return <span className="text-lg font-bold text-white">{position}</span>;
   };
 
+  const sanitizedName = sanitize(athlete.name);
+
   return (
     <div
       className={`grid grid-cols-[50px_60px_1fr_110px_90px] gap-4 items-center px-4 py-3 transition-all duration-200 ${getRankStyle()}`}
@@ -115,7 +118,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
       <div className="relative">
         <img
           src={getPlaceholderImageUrl(athlete.imageUrl)}
-          alt={athlete.name}
+          alt={sanitizedName}
           className="w-10 h-10 rounded-full object-cover border-2 border-white/30 shadow-md"
         />
       </div>
@@ -123,7 +126,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
       {/* Name */}
       <div>
         <div className="font-semibold text-white text-sm leading-tight">
-          {athlete.name}
+          {sanitizedName}
         </div>
         {position <= 10 && (
           <div className="text-xs text-gray-300 mt-0.5">

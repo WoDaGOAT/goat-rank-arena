@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { sanitize } from '@/lib/sanitize';
 
 interface ProfileData {
     name: string;
@@ -20,7 +21,7 @@ export const useProfileUpdater = () => {
         const { error } = await supabase!
             .from('profiles')
             .update({ 
-              full_name: name,
+              full_name: sanitize(name),
               country: country,
               favorite_sports: favoriteSports,
             })

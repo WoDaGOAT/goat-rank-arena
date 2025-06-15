@@ -1,8 +1,10 @@
+
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare } from "lucide-react";
 import { UserComment } from "@/types";
+import { sanitize } from "@/lib/sanitize";
 
 interface UserCommentsActivityProps {
     userComments: UserComment[] | undefined;
@@ -25,10 +27,10 @@ const UserCommentsActivity = ({ userComments, isLoading }: UserCommentsActivityP
                 <div className="space-y-4">
                     {userComments.map(comment => (
                         <div key={comment.id} className="bg-white/5 p-3 rounded-lg border border-white/10">
-                            <p className="text-gray-300 italic whitespace-pre-wrap">"{comment.comment}"</p>
+                            <p className="text-gray-300 italic whitespace-pre-wrap">"{sanitize(comment.comment)}"</p>
                             <div className="text-xs text-gray-400 mt-2 flex justify-between items-center">
                                 <span>
-                                    on <Link to={`/category/${comment.category_id}`} className="text-blue-400 hover:underline">{comment.categories?.name || 'a category'}</Link>
+                                    on <Link to={`/category/${comment.category_id}`} className="text-blue-400 hover:underline">{sanitize(comment.categories?.name) || 'a category'}</Link>
                                 </span>
                                 <span>
                                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
