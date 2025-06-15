@@ -58,7 +58,7 @@ const UserRankingPage = () => {
       <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
         <main className="container mx-auto px-4 py-8">
            <div className="mb-6">
-            <Button asChild variant="secondary" className="bg-white text-indigo-900 hover:bg-gray-200">
+            <Button asChild variant="outline" className="border-white/20 bg-white/10 text-gray-300 hover:text-white hover:bg-white/20">
               <Link to={`/feed`}>
                 <ChevronLeft /> Back to Feed
               </Link>
