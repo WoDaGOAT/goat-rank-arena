@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,13 +26,15 @@ const ListItem = React.forwardRef<
           ref={ref}
           to={to || "#"}
           className={cn(
-            "block select-none space-y-1 rounded-md p-2 md:p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-800 focus:bg-gray-700 focus:text-white text-xs md:text-sm",
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
           {...props}
         >
-          <div className="text-xs md:text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-xs md:text-sm leading-snug text-gray-300">{children}</p>
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
         </Link>
       </NavigationMenuLink>
     </li>
@@ -122,11 +123,11 @@ const NavMenu = () => {
     }
 
     return (
-        <NavigationMenu className="relative z-[100]">
-            <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
+        <NavigationMenu>
+            <NavigationMenuList>
                 {menuItems.length > 0 ? (
                     menuItems.map((item) => (
-                        <NavigationMenuItem key={item.id} className="relative">
+                        <NavigationMenuItem key={item.id}>
                             <NavigationMenuTrigger className={triggerClassName}>
                                 {item.name}
                                 {item.children && item.children.length > 0 && (
@@ -136,25 +137,13 @@ const NavMenu = () => {
                                 )}
                             </NavigationMenuTrigger>
                             {item.children && item.children.length > 0 && (
-                                <NavigationMenuContent
-                                    className={cn(
-                                        "bg-black border border-gray-700 text-white shadow-xl rounded-md z-[2000]",
-                                        "absolute left-1/2 -translate-x-1/2 top-full mt-1 min-w-[320px] max-w-[420px] md:min-w-[340px] md:w-auto p-0"
-                                    )}
-                                    style={{
-                                        backgroundColor: "#11151C",
-                                        color: "#fff",
-                                        border: "1px solid #333",
-                                        zIndex: 2000,
-                                    }}
-                                >
-                                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4">
+                                <NavigationMenuContent>
+                                    <ul className="grid w-[320px] gap-3 p-4 md:w-[400px] md:grid-cols-2 lg:w-[500px]">
                                         {item.children.map((subItem) => (
                                             <ListItem
                                                 key={subItem.id}
                                                 to={`/category/${subItem.id}`}
                                                 title={subItem.name}
-                                                className="text-white hover:bg-gray-800 border border-gray-700 rounded-md"
                                             >
                                                 {subItem.description || "No description"}
                                             </ListItem>
