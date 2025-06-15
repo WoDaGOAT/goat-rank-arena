@@ -144,9 +144,9 @@ const NavMenu = () => {
                 <NavigationMenuTrigger className={triggerClassName}>
                   {item.name} {item.children && item.children.length > 0 && `(${item.children.length})`}
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
+                <NavigationMenuContent className="!bg-black !border-gray-800 !text-white z-[100] min-w-[300px] p-0">
                     {(item.children && item.children.length > 0) ? (
-                        <ul className="grid w-[300px] gap-2 p-3 md:w-[600px] md:gap-3 md:p-4 md:grid-cols-2 lg:w-[700px] lg:grid-cols-2 bg-black text-white rounded-lg shadow-lg border border-gray-800 z-50">
+                        <ul className="grid gap-2 p-3 md:gap-3 md:p-4 md:grid-cols-2 lg:grid-cols-2 bg-black text-white">
                             {item.children.map((subItem) => (
                             <ListItem
                                 key={subItem.id}
@@ -159,7 +159,7 @@ const NavMenu = () => {
                             ))}
                         </ul>
                     ) : (
-                        <div className="w-[300px] p-4 text-center text-gray-400 bg-black text-white rounded-lg shadow-lg border border-gray-800 z-50">No sub-categories defined.</div>
+                        <div className="p-4 text-center text-gray-400 bg-black">No sub-categories defined.</div>
                     )}
                 </NavigationMenuContent>
              </NavigationMenuItem>
