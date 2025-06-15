@@ -84,6 +84,8 @@ const CreateRankingPage = () => {
     });
   };
 
+  const hasErrors = selectedAthletes.some(a => !!a.error);
+
   if (isLoadingCategory || (user && isLoadingUserRanking)) {
     return (
       <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
@@ -182,12 +184,17 @@ const CreateRankingPage = () => {
 
           <RankingActions
             categoryId={categoryId!}
-            disabled={selectedAthletes.length !== 10 || !rankingTitle.trim()}
+            disabled={selectedAthletes.length !== 10 || !rankingTitle.trim() || hasErrors}
             saveLabel={isSaving ? "Saving..." : `Save Ranking (${selectedAthletes.length}/10)`}
             onSave={handleSave}
             isSaving={isSaving}
           />
-          {selectedAthletes.length === 10 && !rankingTitle.trim() && (
+          {hasErrors && (
+            <p className="text-right text-red-400 mt-2">
+              Please fix the validation errors before saving.
+            </p>
+          )}
+          {selectedAthletes.length === 10 && !rankingTitle.trim() && !hasErrors && (
             <p className="text-right text-yellow-400 mt-2">
               Please provide a title for your ranking to save it.
             </p>

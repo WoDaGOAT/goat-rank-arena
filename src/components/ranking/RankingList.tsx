@@ -1,12 +1,14 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { GripVertical, X, Search } from "lucide-react";
+import { X, Search } from "lucide-react";
 import React from "react";
 import { Athlete } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface SelectedAthlete extends Athlete {
   userPoints: number;
+  error?: string | null;
 }
 
 interface RankingListProps {
@@ -38,7 +40,7 @@ const RankingList: React.FC<RankingListProps> = ({
         </p>
       </div>
     ) : (
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3 max-h-[calc(10*76px)] overflow-y-auto pr-2">
         {selectedAthletes.map((athlete, index) => (
           <div
             key={athlete.id}
@@ -46,16 +48,18 @@ const RankingList: React.FC<RankingListProps> = ({
             onDragStart={() => handleDragStart(index)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragEnd={handleDragEnd}
-            className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/20 cursor-move hover:bg-white/10 transition-colors group"
+            className="flex items-center gap-4 p-3 bg-white/5 rounded-lg border border-white/20 cursor-move hover:bg-white/10 transition-colors group"
           >
-            {/* <GripVertical className="w-4 h-4 text-gray-400 group-hover:text-white" /> */}
             <img
-              src={`https://images.unsplash.com/${athlete.imageUrl}?w=400&h=225&fit=crop&q=80`}
+              src={athlete.imageUrl ? `https://images.unsplash.com/${athlete.imageUrl}?w=400&h=225&fit=crop&q=80` : '/placeholder.svg'}
               alt={athlete.name}
               className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
             />
             <div className="flex-1">
               <div className="font-semibold text-white">{athlete.name}</div>
+              {athlete.error && (
+                <p className="text-xs text-red-400 mt-1">{athlete.error}</p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Input
@@ -67,7 +71,10 @@ const RankingList: React.FC<RankingListProps> = ({
                     parseInt(e.target.value) || 0
                   )
                 }
-                className="w-16 h-8 text-center bg-white/10 border-white/30 text-white text-sm"
+                className={cn(
+                  "w-20 h-9 text-center bg-white/10 border-white/30 text-white text-sm",
+                  athlete.error && "border-red-500 focus-visible:ring-red-500"
+                )}
                 min="0"
                 max="100"
               />

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 export interface SelectedAthlete extends Athlete {
   userPoints: number;
+  error?: string | null;
 }
 
 export const useRankingManager = () => {
@@ -22,7 +23,8 @@ export const useRankingManager = () => {
     
     setSelectedAthletes(prev => [...prev, {
       ...athlete,
-      userPoints
+      userPoints,
+      error: null,
     }]);
     return true;
   };
@@ -30,20 +32,37 @@ export const useRankingManager = () => {
   const removeAthlete = (athleteId: string) => {
     setSelectedAthletes(prev => {
       const updated = prev.filter(athlete => athlete.id !== athleteId);
-      // Recalculate points based on new positions
+      // Recalculate points based on new positions and clear errors
       return updated.map((athlete, index) => ({
         ...athlete,
-        userPoints: Math.max(0, 100 - index * 5)
+        userPoints: Math.max(0, 100 - index * 5),
+        error: null,
       }));
     });
   };
 
   const updateAthletePoints = (athleteId: string, points: number) => {
-    setSelectedAthletes(prev =>
-      prev.map(athlete =>
-        athlete.id === athleteId ? { ...athlete, userPoints: Math.max(0, Math.min(100, points)) } : athlete
-      )
-    );
+    setSelectedAthletes(prev => {
+      const updatedList = prev.map(athlete =>
+        athlete.id === athleteId ? { ...athlete, userPoints: points } : athlete
+      );
+
+      return updatedList.map((athlete, index, arr) => {
+        let error: string | null = null;
+
+        if (athlete.userPoints < 0 || athlete.userPoints > 100) {
+          error = "Points must be 0-100.";
+        } else if (index > 0) {
+          const prevAthlete = arr[index - 1];
+          if (athlete.userPoints >= prevAthlete.userPoints) {
+            error = "Must be less than rank above.";
+          } else if (prevAthlete.userPoints - athlete.userPoints > 10) {
+            error = "Max 10 point gap.";
+          }
+        }
+        return { ...athlete, error };
+      });
+    });
   };
 
   const handleDragStart = (index: number) => {
@@ -59,10 +78,11 @@ export const useRankingManager = () => {
     updatedAthletes.splice(draggedIndex, 1);
     updatedAthletes.splice(index, 0, draggedItem);
 
-    // Recalculate points based on new positions
+    // Recalculate points based on new positions and clear errors
     const reorderedWithPoints = updatedAthletes.map((athlete, idx) => ({
       ...athlete,
-      userPoints: Math.max(0, 100 - idx * 5)
+      userPoints: Math.max(0, 100 - idx * 5),
+      error: null,
     }));
 
     setSelectedAthletes(reorderedWithPoints);
