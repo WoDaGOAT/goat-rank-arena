@@ -21,6 +21,7 @@ interface AuthContextType {
   loading: boolean;
   refetchUser: () => Promise<void>;
   openLoginDialog: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   refetchUser: async () => {},
   openLoginDialog: () => {},
+  logout: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -102,6 +104,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [fetchUserAndProfile]);
 
+  const logout = async () => {
+    await supabase!.auth.signOut();
+  };
+
   const openLoginDialog = () => setIsLoginDialogOpen(true);
 
   const isAdmin = roles?.includes('admin') ?? false;
@@ -115,6 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     refetchUser: fetchUserAndProfile,
     openLoginDialog,
+    logout,
   };
 
   return (
