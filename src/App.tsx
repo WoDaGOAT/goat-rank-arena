@@ -8,6 +8,7 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { HelmetProvider } from "react-helmet-async";
 import { isSupabaseConfigured } from "./lib/supabase";
 import CommentManagementPage from "./pages/admin/CommentManagementPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const Index = lazy(() => import("./pages/Index"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
@@ -24,6 +25,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
 const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage"));
 
+const queryClient = new QueryClient();
+
 function App() {
   if (!isSupabaseConfigured) {
     return (
@@ -37,36 +40,38 @@ function App() {
   }
   return (
     <HelmetProvider>
-      <Router>
-        <AuthProvider>
-          <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-            <Navbar />
-            <main className="flex-grow">
-              <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-gray-900">Loading...</div>}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/category/:categoryId" element={<CategoryPage />} />
-                  <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
-                  <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
-                  <Route path="/profile" element={<UserProfilePage />} />
-                  <Route path="/users/:userId" element={<PublicProfilePage />} />
-                  <Route path="/feed" element={<FeedPage />} />
-                  <Route path="/quiz" element={<QuizPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/gdpr" element={<GdprPage />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                  <Route path="/admin/users" element={<UserManagementPage />} />
-                  <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
-                  <Route path="/admin/comments" element={<CommentManagementPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </main>
-            <Footer />
-          </div>
-          <SonnerToaster />
-        </AuthProvider>
-      </Router>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <AuthProvider>
+            <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+              <Navbar />
+              <main className="flex-grow">
+                <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-gray-900">Loading...</div>}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/category/:categoryId" element={<CategoryPage />} />
+                    <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
+                    <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                    <Route path="/profile" element={<UserProfilePage />} />
+                    <Route path="/users/:userId" element={<PublicProfilePage />} />
+                    <Route path="/feed" element={<FeedPage />} />
+                    <Route path="/quiz" element={<QuizPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/gdpr" element={<GdprPage />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                    <Route path="/admin/users" element={<UserManagementPage />} />
+                    <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
+                    <Route path="/admin/comments" element={<CommentManagementPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </main>
+              <Footer />
+            </div>
+            <SonnerToaster />
+          </AuthProvider>
+        </Router>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }
