@@ -1,16 +1,12 @@
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
 const PrivacyPolicyPage = () => {
   return (
     <>
-      <Navbar />
       <div
-        className="min-h-screen flex flex-col"
+        className="flex flex-col flex-grow"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
-        <main className="flex-grow container mx-auto px-4 py-12 text-white">
+        <div className="flex-grow container mx-auto px-4 py-12 text-white">
            <div className="bg-white/5 p-8 rounded-lg max-w-4xl mx-auto">
             <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">Privacy Policy</h1>
             <div className="space-y-4 text-gray-300">
@@ -36,8 +32,7 @@ const PrivacyPolicyPage = () => {
               <p>If you have questions or comments about this policy, you may email us at <a href="mailto:privacy@wodagoat.com" className="text-cyan-400 hover:underline">privacy@wodagoat.com</a>.</p>
             </div>
            </div>
-        </main>
-        <Footer />
+        </div>
       </div>
     </>
   );

@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Quiz, QuizAttempt, UserAnswerSelection } from "@/types/quiz";
-import Navbar from "@/components/Navbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import QuizView from "@/components/quiz/QuizView";
 import QuizResult from "@/components/quiz/QuizResult";
@@ -12,7 +11,6 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import QuizLeaderboard from "@/components/quiz/QuizLeaderboard";
 import { Swords, Trophy } from "lucide-react";
-import Footer from "@/components/Footer";
 
 const fetchTodaysQuiz = async () => {
   const today = new Date().toISOString().split('T')[0];
@@ -131,28 +129,24 @@ const QuizPage = () => {
     };
 
   return (
-    <>
-      <Navbar />
-      <div
-        className="min-h-screen py-12 px-4 flex flex-col"
-        style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
-      >
-        <main className="container mx-auto flex-grow">
-            <div className="flex justify-center mb-8 gap-4">
-                <Button onClick={() => setView('quiz')} variant={view === 'quiz' ? 'default' : 'outline'} className="w-48">
-                    <Swords className="mr-2 h-4 w-4" />
-                    Daily Quiz
-                </Button>
-                <Button onClick={() => setView('leaderboard')} variant={view === 'leaderboard' ? 'default' : 'outline'} className="w-48">
-                    <Trophy className="mr-2 h-4 w-4" />
-                    Leaderboard
-                </Button>
-            </div>
-            {view === 'quiz' ? renderContent() : <QuizLeaderboard />}
-        </main>
-        <Footer />
+    <div
+      className="py-12 px-4 flex flex-col flex-grow"
+      style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
+    >
+      <div className="container mx-auto flex-grow">
+          <div className="flex justify-center mb-8 gap-4">
+              <Button onClick={() => setView('quiz')} variant={view === 'quiz' ? 'default' : 'outline'} className="w-48">
+                  <Swords className="mr-2 h-4 w-4" />
+                  Daily Quiz
+              </Button>
+              <Button onClick={() => setView('leaderboard')} variant={view === 'leaderboard' ? 'default' : 'outline'} className="w-48">
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Leaderboard
+              </Button>
+          </div>
+          {view === 'quiz' ? renderContent() : <QuizLeaderboard />}
       </div>
-    </>
+    </div>
   );
 };
 

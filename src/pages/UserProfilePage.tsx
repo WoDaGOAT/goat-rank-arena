@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +37,7 @@ const UserProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
+      <div className="flex flex-grow items-center justify-center" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
         <div className="text-white text-xl">Loading profile...</div>
       </div>
     );
@@ -49,68 +48,64 @@ const UserProfilePage = () => {
   }
 
   return (
-    <>
-      <Navbar />
-      <div
-        className="min-h-screen flex flex-col"
-        style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
-      >
-        <main className="container mx-auto px-4 py-12 flex-grow">
-          <Card className="max-w-2xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <ProfileHeader
-                profile={profile}
-                user={user}
+    <div
+      className="flex flex-col flex-grow"
+      style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
+    >
+      <div className="container mx-auto px-4 py-12 flex-grow">
+        <Card className="max-w-2xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <ProfileHeader
+              profile={profile}
+              user={user}
+              name={name}
+              isUploading={isUploading}
+              handleAvatarUpload={handleAvatarUpload}
+            />
+            
+            <div className="space-y-6">
+              <ProfileForm
                 name={name}
-                isUploading={isUploading}
-                handleAvatarUpload={handleAvatarUpload}
+                setName={setName}
+                country={country}
+                setCountry={setCountry}
+                user={user}
+                favoriteSports={favoriteSports}
+                handleSportChange={handleSportChange}
+                availableSports={availableSports}
               />
               
-              <div className="space-y-6">
-                <ProfileForm
-                  name={name}
-                  setName={setName}
-                  country={country}
-                  setCountry={setCountry}
-                  user={user}
-                  favoriteSports={favoriteSports}
-                  handleSportChange={handleSportChange}
-                  availableSports={availableSports}
-                />
-                
-                <RankingActivity 
-                  likedCategories={likedCategories} 
-                  isLoading={isLoadingLikedCategories}
-                  userRankings={userRankings}
-                  isLoadingUserRankings={isLoadingUserRankings}
-                />
+              <RankingActivity 
+                likedCategories={likedCategories} 
+                isLoading={isLoadingLikedCategories}
+                userRankings={userRankings}
+                isLoadingUserRankings={isLoadingUserRankings}
+              />
 
-                <QuizActivity 
-                  quizAttempts={quizAttempts}
-                  isLoading={isLoadingQuizAttempts}
-                />
+              <QuizActivity 
+                quizAttempts={quizAttempts}
+                isLoading={isLoadingQuizAttempts}
+              />
 
-                <UserCommentsActivity userComments={userComments} isLoading={isLoadingUserComments} />
+              <UserCommentsActivity userComments={userComments} isLoading={isLoadingUserComments} />
 
-                <div className="border-t border-gray-700"></div>
+              <div className="border-t border-gray-700"></div>
 
-                <FriendsList />
-              </div>
+              <FriendsList />
+            </div>
 
-              <div className="flex justify-end pt-6">
-                <Button variant="cta" onClick={() => handleSaveChanges({name, country, favoriteSports})} disabled={isSaving}>
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-        <Footer />
+            <div className="flex justify-end pt-6">
+              <Button variant="cta" onClick={() => handleSaveChanges({name, country, favoriteSports})} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </>
+    </div>
   );
 };
 

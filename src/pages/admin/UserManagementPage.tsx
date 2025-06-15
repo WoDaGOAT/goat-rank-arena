@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import UserTable from "@/components/admin/UserTable";

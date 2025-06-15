@@ -71,7 +71,7 @@ const Index = () => {
       </Helmet>
       <Navbar />
       <div
-        className="min-h-screen flex flex-col"
+        className="flex flex-col flex-grow"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
         <header className="bg-transparent text-primary-foreground py-8 px-4 text-center shadow-md">
@@ -85,7 +85,7 @@ const Index = () => {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-12 flex-grow">
+        <div className="container mx-auto px-4 py-12 flex-grow">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-10">
                 Explore GOAT Debates
             </h2>
@@ -115,10 +115,9 @@ const Index = () => {
                 </p>
                 )
             )}
-        </main>
-
-        <Footer />
+        </div>
       </div>
+      <Footer />
     </>
   );
 };

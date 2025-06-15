@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Users, TrendingUp } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,7 +9,6 @@ import { SocialActions } from "@/components/category/SocialActions";
 import CommentSection from "@/components/category/CommentSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { allAthletes } from "@/data/mockAthletes";
-import Footer from "@/components/Footer";
 import { Helmet } from "react-helmet-async";
 
 type DbCategory = {
@@ -77,9 +75,8 @@ const CategoryPage = () => {
           <title>Loading Category... | Wodagoat</title>
           <meta name="description" content="Loading category details, leaderboards, and community rankings." />
         </Helmet>
-        <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-          <Navbar />
-          <main className="container mx-auto px-4 py-8 flex-grow">
+        <div className="flex flex-col flex-grow" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+          <div className="container mx-auto px-4 py-8 flex-grow">
               <Skeleton className="h-12 w-48 mb-8" />
               <Skeleton className="h-10 w-3/4 mb-2" />
               <Skeleton className="h-6 w-1/2 mb-8" />
@@ -87,8 +84,7 @@ const CategoryPage = () => {
                   <div className="w-full md:w-2/3 lg:w-3/5"><Skeleton className="h-96 w-full" /></div>
                   <div className="w-full md:w-1/3 lg:w-2/5 space-y-6"><Skeleton className="h-48 w-full" /></div>
               </div>
-          </main>
-          <Footer />
+          </div>
         </div>
       </>
     );
@@ -101,9 +97,8 @@ const CategoryPage = () => {
           <title>Category Not Found | Wodagoat</title>
           <meta name="description" content="The category you're looking for doesn't exist or couldn't be loaded. Please return to the homepage to explore other debates." />
         </Helmet>
-        <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-          <Navbar />
-          <main className="container mx-auto px-4 py-8 text-center flex-grow flex items-center justify-center">
+        <div className="flex flex-col flex-grow" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+          <div className="container mx-auto px-4 py-8 text-center flex-grow flex items-center justify-center">
             <div>
               <h1 className="text-3xl font-bold text-white mb-4">Category Not Found</h1>
               <p className="text-gray-300 mb-6">The category you're looking for doesn't exist or couldn't be loaded.</p>
@@ -113,8 +108,7 @@ const CategoryPage = () => {
                 </Link>
               </Button>
             </div>
-          </main>
-          <Footer />
+          </div>
         </div>
       </>
     );
@@ -126,9 +120,8 @@ const CategoryPage = () => {
         <title>{`${dbCategory.name} - GOAT Debate | Wodagoat`}</title>
         <meta name="description" content={dbCategory.description || `Join the GOAT debate for ${dbCategory.name}. Create rankings, view leaderboards, and share your opinion with a global community of sports fans.`} />
       </Helmet>
-      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <Navbar />
-        <main className="container mx-auto px-4 py-8 flex-grow">
+      <div className="flex flex-col flex-grow" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+        <div className="container mx-auto px-4 py-8 flex-grow">
           <div className="max-w-2xl mx-auto">
             <div className="mb-8">
               <Button 
@@ -173,8 +166,7 @@ const CategoryPage = () => {
               </Link>
             </Button>
           </div>
-        </main>
-        <Footer />
+        </div>
       </div>
     </>
   );

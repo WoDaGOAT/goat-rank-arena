@@ -1,10 +1,8 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import Footer from "@/components/Footer";
 
 const NotFound = () => {
   const location = useLocation();
@@ -18,9 +16,8 @@ const NotFound = () => {
 
   return (
     <>
-      <Navbar />
-      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <main className="flex-grow flex items-center justify-center">
+      <div className="flex flex-col flex-grow" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+        <div className="flex-grow flex items-center justify-center">
             <div className="text-center text-white">
             <h1 className="text-6xl font-bold mb-4">404</h1>
             <p className="text-2xl text-gray-300 mb-8">Oops! Page not found.</p>
@@ -30,8 +27,7 @@ const NotFound = () => {
                 </Link>
             </Button>
             </div>
-        </main>
-        <Footer />
+        </div>
       </div>
     </>
   );
