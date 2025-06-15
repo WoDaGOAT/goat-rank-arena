@@ -333,7 +333,13 @@ export type Database = {
     }
     Functions: {
       create_new_ranking_feed_item: {
-        Args: { p_ranking_id: string; p_athletes: Json }
+        Args:
+          | { p_ranking_id: string; p_athletes: Json }
+          | {
+              p_ranking_id: string
+              p_athletes: Json
+              p_ranking_description: string
+            }
         Returns: undefined
       }
     }

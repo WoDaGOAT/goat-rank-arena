@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -68,6 +67,7 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
       const { error: rpcError } = await supabase.rpc('create_new_ranking_feed_item', {
         p_ranking_id: rankingId,
         p_athletes: feedAthletes,
+        p_ranking_description: rankingDescription.trim(),
       });
 
       if (rpcError) {

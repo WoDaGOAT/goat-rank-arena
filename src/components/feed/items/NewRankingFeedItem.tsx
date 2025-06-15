@@ -22,6 +22,7 @@ export interface NewRankingFeedData {
   };
   ranking_id: string;
   ranking_title: string;
+  ranking_description?: string;
   category_id: string;
   category_name: string;
   athletes: RankedAthlete[];
@@ -33,7 +34,7 @@ interface NewRankingFeedItemProps {
 }
 
 const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
-  const { author, ranking_title, category_id, category_name, athletes } = data;
+  const { author, ranking_title, ranking_description, category_id, category_name, athletes } = data;
   const userInitial = author?.full_name?.charAt(0) || '?';
 
   const sortedAthletes = athletes?.sort((a, b) => a.position - b.position);
@@ -57,9 +58,14 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
             
             <div className="pl-1">
                 <h3 className="text-xl font-bold text-white">{ranking_title}</h3>
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-gray-300 mb-2">
                     in <Link to={`/category/${category_id}`} className="font-semibold text-blue-400 hover:underline">{category_name}</Link>
                 </p>
+                {ranking_description && (
+                  <blockquote className="mt-2 pl-3 border-l-2 border-gray-600/80">
+                    <p className="text-sm text-gray-400 italic">{ranking_description}</p>
+                  </blockquote>
+                )}
             </div>
           </div>
         </div>
