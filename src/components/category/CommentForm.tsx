@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Send } from "lucide-react";
 import { CommentWithUser } from "@/types";
 import { sanitize } from "@/lib/sanitize";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 
 interface CommentFormProps {
   categoryId: string;
@@ -25,13 +26,22 @@ const CommentForm = ({ categoryId }: CommentFormProps) => {
         openLoginDialog();
         throw new Error("User not authenticated");
       }
-      const { data, error } = await supabase
-        .from("category_comments")
-        .insert({ user_id: user.id, category_id: categoryId, comment: commentText })
-        .select("*, profiles (id, full_name, avatar_url)")
-        .single();
-        
-      if (error) throw error;
+      
+      const { data, error } = await supabase.functions.invoke("post-comment", {
+        body: {
+          categoryId: categoryId,
+          commentText: commentText,
+        },
+      });
+
+      if (error) {
+        if (error instanceof FunctionsHttpError) {
+          const errorJson = await error.context.json();
+          throw new Error(errorJson.error || "Failed to post comment.");
+        }
+        throw error;
+      }
+
       if (!data) throw new Error("Comment could not be created.");
 
       return data as CommentWithUser;
@@ -43,7 +53,7 @@ const CommentForm = ({ categoryId }: CommentFormProps) => {
     },
     onError: (error) => {
       if (error.message !== "User not authenticated") {
-        toast.error("Failed to post comment. Please try again.");
+        toast.error(error.message || "Failed to post comment. Please try again.");
       }
     },
   });
