@@ -7,6 +7,8 @@ import Logo from "./nav/Logo";
 import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import { Link } from "react-router-dom";
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const { user, loading } = useAuth();
@@ -17,7 +19,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Logo />
-            <Link to="/feed" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link to="/feed" className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
                 Feed
             </Link>
             <NavMenu />
