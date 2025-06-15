@@ -10,10 +10,14 @@ export type Profile = Database['public']['Tables']['profiles']['Row'] & {
   favorite_sports?: string[] | null;
 };
 
+type AppRole = Database['public']['Enums']['app_role'];
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  roles: AppRole[] | null;
+  isAdmin: boolean;
   loading: boolean;
   refetchUser: () => Promise<void>;
   openLoginDialog: () => void;
@@ -23,6 +27,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   profile: null,
+  roles: null,
+  isAdmin: false,
   loading: true,
   refetchUser: async () => {},
   openLoginDialog: () => {},
@@ -32,6 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [roles, setRoles] = useState<AppRole[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
@@ -60,8 +67,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("Error fetching profile:", profileError.message);
       }
       setProfile(profileData);
+
+      const { data: rolesData, error: rolesError } = await supabase!
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', currentUser.id);
+      
+      if (rolesError) {
+        console.error("Error fetching user roles:", rolesError.message);
+      }
+      const userRoles = rolesData ? rolesData.map(r => r.role) : [];
+      setRoles(userRoles);
+
     } else {
       setProfile(null);
+      setRoles(null);
     }
     setLoading(false);
   }, []);
@@ -84,10 +104,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const openLoginDialog = () => setIsLoginDialogOpen(true);
 
+  const isAdmin = roles?.includes('admin') ?? false;
+
   const value = {
     user,
     session,
     profile,
+    roles,
+    isAdmin,
     loading,
     refetchUser: fetchUserAndProfile,
     openLoginDialog,

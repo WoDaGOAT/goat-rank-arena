@@ -16,6 +16,7 @@ import PublicProfilePage from "./pages/PublicProfilePage";
 import QuizPage from "./pages/QuizPage";
 import UserRankingPage from "./pages/UserRankingPage";
 import CreateQuizPage from "./pages/admin/CreateQuizPage";
+import UserManagementPage from "./pages/admin/UserManagementPage";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => {
               <Route path="/feed" element={<FeedPage />} />
               <Route path="/quiz" element={<QuizPage />} />
               <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
+              <Route path="/admin/users" element={<UserManagementPage />} />
               <Route path="/category/:categoryId" element={<CategoryPage />} />
               <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
               <Route path="/profile" element={<UserProfilePage />} />
