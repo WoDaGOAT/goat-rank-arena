@@ -1,7 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { footballPlayers } from '@/data/footballPlayers';
+import footballPlayers from '@/data/footballPlayers';
 import { RankedAthlete } from '@/components/feed/items/NewRankingFeedItem';
 
 export interface UserRankingDetails {
