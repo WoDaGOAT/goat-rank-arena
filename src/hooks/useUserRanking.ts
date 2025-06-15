@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import footballPlayers from '@/data/footballPlayers';
@@ -39,7 +40,7 @@ export const useUserRanking = (rankingId?: string) => {
           categories (name)
         `)
         .eq('id', rankingId)
-        .single();
+        .maybeSingle();
 
       if (rankingError) {
         console.error("Error fetching ranking:", rankingError);
