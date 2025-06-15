@@ -10,6 +10,7 @@ import { SocialActions } from "@/components/category/SocialActions";
 import CommentSection from "@/components/category/CommentSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { allAthletes } from "@/data/mockAthletes";
+import Footer from "@/components/Footer";
 
 type DbCategory = {
     id: string;
@@ -70,9 +71,9 @@ const CategoryPage = () => {
 
   if (isLoadingCategory || isLoadingLikes) {
      return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-grow">
             <Skeleton className="h-12 w-48 mb-8" />
             <Skeleton className="h-10 w-3/4 mb-2" />
             <Skeleton className="h-6 w-1/2 mb-8" />
@@ -80,32 +81,36 @@ const CategoryPage = () => {
                 <div className="w-full md:w-2/3 lg:w-3/5"><Skeleton className="h-96 w-full" /></div>
                 <div className="w-full md:w-1/3 lg:w-2/5 space-y-6"><Skeleton className="h-48 w-full" /></div>
             </div>
-        </div>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   if (!dbCategory) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
-        <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Category Not Found</h1>
-          <p className="text-gray-300 mb-6">The category you're looking for doesn't exist or couldn't be loaded.</p>
-          <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-indigo-900">
-            <Link to="/">
-              <ChevronLeft className="mr-2 h-4 w-4" /> Go Back to Categories
-            </Link>
-          </Button>
-        </div>
+        <main className="container mx-auto px-4 py-8 text-center flex-grow flex items-center justify-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-4">Category Not Found</h1>
+            <p className="text-gray-300 mb-6">The category you're looking for doesn't exist or couldn't be loaded.</p>
+            <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-indigo-900">
+              <Link to="/">
+                <ChevronLeft className="mr-2 h-4 w-4" /> Go Back to Categories
+              </Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="mb-8">
           <Button 
             asChild 
@@ -161,7 +166,8 @@ const CategoryPage = () => {
         <div className="mt-8">
             <CommentSection categoryId={categoryId!} />
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };

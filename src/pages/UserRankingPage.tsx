@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import RankedAthleteRow from "@/components/feed/items/RankedAthleteRow";
 import UserHoverCard from "@/components/profile/UserHoverCard";
+import Footer from "@/components/Footer";
 
 const UserRankingPage = () => {
   const { rankingId } = useParams<{ rankingId: string }>();
@@ -22,11 +23,12 @@ const UserRankingPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
-        <div className="container mx-auto px-4 py-8 text-center text-white">
+        <main className="container mx-auto px-4 py-8 text-center text-white flex-grow flex items-center justify-center">
           <p>Loading ranking...</p>
-        </div>
+        </main>
+        <Footer />
       </div>
     );
   }
@@ -35,18 +37,21 @@ const UserRankingPage = () => {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-          <div className="container mx-auto px-4 py-8 text-center text-white">
-            <h1 className="text-3xl font-bold text-yellow-400 mb-4">Ranking Not Available</h1>
-            <p className="text-gray-300">We couldn't find the details for this specific ranking.</p>
-            <p className="text-gray-400 mt-2">This might be because the ranking was deleted or the link is incorrect.</p>
-            <p className="text-sm text-gray-500 mt-1">Attempted to load ID: {rankingId}</p>
-            <Button asChild variant="outline" className="mt-6 border-white text-white hover:bg-white hover:text-indigo-900">
-              <Link to={`/feed`}>
-                <ChevronLeft className="mr-2 h-4 w-4" /> Back to Feed
-              </Link>
-            </Button>
-          </div>
+        <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+          <main className="container mx-auto px-4 py-8 text-center text-white flex-grow flex flex-col items-center justify-center">
+            <div>
+              <h1 className="text-3xl font-bold text-yellow-400 mb-4">Ranking Not Available</h1>
+              <p className="text-gray-300">We couldn't find the details for this specific ranking.</p>
+              <p className="text-gray-400 mt-2">This might be because the ranking was deleted or the link is incorrect.</p>
+              <p className="text-sm text-gray-500 mt-1">Attempted to load ID: {rankingId}</p>
+              <Button asChild variant="outline" className="mt-6 border-white text-white hover:bg-white hover:text-indigo-900">
+                <Link to={`/feed`}>
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Back to Feed
+                </Link>
+              </Button>
+            </div>
+          </main>
+          <Footer />
         </div>
       </>
     );
@@ -55,8 +60,8 @@ const UserRankingPage = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
-        <main className="container mx-auto px-4 py-8">
+      <div className="min-h-screen text-white flex flex-col" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
+        <main className="container mx-auto px-4 py-8 flex-grow">
            <div className="mb-6">
             <Button asChild variant="outline" className="border-white/10 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white">
               <Link to={`/feed`}>
@@ -143,6 +148,7 @@ const UserRankingPage = () => {
             </aside>
           </div>
         </main>
+        <Footer />
       </div>
     </>
   );
