@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -53,14 +54,11 @@ const NavMenu = () => {
     const { data: allCategories, isLoading, isError } = useQuery<Category[]>({
         queryKey: ['categories'],
         queryFn: async () => {
-          console.log('Fetching categories...');
           const { data, error } = await supabase.from('categories').select('*');
           if (error) {
-            console.error('Error fetching categories:', error);
             toast.error("Failed to load navigation categories.");
             throw new Error(error.message);
           }
-          console.log('Fetched categories:', data);
           return data || [];
         },
         retry: 1,
@@ -71,12 +69,9 @@ const NavMenu = () => {
     // 1. Build parent-child tree
     const menuItems = React.useMemo(() => {
         if (!allCategories) return [];
-        
         // Build id => { ...category, children: [] } for fast lookup
         const categoriesById = new Map(allCategories.map(c => [c.id, { ...c, children: [] as Category[] }]));
-      
         const rootCategories: (Category & { children: Category[] })[] = [];
-        // Fill in parent-child relationship
         allCategories.forEach(category => {
           if (category.parent_id) {
             const parent = categoriesById.get(category.parent_id);
@@ -91,18 +86,12 @@ const NavMenu = () => {
         // Sort roots by desired order
         const desiredOrder = ['GOAT', 'Current GOAT', 'GOAT of my Time', 'Competitions'];
         rootCategories.sort((a, b) => desiredOrder.indexOf(a.name) - desiredOrder.indexOf(b.name));
-      
-        // DEBUG: Show the processed menu items in devtools (remove after debugging)
-        // Only runs on changes, not in render
-        // eslint-disable-next-line no-console
-        console.log("== NAV MENU ITEMS BUILT ==", rootCategories);
-
         return rootCategories;
     }, [allCategories]);
 
     const triggerClassName =
-    "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-colors cursor-pointer rounded-none shadow-none border-none " +
-    "text-xs md:text-base whitespace-nowrap hover:text-gray-300 data-[state=open]:text-white data-[active]:text-white";
+      "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-colors cursor-pointer rounded-none shadow-none border-none " +
+      "text-xs md:text-base whitespace-nowrap hover:text-gray-300 data-[state=open]:text-white data-[active]:text-white";
 
     if (isLoading) {
         return (
@@ -132,32 +121,34 @@ const NavMenu = () => {
         );
     }
 
-    // Key change: For every top-level menu item, if item.children exists and is non-empty, show the dropdown menu.
-    // Otherwise, show "No sub-categories defined."
     return (
         <NavigationMenu className="relative z-[100]">
             <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
                 {menuItems.length > 0 ? (
                     menuItems.map((item) => (
-                        <NavigationMenuItem key={item.id}>
+                        <NavigationMenuItem key={item.id} className="relative">
                             <NavigationMenuTrigger className={triggerClassName}>
-                                {item.name} {item.children && item.children.length > 0 && `(${item.children.length})`}
-                            </NavigationMenuTrigger>
-                            <NavigationMenuContent
-                                className={cn(
-                                    "bg-black border border-gray-700 text-white shadow-xl rounded-md z-[2000] min-w-[320px] max-w-[420px] md:min-w-[340px] md:w-auto p-0",
-                                    "absolute left-0 top-full mt-0.5"
+                                {item.name}
+                                {item.children && item.children.length > 0 && (
+                                  <span className="ml-1 text-xs text-primary-400">
+                                    ({item.children.length})
+                                  </span>
                                 )}
-                                style={{
-                                    backgroundColor: "#000",
-                                    color: "#fff",
-                                    border: "1px solid #333",
-                                    zIndex: 2000,
-                                }}
-                            >
-                                {/* Show all subcategories for this parent */}
-                                {item.children && item.children.length > 0 ? (
-                                    <ul className="grid grid-cols-2 gap-2 p-4">
+                            </NavigationMenuTrigger>
+                            {item.children && item.children.length > 0 && (
+                                <NavigationMenuContent
+                                    className={cn(
+                                        "bg-black border border-gray-700 text-white shadow-xl rounded-md z-[2000]",
+                                        "absolute left-1/2 -translate-x-1/2 top-full mt-1 min-w-[320px] max-w-[420px] md:min-w-[340px] md:w-auto p-0"
+                                    )}
+                                    style={{
+                                        backgroundColor: "#11151C",
+                                        color: "#fff",
+                                        border: "1px solid #333",
+                                        zIndex: 2000,
+                                    }}
+                                >
+                                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4">
                                         {item.children.map((subItem) => (
                                             <ListItem
                                                 key={subItem.id}
@@ -169,10 +160,8 @@ const NavMenu = () => {
                                             </ListItem>
                                         ))}
                                     </ul>
-                                ) : (
-                                    <div className="p-4 text-center text-gray-400">No sub-categories defined.</div>
-                                )}
-                            </NavigationMenuContent>
+                                </NavigationMenuContent>
+                            )}
                         </NavigationMenuItem>
                     ))
                 ) : (
