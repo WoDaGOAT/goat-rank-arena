@@ -1,4 +1,3 @@
-
 export type AthleteMovement = "up" | "down" | "neutral";
 
 export interface Club {
@@ -39,6 +38,15 @@ export interface Category {
   athleteIds?: string[];
   userRankingCount: number;
   leaderboard: Athlete[];
+}
+
+// New type for user comments on their profile
+export interface UserComment {
+  id: string;
+  comment: string;
+  created_at: string;
+  category_id: string;
+  categories: { name: string | null } | null;
 }
 
 // New type for comments with user profile information

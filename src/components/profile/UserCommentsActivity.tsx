@@ -1,16 +1,8 @@
-
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare } from "lucide-react";
-
-interface UserComment {
-  id: string;
-  comment: string;
-  created_at: string;
-  category_id: string;
-  categories: { name: string | null } | null;
-}
+import { UserComment } from "@/types";
 
 interface UserCommentsActivityProps {
     userComments: UserComment[] | undefined;

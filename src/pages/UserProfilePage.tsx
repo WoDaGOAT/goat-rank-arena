@@ -12,6 +12,7 @@ import ProfileForm from "@/components/profile/ProfileForm";
 import RankingActivity from "@/components/profile/RankingActivity";
 import { useQuery } from "@tanstack/react-query";
 import UserCommentsActivity from "@/components/profile/UserCommentsActivity";
+import { UserComment } from "@/types";
 
 const UserProfilePage = () => {
   const { user, profile, loading, refetchUser } = useAuth();
@@ -55,14 +56,6 @@ const UserProfilePage = () => {
     queryKey: ['userComments', user?.id],
     queryFn: async () => {
         if (!user) return [];
-        
-        type UserComment = {
-            id: string;
-            comment: string;
-            created_at: string;
-            category_id: string;
-            categories: { name: string | null } | null;
-        }
 
         const { data, error } = await supabase
             .from('category_comments')
@@ -82,7 +75,17 @@ const UserProfilePage = () => {
             console.error('Error fetching user comments:', error);
             return [] as UserComment[];
         }
-        return data as UserComment[];
+        
+        if (!data) {
+            return [];
+        }
+
+        const formattedData = data.map((comment) => ({
+            ...comment,
+            categories: Array.isArray(comment.categories) ? (comment.categories[0] || null) : (comment.categories || null),
+        }));
+
+        return formattedData as UserComment[];
     },
     enabled: !!user,
   });
