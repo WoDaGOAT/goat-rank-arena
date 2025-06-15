@@ -63,22 +63,58 @@ export interface CommentWithUser {
   } | null;
 }
 
-// New type for notifications
-export interface Notification {
-  id: string;
-  user_id: string;
-  type: 'new_comment_reply' | 'new_category';
-  data: {
-    category_id: string;
-    category_name: string;
-    comment_id?: string;
-    parent_comment_id?: string;
-    replying_user_id?: string;
-    replying_user_name?: string;
-  };
-  is_read: boolean;
-  created_at: string;
-}
+// New type for notifications - using a discriminated union
+export type Notification =
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'new_comment_reply';
+      data: {
+        category_id: string;
+        category_name: string;
+        comment_id: string;
+        parent_comment_id: string;
+        replying_user_id: string;
+        replying_user_name: string;
+      };
+    }
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'new_category';
+      data: {
+        category_id: string;
+        category_name: string;
+      };
+    }
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'new_friend_request';
+      data: {
+        requester_id: string;
+        requester_name: string;
+        friendship_id: string;
+      };
+    }
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'friend_request_accepted';
+      data: {
+        receiver_id: string;
+        receiver_name: string;
+        friendship_id: string;
+      };
+    };
 
 // Placeholder images (keys from provided list)
 export const placeholderImages: Record<string, string> = {

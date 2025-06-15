@@ -44,6 +44,7 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
                     </p>
                 );
             default:
+                const _exhaustiveCheck: never = notification;
                 return <p>You have a new notification.</p>;
         }
     };
@@ -61,17 +62,18 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
     const handleAccept = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        acceptFriendRequest(notification.data.friendship_id);
+        if (notification.type === 'new_friend_request') {
+            acceptFriendRequest(notification.data.friendship_id);
+        }
     };
 
     const handleDecline = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        declineFriendRequest(notification.data.friendship_id);
+        if (notification.type === 'new_friend_request') {
+            declineFriendRequest(notification.data.friendship_id);
+        }
     };
-
-    const isClickable = ['new_comment_reply', 'new_category'].includes(notification.type);
-    const linkTarget = isClickable ? `/category/${notification.data.category_id}` : '#';
 
     const content = (
         <div className="flex items-start gap-3 relative">
@@ -102,10 +104,10 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         </div>
     );
 
-    if (isClickable) {
+    if (notification.type === 'new_comment_reply' || notification.type === 'new_category') {
         return (
             <Link 
-                to={linkTarget} 
+                to={`/category/${notification.data.category_id}`} 
                 className="block p-3 hover:bg-white/10 rounded-md transition-colors"
             >
                 {content}
@@ -121,3 +123,4 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
 };
 
 export default NotificationItem;
+
