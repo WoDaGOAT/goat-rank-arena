@@ -11,6 +11,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileForm from "@/components/profile/ProfileForm";
 import RankingActivity from "@/components/profile/RankingActivity";
 import { useQuery } from "@tanstack/react-query";
+import UserCommentsActivity from "@/components/profile/UserCommentsActivity";
 
 const UserProfilePage = () => {
   const { user, profile, loading, refetchUser } = useAuth();
@@ -48,6 +49,42 @@ const UserProfilePage = () => {
         .filter(Boolean) as { id: string, name: string | null }[];
     },
     enabled: !!user && !loading,
+  });
+
+  const { data: userComments, isLoading: isLoadingUserComments } = useQuery({
+    queryKey: ['userComments', user?.id],
+    queryFn: async () => {
+        if (!user) return [];
+        
+        type UserComment = {
+            id: string;
+            comment: string;
+            created_at: string;
+            category_id: string;
+            categories: { name: string | null } | null;
+        }
+
+        const { data, error } = await supabase
+            .from('category_comments')
+            .select(`
+                id,
+                comment,
+                created_at,
+                category_id,
+                categories ( name )
+            `)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        if (error) {
+            toast.error("Failed to fetch your comments.");
+            console.error('Error fetching user comments:', error);
+            return [] as UserComment[];
+        }
+        return data as UserComment[];
+    },
+    enabled: !!user,
   });
 
   useEffect(() => {
@@ -187,6 +224,8 @@ const UserProfilePage = () => {
                 />
                 
                 <RankingActivity likedCategories={likedCategories} isLoading={isLoadingLikedCategories} />
+
+                <UserCommentsActivity userComments={userComments} isLoading={isLoadingUserComments} />
               </div>
 
               <div className="flex justify-end pt-6">
