@@ -16,7 +16,7 @@ import { Button } from '../ui/button';
 import { sanitize } from '@/lib/sanitize';
 
 const UserMenu = () => {
-  const { user, profile, roles, logout } = useAuth();
+  const { user, profile, isAdmin, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -51,7 +51,7 @@ const UserMenu = () => {
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
-          {roles.includes('admin') && (
+          {isAdmin && (
             <>
               <DropdownMenuSeparator className="bg-gray-700" />
               <DropdownMenuLabel className="text-xs text-gray-400 px-2">Admin Panel</DropdownMenuLabel>
