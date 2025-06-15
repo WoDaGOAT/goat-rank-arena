@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
@@ -28,13 +27,12 @@ const Index = () => {
       }
 
       const featuredCategories = [
-        "Cricket",
-        "Football",
-        "Formula 1",
-        "MMA",
-        "Swimming GOAT",
-        "Tennis",
-        "Track & Field GOAT",
+        "GOAT Footballer",
+        "GOAT Goalkeeper",
+        "GOAT Defender",
+        "GOAT Midfielder",
+        "GOAT Attacker",
+        "GOAT Free-Kick Taker",
       ];
 
       // Now, fetch up to 9 subcategories of 'GOAT' that are in our featured list
