@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import AuthButtons from "./nav/AuthButtons";
@@ -7,8 +6,6 @@ import Logo from "./nav/Logo";
 import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import { Link } from "react-router-dom";
-import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
-import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const { user, loading } = useAuth();
@@ -21,10 +18,7 @@ const Navbar = () => {
             <Logo />
             <Link
               to="/feed"
-              className={cn(
-                navigationMenuTriggerStyle(),
-                "bg-transparent hover:bg-white/10 focus:bg-white/10"
-              )}
+              className="bg-transparent hover:bg-white/10 focus:bg-white/10 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 focus:outline-none"
             >
               Feed
             </Link>
