@@ -7,6 +7,8 @@ import Logo from "./nav/Logo";
 import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import { Link } from "react-router-dom";
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const { user, loading } = useAuth();
@@ -19,7 +21,10 @@ const Navbar = () => {
             <Logo />
             <Link
               to="/feed"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 hover:bg-white hover:text-black focus:bg-white focus:text-black focus:outline-none"
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "bg-transparent hover:bg-white/10 focus:bg-white/10"
+              )}
             >
               Feed
             </Link>
