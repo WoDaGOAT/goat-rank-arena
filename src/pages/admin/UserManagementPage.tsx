@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+
 import { useAuth } from "@/contexts/AuthContext";
 import UserTable from "@/components/admin/UserTable";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -6,7 +6,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldAlert, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddUserDialog from "@/components/admin/AddUserDialog";
-import Footer from "@/components/Footer";
 
 const UserManagementPage = () => {
   const { isAdmin, loading } = useAuth();
@@ -40,9 +39,8 @@ const UserManagementPage = () => {
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen flex flex-col">
-      <Navbar />
-      <main className="container mx-auto px-4 py-8 flex-grow">
+    <div className="bg-background text-foreground flex-grow flex flex-col">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-4xl font-bold">User Management</h1>
@@ -58,8 +56,7 @@ const UserManagementPage = () => {
           <p className="text-muted-foreground mb-8">View, manage roles, delete, and add new users.</p>
           {renderContent()}
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

@@ -1,11 +1,9 @@
-import Navbar from "@/components/Navbar";
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Category } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import Footer from "@/components/Footer";
 import { Helmet } from "react-helmet-async";
 
 const Index = () => {
@@ -69,7 +67,6 @@ const Index = () => {
         <title>Wodagoat - Rank the GOATs of Sports</title>
         <meta name="description" content="The ultimate platform for sports fans to rank their favorite athletes, debate the GOATs, and see global leaderboards for sports like Football, Cricket, Tennis, and more." />
       </Helmet>
-      <Navbar />
       <div
         className="flex flex-col flex-grow"
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
@@ -117,7 +114,6 @@ const Index = () => {
             )}
         </div>
       </div>
-      <Footer />
     </>
   );
 };
