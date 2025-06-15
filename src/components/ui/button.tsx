@@ -21,7 +21,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline rounded-md",
         cta:
           // Normal (enabled) style
-          "bg-[#388BFF] text-white rounded-full px-6 py-2 font-semibold text-lg shadow transition-colors hover:bg-[#1485ff] active:bg-[#066cd9] " +
+          "bg-gradient-to-r from-fuchsia-500 to-cyan-500 font-poppins text-white rounded-lg px-6 py-2 font-semibold text-lg shadow transition-opacity hover:opacity-90 " +
           // Disabled state override (use Figma spec)
           "disabled:bg-white disabled:text-[#A2A2A2] disabled:shadow-none disabled:rounded-[12px] disabled:border-0 disabled:h-[36px] disabled:min-w-[58px] disabled:font-semibold disabled:opacity-100",
       },

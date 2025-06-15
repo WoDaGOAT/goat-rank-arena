@@ -1,4 +1,3 @@
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -116,7 +115,7 @@ const ContactForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isPending} className="w-full bg-gradient-to-r from-fuchsia-500 to-cyan-500 hover:opacity-90 transition-opacity">
+        <Button type="submit" variant="cta" disabled={isPending} className="w-full">
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isPending ? 'Sending...' : 'Send Message'}
         </Button>

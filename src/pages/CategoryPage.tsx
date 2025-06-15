@@ -153,7 +153,7 @@ const CategoryPage = () => {
               <p className="text-gray-300 mb-4">
                 Share your opinion! Create your own ranking for this category and see how it compares with others. Your submission helps shape the global leaderboard.
               </p>
-              <Button asChild size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              <Button asChild variant="cta" size="lg" className="w-full">
                 <Link to={`/category/${categoryId}/create-ranking`}>
                   <Users className="mr-2 h-5 w-5" /> Create Your Ranking
                 </Link>
