@@ -158,9 +158,9 @@ const CategoryPage = () => {
                         categoryName={dbCategory.name}
                     />
                 </div>
-              </div>
 
-              <GlobalLeaderboard athletes={allAthletes} categoryName="Global Leaderboard" />
+                <GlobalLeaderboard athletes={allAthletes} categoryName="Global Leaderboard" />
+              </div>
             </div>
 
             {/* Right Column: Category Info & CTA */}
