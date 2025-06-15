@@ -1,19 +1,11 @@
-
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { UserRankingForProfile } from "@/hooks/useUserRankings";
 
 interface LikedCategory {
     id: string;
     name: string | null;
-}
-
-interface UserRankingForProfile {
-  id: string;
-  title: string;
-  created_at: string;
-  category_id: string;
-  categories: { name: string | null } | null;
 }
 
 interface RankingActivityProps {
