@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -274,7 +273,7 @@ const CreateRankingPage = () => {
 
           <RankingActions
             categoryId={categoryId!}
-            disabled={selectedAthletes.length < 10 || !rankingTitle.trim()}
+            disabled={selectedAthletes.length < 10}
             saveLabel={saveMutation.isPending ? "Saving..." : `Save Ranking (${selectedAthletes.length} athletes)`}
             onSave={handleSaveRanking}
             isSaving={saveMutation.isPending}
