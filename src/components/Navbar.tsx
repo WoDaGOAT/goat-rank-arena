@@ -34,10 +34,12 @@ const Navbar = () => {
               </Link>
               <Link
                 to="/quiz"
-                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
+                className="bg-transparent focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group"
               >
                 <FileQuestion className="h-5 w-5" />
-                <span>Quiz</span>
+                <span className="font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent transition-all group-hover:[filter:brightness(1.2)]">
+                  Quiz
+                </span>
               </Link>
               
               {isAdmin && (
