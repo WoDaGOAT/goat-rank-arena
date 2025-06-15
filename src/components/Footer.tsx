@@ -9,6 +9,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-sm">&copy; {new Date().getFullYear()} wodagoat. All rights reserved.</p>
           <div className="flex gap-6 items-center">
+            <Link to="/contact" className="text-sm hover:text-primary-foreground transition-colors">Contact</Link>
             <Link to="/gdpr" className="text-sm hover:text-primary-foreground transition-colors">GDPR</Link>
             <Link to="/privacy-policy" className="text-sm hover:text-primary-foreground transition-colors">Privacy Policy</Link>
           </div>

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import CreateQuizPage from "./pages/admin/CreateQuizPage";
 import UserManagementPage from "./pages/admin/UserManagementPage";
 import GdprPage from "./pages/GdprPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import ContactPage from "./pages/ContactPage";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +53,7 @@ const App = () => {
               <Route path="/profile" element={<UserProfilePage />} />
               <Route path="/user/:userId" element={<PublicProfilePage />} />
               <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/gdpr" element={<GdprPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="*" element={<NotFound />} />
