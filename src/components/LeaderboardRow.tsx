@@ -1,4 +1,3 @@
-
 import { Athlete, getPlaceholderImageUrl } from "@/types";
 import { ArrowUp, ArrowDown, Minus, Crown, Medal, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -119,14 +118,6 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
           alt={athlete.name}
           className="w-10 h-10 rounded-full object-cover border-2 border-white/30 shadow-md"
         />
-        {position <= 10 && (
-          <div
-            className="absolute -top-2 -right-2 w-5 h-5 bg-blue-500/80 rounded-full flex items-center justify-center border-2 border-white"
-            style={{ minWidth: 20, minHeight: 20 }}
-          >
-            <span className="text-white text-xs font-bold">{position}</span>
-          </div>
-        )}
       </div>
 
       {/* Name */}
@@ -156,4 +147,3 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
 };
 
 export default LeaderboardRow;
-
