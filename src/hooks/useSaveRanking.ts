@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -25,10 +24,6 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
       if (selectedAthletes.length !== 10) {
         toast.error("You must have exactly 10 athletes in your ranking.");
         throw new Error("Incorrect number of athletes");
-      }
-      if (!rankingTitle.trim()) {
-        toast.error("Ranking title is required.");
-        throw new Error("Title required");
       }
 
       const { data: rankingData, error: rankingError } = await supabase
@@ -69,7 +64,7 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
       navigate(`/category/${categoryId}`);
     },
     onError: (error: Error) => {
-      if (error.message !== "User not authenticated" && error.message !== "Incorrect number of athletes" && error.message !== "Title required") {
+      if (error.message !== "User not authenticated" && error.message !== "Incorrect number of athletes") {
          toast.error(error.message || "Failed to save ranking. Please try again.");
       }
     }

@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import allFootballPlayers from "@/data/footballPlayers";
@@ -161,11 +160,16 @@ const CreateRankingPage = () => {
 
           <RankingActions
             categoryId={categoryId!}
-            disabled={selectedAthletes.length !== 10}
+            disabled={selectedAthletes.length !== 10 || !rankingTitle.trim()}
             saveLabel={isSaving ? "Saving..." : `Save Ranking (${selectedAthletes.length}/10)`}
             onSave={handleSave}
             isSaving={isSaving}
           />
+          {selectedAthletes.length === 10 && !rankingTitle.trim() && (
+            <p className="text-right text-yellow-400 mt-2">
+              Please provide a title for your ranking to save it.
+            </p>
+          )}
         </div>
       </div>
     </div>
