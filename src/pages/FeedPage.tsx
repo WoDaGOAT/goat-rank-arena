@@ -13,7 +13,7 @@ const FeedPage = () => {
         <header className="bg-transparent text-primary-foreground py-8 px-4 text-center shadow-md">
           <div className="container mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight leading-tight">
-              Activity Feed
+              Home
             </h1>
             <p className="text-base sm:text-lg md:text-xl mb-8 max-w-3xl mx-auto text-primary-foreground/80 font-medium">
               See what's happening across the platform.
