@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import AuthButtons from "./nav/AuthButtons";
@@ -16,7 +17,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Logo />
-            <Link to="/feed" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+            <Link to="/feed" className="text-sm font-medium transition-colors hover:text-primary">
                 Home
             </Link>
             <NavMenu />
