@@ -27,18 +27,22 @@ const UserRankingPage = () => {
 
   if (error || !ranking) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+      <>
         <Navbar />
-        <div className="container mx-auto px-4 py-8 text-center text-white">
-          <h1 className="text-2xl font-bold">Ranking not found</h1>
-          <p className="text-gray-400 mt-2">Could not load the requested ranking.</p>
-           <Button asChild variant="outline" className="mt-4 border-white text-white hover:bg-white hover:text-indigo-900">
-            <Link to={`/`}>
-              <ChevronLeft className="mr-2 h-4 w-4" /> Go Home
-            </Link>
-          </Button>
+        <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+          <div className="container mx-auto px-4 py-8 text-center text-white">
+            <h1 className="text-3xl font-bold text-yellow-400 mb-4">Ranking Not Available</h1>
+            <p className="text-gray-300">We couldn't find the details for this specific ranking.</p>
+            <p className="text-gray-400 mt-2">This might be because the ranking was deleted or the link is incorrect.</p>
+            <p className="text-sm text-gray-500 mt-1">Attempted to load ID: {rankingId}</p>
+            <Button asChild variant="outline" className="mt-6 border-white text-white hover:bg-white hover:text-indigo-900">
+              <Link to={`/feed`}>
+                <ChevronLeft className="mr-2 h-4 w-4" /> Back to Feed
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
   
