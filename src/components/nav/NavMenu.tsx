@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -106,33 +105,33 @@ const NavMenu = () => {
     "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-colors cursor-pointer rounded-none shadow-none border-none " +
     "text-xs md:text-base whitespace-nowrap hover:text-gray-300 data-[state=open]:text-white data-[active]:text-white";
 
-    if (isLoading) {
-        return (
-            <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
-                <div className="flex flex-nowrap items-center justify-center gap-0 md:gap-4 min-w-0 px-4">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                        <Skeleton key={index} className="h-8 w-24 bg-gray-700" />
-                    ))}
-                </div>
+  if (isLoading) {
+    return (
+        <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
+            <div className="flex flex-nowrap items-center justify-center gap-0 md:gap-4 min-w-0 px-4">
+                {Array.from({ length: 4 }).map((_, index) => (
+                    <Skeleton key={index} className="h-8 w-24 bg-gray-700" />
+                ))}
             </div>
-        );
-    }
+        </div>
+    );
+  }
 
-    if (isError) {
-        return (
-            <div className="flex-grow flex justify-center items-center min-w-0 overflow-x-auto">
-                <div className="text-red-500 text-xs md:text-sm px-4 text-center">
-                    Could not load categories.
-                    <button 
-                        onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
-                        className="ml-2 underline hover:text-red-400 transition-colors"
-                    >
-                        Retry
-                    </button>
-                </div>
+  if (isError) {
+    return (
+        <div className="flex-grow flex justify-center items-center min-w-0 overflow-x-auto">
+            <div className="text-red-500 text-xs md:text-sm px-4 text-center">
+                Could not load categories.
+                <button 
+                    onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
+                    className="ml-2 underline hover:text-red-400 transition-colors"
+                >
+                    Retry
+                </button>
             </div>
-        );
-    }
+        </div>
+    );
+  }
 
   return (
     <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
@@ -140,33 +139,33 @@ const NavMenu = () => {
         <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
           {menuItems.length > 0 ? (
             menuItems.map((item) => (
-             <NavigationMenuItem key={item.id}>
+              <NavigationMenuItem key={item.id}>
                 <NavigationMenuTrigger className={triggerClassName}>
                   {item.name} {item.children && item.children.length > 0 && `(${item.children.length})`}
                 </NavigationMenuTrigger>
-                <NavigationMenuContent className="absolute top-full left-0 w-[400px] bg-black border border-gray-700 text-white shadow-xl rounded-md z-[100]">
-                    {(item.children && item.children.length > 0) ? (
-                        <ul className="grid grid-cols-2 gap-2 p-4">
-                            {item.children.map((subItem) => (
-                            <ListItem
-                                key={subItem.id}
-                                to={`/category/${subItem.id}`}
-                                title={subItem.name}
-                                className="text-white hover:bg-gray-800 border border-gray-700 rounded-md"
-                            >
-                                {subItem.description}
-                            </ListItem>
-                            ))}
-                        </ul>
-                    ) : (
-                        <div className="p-4 text-center text-gray-400">No sub-categories defined.</div>
-                    )}
+                <NavigationMenuContent className="bg-black border border-gray-700 text-white shadow-xl rounded-md z-[100] min-w-[320px]">
+                  {(item.children && item.children.length > 0) ? (
+                    <ul className="grid grid-cols-2 gap-2 p-4">
+                      {item.children.map((subItem) => (
+                        <ListItem
+                          key={subItem.id}
+                          to={`/category/${subItem.id}`}
+                          title={subItem.name}
+                          className="text-white hover:bg-gray-800 border border-gray-700 rounded-md"
+                        >
+                          {subItem.description}
+                        </ListItem>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-4 text-center text-gray-400">No sub-categories defined.</div>
+                  )}
                 </NavigationMenuContent>
-             </NavigationMenuItem>
+              </NavigationMenuItem>
             ))
           ) : (
             <div className="text-gray-400 text-xs md:text-sm px-4">
-                No categories found.
+              No categories found.
             </div>
           )}
         </NavigationMenuList>
