@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,6 +87,42 @@ const UserProfilePage = () => {
         }));
 
         return formattedData as UserComment[];
+    },
+    enabled: !!user,
+  });
+
+  const { data: userRankings, isLoading: isLoadingUserRankings } = useQuery({
+    queryKey: ['userRankings', user?.id],
+    queryFn: async () => {
+        if (!user) return [];
+
+        const { data, error } = await supabase
+            .from('user_rankings')
+            .select(`
+                id,
+                title,
+                created_at,
+                category_id,
+                categories ( name )
+            `)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (error) {
+            toast.error("Failed to fetch your rankings.");
+            console.error('Error fetching user rankings:', error);
+            return [];
+        }
+        
+        if (!data) {
+            return [];
+        }
+        
+        return data.map((ranking) => ({
+            ...ranking,
+            categories: Array.isArray(ranking.categories) ? (ranking.categories[0] || null) : (ranking.categories || null),
+        }));
     },
     enabled: !!user,
   });
@@ -226,7 +263,12 @@ const UserProfilePage = () => {
                   availableSports={availableSports}
                 />
                 
-                <RankingActivity likedCategories={likedCategories} isLoading={isLoadingLikedCategories} />
+                <RankingActivity 
+                  likedCategories={likedCategories} 
+                  isLoading={isLoadingLikedCategories}
+                  userRankings={userRankings}
+                  isLoadingUserRankings={isLoadingUserRankings}
+                />
 
                 <UserCommentsActivity userComments={userComments} isLoading={isLoadingUserComments} />
 

@@ -336,7 +336,11 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      feed_item_type: "new_user" | "new_comment" | "accepted_friendship"
+      feed_item_type:
+        | "new_user"
+        | "new_comment"
+        | "accepted_friendship"
+        | "new_ranking"
       friendship_status: "pending" | "accepted" | "declined" | "blocked"
       notification_type:
         | "new_comment_reply"
@@ -459,7 +463,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      feed_item_type: ["new_user", "new_comment", "accepted_friendship"],
+      feed_item_type: [
+        "new_user",
+        "new_comment",
+        "accepted_friendship",
+        "new_ranking",
+      ],
       friendship_status: ["pending", "accepted", "declined", "blocked"],
       notification_type: [
         "new_comment_reply",

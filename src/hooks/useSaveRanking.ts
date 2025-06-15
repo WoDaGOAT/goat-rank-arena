@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -61,6 +62,8 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
       toast.success("Ranking saved successfully!");
       queryClient.invalidateQueries({ queryKey: ['category', categoryId] });
       queryClient.invalidateQueries({ queryKey: ['leaderboard', categoryId] });
+      queryClient.invalidateQueries({ queryKey: ['feedItems'] });
+      queryClient.invalidateQueries({ queryKey: ['userRankings', user?.id] });
       navigate(`/category/${categoryId}`);
     },
     onError: (error: Error) => {

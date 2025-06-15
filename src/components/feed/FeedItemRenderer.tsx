@@ -5,13 +5,15 @@ import { NewCommentFeedData } from './items/NewCommentFeedItem';
 import NewCommentFeedItem from './items/NewCommentFeedItem';
 import { AcceptedFriendshipFeedData } from './items/AcceptedFriendshipFeedItem';
 import AcceptedFriendshipFeedItem from './items/AcceptedFriendshipFeedItem';
+import { NewRankingFeedData } from './items/NewRankingFeedItem';
+import NewRankingFeedItem from './items/NewRankingFeedItem';
 
-type FeedItemData = NewUserFeedData | NewCommentFeedData | AcceptedFriendshipFeedData;
+type FeedItemData = NewUserFeedData | NewCommentFeedData | AcceptedFriendshipFeedData | NewRankingFeedData;
 
 export interface FeedItemType {
   id: string;
   created_at: string;
-  type: 'new_user' | 'new_comment' | 'accepted_friendship';
+  type: 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking';
   data: FeedItemData;
 }
 
@@ -27,6 +29,8 @@ const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
       return <NewCommentFeedItem data={item.data as NewCommentFeedData} createdAt={item.created_at} />;
     case 'accepted_friendship':
       return <AcceptedFriendshipFeedItem data={item.data as AcceptedFriendshipFeedData} createdAt={item.created_at} />;
+    case 'new_ranking':
+      return <NewRankingFeedItem data={item.data as NewRankingFeedData} createdAt={item.created_at} />;
     default:
       return null;
   }
