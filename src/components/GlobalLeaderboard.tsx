@@ -11,7 +11,7 @@ interface GlobalLeaderboardProps {
 
 const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) => {
   return (
-    <Card className="max-w-2xl mx-auto shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+    <Card className="max-w-2xl shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20">
       <CardHeader className="border-b border-white/30 bg-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5"></div>
         <div className="relative flex items-center gap-3">

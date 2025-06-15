@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Users, Info, TrendingUp, Heart, MessageSquare } from "lucide-react";
+import { ChevronLeft, Users, TrendingUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -129,35 +129,37 @@ const CategoryPage = () => {
       <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
         <main className="container mx-auto px-4 py-8 flex-grow">
-          <div className="mb-8">
-            <Button 
-              asChild 
-              size="lg"
-              className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 shadow-lg transition-all duration-200 font-semibold"
-            >
-              <Link to="/">
-                <ChevronLeft className="mr-2 h-5 w-5" /> Back to All Categories
-              </Link>
-            </Button>
-          </div>
-
-          <header className="mb-4">
-              <h1 className="text-4xl font-extrabold text-white mb-2">{dbCategory.name}</h1>
-              <p className="text-lg text-gray-300">{dbCategory.description}</p>
-          </header>
-          
-          <div className="mb-8">
-              <SocialActions 
-                  categoryId={categoryId!} 
-                  initialLikes={likesData?.count ?? 0}
-                  isLiked={likesData?.isLiked ?? false}
-                  categoryName={dbCategory.name}
-              />
-          </div>
-
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Column: Leaderboard */}
+            {/* Left Column: Header, Actions, and Leaderboard */}
             <div className="w-full lg:w-2/3 xl:w-3/5">
+              <div className="max-w-2xl">
+                <div className="mb-8">
+                  <Button 
+                    asChild 
+                    size="lg"
+                    className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 shadow-lg transition-all duration-200 font-semibold"
+                  >
+                    <Link to="/">
+                      <ChevronLeft className="mr-2 h-5 w-5" /> Back to All Categories
+                    </Link>
+                  </Button>
+                </div>
+
+                <header className="mb-4">
+                    <h1 className="text-4xl font-extrabold text-white mb-2">{dbCategory.name}</h1>
+                    <p className="text-lg text-gray-300">{dbCategory.description}</p>
+                </header>
+                
+                <div className="mb-8">
+                    <SocialActions 
+                        categoryId={categoryId!} 
+                        initialLikes={likesData?.count ?? 0}
+                        isLiked={likesData?.isLiked ?? false}
+                        categoryName={dbCategory.name}
+                    />
+                </div>
+              </div>
+
               <GlobalLeaderboard athletes={allAthletes} categoryName="Global Leaderboard" />
             </div>
 
