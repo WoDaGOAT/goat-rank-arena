@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -134,6 +133,7 @@ const NavMenu = () => {
     );
   }
 
+  // Remove console.log from render (fixes build error)
   // Remove OVERFLOW from parent, move to container in Navbar if wanted
   return (
     <NavigationMenu className="relative z-[100]">
@@ -156,7 +156,7 @@ const NavMenu = () => {
                   zIndex: 2000,
                 }}
               >
-                {console.log(`Subcategories for ${item.name}:`, item.children)}
+                {/* Logging here causes void error. Remove from render. */}
                 {(item.children && item.children.length > 0) ? (
                   <ul className="grid grid-cols-2 gap-2 p-4">
                     {item.children.map((subItem) => (
