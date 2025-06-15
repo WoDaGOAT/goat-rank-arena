@@ -80,7 +80,7 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
 
     {/* Search Results */}
     <div className="space-y-2 max-h-96 overflow-y-auto">
-      {filteredAthletes.slice(0, 10).map((athlete) => (
+      {filteredAthletes.slice(0, 50).map((athlete) => (
         <div
           key={athlete.id}
           className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/20 hover:bg-white/10 transition-colors"
