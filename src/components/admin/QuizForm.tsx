@@ -88,7 +88,7 @@ const QuizForm = () => {
     },
     onSuccess: () => {
       toast.success("Quiz created successfully!");
-      queryClient.invalidateQueries({ queryKey: ['dailyQuiz'] }); // Invalidate any quiz queries
+      queryClient.invalidateQueries({ queryKey: ['todaysQuiz'] }); // Invalidate any quiz queries
       navigate("/quiz");
     },
     onError: (error) => {

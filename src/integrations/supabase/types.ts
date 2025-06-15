@@ -475,6 +475,15 @@ export type Database = {
             }
         Returns: undefined
       }
+      create_quiz: {
+        Args: {
+          p_title: string
+          p_topic: string
+          p_active_date: string
+          p_questions: Json
+        }
+        Returns: string
+      }
       get_quiz_leaderboard: {
         Args: Record<PropertyKey, never>
         Returns: {
