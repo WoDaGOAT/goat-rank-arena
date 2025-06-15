@@ -19,7 +19,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Logo />
-            <Link to="/feed" className={cn(navigationMenuTriggerStyle(), "hover:bg-white hover:text-gray-900")}>
+            <Link to="/feed" className={cn(navigationMenuTriggerStyle(), "hover:bg-white hover:text-black focus:bg-white focus:text-black")}>
                 Feed
             </Link>
             <NavMenu />
