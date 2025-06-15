@@ -103,8 +103,8 @@ const NavMenu = () => {
     }, [allCategories]);
 
     const triggerClassName =
-    "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-none cursor-pointer rounded-none shadow-none border-none " +
-    "text-xs md:text-base whitespace-nowrap";
+    "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-colors cursor-pointer rounded-none shadow-none border-none " +
+    "text-xs md:text-base whitespace-nowrap hover:text-gray-300 data-[state=open]:text-white data-[active]:text-white";
 
     if (isLoading) {
         return (
@@ -136,7 +136,7 @@ const NavMenu = () => {
 
   return (
     <div className="flex-grow flex justify-center min-w-0 overflow-x-auto">
-      <NavigationMenu>
+      <NavigationMenu className="relative z-50">
         <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
           {menuItems.length > 0 ? (
             menuItems.map((item) => (
@@ -144,9 +144,9 @@ const NavMenu = () => {
                 <NavigationMenuTrigger className={triggerClassName}>
                   {item.name} {item.children && item.children.length > 0 && `(${item.children.length})`}
                 </NavigationMenuTrigger>
-                <NavigationMenuContent className="!bg-black !border-gray-800 !text-white z-[100] min-w-[300px] p-0">
+                <NavigationMenuContent className="absolute top-full left-0 w-[400px] bg-black border border-gray-700 text-white shadow-xl rounded-md z-[100]">
                     {(item.children && item.children.length > 0) ? (
-                        <ul className="grid gap-2 p-3 md:gap-3 md:p-4 md:grid-cols-2 lg:grid-cols-2 bg-black text-white">
+                        <ul className="grid grid-cols-2 gap-2 p-4">
                             {item.children.map((subItem) => (
                             <ListItem
                                 key={subItem.id}
@@ -159,7 +159,7 @@ const NavMenu = () => {
                             ))}
                         </ul>
                     ) : (
-                        <div className="p-4 text-center text-gray-400 bg-black">No sub-categories defined.</div>
+                        <div className="p-4 text-center text-gray-400">No sub-categories defined.</div>
                     )}
                 </NavigationMenuContent>
              </NavigationMenuItem>
