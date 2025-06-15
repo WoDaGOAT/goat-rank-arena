@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { Category } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import FeedList from "@/components/feed/FeedList";
 
 const Index = () => {
   const { data: categories, isLoading, isError } = useQuery<Category[]>({
@@ -60,35 +62,48 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-10">
-            Choose a Category & Join the Debate
-          </h2>
-          {isLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-[420px] w-full rounded-lg bg-white/5" />
-              ))}
-            </div>
-          )}
-          {isError && (
-            <p className="text-center text-red-400 text-lg">
-              Could not load categories. Please try again later.
-            </p>
-          )}
-          {!isLoading && !isError && categories && categories.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {categories.map((category) => (
-                <CategoryCard key={category.id} category={category} />
-              ))}
-            </div>
-          ) : (
-            !isLoading &&
-            !isError && (
-              <p className="text-center text-muted-foreground text-lg">
-                No categories available at the moment. Check back soon!
-              </p>
-            )
-          )}
+            <Tabs defaultValue="categories" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto bg-white/5 border border-gray-700 text-gray-300">
+                    <TabsTrigger value="categories">Categories</TabsTrigger>
+                    <TabsTrigger value="feed">Activity Feed</TabsTrigger>
+                </TabsList>
+                <TabsContent value="categories" className="mt-10">
+                    <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-10">
+                        Choose a Category & Join the Debate
+                    </h2>
+                    {isLoading && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-[420px] w-full rounded-lg bg-white/5" />
+                        ))}
+                        </div>
+                    )}
+                    {isError && (
+                        <p className="text-center text-red-400 text-lg">
+                        Could not load categories. Please try again later.
+                        </p>
+                    )}
+                    {!isLoading && !isError && categories && categories.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {categories.map((category) => (
+                            <CategoryCard key={category.id} category={category} />
+                        ))}
+                        </div>
+                    ) : (
+                        !isLoading &&
+                        !isError && (
+                        <p className="text-center text-muted-foreground text-lg">
+                            No categories available at the moment. Check back soon!
+                        </p>
+                        )
+                    )}
+                </TabsContent>
+                <TabsContent value="feed" className="mt-10">
+                    <div className="max-w-3xl mx-auto">
+                        <FeedList />
+                    </div>
+                </TabsContent>
+            </Tabs>
         </main>
 
         <footer className="py-8 text-center text-muted-foreground border-t border-border mt-12">

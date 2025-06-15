@@ -122,6 +122,27 @@ export type Database = {
           },
         ]
       }
+      feed_items: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          type: Database["public"]["Enums"]["feed_item_type"]
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          id?: string
+          type: Database["public"]["Enums"]["feed_item_type"]
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          type?: Database["public"]["Enums"]["feed_item_type"]
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
@@ -245,6 +266,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      feed_item_type: "new_user" | "new_comment" | "accepted_friendship"
       friendship_status: "pending" | "accepted" | "declined" | "blocked"
       notification_type:
         | "new_comment_reply"
@@ -367,6 +389,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      feed_item_type: ["new_user", "new_comment", "accepted_friendship"],
       friendship_status: ["pending", "accepted", "declined", "blocked"],
       notification_type: [
         "new_comment_reply",
