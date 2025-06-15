@@ -239,6 +239,76 @@ export type Database = {
         }
         Relationships: []
       }
+      ranking_athletes: {
+        Row: {
+          athlete_id: string
+          created_at: string
+          id: number
+          points: number
+          position: number
+          ranking_id: string
+        }
+        Insert: {
+          athlete_id: string
+          created_at?: string
+          id?: number
+          points: number
+          position: number
+          ranking_id: string
+        }
+        Update: {
+          athlete_id?: string
+          created_at?: string
+          id?: number
+          points?: number
+          position?: number
+          ranking_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_athletes_ranking_id_fkey"
+            columns: ["ranking_id"]
+            isOneToOne: false
+            referencedRelation: "user_rankings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_rankings: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_rankings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
