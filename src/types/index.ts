@@ -63,6 +63,23 @@ export interface CommentWithUser {
   } | null;
 }
 
+// New type for notifications
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: 'new_comment_reply' | 'new_category';
+  data: {
+    category_id: string;
+    category_name: string;
+    comment_id?: string;
+    parent_comment_id?: string;
+    replying_user_id?: string;
+    replying_user_name?: string;
+  };
+  is_read: boolean;
+  created_at: string;
+}
+
 // Placeholder images (keys from provided list)
 export const placeholderImages: Record<string, string> = {
   "lionel-messi": "photo-1493962853295-0fd70327578a",

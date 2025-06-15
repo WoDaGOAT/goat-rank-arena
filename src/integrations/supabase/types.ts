@@ -44,6 +44,48 @@ export type Database = {
           },
         ]
       }
+      category_comments: {
+        Row: {
+          category_id: string
+          comment: string
+          created_at: string
+          id: string
+          parent_comment_id: string | null
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          comment: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          comment?: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_comments_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "category_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       category_likes: {
         Row: {
           category_id: string
@@ -72,6 +114,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -127,6 +196,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      notification_type: "new_comment_reply" | "new_category"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -243,6 +313,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      notification_type: ["new_comment_reply", "new_category"],
     },
   },
 } as const
