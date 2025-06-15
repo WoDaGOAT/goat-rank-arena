@@ -84,6 +84,13 @@ export type Database = {
             referencedRelation: "category_comments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "category_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       category_likes: {

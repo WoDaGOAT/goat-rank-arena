@@ -35,19 +35,9 @@ const CommentForm = ({ categoryId }: CommentFormProps) => {
 
       return data as CommentWithUser;
     },
-    onSuccess: (newComment) => {
+    onSuccess: () => {
       setComment("");
-      queryClient.setQueryData<CommentWithUser[]>(["categoryComments", categoryId], (oldComments = []) => {
-        const augmentedComment = {
-          ...newComment,
-          profiles: newComment.profiles || {
-            id: user!.id,
-            full_name: user!.user_metadata?.full_name || 'Anonymous',
-            avatar_url: user!.user_metadata?.avatar_url || null,
-          }
-        };
-        return [augmentedComment, ...oldComments];
-      });
+      queryClient.invalidateQueries({ queryKey: ["categoryComments", categoryId] });
       toast.success("Comment posted!");
     },
     onError: (error) => {
