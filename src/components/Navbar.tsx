@@ -8,7 +8,7 @@ import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 
 const Navbar = () => {
-  const { user, profile, loading, handleLogout } = useAuth();
+  const { user, loading } = useAuth();
 
   return (
     <nav className="bg-gray-900/80 backdrop-blur-sm text-white sticky top-0 z-50 border-b border-gray-700/50">
@@ -28,7 +28,7 @@ const Navbar = () => {
             ) : user ? (
               <>
                 <NotificationBell />
-                <UserMenu user={user} profile={profile} onLogout={handleLogout} />
+                <UserMenu />
               </>
             ) : (
               <AuthButtons />
