@@ -67,37 +67,36 @@ const NavMenu = () => {
         staleTime: 0, // Always refetch
         refetchOnMount: true,
     });
-    
+
+    // 1. Build parent-child tree
     const menuItems = React.useMemo(() => {
         if (!allCategories) return [];
         
-        console.log('Processing categories for menu:', allCategories);
-        
+        // Build id => { ...category, children: [] } for fast lookup
         const categoriesById = new Map(allCategories.map(c => [c.id, { ...c, children: [] as Category[] }]));
       
         const rootCategories: (Category & { children: Category[] })[] = [];
-      
+        // Fill in parent-child relationship
         allCategories.forEach(category => {
           if (category.parent_id) {
             const parent = categoriesById.get(category.parent_id);
             if (parent) {
-              const childWithChildren = categoriesById.get(category.id);
-              if (childWithChildren) {
-                parent.children.push(childWithChildren);
-              }
+              parent.children.push(categoriesById.get(category.id)!);
             }
           } else {
-            const rootCategory = categoriesById.get(category.id);
-            if (rootCategory) {
-              rootCategories.push(rootCategory);
-            }
+            rootCategories.push(categoriesById.get(category.id)!);
           }
         });
-        
+
+        // Sort roots by desired order
         const desiredOrder = ['GOAT', 'Current GOAT', 'GOAT of my Time', 'Competitions'];
         rootCategories.sort((a, b) => desiredOrder.indexOf(a.name) - desiredOrder.indexOf(b.name));
       
-        console.log('Processed menu items:', rootCategories);
+        // DEBUG: Show the processed menu items in devtools (remove after debugging)
+        // Only runs on changes, not in render
+        // eslint-disable-next-line no-console
+        console.log("== NAV MENU ITEMS BUILT ==", rootCategories);
+
         return rootCategories;
     }, [allCategories]);
 
@@ -105,85 +104,85 @@ const NavMenu = () => {
     "bg-transparent text-white px-1 md:px-4 py-1 md:py-2 font-medium transition-colors cursor-pointer rounded-none shadow-none border-none " +
     "text-xs md:text-base whitespace-nowrap hover:text-gray-300 data-[state=open]:text-white data-[active]:text-white";
 
-  if (isLoading) {
-    return (
-        <div className="flex-grow flex justify-center min-w-0">
-            <div className="flex flex-nowrap items-center justify-center gap-0 md:gap-4 min-w-0 px-4">
-                {Array.from({ length: 4 }).map((_, index) => (
-                    <Skeleton key={index} className="h-8 w-24 bg-gray-700" />
-                ))}
-            </div>
-        </div>
-    );
-  }
-
-  if (isError) {
-    return (
-        <div className="flex-grow flex justify-center items-center min-w-0">
-            <div className="text-red-500 text-xs md:text-sm px-4 text-center">
-                Could not load categories.
-                <button 
-                    onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
-                    className="ml-2 underline hover:text-red-400 transition-colors"
-                >
-                    Retry
-                </button>
-            </div>
-        </div>
-    );
-  }
-
-  // Remove console.log from render (fixes build error)
-  // Remove OVERFLOW from parent, move to container in Navbar if wanted
-  return (
-    <NavigationMenu className="relative z-[100]">
-      <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
-        {menuItems.length > 0 ? (
-          menuItems.map((item) => (
-            <NavigationMenuItem key={item.id}>
-              <NavigationMenuTrigger className={triggerClassName}>
-                {item.name} {item.children && item.children.length > 0 && `(${item.children.length})`}
-              </NavigationMenuTrigger>
-              <NavigationMenuContent
-                className={cn(
-                  "bg-black border border-gray-700 text-white shadow-xl rounded-md z-[2000] min-w-[320px] max-w-[420px] md:min-w-[340px] md:w-auto p-0",
-                  "absolute left-0 top-full mt-0.5" // Ensures menu drops below item
-                )}
-                style={{
-                  backgroundColor: "#000",
-                  color: "#fff",
-                  border: "1px solid #333",
-                  zIndex: 2000,
-                }}
-              >
-                {/* Logging here causes void error. Remove from render. */}
-                {(item.children && item.children.length > 0) ? (
-                  <ul className="grid grid-cols-2 gap-2 p-4">
-                    {item.children.map((subItem) => (
-                      <ListItem
-                        key={subItem.id}
-                        to={`/category/${subItem.id}`}
-                        title={subItem.name}
-                        className="text-white hover:bg-gray-800 border border-gray-700 rounded-md"
-                      >
-                        {subItem.description}
-                      </ListItem>
+    if (isLoading) {
+        return (
+            <div className="flex-grow flex justify-center min-w-0">
+                <div className="flex flex-nowrap items-center justify-center gap-0 md:gap-4 min-w-0 px-4">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <Skeleton key={index} className="h-8 w-24 bg-gray-700" />
                     ))}
-                  </ul>
+                </div>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex-grow flex justify-center items-center min-w-0">
+                <div className="text-red-500 text-xs md:text-sm px-4 text-center">
+                    Could not load categories.
+                    <button 
+                        onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
+                        className="ml-2 underline hover:text-red-400 transition-colors"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Key change: For every top-level menu item, if item.children exists and is non-empty, show the dropdown menu.
+    // Otherwise, show "No sub-categories defined."
+    return (
+        <NavigationMenu className="relative z-[100]">
+            <NavigationMenuList className="flex flex-nowrap items-center justify-center gap-0 md:gap-1 min-w-0">
+                {menuItems.length > 0 ? (
+                    menuItems.map((item) => (
+                        <NavigationMenuItem key={item.id}>
+                            <NavigationMenuTrigger className={triggerClassName}>
+                                {item.name} {item.children && item.children.length > 0 && `(${item.children.length})`}
+                            </NavigationMenuTrigger>
+                            <NavigationMenuContent
+                                className={cn(
+                                    "bg-black border border-gray-700 text-white shadow-xl rounded-md z-[2000] min-w-[320px] max-w-[420px] md:min-w-[340px] md:w-auto p-0",
+                                    "absolute left-0 top-full mt-0.5"
+                                )}
+                                style={{
+                                    backgroundColor: "#000",
+                                    color: "#fff",
+                                    border: "1px solid #333",
+                                    zIndex: 2000,
+                                }}
+                            >
+                                {/* Show all subcategories for this parent */}
+                                {item.children && item.children.length > 0 ? (
+                                    <ul className="grid grid-cols-2 gap-2 p-4">
+                                        {item.children.map((subItem) => (
+                                            <ListItem
+                                                key={subItem.id}
+                                                to={`/category/${subItem.id}`}
+                                                title={subItem.name}
+                                                className="text-white hover:bg-gray-800 border border-gray-700 rounded-md"
+                                            >
+                                                {subItem.description || "No description"}
+                                            </ListItem>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <div className="p-4 text-center text-gray-400">No sub-categories defined.</div>
+                                )}
+                            </NavigationMenuContent>
+                        </NavigationMenuItem>
+                    ))
                 ) : (
-                  <div className="p-4 text-center text-gray-400">No sub-categories defined.</div>
+                    <div className="text-gray-400 text-xs md:text-sm px-4">
+                        No categories found.
+                    </div>
                 )}
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          ))
-        ) : (
-          <div className="text-gray-400 text-xs md:text-sm px-4">
-            No categories found.
-          </div>
-        )}
-      </NavigationMenuList>
-    </NavigationMenu>
-  );
+            </NavigationMenuList>
+        </NavigationMenu>
+    );
 };
 
 export default NavMenu;
