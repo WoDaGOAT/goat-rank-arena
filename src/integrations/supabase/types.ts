@@ -475,6 +475,16 @@ export type Database = {
             }
         Returns: undefined
       }
+      get_quiz_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          full_name: string
+          avatar_url: string
+          total_score: number
+          quizzes_completed: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user"

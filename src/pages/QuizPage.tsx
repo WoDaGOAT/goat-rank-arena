@@ -10,6 +10,9 @@ import QuizResult from "@/components/quiz/QuizResult";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import QuizLeaderboard from "@/components/quiz/QuizLeaderboard";
+import { Swords, Trophy } from "lucide-react";
 
 const fetchTodaysQuiz = async () => {
   const today = new Date().toISOString().split('T')[0];
@@ -42,6 +45,7 @@ const fetchUserAttempt = async (userId: string, quizId: string) => {
 const QuizPage = () => {
     const { user, loading: authLoading } = useAuth();
     const queryClient = useQueryClient();
+    const [view, setView] = useState<'quiz' | 'leaderboard'>('quiz');
 
     const { data: quiz, isLoading: quizLoading, isError: quizError } = useQuery({
         queryKey: ['todaysQuiz'],
@@ -134,7 +138,17 @@ const QuizPage = () => {
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
         <main className="container mx-auto">
-            {renderContent()}
+            <div className="flex justify-center mb-8 gap-4">
+                <Button onClick={() => setView('quiz')} variant={view === 'quiz' ? 'default' : 'outline'} className="w-48">
+                    <Swords className="mr-2 h-4 w-4" />
+                    Daily Quiz
+                </Button>
+                <Button onClick={() => setView('leaderboard')} variant={view === 'leaderboard' ? 'default' : 'outline'} className="w-48">
+                    <Trophy className="mr-2 h-4 w-4" />
+                    Leaderboard
+                </Button>
+            </div>
+            {view === 'quiz' ? renderContent() : <QuizLeaderboard />}
         </main>
       </div>
     </>
