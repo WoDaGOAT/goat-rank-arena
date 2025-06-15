@@ -96,13 +96,13 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
       <div className="border-t border-gray-700/50">
         <div className="p-3 flex justify-between items-center">
             <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white rounded-full w-8 h-8"><ThumbsUp className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white rounded-full w-8 h-8"><Trophy className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white rounded-full w-8 h-8"><Flame className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white rounded-full w-8 h-8"><Frown className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><ThumbsUp className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><Trophy className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><Flame className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><Frown className="h-4 w-4" /></Button>
             </div>
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" onClick={() => setShowComments(s => !s)} className="text-gray-400 hover:text-white flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setShowComments(s => !s)} className="text-gray-400 hover:text-white hover:bg-gray-800 flex items-center gap-2 px-3">
                     <MessageSquare className="h-4 w-4" />
                     <span>Comments</span>
                 </Button>
