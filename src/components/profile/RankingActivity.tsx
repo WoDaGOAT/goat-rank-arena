@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -30,7 +31,7 @@ const RankingActivity = ({ likedCategories, isLoading, userRankings, isLoadingUs
                     <ul className="space-y-3 text-gray-300">
                         {userRankings.map(ranking => (
                             <li key={ranking.id} className="text-sm">
-                                <Link to={`/category/${ranking.category_id}`} className="font-semibold text-blue-400 hover:underline">
+                                <Link to={`/ranking/${ranking.id}`} className="font-semibold text-blue-400 hover:underline">
                                     {ranking.title}
                                 </Link>
                                 <div className="text-gray-400 text-xs">

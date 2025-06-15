@@ -13,6 +13,7 @@ import { isSupabaseConfigured } from "./lib/supabase";
 import FeedPage from "./pages/FeedPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import QuizPage from "./pages/QuizPage";
+import UserRankingPage from "./pages/UserRankingPage";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => {
               <Route path="/category/:categoryId/create-ranking" element={<CreateRankingPage />} />
               <Route path="/profile" element={<UserProfilePage />} />
               <Route path="/user/:userId" element={<PublicProfilePage />} />
+              <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
