@@ -1,4 +1,5 @@
-import { useParams, Link } from "react-router-dom";
+
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +12,10 @@ import RankingDetailsForm from "@/components/ranking/RankingDetailsForm";
 import AthleteSearch from "@/components/ranking/AthleteSearch";
 import RankingList from "@/components/ranking/RankingList";
 import RankingActions from "@/components/ranking/RankingActions";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface SelectedAthlete extends Athlete {
   userPoints: number;
@@ -20,6 +23,10 @@ interface SelectedAthlete extends Athlete {
 
 const CreateRankingPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const { data: category, isLoading: isLoadingCategory } = useQuery<Category | null>({
     queryKey: ['category', categoryId],
     queryFn: async () => {
@@ -49,6 +56,68 @@ const CreateRankingPage = () => {
   const [selectedAthletes, setSelectedAthletes] = useState<SelectedAthlete[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [selectedLetter, setSelectedLetter] = useState<string>("");
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) {
+        toast.error("You must be logged in to save a ranking.");
+        throw new Error("User not authenticated");
+      }
+      if (selectedAthletes.length < 10) {
+        toast.error("You must select at least 10 athletes.");
+        throw new Error("Not enough athletes");
+      }
+      if (!rankingTitle.trim()) {
+        toast.error("Ranking title is required.");
+        throw new Error("Title required");
+      }
+
+      // 1. Create the ranking entry
+      const { data: rankingData, error: rankingError } = await supabase
+        .from('user_rankings')
+        .insert({
+          user_id: user.id,
+          category_id: categoryId!,
+          title: rankingTitle.trim(),
+          description: rankingDescription.trim(),
+        })
+        .select('id')
+        .single();
+
+      if (rankingError) throw rankingError;
+      const rankingId = rankingData.id;
+
+      // 2. Create the athlete entries for the ranking
+      const rankingAthletes = selectedAthletes.map((athlete, index) => ({
+        ranking_id: rankingId,
+        athlete_id: athlete.id,
+        position: index + 1,
+        points: athlete.userPoints,
+      }));
+
+      const { error: athletesError } = await supabase
+        .from('ranking_athletes')
+        .insert(rankingAthletes);
+
+      if (athletesError) {
+        // Attempt to clean up the created ranking if athlete insertion fails
+        await supabase.from('user_rankings').delete().match({ id: rankingId });
+        throw athletesError;
+      }
+      return rankingId;
+    },
+    onSuccess: (rankingId) => {
+      toast.success("Ranking saved successfully!");
+      queryClient.invalidateQueries({ queryKey: ['category', categoryId] });
+      queryClient.invalidateQueries({ queryKey: ['leaderboard', categoryId] });
+      navigate(`/category/${categoryId}`);
+    },
+    onError: (error: Error) => {
+      if (error.message !== "User not authenticated" && error.message !== "Not enough athletes" && error.message !== "Title required") {
+         toast.error(error.message || "Failed to save ranking. Please try again.");
+      }
+    }
+  });
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -197,8 +266,10 @@ const CreateRankingPage = () => {
 
           <RankingActions
             categoryId={categoryId!}
-            disabled={selectedAthletes.length < 10}
-            saveLabel={`Save Ranking (${selectedAthletes.length} athletes)`}
+            disabled={selectedAthletes.length < 10 || !rankingTitle.trim()}
+            saveLabel={saveMutation.isPending ? "Saving..." : `Save Ranking (${selectedAthletes.length} athletes)`}
+            onSave={() => saveMutation.mutate()}
+            isSaving={saveMutation.isPending}
           />
         </div>
       </div>

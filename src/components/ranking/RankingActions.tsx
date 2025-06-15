@@ -8,6 +8,8 @@ interface RankingActionsProps {
   categoryId?: string;
   disabled: boolean;
   saveLabel: string;
+  onSave: () => void;
+  isSaving: boolean;
 }
 
 const commonButtonStyle =
@@ -17,11 +19,14 @@ const RankingActions: React.FC<RankingActionsProps> = ({
   categoryId,
   disabled,
   saveLabel,
+  onSave,
+  isSaving,
 }) => (
   <div className="flex justify-end gap-4 mt-8">
     <Button
       asChild
       className={`bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] shadow ${commonButtonStyle}`}
+      disabled={isSaving}
     >
       <Link to={categoryId ? `/category/${categoryId}` : "/"}>
         Cancel
@@ -29,7 +34,8 @@ const RankingActions: React.FC<RankingActionsProps> = ({
     </Button>
     <Button
       variant="cta"
-      disabled={disabled}
+      disabled={disabled || isSaving}
+      onClick={onSave}
       className={`${commonButtonStyle} disabled:h-[44px] disabled:text-black`}
     >
       <Save className="mr-2 h-5 w-5" />
