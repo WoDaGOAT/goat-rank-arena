@@ -26,17 +26,10 @@ export const useUserRanking = (rankingId?: string) => {
     queryFn: async (): Promise<UserRankingDetails | null> => {
       if (!rankingId) return null;
 
+      // 1. Fetch the core ranking data
       const { data: rankingData, error: rankingError } = await supabase
         .from('user_rankings')
-        .select(`
-          id,
-          created_at,
-          title,
-          description,
-          user_id,
-          category_id,
-          categories (name)
-        `)
+        .select('*')
         .eq('id', rankingId)
         .maybeSingle();
 
@@ -45,34 +38,31 @@ export const useUserRanking = (rankingId?: string) => {
         throw rankingError;
       }
       
-      if (!rankingData) return null;
-
-      let profileData = null;
-      if (rankingData.user_id) {
-          const { data, error: profileError } = await supabase
-              .from('profiles')
-              .select('full_name, avatar_url')
-              .eq('id', rankingData.user_id)
-              .maybeSingle();
-          
-          if (profileError) {
-              console.error(`Error fetching profile for user ${rankingData.user_id}:`, profileError);
-          }
-          profileData = data;
+      if (!rankingData) {
+        console.warn(`No ranking found for ID ${rankingId}`);
+        return null;
       }
 
-      const { data: athletesData, error: athletesError } = await supabase
-        .from('ranking_athletes')
-        .select('athlete_id, position, points')
-        .eq('ranking_id', rankingId)
-        .order('position', { ascending: true });
+      // 2. Fetch related data in separate queries
+      const [
+        { data: profileData, error: profileError },
+        { data: categoryData, error: categoryError },
+        { data: athletesData, error: athletesError }
+      ] = await Promise.all([
+        supabase.from('profiles').select('full_name, avatar_url').eq('id', rankingData.user_id).maybeSingle(),
+        supabase.from('categories').select('name').eq('id', rankingData.category_id).maybeSingle(),
+        supabase.from('ranking_athletes').select('athlete_id, position, points').eq('ranking_id', rankingId).order('position', { ascending: true })
+      ]);
 
+      if (profileError) console.error(`Error fetching profile for user ${rankingData.user_id}:`, profileError);
+      if (categoryError) console.error(`Error fetching category ${rankingData.category_id}:`, categoryError);
       if (athletesError) {
-        console.error("Error fetching ranking athletes:", athletesError);
-        throw athletesError;
+          console.error("Error fetching ranking athletes:", athletesError);
+          throw athletesError;
       }
       
-      const hydratedAthletes: RankedAthlete[] = athletesData.map(athlete => {
+      // 3. Hydrate athlete data
+      const hydratedAthletes: RankedAthlete[] = (athletesData || []).map(athlete => {
         const fullAthlete = footballPlayers.find(p => String(p.id) === athlete.athlete_id);
         return {
           id: athlete.athlete_id,
@@ -83,14 +73,15 @@ export const useUserRanking = (rankingId?: string) => {
         };
       });
       
-      const rankingWithAthletes = {
+      // 4. Combine all data into a single object
+      const finalRanking = {
           ...rankingData,
           profiles: profileData,
-          categories: Array.isArray(rankingData.categories) ? rankingData.categories[0] : rankingData.categories,
+          categories: categoryData,
           athletes: hydratedAthletes,
       }
 
-      return rankingWithAthletes as UserRankingDetails;
+      return finalRanking as UserRankingDetails;
     },
     enabled: !!rankingId,
   });
