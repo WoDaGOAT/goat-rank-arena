@@ -21,7 +21,7 @@ const Navbar = () => {
         </div>
 
         {/* Main content with padding to avoid logo */}
-        <div className="pl-28 md:pl-36 flex flex-col">
+        <div className="pl-[10.5rem] md:pl-[12.5rem] flex flex-col">
           {/* Top Row: Links and Auth */}
           <div className="flex items-center justify-end h-16">
             <div className="flex items-center gap-2 md:gap-4 text-base font-medium">
