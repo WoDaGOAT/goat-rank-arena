@@ -129,62 +129,49 @@ const CategoryPage = () => {
       <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <Navbar />
         <main className="container mx-auto px-4 py-8 flex-grow">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Column: Header, Actions, and Leaderboard */}
-            <div className="w-full lg:w-2/3 xl:w-3/5">
-              <div className="max-w-2xl">
-                <div className="mb-8">
-                  <Button 
-                    asChild 
-                    size="lg"
-                    className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 shadow-lg transition-all duration-200 font-semibold"
-                  >
-                    <Link to="/">
-                      <ChevronLeft className="mr-2 h-5 w-5" /> Back to All Categories
-                    </Link>
-                  </Button>
-                </div>
-
-                <header className="mb-4">
-                    <h1 className="text-4xl font-extrabold text-white mb-2">{dbCategory.name}</h1>
-                    <p className="text-lg text-gray-300">{dbCategory.description}</p>
-                </header>
-                
-                <div className="mb-8">
-                    <SocialActions 
-                        categoryId={categoryId!} 
-                        initialLikes={likesData?.count ?? 0}
-                        isLiked={likesData?.isLiked ?? false}
-                        categoryName={dbCategory.name}
-                    />
-                </div>
-
-                <GlobalLeaderboard athletes={allAthletes} categoryName="Global Leaderboard" />
-              </div>
+          <div className="max-w-2xl mx-auto">
+            <div className="mb-8">
+              <Button 
+                asChild 
+                size="lg"
+                className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 shadow-lg transition-all duration-200 font-semibold"
+              >
+                <Link to="/">
+                  <ChevronLeft className="mr-2 h-5 w-5" /> Back to All Categories
+                </Link>
+              </Button>
             </div>
 
-            {/* Right Column: Category Info & CTA */}
-            <div className="w-full lg:w-1/3 xl:w-2/5 space-y-6">
-               <div className="p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20">
-                <h2 className="text-xl font-semibold text-white mb-3 flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2 text-blue-300" />
-                  How to Participate
-                </h2>
-                <p className="text-gray-300 mb-4">
-                  Share your opinion! Create your own ranking for this category and see how it compares with others. Your submission helps shape the global leaderboard.
-                </p>
-                <Button asChild variant="cta" size="lg" className="w-full">
-                  <Link to={`/category/${categoryId}/create-ranking`}>
-                    <Users className="mr-2 h-5 w-5" /> Create Your Ranking
-                  </Link>
-                </Button>
-              </div>
+            <header className="mb-4">
+                <h1 className="text-4xl font-extrabold text-white mb-2">{dbCategory.name}</h1>
+                <p className="text-lg text-gray-300">{dbCategory.description}</p>
+            </header>
+            
+            <div className="mb-8">
+                <SocialActions 
+                    categoryId={categoryId!} 
+                    initialLikes={likesData?.count ?? 0}
+                    isLiked={likesData?.isLiked ?? false}
+                    categoryName={dbCategory.name}
+                />
             </div>
+
+            <GlobalLeaderboard athletes={allAthletes} categoryName="Global Leaderboard" />
           </div>
           
           {/* Full-width Comment Section */}
           <div className="mt-8">
               <CommentSection categoryId={categoryId!} />
+          </div>
+
+          {/* Floating Action Button */}
+          <div className="fixed bottom-8 right-8 z-50">
+            <Button asChild variant="cta" className="rounded-full shadow-2xl hover:scale-105 transition-transform w-16 h-16 p-0 flex items-center justify-center sm:w-auto sm:px-6 sm:py-3">
+              <Link to={`/category/${categoryId}/create-ranking`} title="Create Your Ranking">
+                <Users className="h-7 w-7 sm:h-6 sm:w-6 sm:mr-2 shrink-0" />
+                <span className="hidden sm:inline font-semibold">Create Ranking</span>
+              </Link>
+            </Button>
           </div>
         </main>
         <Footer />
