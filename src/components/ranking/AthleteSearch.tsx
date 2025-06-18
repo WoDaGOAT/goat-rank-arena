@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus } from "lucide-react";
 import React from "react";
-import { Athlete } from "@/types";
+import { Athlete, getPlaceholderImageUrl } from "@/types";
 
 interface AthleteSearchProps {
   allAthletes: Athlete[];
@@ -89,7 +89,7 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
         >
           <div className="flex items-center gap-3">
             <img
-              src={`https://images.unsplash.com/${athlete.imageUrl}?w=400&h=225&fit=crop&q=80`}
+              src={getPlaceholderImageUrl(athlete.imageUrl)}
               alt={athlete.name}
               className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
             />

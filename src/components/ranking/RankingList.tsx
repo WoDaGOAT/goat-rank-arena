@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X, Search } from "lucide-react";
 import React from "react";
-import { Athlete } from "@/types";
+import { Athlete, getPlaceholderImageUrl } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface SelectedAthlete extends Athlete {
@@ -51,7 +51,7 @@ const RankingList: React.FC<RankingListProps> = ({
             className="flex items-center gap-4 p-3 bg-white/5 rounded-lg border border-white/20 cursor-move hover:bg-white/10 transition-colors group"
           >
             <img
-              src={athlete.imageUrl ? `https://images.unsplash.com/${athlete.imageUrl}?w=400&h=225&fit=crop&q=80` : '/placeholder.svg'}
+              src={getPlaceholderImageUrl(athlete.imageUrl)}
               alt={athlete.name}
               className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
             />
