@@ -3,13 +3,11 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Category } from "@/types";
 import { ChevronLeft } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRankingForCategory } from "@/hooks/useUserRankingForCategory";
 import { useAuth } from "@/contexts/AuthContext";
 import RankingEditor from "@/components/ranking/RankingEditor";
-import Footer from "@/components/Footer";
 
 const CreateRankingPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -43,11 +41,9 @@ const CreateRankingPage = () => {
   if (isLoadingCategory || (user && isLoadingUserRanking)) {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <Navbar />
         <main className="flex-grow flex items-center justify-center container mx-auto px-4 py-8 text-center text-white">
           <p>Loading...</p>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -55,7 +51,6 @@ const CreateRankingPage = () => {
   if (userRanking) {
     return (
      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-       <Navbar />
        <main className="flex-grow flex items-center justify-center container mx-auto px-4 py-8 text-center">
          <div>
           <h1 className="text-3xl font-bold text-white mb-4">Ranking Already Submitted</h1>
@@ -67,7 +62,6 @@ const CreateRankingPage = () => {
           </Button>
          </div>
        </main>
-       <Footer />
      </div>
    );
  }
@@ -75,7 +69,6 @@ const CreateRankingPage = () => {
   if (!category) {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <Navbar />
         <main className="flex-grow flex items-center justify-center container mx-auto px-4 py-8 text-center">
           <div>
             <h1 className="text-3xl font-bold text-white mb-4">Category Not Found</h1>
@@ -87,18 +80,15 @@ const CreateRankingPage = () => {
             </Button>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-      <Navbar />
       <main className="container mx-auto px-4 py-8 flex-grow">
         <RankingEditor category={category} />
       </main>
-      <Footer />
     </div>
   );
 };
