@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
@@ -160,7 +161,7 @@ const CategoryPage = () => {
           {/* Floating Action Button */}
           <div className="fixed bottom-8 right-8 z-50">
             <Button asChild variant="cta" className="rounded-full shadow-2xl hover:scale-105 transition-transform w-16 h-16 p-0 flex items-center justify-center sm:w-auto sm:px-6 sm:py-3">
-              <Link to={`/category/${categoryId}/create-ranking`} title="Create Your Ranking">
+              <Link to={`/category/${categoryId}/rank`} title="Create Your Ranking">
                 <Users className="h-7 w-7 sm:h-6 sm:w-6 sm:mr-2 shrink-0" />
                 <span className="hidden sm:inline font-semibold">Create Ranking</span>
               </Link>
