@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -113,6 +112,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
           saveLabel={isSaving ? "Saving..." : `Save Ranking (${selectedAthletes.length}/10)`}
           onSave={handleSave}
           isSaving={isSaving}
+          selectedAthleteCount={selectedAthletes.length}
         />
         {hasErrors && (
           <p className="text-right text-red-400 mt-2">
