@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus } from "lucide-react";
 import React from "react";
 import { Athlete, getPlaceholderImageUrl } from "@/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface AthleteSearchProps {
   allAthletes: Athlete[];
@@ -88,11 +89,12 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
           className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/20 hover:bg-white/10 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <img
-              src={getPlaceholderImageUrl(athlete.imageUrl)}
-              alt={athlete.name}
-              className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
-            />
+            <Avatar className="w-10 h-10 border-2 border-white/30">
+              <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={athlete.name} />
+              <AvatarFallback className="bg-white/20 text-white text-sm">
+                {athlete.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <div className="font-semibold text-white">{athlete.name}</div>
               <div className="text-sm text-gray-300">

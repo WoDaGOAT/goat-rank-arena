@@ -5,6 +5,7 @@ import { X, Search } from "lucide-react";
 import React from "react";
 import { Athlete, getPlaceholderImageUrl } from "@/types";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface SelectedAthlete extends Athlete {
   userPoints: number;
@@ -50,11 +51,12 @@ const RankingList: React.FC<RankingListProps> = ({
             onDragEnd={handleDragEnd}
             className="flex items-center gap-4 p-3 bg-white/5 rounded-lg border border-white/20 cursor-move hover:bg-white/10 transition-colors group"
           >
-            <img
-              src={getPlaceholderImageUrl(athlete.imageUrl)}
-              alt={athlete.name}
-              className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
-            />
+            <Avatar className="w-10 h-10 border-2 border-white/30">
+              <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={athlete.name} />
+              <AvatarFallback className="bg-white/20 text-white text-sm">
+                {athlete.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1">
               <div className="font-semibold text-white">{athlete.name}</div>
               {athlete.error && (
