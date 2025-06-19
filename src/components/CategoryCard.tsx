@@ -15,15 +15,17 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
   const showOctagon = category.imageUrl === "octagon";
   
   return (
-    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col bg-white/5 border-white/10 text-white">
+    <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col bg-white/5 border-white/10 text-white h-full">
       <CardHeader className="flex-grow">
-        <div className="relative w-full h-48 mb-4 rounded-t-md overflow-hidden bg-zinc-100/5 dark:bg-zinc-800/5">
+        <div className="relative w-full h-60 mb-4 rounded-t-md overflow-hidden bg-zinc-100/5 dark:bg-zinc-800/5 flex items-center justify-center">
           {showOctagon ? (
             <div className="flex items-center justify-center w-full h-full">
               <Octagon className="w-20 h-20 text-primary" strokeWidth={1.5} />
             </div>
           ) : (
-            <PodiumDisplay athletes={category.leaderboard} />
+            <div className="w-full h-full flex items-center justify-center">
+              <PodiumDisplay athletes={category.leaderboard} />
+            </div>
           )}
         </div>
         <CardTitle className="text-2xl font-semibold text-primary">{category.name}</CardTitle>
