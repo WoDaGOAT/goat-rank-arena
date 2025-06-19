@@ -87,6 +87,18 @@ const CreateRankingPage = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
       <main className="container mx-auto px-4 py-8 flex-grow">
+        <div className="mb-8">
+          <Button 
+            asChild 
+            size="lg"
+            className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold"
+          >
+            <Link to={`/category/${category.id}`}>
+              <ChevronLeft className="mr-2 h-5 w-5" /> Back to {category.name}
+            </Link>
+          </Button>
+        </div>
+
         <RankingEditor category={category} />
       </main>
     </div>
