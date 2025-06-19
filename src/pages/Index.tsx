@@ -1,3 +1,4 @@
+
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -92,7 +93,7 @@ const Index = () => {
             });
 
             // Convert to leaderboard format and sort by total score
-            leaderboard = Object.entries(athleteScores)
+            const athleteObjects = Object.entries(athleteScores)
               .map(([athleteId, { totalScore }]) => {
                 // Find athlete data from footballPlayers
                 const athleteData = footballPlayers.find(player => player.id === athleteId);
@@ -102,11 +103,11 @@ const Index = () => {
                   return null;
                 }
 
-                return {
+                const athlete: Athlete = {
                   id: athleteData.id,
                   rank: 0, // Will be set after sorting
                   name: athleteData.name,
-                  imageUrl: athleteData.imageUrl || undefined,
+                  imageUrl: athleteData.imageUrl,
                   points: totalScore,
                   movement: "neutral" as const,
                   dateOfBirth: athleteData.dateOfBirth || "",
@@ -118,8 +119,12 @@ const Index = () => {
                   positions: athleteData.positions || [],
                   nationality: athleteData.nationality || ""
                 };
+
+                return athlete;
               })
-              .filter((athlete): athlete is Athlete => athlete !== null)
+              .filter((athlete): athlete is Athlete => athlete !== null);
+
+            leaderboard = athleteObjects
               .sort((a, b) => b.points - a.points)
               .slice(0, 3) // Only top 3 for podium
               .map((athlete, index) => ({
