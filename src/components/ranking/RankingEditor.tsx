@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import allFootballPlayers from "@/data/footballPlayers";
 import { Category, Athlete } from "@/types";
@@ -11,6 +12,9 @@ import RankingActions from "@/components/ranking/RankingActions";
 import { useRankingManager } from "@/hooks/useRankingManager";
 import { useAthleteSearch } from "@/hooks/useAthleteSearch";
 import { useSaveRanking } from "@/hooks/useSaveRanking";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAthleteSelectionPersistence } from "@/hooks/useAthleteSelectionPersistence";
+import { toast } from "sonner";
 
 interface RankingEditorProps {
   category: Category;
@@ -19,6 +23,12 @@ interface RankingEditorProps {
 const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   const [rankingTitle, setRankingTitle] = useState("");
   const [rankingDescription, setRankingDescription] = useState("");
+  const { user, openLoginDialog, savePreLoginUrl } = useAuth();
+  const navigate = useNavigate();
+  const { loadSelection, saveSelection, clearSelection } = useAthleteSelectionPersistence();
+
+  // Load any saved selection on component mount
+  const savedSelection = loadSelection(category.id!);
 
   const {
     selectedAthletes,
@@ -28,7 +38,15 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     handleDragStart,
     handleDragOver,
     handleDragEnd,
-  } = useRankingManager();
+  } = useRankingManager(savedSelection || undefined);
+
+  // Clear saved selection after loading it
+  useEffect(() => {
+    if (savedSelection) {
+      clearSelection();
+      toast.success("Your athlete selection has been restored!");
+    }
+  }, [savedSelection, clearSelection]);
 
   const {
     searchTerm,
@@ -48,6 +66,14 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   };
 
   const handleSave = () => {
+    if (!user) {
+      // Save current selection and redirect to login
+      saveSelection(selectedAthletes, category.id!);
+      savePreLoginUrl(window.location.pathname);
+      openLoginDialog();
+      return;
+    }
+
     onSave({
       rankingTitle,
       rankingDescription,

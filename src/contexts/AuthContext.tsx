@@ -22,6 +22,8 @@ interface AuthContextType {
   refetchUser: () => Promise<void>;
   openLoginDialog: () => void;
   logout: () => Promise<void>;
+  savePreLoginUrl: (url: string) => void;
+  getAndClearPreLoginUrl: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,6 +36,8 @@ const AuthContext = createContext<AuthContextType>({
   refetchUser: async () => {},
   openLoginDialog: () => {},
   logout: async () => {},
+  savePreLoginUrl: () => {},
+  getAndClearPreLoginUrl: () => null,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -43,6 +47,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+
+  const savePreLoginUrl = (url: string) => {
+    sessionStorage.setItem('preLoginUrl', url);
+  };
+
+  const getAndClearPreLoginUrl = () => {
+    const url = sessionStorage.getItem('preLoginUrl');
+    if (url) {
+      sessionStorage.removeItem('preLoginUrl');
+    }
+    return url;
+  };
 
   const fetchUserAndProfile = useCallback(async () => {
     setLoading(true);
@@ -122,6 +138,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     refetchUser: fetchUserAndProfile,
     openLoginDialog,
     logout,
+    savePreLoginUrl,
+    getAndClearPreLoginUrl,
   };
 
   return (

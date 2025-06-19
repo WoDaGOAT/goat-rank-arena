@@ -10,10 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import SocialLogins from "./SocialLogins";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface LoginDialogProps {
   children?: React.ReactNode;
@@ -26,10 +28,25 @@ const LoginDialog = ({ children, open: controlledOpen, onOpenChange: setControll
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { user, getAndClearPreLoginUrl } = useAuth();
+  const navigate = useNavigate();
 
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const onOpenChange = isControlled ? setControlledOpen : setInternalOpen;
+
+  // Handle post-login navigation
+  useEffect(() => {
+    if (user && open) {
+      const preLoginUrl = getAndClearPreLoginUrl();
+      if (preLoginUrl) {
+        navigate(preLoginUrl);
+      }
+      if (onOpenChange) {
+        onOpenChange(false);
+      }
+    }
+  }, [user, open, navigate, getAndClearPreLoginUrl, onOpenChange]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,9 +60,7 @@ const LoginDialog = ({ children, open: controlledOpen, onOpenChange: setControll
       toast.error(error.message);
     } else {
       toast.success("Logged in successfully!");
-      if (onOpenChange) {
-        onOpenChange(false);
-      }
+      // Navigation will be handled by useEffect above
     }
   };
 

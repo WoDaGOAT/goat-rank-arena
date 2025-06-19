@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Athlete } from "@/types";
 import { toast } from "sonner";
@@ -8,8 +7,8 @@ export interface SelectedAthlete extends Athlete {
   error?: string | null;
 }
 
-export const useRankingManager = () => {
-  const [selectedAthletes, setSelectedAthletes] = useState<SelectedAthlete[]>([]);
+export const useRankingManager = (initialAthletes?: SelectedAthlete[]) => {
+  const [selectedAthletes, setSelectedAthletes] = useState<SelectedAthlete[]>(initialAthletes || []);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const addAthlete = (athlete: Athlete): boolean => {
