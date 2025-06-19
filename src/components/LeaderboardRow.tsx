@@ -1,6 +1,8 @@
+
 import { Athlete, getPlaceholderImageUrl } from "@/types";
 import { ArrowUp, ArrowDown, Minus, Crown, Medal, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { sanitize } from "@/lib/sanitize";
 
 interface LeaderboardRowProps {
@@ -116,11 +118,12 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
 
       {/* Avatar */}
       <div className="relative">
-        <img
-          src={getPlaceholderImageUrl(athlete.imageUrl)}
-          alt={sanitizedName}
-          className="w-10 h-10 rounded-full object-cover border-2 border-white/30 shadow-md"
-        />
+        <Avatar className="w-10 h-10 border-2 border-white/30 shadow-md">
+          <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
+          <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+            {sanitizedName.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
       </div>
 
       {/* Name */}

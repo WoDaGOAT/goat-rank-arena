@@ -129,8 +129,9 @@ export type Notification =
       };
     };
 
-// Placeholder images (keys from provided list)
+// Enhanced placeholder images with more athlete mappings
 export const placeholderImages: Record<string, string> = {
+  // Existing mappings
   "lionel-messi": "photo-1493962853295-0fd70327578a",
   "cristiano-ronaldo": "photo-1466721591366-2d5fba72006d",
   "neymar-jr": "photo-1452378174528-3090a4bba7b2",
@@ -143,22 +144,69 @@ export const placeholderImages: Record<string, string> = {
   "sadio-mane": "photo-1452378174528-3090a4bba7b2",
   "lebron-james": "photo-1469041797191-50ace28483c3",
   "stephen-curry": "photo-1438565434616-3ef039228b15",
+  
+  // Additional football legends
+  "pele": "photo-1488590528505-98d2b5aba04b",
+  "diego-maradona": "photo-1518770660439-4636190af475",
+  "zinedine-zidane": "photo-1461749280684-dccba630e2f6",
+  "ronaldinho": "photo-1486312338219-ce68d2c6f44d",
+  "ronaldo-nazario": "photo-1581091226825-a6a2a5aee158",
+  "thierry-henry": "photo-1485827404703-89b55fcc595e",
+  "francesco-totti": "photo-1526374965328-7f61d4dc18c5",
+  "andrea-pirlo": "photo-1531297484001-80022131f5a1",
+  "frank-lampard": "photo-1487058792275-0ad4aaf24ca7",
+  "steven-gerrard": "photo-1605810230434-7631ac76ec81",
+  "xavi-hernandez": "photo-1493962853295-0fd70327578a",
+  "andres-iniesta": "photo-1466721591366-2d5fba72006d",
+  "luis-figo": "photo-1452378174528-3090a4bba7b2",
+  "david-beckham": "photo-1469041797191-50ace28483c3",
+  "kaka": "photo-1438565434616-3ef039228b15",
+  "paolo-maldini": "photo-1441057206919-63d19fac2369",
+  "roberto-carlos": "photo-1518877593221-1f28583780b4",
+  "cafu": "photo-1488590528505-98d2b5aba04b",
+  "gianluigi-buffon": "photo-1518770660439-4636190af475",
+  "iker-casillas": "photo-1461749280684-dccba630e2f6",
 };
 
-// Function to get a placeholder image URL
+// Enhanced function to get a placeholder image URL with better fallback logic
 export const getPlaceholderImageUrl = (key: string | undefined): string => {
-  let imagePathId: string | undefined = undefined;
+  if (!key) {
+    // Return a default sports-related image if no key provided
+    return `https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=225&fit=crop&q=80`;
+  }
 
-  if (key) {
-    if (placeholderImages[key]) {
-      imagePathId = placeholderImages[key];
-    } else if (key.startsWith("photo-")) {
-      imagePathId = key;
+  // Check if we have a direct mapping
+  if (placeholderImages[key]) {
+    return `https://images.unsplash.com/photo-${placeholderImages[key]}?w=400&h=225&fit=crop&q=80`;
+  }
+
+  // Check if the key already starts with "photo-" (direct Unsplash ID)
+  if (key.startsWith("photo-")) {
+    return `https://images.unsplash.com/${key}?w=400&h=225&fit=crop&q=80`;
+  }
+
+  // Try to find a partial match (case-insensitive) for athlete names
+  const lowerKey = key.toLowerCase();
+  for (const [athleteKey, imageId] of Object.entries(placeholderImages)) {
+    if (athleteKey.toLowerCase().includes(lowerKey) || lowerKey.includes(athleteKey.toLowerCase())) {
+      return `https://images.unsplash.com/photo-${imageId}?w=400&h=225&fit=crop&q=80`;
     }
   }
 
-  if (imagePathId) {
-    return `https://images.unsplash.com/${imagePathId}?w=400&h=225&fit=crop&q=80`;
-  }
-  return `/placeholder.svg`;
+  // Use a hash-based approach to assign consistent images to unmapped athletes
+  const hashCode = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  };
+
+  // Get all available image IDs
+  const imageIds = Object.values(placeholderImages);
+  const imageIndex = hashCode(key) % imageIds.length;
+  
+  return `https://images.unsplash.com/photo-${imageIds[imageIndex]}?w=400&h=225&fit=crop&q=80`;
 };
