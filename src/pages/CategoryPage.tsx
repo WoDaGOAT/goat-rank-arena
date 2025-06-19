@@ -115,6 +115,15 @@ const CategoryPage = () => {
     );
   }
 
+  const socialActions = (
+    <SocialActions 
+      categoryId={categoryId!} 
+      initialLikes={likesData?.count ?? 0}
+      isLiked={likesData?.isLiked ?? false}
+      categoryName={dbCategory.name}
+    />
+  );
+
   return (
     <>
       <Helmet>
@@ -140,17 +149,12 @@ const CategoryPage = () => {
                 <h1 className="text-4xl font-extrabold text-white mb-2">{dbCategory.name}</h1>
                 <p className="text-lg text-gray-300">{dbCategory.description}</p>
             </header>
-            
-            <div className="mb-8">
-                <SocialActions 
-                    categoryId={categoryId!} 
-                    initialLikes={likesData?.count ?? 0}
-                    isLiked={likesData?.isLiked ?? false}
-                    categoryName={dbCategory.name}
-                />
-            </div>
 
-            <GlobalLeaderboard athletes={allAthletes} categoryName="Global Leaderboard" />
+            <GlobalLeaderboard 
+              athletes={allAthletes} 
+              categoryName="Global Leaderboard" 
+              socialActions={socialActions}
+            />
           </div>
           
           {/* Full-width Comment Section */}

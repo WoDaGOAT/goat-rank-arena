@@ -8,9 +8,10 @@ import { sanitize } from "@/lib/sanitize";
 interface GlobalLeaderboardProps {
   athletes: Athlete[];
   categoryName: string;
+  socialActions?: React.ReactNode;
 }
 
-const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) => {
+const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLeaderboardProps) => {
   return (
     <Card className="shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20">
       <CardHeader className="border-b border-white/30 bg-white/5 relative overflow-hidden">
@@ -50,6 +51,13 @@ const GlobalLeaderboard = ({ athletes, categoryName }: GlobalLeaderboardProps) =
             />
           ))}
         </div>
+        
+        {/* Social Actions at the bottom */}
+        {socialActions && (
+          <div className="p-4 border-t border-white/20 bg-white/5">
+            {socialActions}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
