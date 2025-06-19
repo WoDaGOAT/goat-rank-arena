@@ -26,7 +26,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
   selectedAthleteCount,
 }) => {
   const needsMoreAthletes = selectedAthleteCount < 10;
-  const isDisabledDueToAthleteCount = needsMoreAthletes && !isSaving;
+  const showAthleteTooltip = needsMoreAthletes && !isSaving;
 
   return (
     <div className="flex justify-end gap-4 mt-8">
@@ -47,13 +47,17 @@ const RankingActions: React.FC<RankingActionsProps> = ({
               variant="cta"
               disabled={disabled || isSaving}
               onClick={onSave}
-              className={`${commonButtonStyle} disabled:h-[44px] disabled:text-black`}
+              className={`${commonButtonStyle} ${
+                disabled && !isSaving 
+                  ? 'opacity-50 cursor-not-allowed grayscale' 
+                  : ''
+              } disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale`}
             >
               <Save className="mr-2 h-5 w-5" />
               {saveLabel}
             </Button>
           </TooltipTrigger>
-          {isDisabledDueToAthleteCount && (
+          {showAthleteTooltip && (
             <TooltipContent>
               <p>Select 10 athletes to enable this button.</p>
             </TooltipContent>

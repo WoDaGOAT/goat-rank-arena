@@ -23,11 +23,12 @@ interface RankingEditorProps {
 const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   const [rankingTitle, setRankingTitle] = useState("");
   const [rankingDescription, setRankingDescription] = useState("");
+  const [isInitialized, setIsInitialized] = useState(false);
   const { user, openLoginDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
-  const { loadSelection, saveSelection, clearSelection } = useAthleteSelectionPersistence();
+  const { loadSelection, saveSelection, clearSelection, hasStoredSelection } = useAthleteSelectionPersistence();
 
-  // Load any saved selection on component mount
+  // Check for saved selection before initializing the ranking manager
   const savedSelection = loadSelection(category.id!);
 
   const {
@@ -40,13 +41,20 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     handleDragEnd,
   } = useRankingManager(savedSelection || undefined);
 
-  // Clear saved selection after loading it
+  // Handle restoration of saved selection
   useEffect(() => {
-    if (savedSelection) {
-      clearSelection();
-      toast.success("Your athlete selection has been restored!");
+    if (!isInitialized) {
+      if (savedSelection && savedSelection.length > 0) {
+        console.log('Restoring athlete selection on mount:', savedSelection.length, 'athletes');
+        toast.success(`Your athlete selection has been restored! (${savedSelection.length} athletes)`);
+        // Clear the saved selection after successful restoration
+        setTimeout(() => {
+          clearSelection();
+        }, 500);
+      }
+      setIsInitialized(true);
     }
-  }, [savedSelection, clearSelection]);
+  }, [savedSelection, clearSelection, isInitialized]);
 
   const {
     searchTerm,
@@ -68,7 +76,11 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   const handleSave = () => {
     if (!user) {
       // Save current selection and redirect to login
-      saveSelection(selectedAthletes, category.id!);
+      if (selectedAthletes.length > 0) {
+        console.log('Saving selection before login:', selectedAthletes.length, 'athletes');
+        saveSelection(selectedAthletes, category.id!);
+        toast.info("Your selection will be saved while you log in.");
+      }
       savePreLoginUrl(window.location.pathname);
       openLoginDialog();
       return;
