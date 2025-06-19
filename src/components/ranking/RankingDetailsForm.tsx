@@ -20,7 +20,7 @@ const RankingDetailsForm: React.FC<RankingDetailsFormProps> = ({
     <h2 className="text-xl font-semibold text-white mb-4">Ranking Details</h2>
     <div className="grid md:grid-cols-2 gap-4">
       <div>
-        <Label htmlFor="title" className="text-white">Ranking Title</Label>
+        <Label htmlFor="title" className="text-white">Ranking Title (Optional)</Label>
         <Input
           id="title"
           value={rankingTitle}

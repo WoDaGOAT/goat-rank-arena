@@ -88,7 +88,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     }
 
     onSave({
-      rankingTitle,
+      rankingTitle: rankingTitle.trim() || "My Ranking", // Use default title if empty
       rankingDescription,
       selectedAthletes,
     });
@@ -147,7 +147,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
 
         <RankingActions
           categoryId={category.id!}
-          disabled={selectedAthletes.length !== 10 || !rankingTitle.trim() || hasErrors}
+          disabled={selectedAthletes.length !== 10 || hasErrors}
           saveLabel={isSaving ? "Saving..." : `Save Ranking (${selectedAthletes.length}/10)`}
           onSave={handleSave}
           isSaving={isSaving}
@@ -156,11 +156,6 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
         {hasErrors && (
           <p className="text-right text-red-400 mt-2">
             Please fix the validation errors before saving.
-          </p>
-        )}
-        {selectedAthletes.length === 10 && !rankingTitle.trim() && !hasErrors && (
-          <p className="text-right text-yellow-400 mt-2">
-            Please provide a title for your ranking to save it.
           </p>
         )}
       </div>

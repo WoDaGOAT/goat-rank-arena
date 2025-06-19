@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -26,12 +27,15 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
         throw new Error("Incorrect number of athletes");
       }
 
+      // Use a default title if none provided
+      const finalTitle = rankingTitle.trim() || "My Ranking";
+
       const { data: rankingData, error: rankingError } = await supabase
         .from('user_rankings')
         .insert({
           user_id: user.id,
           category_id: categoryId!,
-          title: rankingTitle.trim(),
+          title: finalTitle,
           description: rankingDescription.trim(),
         })
         .select('id')
