@@ -24,16 +24,17 @@ const PodiumDisplay = ({ athletes }: PodiumDisplayProps) => {
   const topThree = athletes.slice(0, 3);
   const [first, second, third] = topThree;
 
-  const renderAthlete = (athlete: Athlete, position: number, isCenter = false) => {
-    const sizeClass = isCenter ? "w-20 h-20" : "w-16 h-16";
-    const nameSize = isCenter ? "text-base" : "text-sm";
-    const containerHeight = isCenter ? "h-24" : "h-20";
-    const nameWidth = isCenter ? "max-w-20" : "max-w-16";
+  const renderAthlete = (athlete: Athlete, position: number, podiumHeight: string) => {
+    const isFirst = position === 1;
+    const avatarSize = isFirst ? "w-16 h-16" : "w-14 h-14";
+    const nameSize = isFirst ? "text-sm" : "text-xs";
+    const badgeColor = position === 1 ? 'bg-yellow-500' : position === 2 ? 'bg-gray-400' : 'bg-amber-600';
     
     return (
-      <div className={`flex flex-col items-center ${containerHeight} justify-end`}>
+      <div className="flex flex-col items-center">
+        {/* Avatar and crown section */}
         <div className="relative mb-3">
-          <Avatar className={`${sizeClass} border-2 border-white/30 shadow-lg transition-transform hover:scale-110`}>
+          <Avatar className={`${avatarSize} border-2 border-white/30 shadow-lg transition-transform hover:scale-110`}>
             <AvatarImage 
               src={getPlaceholderImageUrl(athlete.imageUrl)} 
               alt={sanitize(athlete.name)} 
@@ -43,23 +44,22 @@ const PodiumDisplay = ({ athletes }: PodiumDisplayProps) => {
             </AvatarFallback>
           </Avatar>
           
-          {/* Position badge */}
-          <div className={`absolute -top-2 -right-2 ${
-            position === 1 ? 'bg-yellow-500' : position === 2 ? 'bg-gray-400' : 'bg-amber-600'
-          } text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-white shadow-md`}>
-            #{position}
-          </div>
-          
           {/* Crown for first place */}
-          {position === 1 && (
-            <Crown className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-5 h-5 text-yellow-400 drop-shadow-lg" />
+          {isFirst && (
+            <Crown className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 text-yellow-400 drop-shadow-lg" />
           )}
+          
+          {/* Position badge */}
+          <div className={`absolute -top-1 -right-1 ${badgeColor} text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white shadow-md`}>
+            {position}
+          </div>
         </div>
         
+        {/* Name with tooltip */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <p className={`${nameSize} font-medium text-white text-center leading-tight ${nameWidth} truncate cursor-help`}>
+              <p className={`${nameSize} font-semibold text-white text-center leading-tight w-16 truncate cursor-help mb-2`}>
                 {sanitize(athlete.name)}
               </p>
             </TooltipTrigger>
@@ -68,33 +68,43 @@ const PodiumDisplay = ({ athletes }: PodiumDisplayProps) => {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        
+        {/* Points */}
+        <div className="text-xs text-white/70 font-medium mb-1">
+          {Math.round(athlete.points)} pts
+        </div>
+        
+        {/* Podium base */}
+        <div className={`${podiumHeight} w-16 ${badgeColor} rounded-t-lg flex items-end justify-center pb-2 shadow-lg`}>
+          <span className="text-white font-bold text-lg">{position}</span>
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="flex items-end justify-center gap-3 sm:gap-4 md:gap-6 h-60 px-2 sm:px-4">
-      {/* Second place (left) */}
+    <div className="flex items-end justify-center gap-2 h-60 px-4">
+      {/* Second place (left) - medium height */}
       {second && (
         <div className="flex flex-col items-center">
-          {renderAthlete(second, 2)}
+          {renderAthlete(second, 2, "h-16")}
         </div>
       )}
       
-      {/* First place (center) */}
+      {/* First place (center) - tallest */}
       {first && (
         <div className="flex flex-col items-center relative">
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-yellow-400/10 rounded-lg blur-sm transform scale-110"></div>
           <div className="relative z-10">
-            {renderAthlete(first, 1, true)}
+            {renderAthlete(first, 1, "h-24")}
           </div>
         </div>
       )}
       
-      {/* Third place (right) */}
+      {/* Third place (right) - shortest */}
       {third && (
         <div className="flex flex-col items-center">
-          {renderAthlete(third, 3)}
+          {renderAthlete(third, 3, "h-12")}
         </div>
       )}
     </div>
