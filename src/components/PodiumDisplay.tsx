@@ -85,11 +85,7 @@ const PodiumDisplay = ({ athletes }: PodiumDisplayProps) => {
   return (
     <div className="flex items-end justify-center gap-2 h-60 px-4">
       {/* Second place (left) - medium height */}
-      {second && (
-        <div className="flex flex-col items-center">
-          {renderAthlete(second, 2, "h-16")}
-        </div>
-      )}
+      {second && renderAthlete(second, 2, "h-16")}
       
       {/* First place (center) - tallest */}
       {first && (
@@ -102,11 +98,7 @@ const PodiumDisplay = ({ athletes }: PodiumDisplayProps) => {
       )}
       
       {/* Third place (right) - shortest */}
-      {third && (
-        <div className="flex flex-col items-center">
-          {renderAthlete(third, 3, "h-12")}
-        </div>
-      )}
+      {third && renderAthlete(third, 3, "h-12")}
     </div>
   );
 };
