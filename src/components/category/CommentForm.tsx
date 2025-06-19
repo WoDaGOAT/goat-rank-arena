@@ -13,9 +13,10 @@ import { FunctionsHttpError } from "@supabase/supabase-js";
 
 interface CommentFormProps {
   categoryId: string;
+  onSuccess?: () => void;
 }
 
-const CommentForm = ({ categoryId }: CommentFormProps) => {
+const CommentForm = ({ categoryId, onSuccess }: CommentFormProps) => {
   const [comment, setComment] = useState("");
   const { user, openLoginDialog } = useAuth();
   const queryClient = useQueryClient();
@@ -50,6 +51,7 @@ const CommentForm = ({ categoryId }: CommentFormProps) => {
       setComment("");
       queryClient.invalidateQueries({ queryKey: ["categoryComments", categoryId] });
       toast.success("Comment posted!");
+      onSuccess?.();
     },
     onError: (error) => {
       if (error.message !== "User not authenticated") {
@@ -66,7 +68,7 @@ const CommentForm = ({ categoryId }: CommentFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <Textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}

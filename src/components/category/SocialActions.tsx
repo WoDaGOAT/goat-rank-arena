@@ -1,8 +1,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, Share2 } from "lucide-react";
+import { Heart, Share2, MessageSquare } from "lucide-react";
 import { ShareDialog } from "./ShareDialog";
+import { CommentDialog } from "./CommentDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ interface SocialActionsProps {
 
 export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName }: SocialActionsProps) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
   const { user, openLoginDialog } = useAuth();
   const queryClient = useQueryClient();
 
@@ -50,9 +52,17 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
     },
   });
 
+  const handleCommentClick = () => {
+    if (!user) {
+      openLoginDialog();
+      return;
+    }
+    setShowCommentDialog(true);
+  };
+
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-4">
         <Button
           variant="outline"
           className="border-white/20 bg-white/10 text-white hover:bg-white/20"
@@ -61,6 +71,16 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
           <Heart className={`mr-2 h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
           {initialLikes} {initialLikes === 1 ? 'Like' : 'Likes'}
         </Button>
+        
+        <Button
+          variant="outline"
+          className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+          onClick={handleCommentClick}
+        >
+          <MessageSquare className="mr-2 h-4 w-4" />
+          Comment
+        </Button>
+        
         <Button
           variant="outline"
           className="border-white/20 bg-white/10 text-white hover:bg-white/20"
@@ -70,11 +90,18 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
           Share
         </Button>
       </div>
+      
       <ShareDialog
         open={showShareDialog}
         onOpenChange={setShowShareDialog}
         url={window.location.href}
         text={`Check out the leaderboard for ${categoryName} on RankPulse!`}
+      />
+      
+      <CommentDialog
+        open={showCommentDialog}
+        onOpenChange={setShowCommentDialog}
+        categoryId={categoryId}
       />
     </>
   );
