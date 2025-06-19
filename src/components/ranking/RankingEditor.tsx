@@ -23,12 +23,11 @@ interface RankingEditorProps {
 const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   const [rankingTitle, setRankingTitle] = useState("");
   const [rankingDescription, setRankingDescription] = useState("");
-  const [isInitialized, setIsInitialized] = useState(false);
   const { user, openLoginDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
-  const { loadSelection, saveSelection, clearSelection, hasStoredSelection } = useAthleteSelectionPersistence();
+  const { loadSelection, saveSelection, clearSelection } = useAthleteSelectionPersistence();
 
-  // Check for saved selection before initializing the ranking manager
+  // Load any saved selection first
   const savedSelection = loadSelection(category.id!);
 
   const {
@@ -41,20 +40,26 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     handleDragEnd,
   } = useRankingManager(savedSelection || undefined);
 
-  // Handle restoration of saved selection
+  // Show restoration message and clear saved data if we restored a selection
   useEffect(() => {
-    if (!isInitialized) {
-      if (savedSelection && savedSelection.length > 0) {
-        console.log('Restoring athlete selection on mount:', savedSelection.length, 'athletes');
-        toast.success(`Your athlete selection has been restored! (${savedSelection.length} athletes)`);
-        // Clear the saved selection after successful restoration
-        setTimeout(() => {
-          clearSelection();
-        }, 500);
-      }
-      setIsInitialized(true);
+    if (savedSelection && savedSelection.length > 0) {
+      console.log('Restoring athlete selection:', savedSelection.length, 'athletes');
+      toast.success(`Your athlete selection has been restored! (${savedSelection.length} athletes)`);
+      // Clear the saved selection after successful restoration
+      clearSelection();
     }
-  }, [savedSelection, clearSelection, isInitialized]);
+  }, []); // Only run once on mount
+
+  // Auto-save selection whenever selectedAthletes changes
+  useEffect(() => {
+    if (selectedAthletes.length > 0) {
+      console.log('Auto-saving athlete selection:', selectedAthletes.length, 'athletes');
+      saveSelection(selectedAthletes, category.id!);
+    } else if (selectedAthletes.length === 0) {
+      // Clear saved selection if user removes all athletes
+      clearSelection();
+    }
+  }, [selectedAthletes, saveSelection, clearSelection, category.id]);
 
   const {
     searchTerm,
@@ -75,12 +80,8 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
 
   const handleSave = () => {
     if (!user) {
-      // Save current selection and redirect to login
-      if (selectedAthletes.length > 0) {
-        console.log('Saving selection before login:', selectedAthletes.length, 'athletes');
-        saveSelection(selectedAthletes, category.id!);
-        toast.info("Your selection will be saved while you log in.");
-      }
+      // The selection is already auto-saved, just need to save URL and redirect to login
+      console.log('Redirecting to login, selection already saved');
       savePreLoginUrl(window.location.pathname);
       openLoginDialog();
       return;

@@ -1,21 +1,21 @@
 
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { SelectedAthlete } from '@/hooks/useRankingManager';
 
 const STORAGE_KEY = 'pending_athlete_selection';
 
 export const useAthleteSelectionPersistence = () => {
-  const saveSelection = (athletes: SelectedAthlete[], categoryId: string) => {
-    console.log('Saving athlete selection:', athletes.length, 'athletes for category:', categoryId);
+  const saveSelection = useCallback((athletes: SelectedAthlete[], categoryId: string) => {
+    console.log('Saving athlete selection to localStorage:', athletes.length, 'athletes for category:', categoryId);
     const selectionData = {
       athletes,
       categoryId,
       timestamp: Date.now(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(selectionData));
-  };
+  }, []);
 
-  const loadSelection = (currentCategoryId: string) => {
+  const loadSelection = useCallback((currentCategoryId: string) => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
@@ -26,12 +26,12 @@ export const useAthleteSelectionPersistence = () => {
       const selectionData = JSON.parse(stored);
       console.log('Found stored selection:', selectionData);
       
-      // Check if the selection is for the current category and not too old (1 hour)
+      // Check if the selection is for the current category and not too old (24 hours)
       if (
         selectionData.categoryId === currentCategoryId &&
-        Date.now() - selectionData.timestamp < 60 * 60 * 1000
+        Date.now() - selectionData.timestamp < 24 * 60 * 60 * 1000
       ) {
-        console.log('Restoring athlete selection:', selectionData.athletes.length, 'athletes');
+        console.log('Loading athlete selection from localStorage:', selectionData.athletes.length, 'athletes');
         return selectionData.athletes;
       } else {
         console.log('Stored selection is for different category or too old, clearing');
@@ -42,25 +42,25 @@ export const useAthleteSelectionPersistence = () => {
       localStorage.removeItem(STORAGE_KEY);
     }
     return null;
-  };
+  }, []);
 
-  const clearSelection = () => {
-    console.log('Clearing stored athlete selection');
+  const clearSelection = useCallback(() => {
+    console.log('Clearing stored athlete selection from localStorage');
     localStorage.removeItem(STORAGE_KEY);
-  };
+  }, []);
 
-  const hasStoredSelection = (currentCategoryId: string) => {
+  const hasStoredSelection = useCallback((currentCategoryId: string) => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return false;
 
       const selectionData = JSON.parse(stored);
       return selectionData.categoryId === currentCategoryId &&
-             Date.now() - selectionData.timestamp < 60 * 60 * 1000;
+             Date.now() - selectionData.timestamp < 24 * 60 * 60 * 1000;
     } catch {
       return false;
     }
-  };
+  }, []);
 
   return {
     saveSelection,
