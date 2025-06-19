@@ -55,7 +55,7 @@ const CreateRankingPage = () => {
          <div>
           <h1 className="text-3xl font-bold text-white mb-4">Ranking Already Submitted</h1>
           <p className="text-gray-300 mb-6">You have already submitted a ranking for {category?.name}.</p>
-            <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-indigo-900">
+            <Button asChild size="lg" className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold">
             <Link to={`/category/${categoryId}`}>
               <ChevronLeft className="mr-2 h-4 w-4" /> Go Back to {category?.name}
             </Link>
@@ -73,7 +73,7 @@ const CreateRankingPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-white mb-4">Category Not Found</h1>
             <p className="text-gray-300 mb-6">The category you're looking for doesn't exist or couldn't be loaded.</p>
-            <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-indigo-900">
+            <Button asChild size="lg" className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold">
               <Link to="/">
                 <ChevronLeft className="mr-2 h-4 w-4" /> Go Back to Categories
               </Link>
