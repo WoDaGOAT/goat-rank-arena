@@ -1,4 +1,3 @@
-
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -6,6 +5,7 @@ import { Category, Athlete } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
+import { footballPlayers } from "@/data/footballPlayers";
 
 const Index = () => {
   const { data: categories, isLoading, isError } = useQuery<Category[]>({
@@ -49,65 +49,77 @@ const Index = () => {
         throw new Error(error.message);
       }
 
-      // For each category, fetch top 3 athletes from rankings
+      // For each category, fetch top 3 athletes from user rankings
       const categoriesWithLeaderboards = await Promise.all(
         data.map(async (c) => {
-          // Fetch top 3 ranked athletes for this category
-          const { data: rankings, error: rankingsError } = await supabase
-            .from("rankings")
+          // Fetch athlete scores for this category by joining user_rankings with ranking_athletes
+          const { data: athleteRankings, error: rankingsError } = await supabase
+            .from("user_rankings")
             .select(`
-              athletes,
-              created_at
+              ranking_athletes(
+                athlete_id,
+                position,
+                points
+              )
             `)
-            .eq("category_id", c.id)
-            .order("created_at", { ascending: false })
-            .limit(100); // Get recent rankings to calculate leaderboard
+            .eq("category_id", c.id);
 
           let leaderboard: Athlete[] = [];
 
-          if (!rankingsError && rankings && rankings.length > 0) {
-            // Calculate athlete scores from rankings
-            const athleteScores: Record<string, { athlete: any; totalScore: number; appearances: number }> = {};
+          if (!rankingsError && athleteRankings && athleteRankings.length > 0) {
+            // Calculate athlete scores from all rankings
+            const athleteScores: Record<string, { totalScore: number; appearances: number }> = {};
             
-            rankings.forEach((ranking) => {
-              if (ranking.athletes && Array.isArray(ranking.athletes)) {
-                ranking.athletes.forEach((athlete: any, index: number) => {
-                  if (athlete && athlete.id) {
-                    const points = 10 - index; // 10 points for 1st place, 9 for 2nd, etc.
-                    
-                    if (!athleteScores[athlete.id]) {
-                      athleteScores[athlete.id] = {
-                        athlete: athlete,
+            athleteRankings.forEach((ranking) => {
+              if (ranking.ranking_athletes && Array.isArray(ranking.ranking_athletes)) {
+                ranking.ranking_athletes.forEach((athleteRanking: any) => {
+                  const athleteId = athleteRanking.athlete_id;
+                  const points = athleteRanking.points;
+                  
+                  if (athleteId && points) {
+                    if (!athleteScores[athleteId]) {
+                      athleteScores[athleteId] = {
                         totalScore: 0,
                         appearances: 0
                       };
                     }
                     
-                    athleteScores[athlete.id].totalScore += points;
-                    athleteScores[athlete.id].appearances += 1;
+                    athleteScores[athleteId].totalScore += points;
+                    athleteScores[athleteId].appearances += 1;
                   }
                 });
               }
             });
 
             // Convert to leaderboard format and sort by total score
-            leaderboard = Object.values(athleteScores)
-              .map(({ athlete, totalScore }) => ({
-                id: athlete.id,
-                rank: 0, // Will be set after sorting
-                name: athlete.name,
-                imageUrl: athlete.imageUrl,
-                points: totalScore,
-                movement: "neutral" as const,
-                dateOfBirth: athlete.dateOfBirth || "",
-                dateOfDeath: athlete.dateOfDeath,
-                isActive: athlete.isActive || true,
-                countryOfOrigin: athlete.countryOfOrigin || "",
-                clubs: athlete.clubs || [],
-                competitions: athlete.competitions || [],
-                positions: athlete.positions || [],
-                nationality: athlete.nationality || ""
-              }))
+            leaderboard = Object.entries(athleteScores)
+              .map(([athleteId, { totalScore }]) => {
+                // Find athlete data from footballPlayers
+                const athleteData = footballPlayers.find(player => player.id === athleteId);
+                
+                if (!athleteData) {
+                  console.warn(`Athlete data not found for ID: ${athleteId}`);
+                  return null;
+                }
+
+                return {
+                  id: athleteData.id,
+                  rank: 0, // Will be set after sorting
+                  name: athleteData.name,
+                  imageUrl: athleteData.imageUrl,
+                  points: totalScore,
+                  movement: "neutral" as const,
+                  dateOfBirth: athleteData.dateOfBirth || "",
+                  dateOfDeath: athleteData.dateOfDeath,
+                  isActive: athleteData.isActive || true,
+                  countryOfOrigin: athleteData.countryOfOrigin || "",
+                  clubs: athleteData.clubs || [],
+                  competitions: athleteData.competitions || [],
+                  positions: athleteData.positions || [],
+                  nationality: athleteData.nationality || ""
+                };
+              })
+              .filter((athlete): athlete is Athlete => athlete !== null)
               .sort((a, b) => b.points - a.points)
               .slice(0, 3) // Only top 3 for podium
               .map((athlete, index) => ({
