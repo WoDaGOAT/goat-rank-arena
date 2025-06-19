@@ -28,23 +28,25 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
   });
 
   return (
-    <div className="p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 mt-8">
-      <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-        <MessageSquare className="w-5 h-5 mr-2 text-blue-300" />
-        Community Discussion ({comments?.length || 0})
-      </h2>
-      
-      <CommentForm categoryId={categoryId} />
+    <div className="max-w-2xl mx-auto">
+      <div className="p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 mt-8">
+        <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+          <MessageSquare className="w-5 h-5 mr-2 text-blue-300" />
+          Community Discussion ({comments?.length || 0})
+        </h2>
+        
+        <CommentForm categoryId={categoryId} />
 
-      <div className="mt-6 space-y-4">
-        {isLoading && Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full bg-white/10" />)}
-        {error && <p className="text-red-400">Could not load comments.</p>}
-        {comments && comments.length === 0 && (
-          <p className="text-gray-400 text-center py-4">Be the first to comment!</p>
-        )}
-        {comments?.map((comment) => (
-          <CommentItem key={comment.id} comment={comment} />
-        ))}
+        <div className="mt-6 space-y-4">
+          {isLoading && Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full bg-white/10" />)}
+          {error && <p className="text-red-400">Could not load comments.</p>}
+          {comments && comments.length === 0 && (
+            <p className="text-gray-400 text-center py-4">Be the first to comment!</p>
+          )}
+          {comments?.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
+        </div>
       </div>
     </div>
   );
