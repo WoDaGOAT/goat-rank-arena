@@ -1,7 +1,8 @@
+
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Category } from "@/types";
+import { Category, Athlete } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
@@ -48,15 +49,85 @@ const Index = () => {
         throw new Error(error.message);
       }
 
-      // Map the database response to our frontend Category type
-      return data.map((c) => ({
-        id: c.id,
-        name: c.name,
-        description: c.description || "No description provided.",
-        imageUrl: c.image_url || undefined,
-        userRankingCount: Math.floor(Math.random() * 5000) + 1000,
-        leaderboard: [], // Not needed for the category card display
-      }));
+      // For each category, fetch top 3 athletes from rankings
+      const categoriesWithLeaderboards = await Promise.all(
+        data.map(async (c) => {
+          // Fetch top 3 ranked athletes for this category
+          const { data: rankings, error: rankingsError } = await supabase
+            .from("rankings")
+            .select(`
+              athletes,
+              created_at
+            `)
+            .eq("category_id", c.id)
+            .order("created_at", { ascending: false })
+            .limit(100); // Get recent rankings to calculate leaderboard
+
+          let leaderboard: Athlete[] = [];
+
+          if (!rankingsError && rankings && rankings.length > 0) {
+            // Calculate athlete scores from rankings
+            const athleteScores: Record<string, { athlete: any; totalScore: number; appearances: number }> = {};
+            
+            rankings.forEach((ranking) => {
+              if (ranking.athletes && Array.isArray(ranking.athletes)) {
+                ranking.athletes.forEach((athlete: any, index: number) => {
+                  if (athlete && athlete.id) {
+                    const points = 10 - index; // 10 points for 1st place, 9 for 2nd, etc.
+                    
+                    if (!athleteScores[athlete.id]) {
+                      athleteScores[athlete.id] = {
+                        athlete: athlete,
+                        totalScore: 0,
+                        appearances: 0
+                      };
+                    }
+                    
+                    athleteScores[athlete.id].totalScore += points;
+                    athleteScores[athlete.id].appearances += 1;
+                  }
+                });
+              }
+            });
+
+            // Convert to leaderboard format and sort by total score
+            leaderboard = Object.values(athleteScores)
+              .map(({ athlete, totalScore }) => ({
+                id: athlete.id,
+                rank: 0, // Will be set after sorting
+                name: athlete.name,
+                imageUrl: athlete.imageUrl,
+                points: totalScore,
+                movement: "neutral" as const,
+                dateOfBirth: athlete.dateOfBirth || "",
+                dateOfDeath: athlete.dateOfDeath,
+                isActive: athlete.isActive || true,
+                countryOfOrigin: athlete.countryOfOrigin || "",
+                clubs: athlete.clubs || [],
+                competitions: athlete.competitions || [],
+                positions: athlete.positions || [],
+                nationality: athlete.nationality || ""
+              }))
+              .sort((a, b) => b.points - a.points)
+              .slice(0, 3) // Only top 3 for podium
+              .map((athlete, index) => ({
+                ...athlete,
+                rank: index + 1
+              }));
+          }
+
+          return {
+            id: c.id,
+            name: c.name,
+            description: c.description || "No description provided.",
+            imageUrl: c.image_url || undefined,
+            userRankingCount: Math.floor(Math.random() * 5000) + 1000,
+            leaderboard: leaderboard
+          };
+        })
+      );
+
+      return categoriesWithLeaderboards;
     },
     retry: 1,
   });
