@@ -5,7 +5,7 @@ import { Category, Athlete } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
-import { footballPlayers } from "@/data/footballPlayers";
+import footballPlayers from "@/data/footballPlayers";
 
 const Index = () => {
   const { data: categories, isLoading, isError } = useQuery<Category[]>({
@@ -106,7 +106,7 @@ const Index = () => {
                   id: athleteData.id,
                   rank: 0, // Will be set after sorting
                   name: athleteData.name,
-                  imageUrl: athleteData.imageUrl,
+                  imageUrl: athleteData.imageUrl || undefined,
                   points: totalScore,
                   movement: "neutral" as const,
                   dateOfBirth: athleteData.dateOfBirth || "",
