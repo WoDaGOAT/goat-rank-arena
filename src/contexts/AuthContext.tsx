@@ -5,6 +5,7 @@ import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
 export type Profile = Database['public']['Tables']['profiles']['Row'];
+type AppRole = Database['public']['Enums']['app_role'];
 
 interface AuthContextType {
   user: User | null;
@@ -54,6 +55,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isModerator, setIsModerator] = useState(false);
   const [isModeratorOrAdmin, setIsModeratorOrAdmin] = useState(false);
 
+  const fetchUserRoles = async (userId: string): Promise<AppRole[]> => {
+    console.log('AuthProvider: Fetching roles for user', userId);
+    try {
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      if (rolesError) {
+        console.error('AuthProvider: Error fetching roles:', rolesError);
+        return [];
+      }
+
+      const roles = rolesData?.map(r => r.role) || [];
+      console.log('AuthProvider: User roles fetched:', roles);
+      return roles;
+    } catch (error) {
+      console.error('AuthProvider: Role fetch failed:', error);
+      return [];
+    }
+  };
+
+  const updateRoleStates = (roles: AppRole[]) => {
+    const adminRole = roles.includes('admin');
+    const moderatorRole = roles.includes('moderator');
+    
+    setIsAdmin(adminRole);
+    setIsModerator(moderatorRole);
+    setIsModeratorOrAdmin(adminRole || moderatorRole);
+    
+    console.log('AuthProvider: Role states updated', { 
+      isAdmin: adminRole, 
+      isModerator: moderatorRole, 
+      isModeratorOrAdmin: adminRole || moderatorRole 
+    });
+  };
+
   const fetchProfile = async (userId: string) => {
     console.log('AuthProvider: Fetching profile for', userId);
     try {
@@ -76,10 +114,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const fetchUserData = async (userId: string) => {
+    console.log('AuthProvider: Fetching user data for', userId);
+    
+    // Fetch both profile and roles
+    await Promise.all([
+      fetchProfile(userId),
+      fetchUserRoles(userId).then(roles => updateRoleStates(roles))
+    ]);
+  };
+
   const refetchUser = async () => {
     console.log('AuthProvider: Refetching user data');
     if (user) {
-      await fetchProfile(user.id);
+      await fetchUserData(user.id);
     }
   };
 
@@ -102,10 +150,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            // Only fetch profile for now, skip role checks to debug
+            // Fetch user data with roles
             setTimeout(() => {
               if (mounted) {
-                fetchProfile(session.user.id);
+                fetchUserData(session.user.id);
               }
             }, 0);
           } else {
@@ -135,7 +183,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (session?.user) {
             setTimeout(() => {
               if (mounted) {
-                fetchProfile(session.user.id);
+                fetchUserData(session.user.id);
               }
             }, 0);
           }
@@ -201,7 +249,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  console.log('AuthProvider: Rendering with loading =', loading);
+  console.log('AuthProvider: Rendering with loading =', loading, 'isAdmin =', isAdmin);
 
   return (
     <AuthContext.Provider value={{
