@@ -45,6 +45,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  console.log('AuthProvider: Initializing');
+  
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
   const checkUserRoles = async (userId: string) => {
+    console.log('AuthProvider: Checking user roles for', userId);
     try {
       const [adminResult, moderatorResult, moderatorOrAdminResult] = await Promise.all([
         supabase.rpc('is_admin', { p_user_id: userId }),
@@ -61,11 +64,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         supabase.rpc('is_moderator_or_admin', { p_user_id: userId })
       ]);
 
+      console.log('AuthProvider: Role check results', {
+        admin: adminResult.data,
+        moderator: moderatorResult.data,
+        moderatorOrAdmin: moderatorOrAdminResult.data
+      });
+
       setIsAdmin(adminResult.data || false);
       setIsModerator(moderatorResult.data || false);
       setIsModeratorOrAdmin(moderatorOrAdminResult.data || false);
     } catch (error) {
-      console.error('Error checking user roles:', error);
+      console.error('AuthProvider: Error checking user roles:', error);
       setIsAdmin(false);
       setIsModerator(false);
       setIsModeratorOrAdmin(false);
@@ -73,17 +82,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const fetchProfile = async (userId: string) => {
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    console.log('AuthProvider: Fetching profile for', userId);
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
+      if (profileError) {
+        console.error('AuthProvider: Error fetching profile:', profileError);
+        setProfile(null);
+      } else {
+        console.log('AuthProvider: Profile fetched successfully');
+        setProfile(profileData);
+      }
+    } catch (error) {
+      console.error('AuthProvider: Profile fetch failed:', error);
       setProfile(null);
-    } else {
-      setProfile(profileData);
     }
   };
 
@@ -97,22 +113,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    console.log('AuthProvider: useEffect started');
+    
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await Promise.all([
-          fetchProfile(session.user.id),
-          checkUserRoles(session.user.id)
-        ]);
+      try {
+        console.log('AuthProvider: Getting initial session');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('AuthProvider: Error getting session:', error);
+        }
+        
+        console.log('AuthProvider: Initial session:', session ? 'Found' : 'None');
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await Promise.all([
+            fetchProfile(session.user.id),
+            checkUserRoles(session.user.id)
+          ]);
+        }
+        setLoading(false);
+        console.log('AuthProvider: Initial setup complete');
+      } catch (error) {
+        console.error('AuthProvider: Error in getSession:', error);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getSession();
 
+    console.log('AuthProvider: Setting up auth state listener');
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthProvider: Auth state changed:', event, session ? 'Session exists' : 'No session');
+      
       setUser(session?.user ?? null);
       
       if (session?.user) {
@@ -129,10 +163,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('AuthProvider: Cleaning up subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
+    console.log('AuthProvider: Signing out');
     await supabase.auth.signOut();
   };
 
@@ -153,6 +191,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     return url;
   };
+
+  console.log('AuthProvider: Rendering with loading =', loading);
 
   return (
     <AuthContext.Provider value={{

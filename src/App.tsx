@@ -9,8 +9,16 @@ import { HelmetProvider } from "react-helmet-async";
 import { isSupabaseConfigured } from "./lib/supabase";
 import CommentManagementPage from "./pages/admin/CommentManagementPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import ErrorBoundary from "./components/ErrorBoundary";
 
-const Index = lazy(() => import("./pages/Index"));
+console.log('App.tsx: Starting to load');
+console.log('App.tsx: Supabase configured?', isSupabaseConfigured);
+
+const Index = lazy(() => {
+  console.log('App.tsx: Loading Index page');
+  return import("./pages/Index");
+});
+
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const CreateRankingPage = lazy(() => import("./pages/CreateRankingPage"));
 const UserRankingPage = lazy(() => import("./pages/UserRankingPage"));
@@ -25,10 +33,22 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
 const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+console.log('App.tsx: QueryClient created');
 
 function App() {
+  console.log('App.tsx: App component rendering');
+
   if (!isSupabaseConfigured) {
+    console.error('App.tsx: Supabase not configured');
     return (
       <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
         <div className="text-center">
@@ -38,42 +58,56 @@ function App() {
       </div>
     );
   }
+
+  console.log('App.tsx: About to render main app structure');
+
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <AuthProvider>
-            <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-              <Navbar />
-              <main className="flex-grow">
-                <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-gray-900">Loading...</div>}>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/category/:categoryId" element={<CategoryPage />} />
-                    <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
-                    <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
-                    <Route path="/profile" element={<UserProfilePage />} />
-                    <Route path="/users/:userId" element={<PublicProfilePage />} />
-                    <Route path="/feed" element={<FeedPage />} />
-                    <Route path="/quiz" element={<QuizPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/gdpr" element={<GdprPage />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                    <Route path="/admin/users" element={<UserManagementPage />} />
-                    <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
-                    <Route path="/admin/comments" element={<CommentManagementPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-              </main>
-              <Footer />
-            </div>
-            <SonnerToaster />
-          </AuthProvider>
-        </Router>
-      </QueryClientProvider>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <AuthProvider>
+              <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+                <Navbar />
+                <main className="flex-grow">
+                  <Suspense fallback={
+                    <div className="h-screen w-full flex items-center justify-center bg-gray-900">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+                        <p className="text-white">Loading...</p>
+                      </div>
+                    </div>
+                  }>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/category/:categoryId" element={<CategoryPage />} />
+                      <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
+                      <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                      <Route path="/profile" element={<UserProfilePage />} />
+                      <Route path="/users/:userId" element={<PublicProfilePage />} />
+                      <Route path="/feed" element={<FeedPage />} />
+                      <Route path="/quiz" element={<QuizPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/gdpr" element={<GdprPage />} />
+                      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/admin/users" element={<UserManagementPage />} />
+                      <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
+                      <Route path="/admin/comments" element={<CommentManagementPage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </main>
+                <Footer />
+              </div>
+              <SonnerToaster />
+            </AuthProvider>
+          </Router>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
+
+console.log('App.tsx: App component defined');
 
 export default App;
