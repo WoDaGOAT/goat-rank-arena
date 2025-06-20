@@ -29,9 +29,9 @@ const ProfileHeader = ({ profile, user, name, isUploading, handleAvatarUpload }:
           className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
         >
           {isUploading ? (
-            <Loader2 className="h-8 w-8 text-white animate-spin" />
+            <Loader2 className="h-8 w-8 text-white animate-spin aspect-square" />
           ) : (
-            <ImageIcon className="h-8 w-8 text-white" />
+            <ImageIcon className="h-8 w-8 text-white aspect-square" />
           )}
         </label>
         <input
