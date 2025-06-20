@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
+export type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +14,11 @@ interface AuthContextType {
   isModerator: boolean;
   isModeratorOrAdmin: boolean;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>; // Alias for signOut
+  openLoginDialog: () => void;
+  savePreLoginUrl: (url: string) => void;
+  getAndClearPreLoginUrl: () => string | null;
+  refetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,6 +29,11 @@ const AuthContext = createContext<AuthContextType>({
   isModerator: false,
   isModeratorOrAdmin: false,
   signOut: async () => {},
+  logout: async () => {},
+  openLoginDialog: () => {},
+  savePreLoginUrl: () => {},
+  getAndClearPreLoginUrl: () => null,
+  refetchUser: async () => {},
 });
 
 export const useAuth = () => {
@@ -41,6 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
   const [isModeratorOrAdmin, setIsModeratorOrAdmin] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
   const checkUserRoles = async (userId: string) => {
     try {
@@ -73,6 +84,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setProfile(null);
     } else {
       setProfile(profileData);
+    }
+  };
+
+  const refetchUser = async () => {
+    if (user) {
+      await Promise.all([
+        fetchProfile(user.id),
+        checkUserRoles(user.id)
+      ]);
     }
   };
 
@@ -116,6 +136,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const logout = signOut; // Alias for signOut
+
+  const openLoginDialog = () => {
+    setLoginDialogOpen(true);
+  };
+
+  const savePreLoginUrl = (url: string) => {
+    localStorage.setItem('preLoginUrl', url);
+  };
+
+  const getAndClearPreLoginUrl = () => {
+    const url = localStorage.getItem('preLoginUrl');
+    if (url) {
+      localStorage.removeItem('preLoginUrl');
+    }
+    return url;
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -124,7 +162,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isAdmin,
       isModerator,
       isModeratorOrAdmin,
-      signOut
+      signOut,
+      logout,
+      openLoginDialog,
+      savePreLoginUrl,
+      getAndClearPreLoginUrl,
+      refetchUser
     }}>
       {children}
     </AuthContext.Provider>
