@@ -1,5 +1,5 @@
+
 import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -12,7 +12,6 @@ import { useLikedCategories } from "@/hooks/useLikedCategories";
 import { useUserComments } from "@/hooks/useUserComments";
 import { useUserRankings } from "@/hooks/useUserRankings";
 import { useProfileForm } from "@/hooks/useProfileForm";
-import { useProfileUpdater } from "@/hooks/useProfileUpdater";
 import { useAvatarUploader } from "@/hooks/useAvatarUploader";
 import { useUserQuizAttempts } from "@/hooks/useUserQuizAttempts";
 import QuizActivity from "@/components/profile/QuizActivity";
@@ -25,7 +24,6 @@ const UserProfilePage = () => {
     name, setName, country, setCountry, favoriteSports, handleSportChange 
   } = useProfileForm(profile);
 
-  const { isSaving, handleSaveChanges } = useProfileUpdater();
   const { isUploading, handleAvatarUpload } = useAvatarUploader();
 
   const { data: likedCategories, isLoading: isLoadingLikedCategories } = useLikedCategories();
@@ -95,12 +93,6 @@ const UserProfilePage = () => {
               <div className="border-t border-gray-700"></div>
 
               <FriendsList />
-            </div>
-
-            <div className="flex justify-end pt-6">
-              <Button variant="cta" onClick={() => handleSaveChanges({name, country, favoriteSports})} disabled={isSaving}>
-                {isSaving ? "Saving..." : "Save Changes"}
-              </Button>
             </div>
           </CardContent>
         </Card>
