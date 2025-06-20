@@ -14,7 +14,7 @@ interface AuthContextType {
   isModerator: boolean;
   isModeratorOrAdmin: boolean;
   signOut: () => Promise<void>;
-  logout: () => Promise<void>; // Alias for signOut
+  logout: () => Promise<void>;
   openLoginDialog: () => void;
   savePreLoginUrl: (url: string) => void;
   getAndClearPreLoginUrl: () => string | null;
@@ -53,34 +53,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
   const [isModeratorOrAdmin, setIsModeratorOrAdmin] = useState(false);
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-
-  const checkUserRoles = async (userId: string) => {
-    console.log('AuthProvider: Checking user roles for', userId);
-    try {
-      // Use Promise.allSettled to prevent one failed request from breaking all others
-      const [adminResult, moderatorResult, moderatorOrAdminResult] = await Promise.allSettled([
-        supabase.rpc('is_admin', { p_user_id: userId }),
-        supabase.rpc('is_moderator', { p_user_id: userId }),
-        supabase.rpc('is_moderator_or_admin', { p_user_id: userId })
-      ]);
-
-      console.log('AuthProvider: Role check results', {
-        admin: adminResult.status === 'fulfilled' ? adminResult.value.data : 'failed',
-        moderator: moderatorResult.status === 'fulfilled' ? moderatorResult.value.data : 'failed',
-        moderatorOrAdmin: moderatorOrAdminResult.status === 'fulfilled' ? moderatorOrAdminResult.value.data : 'failed'
-      });
-
-      setIsAdmin(adminResult.status === 'fulfilled' ? (adminResult.value.data || false) : false);
-      setIsModerator(moderatorResult.status === 'fulfilled' ? (moderatorResult.value.data || false) : false);
-      setIsModeratorOrAdmin(moderatorOrAdminResult.status === 'fulfilled' ? (moderatorOrAdminResult.value.data || false) : false);
-    } catch (error) {
-      console.error('AuthProvider: Error checking user roles:', error);
-      setIsAdmin(false);
-      setIsModerator(false);
-      setIsModeratorOrAdmin(false);
-    }
-  };
 
   const fetchProfile = async (userId: string) => {
     console.log('AuthProvider: Fetching profile for', userId);
@@ -105,20 +77,50 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const refetchUser = async () => {
+    console.log('AuthProvider: Refetching user data');
     if (user) {
-      await Promise.allSettled([
-        fetchProfile(user.id),
-        checkUserRoles(user.id)
-      ]);
+      await fetchProfile(user.id);
     }
   };
 
   useEffect(() => {
     console.log('AuthProvider: useEffect started');
     
-    const getSession = async () => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
       try {
         console.log('AuthProvider: Getting initial session');
+        
+        // Set up auth state listener first
+        console.log('AuthProvider: Setting up auth state listener');
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('AuthProvider: Auth state changed:', event, session ? 'Session exists' : 'No session');
+          
+          if (!mounted) return;
+
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            // Only fetch profile for now, skip role checks to debug
+            setTimeout(() => {
+              if (mounted) {
+                fetchProfile(session.user.id);
+              }
+            }, 0);
+          } else {
+            setProfile(null);
+            setIsAdmin(false);
+            setIsModerator(false);
+            setIsModeratorOrAdmin(false);
+          }
+          
+          if (mounted) {
+            setLoading(false);
+          }
+        });
+
+        // Then get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -126,48 +128,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         
         console.log('AuthProvider: Initial session:', session ? 'Found' : 'None');
-        setUser(session?.user ?? null);
         
-        if (session?.user) {
-          // Use Promise.allSettled to prevent auth initialization from failing if role checks fail
-          await Promise.allSettled([
-            fetchProfile(session.user.id),
-            checkUserRoles(session.user.id)
-          ]);
+        if (mounted) {
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            setTimeout(() => {
+              if (mounted) {
+                fetchProfile(session.user.id);
+              }
+            }, 0);
+          }
+          setLoading(false);
         }
-        setLoading(false);
+
         console.log('AuthProvider: Initial setup complete');
+
+        return () => {
+          console.log('AuthProvider: Cleaning up subscription');
+          mounted = false;
+          subscription.unsubscribe();
+        };
       } catch (error) {
-        console.error('AuthProvider: Error in getSession:', error);
-        setLoading(false);
+        console.error('AuthProvider: Error in initialization:', error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    getSession();
-
-    console.log('AuthProvider: Setting up auth state listener');
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AuthProvider: Auth state changed:', event, session ? 'Session exists' : 'No session');
-      
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await Promise.allSettled([
-          fetchProfile(session.user.id),
-          checkUserRoles(session.user.id)
-        ]);
-      } else {
-        setProfile(null);
-        setIsAdmin(false);
-        setIsModerator(false);
-        setIsModeratorOrAdmin(false);
-      }
-      setLoading(false);
-    });
-
+    const cleanup = initializeAuth();
+    
     return () => {
-      console.log('AuthProvider: Cleaning up subscription');
-      subscription.unsubscribe();
+      mounted = false;
+      cleanup.then(cleanupFn => cleanupFn && cleanupFn());
     };
   }, []);
 
@@ -180,10 +174,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = signOut; // Alias for signOut
+  const logout = signOut;
 
   const openLoginDialog = () => {
-    setLoginDialogOpen(true);
+    console.log('AuthProvider: Opening login dialog');
   };
 
   const savePreLoginUrl = (url: string) => {

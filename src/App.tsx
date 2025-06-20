@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -14,44 +13,57 @@ import ErrorBoundary from "./components/ErrorBoundary";
 console.log('App.tsx: Starting to load');
 console.log('App.tsx: Supabase configured?', isSupabaseConfigured);
 
-// Simplified loading fallback component
-const LoadingFallback = () => (
-  <div className="h-screen w-full flex items-center justify-center bg-gray-900">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
-      <p className="text-white">Loading WoDaGOAT...</p>
-      <p className="text-gray-400 text-sm mt-2">Initializing application...</p>
+// Enhanced loading fallback component with timeout
+const LoadingFallback = () => {
+  console.log('LoadingFallback: Rendering');
+  return (
+    <div className="h-screen w-full flex items-center justify-center bg-gray-900">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+        <p className="text-white">Loading WoDaGOAT...</p>
+        <p className="text-gray-400 text-sm mt-2">Initializing application...</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Index = lazy(() => {
   console.log('App.tsx: Loading Index page');
   return import("./pages/Index").catch(error => {
     console.error('App.tsx: Failed to load Index page:', error);
-    throw error;
+    // Return a fallback component instead of throwing
+    return {
+      default: () => (
+        <div className="container mx-auto px-4 py-8 text-center text-white">
+          <h1 className="text-2xl font-bold mb-4">Welcome to WoDaGOAT</h1>
+          <p>Loading error occurred. Please refresh the page.</p>
+        </div>
+      )
+    };
   });
 });
 
-const CategoryPage = lazy(() => import("./pages/CategoryPage"));
-const CreateRankingPage = lazy(() => import("./pages/CreateRankingPage"));
-const UserRankingPage = lazy(() => import("./pages/UserRankingPage"));
-const UserProfilePage = lazy(() => import("./pages/UserProfilePage"));
-const PublicProfilePage = lazy(() => import("./pages/PublicProfilePage"));
-const FeedPage = lazy(() => import("./pages/FeedPage"));
-const QuizPage = lazy(() => import("./pages/QuizPage"));
-const ContactPage = lazy(() => import("./pages/ContactPage"));
-const GdprPage = lazy(() => import("./pages/GdprPage"));
-const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
-const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage"));
+// Keep other lazy imports simple for now
+const CategoryPage = lazy(() => import("./pages/CategoryPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const CreateRankingPage = lazy(() => import("./pages/CreateRankingPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const UserRankingPage = lazy(() => import("./pages/UserRankingPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const UserProfilePage = lazy(() => import("./pages/UserProfilePage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const PublicProfilePage = lazy(() => import("./pages/PublicProfilePage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const FeedPage = lazy(() => import("./pages/FeedPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const QuizPage = lazy(() => import("./pages/QuizPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const ContactPage = lazy(() => import("./pages/ContactPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const GdprPage = lazy(() => import("./pages/GdprPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const NotFound = lazy(() => import("./pages/NotFound").catch(() => ({ default: () => <div>Page not found</div> })));
+const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false, // Prevent unnecessary refetches
     },
   },
 });
@@ -75,56 +87,44 @@ function App() {
 
   console.log('App.tsx: About to render main app structure');
 
-  try {
-    return (
-      <ErrorBoundary>
-        <HelmetProvider>
-          <QueryClientProvider client={queryClient}>
-            <Router>
-              <AuthProvider>
-                <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-                  <Navbar />
-                  <main className="flex-grow">
-                    <Suspense fallback={<LoadingFallback />}>
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/category/:categoryId" element={<CategoryPage />} />
-                        <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
-                        <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
-                        <Route path="/profile" element={<UserProfilePage />} />
-                        <Route path="/users/:userId" element={<PublicProfilePage />} />
-                        <Route path="/feed" element={<FeedPage />} />
-                        <Route path="/quiz" element={<QuizPage />} />
-                        <Route path="/contact" element={<ContactPage />} />
-                        <Route path="/gdpr" element={<GdprPage />} />
-                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                        <Route path="/admin/users" element={<UserManagementPage />} />
-                        <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
-                        <Route path="/admin/comments" element={<CommentManagementPage />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Suspense>
-                  </main>
-                  <Footer />
-                </div>
-                <SonnerToaster />
-              </AuthProvider>
-            </Router>
-          </QueryClientProvider>
-        </HelmetProvider>
-      </ErrorBoundary>
-    );
-  } catch (error) {
-    console.error('App.tsx: Error rendering app:', error);
-    return (
-      <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Application Error</h1>
-          <p>Failed to initialize the application. Check console for details.</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <ErrorBoundary>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <AuthProvider>
+              <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+                <Navbar />
+                <main className="flex-grow">
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/category/:categoryId" element={<CategoryPage />} />
+                      <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
+                      <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                      <Route path="/profile" element={<UserProfilePage />} />
+                      <Route path="/users/:userId" element={<PublicProfilePage />} />
+                      <Route path="/feed" element={<FeedPage />} />
+                      <Route path="/quiz" element={<QuizPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/gdpr" element={<GdprPage />} />
+                      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/admin/users" element={<UserManagementPage />} />
+                      <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
+                      <Route path="/admin/comments" element={<CommentManagementPage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </main>
+                <Footer />
+              </div>
+              <SonnerToaster />
+            </AuthProvider>
+          </Router>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
+  );
 }
 
 console.log('App.tsx: App component defined');
