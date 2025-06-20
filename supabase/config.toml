@@ -16,10 +16,10 @@ enable_signup = true
 enable_confirmations = false
 
 [auth.external.google]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
+enabled = true
+client_id = "your_google_client_id_here"
+secret = "your_google_client_secret_here"
+redirect_uri = "http://localhost:3000"
 
 [auth.external.facebook]
 enabled = false
