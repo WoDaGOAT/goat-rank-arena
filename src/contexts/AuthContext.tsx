@@ -58,21 +58,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkUserRoles = async (userId: string) => {
     console.log('AuthProvider: Checking user roles for', userId);
     try {
-      const [adminResult, moderatorResult, moderatorOrAdminResult] = await Promise.all([
+      // Use Promise.allSettled to prevent one failed request from breaking all others
+      const [adminResult, moderatorResult, moderatorOrAdminResult] = await Promise.allSettled([
         supabase.rpc('is_admin', { p_user_id: userId }),
         supabase.rpc('is_moderator', { p_user_id: userId }),
         supabase.rpc('is_moderator_or_admin', { p_user_id: userId })
       ]);
 
       console.log('AuthProvider: Role check results', {
-        admin: adminResult.data,
-        moderator: moderatorResult.data,
-        moderatorOrAdmin: moderatorOrAdminResult.data
+        admin: adminResult.status === 'fulfilled' ? adminResult.value.data : 'failed',
+        moderator: moderatorResult.status === 'fulfilled' ? moderatorResult.value.data : 'failed',
+        moderatorOrAdmin: moderatorOrAdminResult.status === 'fulfilled' ? moderatorOrAdminResult.value.data : 'failed'
       });
 
-      setIsAdmin(adminResult.data || false);
-      setIsModerator(moderatorResult.data || false);
-      setIsModeratorOrAdmin(moderatorOrAdminResult.data || false);
+      setIsAdmin(adminResult.status === 'fulfilled' ? (adminResult.value.data || false) : false);
+      setIsModerator(moderatorResult.status === 'fulfilled' ? (moderatorResult.value.data || false) : false);
+      setIsModeratorOrAdmin(moderatorOrAdminResult.status === 'fulfilled' ? (moderatorOrAdminResult.value.data || false) : false);
     } catch (error) {
       console.error('AuthProvider: Error checking user roles:', error);
       setIsAdmin(false);
@@ -105,7 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refetchUser = async () => {
     if (user) {
-      await Promise.all([
+      await Promise.allSettled([
         fetchProfile(user.id),
         checkUserRoles(user.id)
       ]);
@@ -128,7 +129,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await Promise.all([
+          // Use Promise.allSettled to prevent auth initialization from failing if role checks fail
+          await Promise.allSettled([
             fetchProfile(session.user.id),
             checkUserRoles(session.user.id)
           ]);
@@ -150,7 +152,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await Promise.all([
+        await Promise.allSettled([
           fetchProfile(session.user.id),
           checkUserRoles(session.user.id)
         ]);
@@ -171,7 +173,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     console.log('AuthProvider: Signing out');
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('AuthProvider: Error signing out:', error);
+    }
   };
 
   const logout = signOut; // Alias for signOut
@@ -181,15 +187,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const savePreLoginUrl = (url: string) => {
-    localStorage.setItem('preLoginUrl', url);
+    try {
+      localStorage.setItem('preLoginUrl', url);
+    } catch (error) {
+      console.error('AuthProvider: Error saving preLoginUrl:', error);
+    }
   };
 
   const getAndClearPreLoginUrl = () => {
-    const url = localStorage.getItem('preLoginUrl');
-    if (url) {
-      localStorage.removeItem('preLoginUrl');
+    try {
+      const url = localStorage.getItem('preLoginUrl');
+      if (url) {
+        localStorage.removeItem('preLoginUrl');
+      }
+      return url;
+    } catch (error) {
+      console.error('AuthProvider: Error getting preLoginUrl:', error);
+      return null;
     }
-    return url;
   };
 
   console.log('AuthProvider: Rendering with loading =', loading);

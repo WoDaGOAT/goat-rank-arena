@@ -14,9 +14,23 @@ import ErrorBoundary from "./components/ErrorBoundary";
 console.log('App.tsx: Starting to load');
 console.log('App.tsx: Supabase configured?', isSupabaseConfigured);
 
+// Simplified loading fallback component
+const LoadingFallback = () => (
+  <div className="h-screen w-full flex items-center justify-center bg-gray-900">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+      <p className="text-white">Loading WoDaGOAT...</p>
+      <p className="text-gray-400 text-sm mt-2">Initializing application...</p>
+    </div>
+  </div>
+);
+
 const Index = lazy(() => {
   console.log('App.tsx: Loading Index page');
-  return import("./pages/Index");
+  return import("./pages/Index").catch(error => {
+    console.error('App.tsx: Failed to load Index page:', error);
+    throw error;
+  });
 });
 
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
@@ -61,51 +75,56 @@ function App() {
 
   console.log('App.tsx: About to render main app structure');
 
-  return (
-    <ErrorBoundary>
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <AuthProvider>
-              <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-                <Navbar />
-                <main className="flex-grow">
-                  <Suspense fallback={
-                    <div className="h-screen w-full flex items-center justify-center bg-gray-900">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
-                        <p className="text-white">Loading...</p>
-                      </div>
-                    </div>
-                  }>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/category/:categoryId" element={<CategoryPage />} />
-                      <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
-                      <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
-                      <Route path="/profile" element={<UserProfilePage />} />
-                      <Route path="/users/:userId" element={<PublicProfilePage />} />
-                      <Route path="/feed" element={<FeedPage />} />
-                      <Route path="/quiz" element={<QuizPage />} />
-                      <Route path="/contact" element={<ContactPage />} />
-                      <Route path="/gdpr" element={<GdprPage />} />
-                      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                      <Route path="/admin/users" element={<UserManagementPage />} />
-                      <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
-                      <Route path="/admin/comments" element={<CommentManagementPage />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </main>
-                <Footer />
-              </div>
-              <SonnerToaster />
-            </AuthProvider>
-          </Router>
-        </QueryClientProvider>
-      </HelmetProvider>
-    </ErrorBoundary>
-  );
+  try {
+    return (
+      <ErrorBoundary>
+        <HelmetProvider>
+          <QueryClientProvider client={queryClient}>
+            <Router>
+              <AuthProvider>
+                <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <main className="flex-grow">
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/category/:categoryId" element={<CategoryPage />} />
+                        <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
+                        <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                        <Route path="/profile" element={<UserProfilePage />} />
+                        <Route path="/users/:userId" element={<PublicProfilePage />} />
+                        <Route path="/feed" element={<FeedPage />} />
+                        <Route path="/quiz" element={<QuizPage />} />
+                        <Route path="/contact" element={<ContactPage />} />
+                        <Route path="/gdpr" element={<GdprPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route path="/admin/users" element={<UserManagementPage />} />
+                        <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
+                        <Route path="/admin/comments" element={<CommentManagementPage />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </main>
+                  <Footer />
+                </div>
+                <SonnerToaster />
+              </AuthProvider>
+            </Router>
+          </QueryClientProvider>
+        </HelmetProvider>
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('App.tsx: Error rendering app:', error);
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Application Error</h1>
+          <p>Failed to initialize the application. Check console for details.</p>
+        </div>
+      </div>
+    );
+  }
 }
 
 console.log('App.tsx: App component defined');
