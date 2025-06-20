@@ -1,1 +1,55 @@
-project_id = "iqdiaqepjekcqievefvp"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[auth]
+enabled = true
+port = 54324
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_signup = true
+enable_confirmations = false
+
+[auth.external.google]
+enabled = false
+client_id = ""
+secret = ""
+redirect_uri = ""
+
+[auth.external.facebook]
+enabled = false
+client_id = ""
+secret = ""
+redirect_uri = ""
+
+[functions]
+enabled = true
+
+[functions.post-comment]
+verify_jwt = true
+
+[db]
+port = 54322
+
+[storage]
+enabled = true
+port = 54323
+file_size_limit = "50MiB"
+
+[edge-runtime]
+enabled = true
+port = 54325
+
+[analytics]
+enabled = false
+
+[inbucket]
+enabled = true
+port = 54326
+smtp_port = 54327
+pop3_port = 54328

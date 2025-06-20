@@ -28,33 +28,80 @@ const CommentForm = ({ categoryId, onSuccess }: CommentFormProps) => {
         throw new Error("User not authenticated");
       }
       
-      const { data, error } = await supabase.functions.invoke("post-comment", {
-        body: {
-          categoryId: categoryId,
-          commentText: commentText,
-        },
-      });
+      console.log("🔍 Starting comment submission...");
+      console.log("📝 Comment text:", commentText);
+      console.log("🏷️ Category ID:", categoryId);
+      console.log("👤 User ID:", user.id);
+      
+      try {
+        const { data, error } = await supabase.functions.invoke("post-comment", {
+          body: {
+            categoryId: categoryId,
+            commentText: commentText,
+          },
+        });
 
-      if (error) {
-        if (error instanceof FunctionsHttpError) {
-          const errorJson = await error.context.json();
-          throw new Error(errorJson.error || "Failed to post comment.");
+        console.log("📤 Function invoked, response:", { data, error });
+
+        if (error) {
+          console.error("❌ Edge Function error:", error);
+          
+          // Handle different types of errors
+          if (error instanceof FunctionsHttpError) {
+            console.error("❌ HTTP Error details:", error.context);
+            try {
+              const errorJson = await error.context.json();
+              console.error("❌ Error JSON:", errorJson);
+              throw new Error(errorJson.error || "Failed to post comment.");
+            } catch (parseError) {
+              console.error("❌ Error parsing response:", parseError);
+              throw new Error("Failed to post comment - server error.");
+            }
+          }
+          
+          // Handle network or deployment errors
+          if (error.message?.includes("Failed to fetch") || error.message?.includes("NetworkError")) {
+            throw new Error("Network error - please check your connection and try again.");
+          }
+          
+          if (error.message?.includes("Function not found") || error.message?.includes("404")) {
+            throw new Error("Comment function not available - please contact support.");
+          }
+          
+          throw error;
         }
-        throw error;
+
+        if (!data) {
+          console.error("❌ No data returned from function");
+          throw new Error("Comment could not be created - no response.");
+        }
+
+        console.log("✅ Comment created successfully:", data);
+        return data as CommentWithUser;
+        
+      } catch (networkError) {
+        console.error("❌ Network/Function error:", networkError);
+        
+        // Provide user-friendly error messages
+        if (networkError.message?.includes("failed to send a request")) {
+          throw new Error("Unable to reach comment service. Please check if the app is properly deployed and try again.");
+        }
+        
+        throw networkError;
       }
-
-      if (!data) throw new Error("Comment could not be created.");
-
-      return data as CommentWithUser;
     },
     onSuccess: () => {
+      console.log("✅ Comment submission successful, clearing form");
       setComment("");
       queryClient.invalidateQueries({ queryKey: ["categoryComments", categoryId] });
       toast.success("Comment posted!");
       onSuccess?.();
     },
     onError: (error) => {
+      console.error("❌ Comment submission failed:", error);
+      
       if (error.message !== "User not authenticated") {
+        // Show specific error message to user
         toast.error(error.message || "Failed to post comment. Please try again.");
       }
     },
@@ -62,8 +109,13 @@ const CommentForm = ({ categoryId, onSuccess }: CommentFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("📝 Form submitted with comment:", comment.trim());
+    
     if (comment.trim()) {
       addComment(sanitize(comment.trim()));
+    } else {
+      console.warn("⚠️ Empty comment attempted");
+      toast.error("Please enter a comment before posting.");
     }
   };
 
