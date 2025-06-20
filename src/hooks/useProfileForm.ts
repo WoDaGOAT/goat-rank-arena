@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Profile } from '@/contexts/AuthContext';
+import { Profile } from '@/types/auth';
 
 export const useProfileForm = (profile: Profile | null) => {
     const [name, setName] = useState('');
