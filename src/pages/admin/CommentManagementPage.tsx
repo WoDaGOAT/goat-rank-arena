@@ -14,7 +14,7 @@ const CommentManagementPage = () => {
             const { data, error } = await supabase.rpc('get_all_comments_for_admin');
             
             if (error) {
-                toast.error('Failed to fetch comments. You might not have admin rights.');
+                toast.error('Failed to fetch comments. You might not have moderator or admin rights.');
                 console.error('Error fetching comments for admin:', error);
                 throw new Error('Failed to fetch comments.');
             }
@@ -35,7 +35,7 @@ const CommentManagementPage = () => {
         return (
             <div className="container mx-auto px-4 py-8 text-center">
                 <h1 className="text-3xl font-bold mb-6 text-white">Comment Moderation</h1>
-                <p className="text-red-400">Error loading comments. Please ensure you are an administrator and try again.</p>
+                <p className="text-red-400">Error loading comments. Please ensure you are a moderator or administrator and try again.</p>
             </div>
         )
     }

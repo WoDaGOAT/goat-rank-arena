@@ -565,6 +565,14 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      is_moderator: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      is_moderator_or_admin: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       remove_role_from_user: {
         Args: {
           p_user_id: string
@@ -579,9 +587,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_user_status_moderator: {
+        Args: {
+          p_user_id: string
+          p_status: Database["public"]["Enums"]["user_status"]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "moderator"
       feed_item_type:
         | "new_user"
         | "new_comment"
@@ -709,7 +724,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "moderator"],
       feed_item_type: [
         "new_user",
         "new_comment",

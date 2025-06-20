@@ -16,7 +16,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database['public']['Enums']['app_role'];
 
-const ALL_ROLES: AppRole[] = ['admin', 'user'];
+const ALL_ROLES: AppRole[] = ['admin', 'moderator', 'user'];
 
 interface RoleManagerProps {
   userId: string;
@@ -62,6 +62,19 @@ const RoleManager = ({ userId, currentRoles }: RoleManagerProps) => {
     }
   };
 
+  const getRoleColor = (role: AppRole) => {
+    switch (role) {
+      case 'admin':
+        return 'text-red-400';
+      case 'moderator':
+        return 'text-yellow-400';
+      case 'user':
+        return 'text-blue-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -79,7 +92,7 @@ const RoleManager = ({ userId, currentRoles }: RoleManagerProps) => {
             checked={currentRoles.includes(role)}
             onCheckedChange={(checked) => handleRoleChange(role, !!checked)}
           >
-            <ShieldCheck className="mr-2 h-4 w-4" />
+            <ShieldCheck className={`mr-2 h-4 w-4 ${getRoleColor(role)}`} />
             <span>{role.charAt(0).toUpperCase() + role.slice(1)}</span>
           </DropdownMenuCheckboxItem>
         ))}

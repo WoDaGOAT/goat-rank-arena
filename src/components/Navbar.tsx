@@ -7,10 +7,10 @@ import Logo from "./nav/Logo";
 import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import { Link } from "react-router-dom";
-import { Rss, FileQuestion, Wrench, Users } from "lucide-react";
+import { Rss, FileQuestion, Wrench, Users, MessageSquareWarning } from "lucide-react";
 
 const Navbar = () => {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, isModeratorOrAdmin } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50">
@@ -41,6 +41,16 @@ const Navbar = () => {
                   Quiz
                 </span>
               </Link>
+              
+              {isModeratorOrAdmin && (
+                <Link
+                  to="/admin/comments"
+                  className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
+                >
+                  <MessageSquareWarning className="h-5 w-5" />
+                  <span>Comments</span>
+                </Link>
+              )}
               
               {isAdmin && (
                 <>

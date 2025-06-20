@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CommentActionsProps {
   comment: AdminComment;
@@ -29,13 +30,16 @@ interface CommentActionsProps {
 }
 
 const CommentActions = ({ comment, refetchComments }: CommentActionsProps) => {
+    const { isAdmin } = useAuth();
     const [isBanAlertOpen, setIsBanAlertOpen] = useState(false);
     const [isUnbanAlertOpen, setIsUnbanAlertOpen] = useState(false);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
     const { mutate: setUserStatus, isPending: isSettingStatus } = useMutation({
         mutationFn: async ({ userId, status }: { userId: string, status: 'active' | 'banned' }) => {
-            const { error } = await supabase.rpc('set_user_status', {
+            // Use the appropriate function based on user role
+            const functionName = isAdmin ? 'set_user_status' : 'set_user_status_moderator';
+            const { error } = await supabase.rpc(functionName, {
                 p_user_id: userId,
                 p_status: status
             });
