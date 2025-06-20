@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -66,6 +67,7 @@ export const useNotifications = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+            queryClient.invalidateQueries({ queryKey: ['friends', user?.id] });
             toast.success("Friend request accepted!");
         },
         onError: (e: Error) => {
@@ -96,9 +98,11 @@ export const useNotifications = () => {
         }
     });
 
-    // Realtime listener for new notifications
+    // Enhanced realtime listener for notifications
     useEffect(() => {
         if (!user) return;
+
+        console.log('useNotifications: Setting up realtime listener for user:', user.id);
 
         const channel = supabase
             .channel(`notifications:${user.id}`)
@@ -111,8 +115,11 @@ export const useNotifications = () => {
                     filter: `user_id=eq.${user.id}`,
                 },
                 (payload) => {
+                    console.log('useNotifications: New notification received:', payload);
                     queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
                     const newNotification = payload.new as Notification;
+                    
+                    // Show toast notifications for different types
                     if (newNotification.type === 'new_comment_reply') {
                         toast.info(`${newNotification.data.replying_user_name} replied to your comment.`);
                     } else if (newNotification.type === 'new_category') {
@@ -124,9 +131,25 @@ export const useNotifications = () => {
                     }
                 }
             )
-            .subscribe();
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'notifications',
+                    filter: `user_id=eq.${user.id}`,
+                },
+                (payload) => {
+                    console.log('useNotifications: Notification updated:', payload);
+                    queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+                }
+            )
+            .subscribe((status) => {
+                console.log('useNotifications: Realtime subscription status:', status);
+            });
 
         return () => {
+            console.log('useNotifications: Cleaning up realtime listener');
             supabase.removeChannel(channel);
         };
     }, [user, queryClient]);
