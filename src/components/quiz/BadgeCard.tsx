@@ -54,8 +54,26 @@ const iconMap: Record<string, LucideIcon> = {
   'trending-up': TrendingUp,
 };
 
+// Detailed requirements for each badge
+const badgeRequirements: Record<string, string> = {
+  'first_quiz': 'Complete your first daily quiz to earn this badge',
+  'streak_3': 'Complete daily quizzes for 3 consecutive days without missing a day',
+  'streak_10': 'Complete daily quizzes for 10 consecutive days without missing a day',
+  'perfect_score': 'Answer all 5 questions correctly in a single daily quiz (5/5 points)',
+  'triple_perfect': 'Achieve 3 perfect scores across different daily quizzes',
+  'top_10_percent': 'Finish in the top 10% of all users on any daily quiz leaderboard',
+  'top_3': 'Finish in the top 3 positions on any daily quiz leaderboard',
+  'daily_champion': 'Achieve the highest score of all users on a daily quiz',
+  'newcomer': 'Automatically earned when you join WoDaGOAT - welcome!',
+  'foot_lover': 'Achieve an overall accuracy of 45-59.9% across all your quiz attempts',
+  'expert': 'Achieve an overall accuracy of 60-74.9% across all your quiz attempts',
+  'legend': 'Achieve an overall accuracy of 75-89.9% across all your quiz attempts',
+  'goat': 'Achieve an overall accuracy of 90% or higher across all your quiz attempts'
+};
+
 const BadgeCard = ({ badge, userBadge, isEarned, className }: BadgeCardProps) => {
   const IconComponent = iconMap[badge.icon] || Sparkles;
+  const requirement = badgeRequirements[badge.id] || badge.description;
   
   return (
     <TooltipProvider>
@@ -100,13 +118,18 @@ const BadgeCard = ({ badge, userBadge, isEarned, className }: BadgeCardProps) =>
         <TooltipContent side="bottom" className="max-w-xs">
           <div className="text-center">
             <p className="font-semibold">{badge.name}</p>
-            <p className="text-sm text-gray-600">{badge.description}</p>
-            <p className="text-xs text-gray-500 mt-1 capitalize">
+            <p className="text-sm text-gray-600 mt-1">{requirement}</p>
+            <p className="text-xs text-gray-500 mt-2 capitalize">
               {badge.rarity} Badge
             </p>
+            {userBadge && (
+              <p className="text-xs text-green-600 mt-1 font-medium">
+                ✓ Earned on {new Date(userBadge.earned_at).toLocaleDateString()}
+              </p>
+            )}
             {!isEarned && (
-              <p className="text-xs text-gray-500 mt-1">
-                Complete the requirement to unlock this badge
+              <p className="text-xs text-orange-600 mt-1 font-medium">
+                🔒 Complete the requirement above to unlock
               </p>
             )}
           </div>
