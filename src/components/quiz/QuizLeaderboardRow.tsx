@@ -46,51 +46,60 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
     const getRankIcon = () => {
         console.log(`Rendering rank icon for rank ${rank}`);
         
-        try {
-            if (rank === 1) {
-                return (
-                    <div className="relative flex items-center justify-center w-10 h-10 bg-yellow-500/20 rounded-full border border-yellow-400/30">
-                        <Crown className="w-5 h-5 text-yellow-400 fill-current" />
-                        <span className="sr-only">1st Place</span>
-                    </div>
-                );
-            }
-            if (rank === 2) {
-                return (
-                    <div className="relative flex items-center justify-center w-10 h-10 bg-gray-400/20 rounded-full border border-gray-300/30">
-                        <Medal className="w-5 h-5 text-gray-300 fill-current" />
-                        <span className="sr-only">2nd Place</span>
-                    </div>
-                );
-            }
-            if (rank === 3) {
-                return (
-                    <div className="relative flex items-center justify-center w-10 h-10 bg-amber-500/20 rounded-full border border-amber-500/30">
-                        <Trophy className="w-5 h-5 text-amber-500 fill-current" />
-                        <span className="sr-only">3rd Place</span>
-                    </div>
-                );
-            }
-            
-            // Fallback for ranks 4+ with styled number
+        // Test if icons can render at all
+        console.log('Crown component:', Crown);
+        console.log('Medal component:', Medal);
+        console.log('Trophy component:', Trophy);
+        
+        if (rank === 1) {
+            console.log('Rendering Crown for rank 1');
             return (
-                <div className="relative flex items-center justify-center w-10 h-10 bg-gray-600/20 rounded-full border border-gray-500/30">
-                    <span className="font-bold text-base text-gray-300 leading-none">
-                        {rank}
-                    </span>
-                </div>
-            );
-        } catch (error) {
-            console.error('Error rendering rank icon:', error);
-            // Ultimate fallback - just show the rank number
-            return (
-                <div className="relative flex items-center justify-center w-10 h-10">
-                    <span className="font-bold text-lg text-white bg-gray-600 rounded-full w-8 h-8 flex items-center justify-center">
-                        {rank}
-                    </span>
+                <div className="flex items-center justify-center w-12 h-12 bg-yellow-500/30 rounded-full border-2 border-yellow-400/50">
+                    <Crown 
+                        size={24}
+                        className="text-yellow-400"
+                        strokeWidth={2}
+                        fill="currentColor"
+                    />
                 </div>
             );
         }
+        if (rank === 2) {
+            console.log('Rendering Medal for rank 2');
+            return (
+                <div className="flex items-center justify-center w-12 h-12 bg-gray-400/30 rounded-full border-2 border-gray-300/50">
+                    <Medal 
+                        size={24}
+                        className="text-gray-300"
+                        strokeWidth={2}
+                        fill="currentColor"
+                    />
+                </div>
+            );
+        }
+        if (rank === 3) {
+            console.log('Rendering Trophy for rank 3');
+            return (
+                <div className="flex items-center justify-center w-12 h-12 bg-amber-500/30 rounded-full border-2 border-amber-500/50">
+                    <Trophy 
+                        size={24}
+                        className="text-amber-500"
+                        strokeWidth={2}
+                        fill="currentColor"
+                    />
+                </div>
+            );
+        }
+        
+        // For ranks 4+, show the number
+        console.log(`Rendering number for rank ${rank}`);
+        return (
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-600/30 rounded-full border-2 border-gray-500/50">
+                <span className="font-bold text-lg text-gray-300">
+                    {rank}
+                </span>
+            </div>
+        );
     };
     
     const rowStyle = rank <= 3 ? `${rankBgColors[rank - 1]} border-l-4 ${rankBorderColors[rank - 1]}` : "hover:bg-white/5";
@@ -126,7 +135,7 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
     };
 
     return (
-        <div className={`grid grid-cols-[60px_1fr_120px_120px] items-center p-3 transition-colors duration-200 ${rowStyle}`}>
+        <div className={`grid grid-cols-[80px_1fr_120px_120px] items-center p-3 transition-colors duration-200 ${rowStyle}`}>
             <div className="flex items-center justify-center min-h-[48px]">
                 {getRankIcon()}
             </div>
