@@ -234,32 +234,36 @@ const QuizPage = () => {
           <div className="flex flex-wrap justify-center mb-8 gap-2">
               <Button 
                 onClick={() => setView('quiz')} 
-                variant={view === 'quiz' ? 'default' : 'outline'} 
-                className="flex-1 sm:flex-none sm:w-40"
+                variant={view === 'quiz' ? 'default' : 'secondary'} 
+                className="flex-1 sm:flex-none sm:w-40 bg-white/10 border-white/20 text-white hover:bg-white/20 data-[state=active]:bg-blue-600"
+                style={view === 'quiz' ? { backgroundColor: '#3b82f6' } : {}}
               >
                   <Swords className="mr-2 h-4 w-4" />
                   Daily Quiz
               </Button>
               <Button 
                 onClick={() => setView('leaderboard')} 
-                variant={view === 'leaderboard' ? 'default' : 'outline'} 
-                className="flex-1 sm:flex-none sm:w-40"
+                variant={view === 'leaderboard' ? 'default' : 'secondary'} 
+                className="flex-1 sm:flex-none sm:w-40 bg-white/10 border-white/20 text-white hover:bg-white/20 data-[state=active]:bg-blue-600"
+                style={view === 'leaderboard' ? { backgroundColor: '#3b82f6' } : {}}
               >
                   <Trophy className="mr-2 h-4 w-4" />
                   Leaderboard
               </Button>
               <Button 
                 onClick={() => setView('badges')} 
-                variant={view === 'badges' ? 'default' : 'outline'} 
-                className="flex-1 sm:flex-none sm:w-40"
+                variant={view === 'badges' ? 'default' : 'secondary'} 
+                className="flex-1 sm:flex-none sm:w-40 bg-white/10 border-white/20 text-white hover:bg-white/20 data-[state=active]:bg-blue-600"
+                style={view === 'badges' ? { backgroundColor: '#3b82f6' } : {}}
               >
                   <Award className="mr-2 h-4 w-4" />
                   Badges
               </Button>
               <Button 
                 onClick={() => setView('progress')} 
-                variant={view === 'progress' ? 'default' : 'outline'} 
-                className="flex-1 sm:flex-none sm:w-40"
+                variant={view === 'progress' ? 'default' : 'secondary'} 
+                className="flex-1 sm:flex-none sm:w-40 bg-white/10 border-white/20 text-white hover:bg-white/20 data-[state=active]:bg-blue-600"
+                style={view === 'progress' ? { backgroundColor: '#3b82f6' } : {}}
               >
                   <TrendingUp className="mr-2 h-4 w-4" />
                   Progress
