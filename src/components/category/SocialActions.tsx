@@ -8,67 +8,140 @@ import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface SocialActionsProps {
-  categoryId: string;
+  categoryId?: string;
+  rankingId?: string;
   initialLikes: number;
   isLiked: boolean;
-  categoryName: string;
+  categoryName?: string;
+  rankingTitle?: string;
 }
 
-export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName }: SocialActionsProps) => {
+export const SocialActions = ({ 
+  categoryId, 
+  rankingId, 
+  initialLikes, 
+  isLiked, 
+  categoryName, 
+  rankingTitle 
+}: SocialActionsProps) => {
   const { user, openLoginDialog } = useAuth();
   const queryClient = useQueryClient();
   const [hoveredReaction, setHoveredReaction] = useState<string | null>(null);
   
-  // Track user's reactions (in a real app, this would come from the database)
-  const [userReactions, setUserReactions] = useState<Record<string, boolean>>({});
-  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({
-    'thumbs-up': 2,
-    'trophy': 0,
-    'flame': 1,
-    'frown': 0,
+  const itemType = categoryId ? 'category' : 'ranking';
+  const itemId = categoryId || rankingId;
+  
+  // Fetch user's reactions for this item
+  const { data: userReactions = {} } = useQuery({
+    queryKey: ["userReactions", itemType, itemId, user?.id],
+    queryFn: async () => {
+      if (!user || !itemId) return {};
+      
+      const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
+      const { data, error } = await supabase
+        .from(tableName)
+        .select("reaction_type")
+        .eq(itemType === 'category' ? 'category_id' : 'ranking_id', itemId)
+        .eq("user_id", user.id);
+      
+      if (error) throw error;
+      
+      const reactions: Record<string, boolean> = {};
+      data.forEach(reaction => {
+        reactions[reaction.reaction_type] = true;
+      });
+      return reactions;
+    },
+    enabled: !!user && !!itemId,
+  });
+
+  // Fetch reaction counts for this item
+  const { data: reactionCounts = {} } = useQuery({
+    queryKey: ["reactionCounts", itemType, itemId],
+    queryFn: async () => {
+      if (!itemId) return {};
+      
+      const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
+      const { data, error } = await supabase
+        .from(tableName)
+        .select("reaction_type")
+        .eq(itemType === 'category' ? 'category_id' : 'ranking_id', itemId);
+      
+      if (error) throw error;
+      
+      const counts: Record<string, number> = {
+        'thumbs-up': 0,
+        'trophy': 0,
+        'flame': 0,
+        'frown': 0,
+      };
+      
+      data.forEach(reaction => {
+        counts[reaction.reaction_type] = (counts[reaction.reaction_type] || 0) + 1;
+      });
+      
+      return counts;
+    },
+    enabled: !!itemId,
   });
 
   // Fetch comment count
   const { data: commentCount = 0 } = useQuery({
-    queryKey: ["categoryCommentCount", categoryId],
+    queryKey: [itemType === 'category' ? "categoryCommentCount" : "rankingCommentCount", itemId],
     queryFn: async () => {
+      if (!itemId) return 0;
+      
+      const tableName = itemType === 'category' ? 'category_comments' : 'ranking_comments';
       const { count, error } = await supabase
-        .from("category_comments")
+        .from(tableName)
         .select("*", { count: "exact", head: true })
-        .eq("category_id", categoryId);
+        .eq(itemType === 'category' ? 'category_id' : 'ranking_id', itemId);
       
       if (error) throw error;
       return count || 0;
     },
-    enabled: !!categoryId,
+    enabled: !!itemId,
   });
 
-  const { mutate: toggleLike } = useMutation({
-    mutationFn: async () => {
-      if (!user) {
+  const { mutate: toggleReaction } = useMutation({
+    mutationFn: async (reactionType: string) => {
+      if (!user || !itemId) {
         openLoginDialog();
         throw new Error("User not authenticated");
       }
 
-      if (isLiked) {
+      const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
+      const idColumn = itemType === 'category' ? 'category_id' : 'ranking_id';
+      const wasReacted = userReactions[reactionType];
+
+      if (wasReacted) {
         const { error } = await supabase
-          .from("category_likes")
+          .from(tableName)
           .delete()
-          .match({ user_id: user.id, category_id: categoryId });
+          .match({ 
+            user_id: user.id, 
+            [idColumn]: itemId,
+            reaction_type: reactionType
+          });
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from("category_likes")
-          .insert({ user_id: user.id, category_id: categoryId });
+          .from(tableName)
+          .insert({ 
+            user_id: user.id, 
+            [idColumn]: itemId,
+            reaction_type: reactionType
+          });
         if (error) throw error;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categoryLikes", categoryId] });
+      queryClient.invalidateQueries({ queryKey: ["userReactions", itemType, itemId, user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["reactionCounts", itemType, itemId] });
     },
     onError: (error) => {
       if (error.message !== "User not authenticated") {
-        toast.error("Failed to update like status. Please try again.");
+        toast.error("Failed to update reaction. Please try again.");
       }
     },
   });
@@ -79,21 +152,7 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
       return;
     }
     
-    // Toggle user's reaction
-    const wasReacted = userReactions[reactionType];
-    const newUserReactions = { ...userReactions, [reactionType]: !wasReacted };
-    setUserReactions(newUserReactions);
-    
-    // Update counts
-    const newCounts = { ...reactionCounts };
-    if (wasReacted) {
-      newCounts[reactionType] = Math.max(0, newCounts[reactionType] - 1);
-    } else {
-      newCounts[reactionType] = newCounts[reactionType] + 1;
-    }
-    setReactionCounts(newCounts);
-    
-    toast.success(`You ${wasReacted ? 'removed' : 'added'} a ${reactionType} reaction!`);
+    toggleReaction(reactionType);
   };
 
   const reactions = [
@@ -109,7 +168,7 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
       <div className="flex items-center gap-2 sm:gap-4">
         {reactions.map(({ icon: Icon, label, tooltip, emoji }) => {
           const isReacted = userReactions[label];
-          const count = reactionCounts[label];
+          const count = reactionCounts[label] || 0;
           
           return (
             <div key={label} className="flex flex-col items-center">

@@ -39,7 +39,7 @@ interface NewRankingFeedItemProps {
 }
 
 const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
-  const { author, ranking_title, ranking_description, category_id, category_name, athletes } = data;
+  const { author, ranking_id, ranking_title, ranking_description, category_id, category_name, athletes } = data;
   const userInitial = author?.full_name?.charAt(0) || '?';
   const [showComments, setShowComments] = useState(false);
   const sanitizedAuthorName = sanitize(author.full_name);
@@ -99,10 +99,10 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
       <div className="border-t border-gray-700/50">
         <div className="p-3">
           <SocialActions 
-            categoryId={category_id}
+            rankingId={ranking_id}
             initialLikes={0}
             isLiked={false}
-            categoryName={category_name}
+            rankingTitle={ranking_title}
           />
         </div>
         <div className="px-3 pb-3 flex justify-between items-center">
