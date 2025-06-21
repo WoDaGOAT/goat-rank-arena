@@ -2,7 +2,6 @@
 import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Trophy, Crown } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
 
 interface GlobalLeaderboardProps {
@@ -16,12 +15,8 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
     <Card className="shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20">
       <CardHeader className="border-b border-white/30 bg-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5"></div>
-        <div className="relative flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Crown className="w-8 h-8 text-yellow-400" />
-            <Trophy className="w-6 h-6 text-blue-300" />
-          </div>
-          <div>
+        <div className="relative flex items-center justify-center">
+          <div className="text-center">
             <h2 className="text-2xl font-bold text-white mb-1">
               {sanitize(categoryName)}
             </h2>
