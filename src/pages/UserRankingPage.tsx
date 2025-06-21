@@ -124,7 +124,7 @@ const UserRankingPage = () => {
                       <div>
                         <p className="text-sm text-gray-400">Created by</p>
                         <UserHoverCard user={{ id: ranking.user_id, full_name: ranking.profiles.full_name, avatar_url: ranking.profiles.avatar_url }}>
-                            <Link to={`/user/${ranking.user_id}`} className="font-semibold text-white hover:underline">
+                            <Link to={`/users/${ranking.user_id}`} className="font-semibold text-white hover:underline">
                                 {ranking.profiles.full_name || 'Anonymous User'}
                             </Link>
                         </UserHoverCard>

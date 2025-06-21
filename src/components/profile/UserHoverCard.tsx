@@ -106,7 +106,7 @@ const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
             <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div className="space-y-1 flex-1">
-            <Link to={`/user/${user.id}`} className="hover:underline">
+            <Link to={`/users/${user.id}`} className="hover:underline">
               <h4 className="text-sm font-semibold">{user.full_name || 'Anonymous User'}</h4>
             </Link>
             <p className="text-sm text-muted-foreground">

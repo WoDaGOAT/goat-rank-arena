@@ -25,7 +25,7 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
     return (
         <Card className="bg-white/5 text-white border-gray-700">
             <CardContent className="p-4 flex items-center gap-4">
-                <Link to={`/user/${user.id}`}>
+                <Link to={`/users/${user.id}`}>
                     <Avatar>
                         <AvatarImage src={data.avatar_url || undefined} alt={data.user_name || 'User'}/>
                         <AvatarFallback>{data.user_name?.charAt(0) || 'U'}</AvatarFallback>
@@ -34,7 +34,7 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
                 <div className="flex-1">
                     <p>
                         <UserHoverCard user={user}>
-                            <Link to={`/user/${user.id}`} className="font-bold hover:underline">
+                            <Link to={`/users/${user.id}`} className="font-bold hover:underline">
                                 {data.user_name || 'A new user'}
                             </Link>
                         </UserHoverCard>

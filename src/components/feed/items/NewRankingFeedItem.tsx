@@ -72,7 +72,7 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
                 </Avatar>
                 <p className="text-sm text-gray-200">
                   <UserHoverCard user={user}>
-                      <Link to={`/user/${user.id}`} className="font-semibold hover:underline">
+                      <Link to={`/users/${user.id}`} className="font-semibold hover:underline">
                           {sanitizedAuthorName || "A user"}
                       </Link>
                   </UserHoverCard>
