@@ -37,10 +37,10 @@ const handler = async (req: Request): Promise<Response> => {
     const { name, email, subject, message }: ContactFormPayload = await req.json();
     console.log("Processing contact form submission:", { name, email, subject });
 
-    // Email to admin - using the verified wodagoat@gmail.com address
+    // Email to admin - using Resend's default verified domain
     console.log("Sending admin notification email...");
     const adminEmail = await resend.emails.send({
-      from: "WoDaGOAT Contact <wodagoat@gmail.com>",
+      from: "WoDaGOAT Contact <onboarding@resend.dev>",
       to: [CONTACT_EMAIL],
       subject: `New contact form submission: ${subject}`,
       html: `
@@ -65,10 +65,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Admin email sent successfully:", adminEmail.data);
 
-    // Confirmation email to user - using the verified wodagoat@gmail.com address
+    // Confirmation email to user - using Resend's default verified domain
     console.log("Sending user confirmation email...");
     const userEmail = await resend.emails.send({
-      from: "WoDaGOAT Team <wodagoat@gmail.com>",
+      from: "WoDaGOAT Team <onboarding@resend.dev>",
       to: [email],
       subject: "We've received your message!",
       html: `
