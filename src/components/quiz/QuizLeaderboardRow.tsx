@@ -1,89 +1,64 @@
 
 import { QuizLeaderboardUser } from '@/hooks/useQuizLeaderboard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Crown, Medal, Trophy, Award } from 'lucide-react';
+import { Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { 
+  getBadgeById, 
+  getBadgeIcon, 
+  getBadgeRarityColor, 
+  getRankFallback 
+} from '@/utils/badgeLookup';
 
 interface QuizLeaderboardRowProps {
   user: QuizLeaderboardUser;
   rank: number;
 }
 
-const rankBgColors = [
-    "bg-yellow-500/10",
-    "bg-gray-400/10",
-    "bg-amber-600/10",
-];
-
-const rankTextColors = [
-    "text-yellow-400",
-    "text-gray-300",
-    "text-amber-500",
-];
-
-const rankBorderColors = [
-    "border-yellow-500/30",
-    "border-gray-400/30",
-    "border-amber-600/30",
-];
-
-const badgeRarityColors = {
-    legendary: "text-yellow-400",
-    epic: "text-purple-400", 
-    rare: "text-blue-400",
-    common: "text-green-400"
-};
-
 const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
-    // Debug logging
     console.log(`QuizLeaderboardRow for user ${user.user_id} at rank ${rank}:`, {
         highest_badge_id: user.highest_badge_id,
         highest_badge_name: user.highest_badge_name,
         highest_badge_rarity: user.highest_badge_rarity,
-        user_object: user
     });
 
     const getRankIcon = () => {
-        console.log(`Rendering rank icon for rank ${rank}`);
-        
-        // Test if icons can render at all
-        console.log('Crown component:', Crown);
-        console.log('Medal component:', Medal);
-        console.log('Trophy component:', Trophy);
-        
-        if (rank === 1) {
-            console.log('Rendering Crown for rank 1');
-            return (
-                <div className="flex items-center justify-center w-12 h-12 bg-yellow-500/30 rounded-full border-2 border-yellow-400/50">
-                    <Crown 
-                        size={24}
-                        className="text-yellow-400"
-                        strokeWidth={2}
-                        fill="currentColor"
-                    />
-                </div>
-            );
+        // Try to get the user's actual badge first
+        if (user.highest_badge_id) {
+            const badge = getBadgeById(user.highest_badge_id);
+            if (badge) {
+                const IconComponent = getBadgeIcon(badge);
+                const rarityColor = getBadgeRarityColor(user.highest_badge_rarity || 'common');
+                
+                console.log(`Displaying badge icon for ${badge.name} with rarity ${badge.rarity}`);
+                
+                return (
+                    <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
+                        rank <= 3 ? getRankFallback(rank).bgColor : 'bg-gray-600/30'
+                    } ${
+                        rank <= 3 ? getRankFallback(rank).borderColor : 'border-gray-500/50'
+                    }`}>
+                        <IconComponent 
+                            size={24}
+                            className={rarityColor}
+                            strokeWidth={2}
+                        />
+                    </div>
+                );
+            }
         }
-        if (rank === 2) {
-            console.log('Rendering Medal for rank 2');
+        
+        // Fallback to rank-based icons
+        const fallback = getRankFallback(rank);
+        console.log(`Using rank fallback for rank ${rank}`);
+        
+        if (fallback.icon) {
+            const IconComponent = fallback.icon;
             return (
-                <div className="flex items-center justify-center w-12 h-12 bg-gray-400/30 rounded-full border-2 border-gray-300/50">
-                    <Medal 
+                <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${fallback.bgColor} ${fallback.borderColor}`}>
+                    <IconComponent 
                         size={24}
-                        className="text-gray-300"
-                        strokeWidth={2}
-                        fill="currentColor"
-                    />
-                </div>
-            );
-        }
-        if (rank === 3) {
-            console.log('Rendering Trophy for rank 3');
-            return (
-                <div className="flex items-center justify-center w-12 h-12 bg-amber-500/30 rounded-full border-2 border-amber-500/50">
-                    <Trophy 
-                        size={24}
-                        className="text-amber-500"
+                        className={fallback.textColor}
                         strokeWidth={2}
                         fill="currentColor"
                     />
@@ -92,31 +67,30 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
         }
         
         // For ranks 4+, show the number
-        console.log(`Rendering number for rank ${rank}`);
         return (
-            <div className="flex items-center justify-center w-12 h-12 bg-gray-600/30 rounded-full border-2 border-gray-500/50">
-                <span className="font-bold text-lg text-gray-300">
+            <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${fallback.bgColor} ${fallback.borderColor}`}>
+                <span className={`font-bold text-lg ${fallback.textColor}`}>
                     {rank}
                 </span>
             </div>
         );
     };
     
-    const rowStyle = rank <= 3 ? `${rankBgColors[rank - 1]} border-l-4 ${rankBorderColors[rank - 1]}` : "hover:bg-white/5";
+    const rowStyle = rank <= 3 ? `${getRankFallback(rank).bgColor.replace('/30', '/10')} border-l-4 ${getRankFallback(rank).borderColor}` : "hover:bg-white/5";
 
     const getBadgeDisplay = () => {
-        // More detailed debugging
         console.log('getBadgeDisplay called with:', {
+            badge_id: user.highest_badge_id,
             badge_name: user.highest_badge_name,
             badge_rarity: user.highest_badge_rarity,
-            type_of_badge_name: typeof user.highest_badge_name,
-            type_of_badge_rarity: typeof user.highest_badge_rarity
         });
 
-        // Check if badge data exists and is not null/empty
-        if (user.highest_badge_name && user.highest_badge_name.trim() !== '') {
-            const rarityColor = badgeRarityColors[user.highest_badge_rarity as keyof typeof badgeRarityColors] || "text-gray-400";
-            console.log(`Displaying badge: ${user.highest_badge_name} with rarity: ${user.highest_badge_rarity} and color: ${rarityColor}`);
+        // Show actual badge if available
+        if (user.highest_badge_id && user.highest_badge_name) {
+            const badge = getBadgeById(user.highest_badge_id);
+            const rarityColor = getBadgeRarityColor(user.highest_badge_rarity || 'common');
+            
+            console.log(`Displaying badge: ${user.highest_badge_name} with rarity: ${user.highest_badge_rarity}`);
             
             return (
                 <div className="flex items-center gap-1">
@@ -126,12 +100,11 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
             );
         }
         
-        // Fallback for users without badges or with null/empty badge names
-        console.log(`No badge found for user ${user.user_id}, using rank fallback for rank ${rank}`);
-        if (rank === 1) return <span className="text-sm text-yellow-400">Quiz Champion</span>;
-        if (rank === 2) return <span className="text-sm text-gray-300">2nd Place</span>;
-        if (rank === 3) return <span className="text-sm text-amber-500">3rd Place</span>;
-        return <span className="text-sm text-gray-400">Rank #{rank}</span>;
+        // Fallback to rank-based labels
+        const fallback = getRankFallback(rank);
+        console.log(`No badge found, using rank fallback: ${fallback.label}`);
+        
+        return <span className={`text-sm ${fallback.textColor}`}>{fallback.label}</span>;
     };
 
     return (
