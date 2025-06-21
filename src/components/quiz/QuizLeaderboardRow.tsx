@@ -1,7 +1,7 @@
 
 import { QuizLeaderboardUser } from '@/hooks/useQuizLeaderboard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Crown, Medal, Trophy } from 'lucide-react';
+import { Crown, Medal, Trophy, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface QuizLeaderboardRowProps {
@@ -27,6 +27,13 @@ const rankBorderColors = [
     "border-amber-600/30",
 ];
 
+const badgeRarityColors = {
+    legendary: "text-yellow-400",
+    epic: "text-purple-400", 
+    rare: "text-blue-400",
+    common: "text-green-400"
+};
+
 const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
 
     const getRankIcon = () => {
@@ -37,6 +44,24 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
     };
     
     const rowStyle = rank <= 3 ? `${rankBgColors[rank - 1]} border-l-4 ${rankBorderColors[rank - 1]}` : "hover:bg-white/5";
+
+    const getBadgeDisplay = () => {
+        if (user.highest_badge_name) {
+            const rarityColor = badgeRarityColors[user.highest_badge_rarity as keyof typeof badgeRarityColors] || "text-gray-400";
+            return (
+                <div className="flex items-center gap-1">
+                    <Award className={`w-3 h-3 ${rarityColor}`} />
+                    <span className={`text-sm ${rarityColor}`}>{user.highest_badge_name}</span>
+                </div>
+            );
+        }
+        
+        // Fallback for users without badges
+        if (rank === 1) return <span className="text-sm text-yellow-400">Quiz Champion</span>;
+        if (rank === 2) return <span className="text-sm text-gray-300">2nd Place</span>;
+        if (rank === 3) return <span className="text-sm text-amber-500">3rd Place</span>;
+        return <span className="text-sm text-gray-400">Rank {rank}</span>;
+    };
 
     return (
         <div className={`grid grid-cols-[60px_1fr_120px_120px] items-center p-3 transition-colors duration-200 ${rowStyle}`}>
@@ -49,9 +74,7 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
                 </Avatar>
                 <div className="truncate">
                     <p className="font-semibold text-white group-hover:underline truncate">{user.full_name || 'Anonymous User'}</p>
-                    <p className={`text-sm ${rank <=3 ? rankTextColors[rank-1] : 'text-gray-400'}`}>
-                        {rank === 1 ? "Quiz Champion" : `Rank ${rank}`}
-                    </p>
+                    {getBadgeDisplay()}
                 </div>
             </Link>
             

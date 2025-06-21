@@ -686,6 +686,9 @@ export type Database = {
           avatar_url: string
           total_score: number
           quizzes_completed: number
+          highest_badge_id: string
+          highest_badge_name: string
+          highest_badge_rarity: string
         }[]
       }
       get_user_status: {

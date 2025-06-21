@@ -9,6 +9,9 @@ export interface QuizLeaderboardUser {
     avatar_url: string | null;
     total_score: number;
     quizzes_completed: number;
+    highest_badge_id: string | null;
+    highest_badge_name: string | null;
+    highest_badge_rarity: string | null;
 }
 
 const fetchQuizLeaderboard = async (): Promise<QuizLeaderboardUser[]> => {
