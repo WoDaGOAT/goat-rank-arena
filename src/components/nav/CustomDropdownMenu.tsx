@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -156,9 +155,9 @@ const CustomDropdownMenu = () => {
                                         transition-all duration-200 rounded-lg
                                         ${isActive 
                                             ? 'bg-gradient-to-r from-fuchsia-500/30 to-cyan-500/30 border-2 border-fuchsia-400/50 shadow-lg hover:from-fuchsia-500/20 hover:to-cyan-500/20 hover:border-fuchsia-400/30' 
-                                            : 'hover:bg-white/10 hover:scale-105'
+                                            : 'hover:bg-white/10'
                                         }
-                                        ${isOpen && !isActive ? 'bg-white/20 scale-105' : ''}
+                                        ${isOpen && !isActive ? 'bg-white/20' : ''}
                                     `}
                                     disabled={!hasChildren}
                                 >
