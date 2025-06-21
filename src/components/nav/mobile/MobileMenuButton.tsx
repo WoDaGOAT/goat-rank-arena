@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Menu } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MobileMenuButtonProps {
@@ -16,7 +16,7 @@ const MobileMenuButton = ({ onClick }: MobileMenuButtonProps) => {
       className="lg:hidden h-10 w-10 p-0 hover:bg-white/10 text-white"
       aria-label="Open menu"
     >
-      <Menu className="h-5 w-5" />
+      <Plus className="h-5 w-5" />
     </Button>
   );
 };
