@@ -47,7 +47,9 @@ export const useUserStats = () => {
         let perfectScores = 0;
         
         attempts.forEach(attempt => {
-          const questionCount = attempt.quizzes?.quiz_questions?.length || 0;
+          // Handle the quiz data structure properly
+          const quiz = Array.isArray(attempt.quizzes) ? attempt.quizzes[0] : attempt.quizzes;
+          const questionCount = quiz?.quiz_questions?.length || 0;
           totalCorrect += attempt.score;
           totalQuestions += questionCount;
           if (attempt.score === questionCount && questionCount > 0) {
