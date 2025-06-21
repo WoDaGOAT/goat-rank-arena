@@ -79,6 +79,7 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
               comment={comment}
               replies={repliesMap[comment.id] || []}
               categoryId={categoryId}
+              allComments={comments || []}
             />
           ))}
         </div>

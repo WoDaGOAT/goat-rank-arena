@@ -14,16 +14,23 @@ interface CommentItemProps {
   replies?: CommentWithUser[];
   categoryId: string;
   isReply?: boolean;
+  allComments?: CommentWithUser[]; // Pass all comments to find nested replies
 }
 
-const CommentItem = ({ comment, replies = [], categoryId, isReply = false }: CommentItemProps) => {
+const CommentItem = ({ comment, replies = [], categoryId, isReply = false, allComments = [] }: CommentItemProps) => {
   const { user, openLoginDialog } = useAuth();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showReplies, setShowReplies] = useState(true);
   
   const authorName = sanitize(comment.profiles?.full_name) || "Anonymous";
   const authorAvatar = comment.profiles?.avatar_url;
-  const replyCount = replies.length;
+  
+  // For nested comments, find replies to this specific comment
+  const directReplies = isReply 
+    ? allComments.filter(c => c.parent_comment_id === comment.id)
+    : replies;
+  
+  const replyCount = directReplies.length;
 
   const handleReplyClick = () => {
     if (!user) {
@@ -39,7 +46,7 @@ const CommentItem = ({ comment, replies = [], categoryId, isReply = false }: Com
   };
 
   if (isReply) {
-    // Render as a nested reply with simpler structure
+    // Render as a nested reply with simpler structure but support for further nesting
     return (
       <div className="flex gap-3">
         <Avatar className="w-6 h-6 flex-shrink-0">
@@ -81,6 +88,47 @@ const CommentItem = ({ comment, replies = [], categoryId, isReply = false }: Com
                 onCancel={() => setShowReplyForm(false)}
                 onSuccess={handleReplySuccess}
               />
+            </div>
+          )}
+
+          {/* Show nested replies if any exist */}
+          {replyCount > 0 && (
+            <div className="mt-3">
+              {/* Show/hide replies button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReplies(!showReplies)}
+                className="text-blue-400 hover:text-blue-300 h-6 px-0 text-xs font-medium hover:bg-transparent mb-2"
+              >
+                {showReplies ? (
+                  <>
+                    <ChevronUp className="w-3 h-3 mr-1" />
+                    Hide {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-3 h-3 mr-1" />
+                    View {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+                  </>
+                )}
+              </Button>
+
+              {/* Nested replies with visual hierarchy */}
+              {showReplies && (
+                <div className="ml-4 border-l border-white/10 pl-3 space-y-3">
+                  {directReplies.map((reply) => (
+                    <CommentItem
+                      key={reply.id}
+                      comment={reply}
+                      replies={[]}
+                      categoryId={categoryId}
+                      isReply={true}
+                      allComments={allComments}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -174,6 +222,7 @@ const CommentItem = ({ comment, replies = [], categoryId, isReply = false }: Com
                       replies={[]}
                       categoryId={categoryId}
                       isReply={true}
+                      allComments={allComments}
                     />
                   ))}
                 </div>
