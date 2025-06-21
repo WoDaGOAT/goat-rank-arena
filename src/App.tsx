@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -111,6 +111,7 @@ function App() {
                       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                       <Route path="/admin/users" element={<UserManagementPage />} />
                       <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
+                      <Route path="/admin/create-quiz" element={<Navigate to="/admin/quizzes/new" replace />} />
                       <Route path="/admin/comments" element={<CommentManagementPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
