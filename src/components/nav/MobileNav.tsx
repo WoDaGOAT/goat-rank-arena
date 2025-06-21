@@ -1,9 +1,9 @@
-
 import React, { useState } from "react";
-import { Menu, X, Rss, FileQuestion, Trophy, CircleUser, UserPlus, LogIn, Info, Mail, HelpCircle } from "lucide-react";
+import { Menu, X, Rss, FileQuestion, Trophy, CircleUser, UserPlus, LogIn, Info, Mail, HelpCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import LoginDialog from "@/components/auth/LoginDialog";
@@ -21,6 +21,7 @@ const MobileNav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const { user, logout, profile } = useAuth();
 
   const { data: allCategories } = useQuery<Category[]>({
@@ -74,6 +75,18 @@ const MobileNav = () => {
     setIsOpen(false);
   };
 
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(categoryId) 
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const isCategoryExpanded = (categoryId: string) => {
+    return expandedCategories.includes(categoryId);
+  };
+
   return (
     <>
       {/* Mobile menu button */}
@@ -87,30 +100,31 @@ const MobileNav = () => {
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Full-screen mobile menu overlay with proper isolation */}
+      {/* Full-screen mobile menu overlay */}
       <div 
         className={`fixed inset-0 lg:hidden transition-all duration-300 ease-in-out ${
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         style={{ 
-          zIndex: 9999,
+          zIndex: 999999,
           isolation: 'isolate'
         }}
       >
-        {/* Dark backdrop overlay - completely blocks underlying content */}
+        {/* Backdrop overlay */}
         <div 
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-black backdrop-blur-md"
           onClick={() => setIsOpen(false)}
           style={{ 
             zIndex: 1,
             width: '100vw',
-            height: '100vh'
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.95)'
           }}
         />
         
-        {/* Menu panel with solid background and proper stacking */}
+        {/* Menu panel */}
         <div 
-          className={`absolute inset-0 bg-slate-900 shadow-2xl transform transition-transform duration-300 ease-in-out ${
+          className={`absolute inset-0 transform transition-transform duration-300 ease-in-out ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
           style={{ 
@@ -120,12 +134,11 @@ const MobileNav = () => {
             position: 'fixed',
             top: 0,
             left: 0,
-            backgroundColor: '#0f172a',
-            border: 'none'
+            backgroundColor: '#0f172a'
           }}
         >
           {/* Header with close button */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-700 bg-slate-800/50">
+          <div className="flex items-center justify-between p-6 border-b border-slate-700 bg-slate-800/80">
             <h2 className="text-2xl font-bold text-white">WoDaGOAT Menu</h2>
             <Button
               variant="ghost"
@@ -189,33 +202,45 @@ const MobileNav = () => {
               </div>
             </div>
 
-            {/* Categories Section */}
+            {/* Categories Section with Collapsible */}
             <div className="space-y-6 mb-8">
               <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-700 pb-2">Categories</h3>
               
               <div className="space-y-4">
                 {menuItems.map((item) => (
                   <div key={item.id} className="space-y-3">
-                    <h4 className="text-lg font-bold text-white bg-slate-800 p-3 rounded-lg border border-slate-600">
-                      {item.name}
-                    </h4>
-                    <div className="space-y-2 ml-4">
-                      {item.children?.map((subItem) => (
-                        <Link
-                          key={subItem.id}
-                          to={`/category/${subItem.id}`}
-                          onClick={handleLinkClick}
-                          className="block p-3 rounded-lg bg-slate-800/50 hover:bg-slate-700 transition-colors border border-slate-700"
-                        >
-                          <div className="text-base font-semibold text-white">
-                            {subItem.name}
-                          </div>
-                          <p className="text-sm text-slate-300 mt-1 line-clamp-2">
-                            {subItem.description || "Rank the greatest athletes"}
-                          </p>
-                        </Link>
-                      ))}
-                    </div>
+                    <Collapsible 
+                      open={isCategoryExpanded(item.id)} 
+                      onOpenChange={() => toggleCategory(item.id)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <button className="w-full flex items-center justify-between text-lg font-bold text-white bg-slate-800 p-3 rounded-lg border border-slate-600 hover:bg-slate-700 transition-colors">
+                          <span>{item.name}</span>
+                          {isCategoryExpanded(item.id) ? (
+                            <ChevronDown className="h-5 w-5 text-slate-300" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-slate-300" />
+                          )}
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-2 ml-4 mt-3">
+                        {item.children?.map((subItem) => (
+                          <Link
+                            key={subItem.id}
+                            to={`/category/${subItem.id}`}
+                            onClick={handleLinkClick}
+                            className="block p-3 rounded-lg bg-slate-800/50 hover:bg-slate-700 transition-colors border border-slate-700"
+                          >
+                            <div className="text-base font-semibold text-white">
+                              {subItem.name}
+                            </div>
+                            <p className="text-sm text-slate-300 mt-1 line-clamp-2">
+                              {subItem.description || "Rank the greatest athletes"}
+                            </p>
+                          </Link>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 ))}
               </div>
