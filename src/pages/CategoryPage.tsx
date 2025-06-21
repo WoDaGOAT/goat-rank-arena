@@ -2,7 +2,7 @@
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Users, TrendingUp } from "lucide-react";
+import { ChevronLeft, Plus, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -137,7 +137,7 @@ const CategoryPage = () => {
           <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
             <Button asChild variant="cta" className="rounded-full shadow-2xl hover:scale-105 transition-transform w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12">
               <Link to={`/category/${categoryId}/rank`} title="Create Your Ranking">
-                <Users className="h-6 w-6 sm:h-7 sm:w-7 md:h-6 md:w-6 md:mr-2 shrink-0" />
+                <Plus className="h-6 w-6 sm:h-7 sm:w-7 md:h-6 md:w-6 md:mr-2 shrink-0" />
                 <span className="hidden md:inline font-semibold">Create Ranking</span>
               </Link>
             </Button>
