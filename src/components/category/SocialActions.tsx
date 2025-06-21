@@ -1,11 +1,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare } from "lucide-react";
-import { CommentDialog } from "./CommentDialog";
+import { Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface SocialActionsProps {
@@ -16,9 +15,23 @@ interface SocialActionsProps {
 }
 
 export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName }: SocialActionsProps) => {
-  const [showCommentDialog, setShowCommentDialog] = useState(false);
   const { user, openLoginDialog } = useAuth();
   const queryClient = useQueryClient();
+
+  // Fetch comment count
+  const { data: commentCount = 0 } = useQuery({
+    queryKey: ["categoryCommentCount", categoryId],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("category_comments")
+        .select("*", { count: "exact", head: true })
+        .eq("category_id", categoryId);
+      
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!categoryId,
+  });
 
   const { mutate: toggleLike } = useMutation({
     mutationFn: async () => {
@@ -50,41 +63,21 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
     },
   });
 
-  const handleCommentClick = () => {
-    if (!user) {
-      openLoginDialog();
-      return;
-    }
-    setShowCommentDialog(true);
-  };
-
   return (
-    <>
-      <div className="flex items-center justify-center gap-4">
-        <Button
-          variant="outline"
-          className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-          onClick={() => toggleLike()}
-        >
-          <Heart className={`mr-2 h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-          {initialLikes} {initialLikes === 1 ? 'Like' : 'Likes'}
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-          onClick={handleCommentClick}
-        >
-          <MessageSquare className="mr-2 h-4 w-4" />
-          Comment
-        </Button>
-      </div>
+    <div className="flex items-center justify-center gap-6">
+      <Button
+        variant="outline"
+        className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+        onClick={() => toggleLike()}
+      >
+        <Heart className={`mr-2 h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+        {initialLikes} {initialLikes === 1 ? 'Like' : 'Likes'}
+      </Button>
       
-      <CommentDialog
-        open={showCommentDialog}
-        onOpenChange={setShowCommentDialog}
-        categoryId={categoryId}
-      />
-    </>
+      <div className="flex items-center text-white">
+        <span className="mr-2">💬</span>
+        <span>{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
+      </div>
+    </div>
   );
 };

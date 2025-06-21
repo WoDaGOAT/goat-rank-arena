@@ -94,6 +94,7 @@ const CommentForm = ({ categoryId, onSuccess }: CommentFormProps) => {
       console.log("✅ Comment submission successful, clearing form");
       setComment("");
       queryClient.invalidateQueries({ queryKey: ["categoryComments", categoryId] });
+      queryClient.invalidateQueries({ queryKey: ["categoryCommentCount", categoryId] });
       toast.success("Comment posted!");
       onSuccess?.();
     },
