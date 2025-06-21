@@ -16,7 +16,7 @@ import BadgeShowcase from '@/components/quiz/BadgeShowcase';
 const PublicProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user: currentUser } = useAuth();
-  const { data: userBadges, isLoading: isBadgesLoading } = usePublicUserBadges(userId);
+  const { data: userBadges = [], isLoading: isBadgesLoading } = usePublicUserBadges(userId);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['publicProfile', userId],
@@ -181,7 +181,7 @@ const PublicProfilePage = () => {
           ) : userBadges && userBadges.length > 0 ? (
             <div className="space-y-4">
               <h3 className="text-xl font-bold">Badges & Achievements</h3>
-              <BadgeShowcase badges={userBadges} />
+              <BadgeShowcase userBadges={userBadges} />
             </div>
           ) : (
             <div className="bg-white/5 p-6 rounded-lg border border-gray-700 text-center">
