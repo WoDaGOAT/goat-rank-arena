@@ -17,20 +17,41 @@ export interface FeedItemType {
   data: FeedItemData;
 }
 
+// Type guard to ensure feed item has correct type
+function isValidFeedItemType(type: string): type is 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' {
+  return ['new_user', 'new_comment', 'accepted_friendship', 'new_ranking'].includes(type);
+}
+
 interface FeedItemRendererProps {
-  item: FeedItemType;
+  item: {
+    id: string;
+    created_at: string;
+    type: string;
+    data: FeedItemData;
+  };
 }
 
 const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
-  switch (item.type) {
+  // Type guard to ensure we only render valid feed item types
+  if (!isValidFeedItemType(item.type)) {
+    console.warn(`Unknown feed item type: ${item.type}`);
+    return null;
+  }
+
+  const typedItem: FeedItemType = {
+    ...item,
+    type: item.type
+  };
+
+  switch (typedItem.type) {
     case 'new_user':
-      return <NewUserFeedItem data={item.data as NewUserFeedData} createdAt={item.created_at} />;
+      return <NewUserFeedItem data={typedItem.data as NewUserFeedData} createdAt={typedItem.created_at} />;
     case 'new_comment':
-      return <NewCommentFeedItem data={item.data as NewCommentFeedData} createdAt={item.created_at} />;
+      return <NewCommentFeedItem data={typedItem.data as NewCommentFeedData} createdAt={typedItem.created_at} />;
     case 'accepted_friendship':
-      return <AcceptedFriendshipFeedItem data={item.data as AcceptedFriendshipFeedData} createdAt={item.created_at} />;
+      return <AcceptedFriendshipFeedItem data={typedItem.data as AcceptedFriendshipFeedData} createdAt={typedItem.created_at} />;
     case 'new_ranking':
-      return <NewRankingFeedItem data={item.data as NewRankingFeedData} createdAt={item.created_at} />;
+      return <NewRankingFeedItem data={typedItem.data as NewRankingFeedData} createdAt={typedItem.created_at} />;
     default:
       return null;
   }
