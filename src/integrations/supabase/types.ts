@@ -122,6 +122,38 @@ export type Database = {
           },
         ]
       }
+      category_reactions: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_reactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feed_items: {
         Row: {
           created_at: string
@@ -403,6 +435,80 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ranking_athletes_ranking_id_fkey"
+            columns: ["ranking_id"]
+            isOneToOne: false
+            referencedRelation: "user_rankings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          parent_comment_id: string | null
+          ranking_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          ranking_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          ranking_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ranking_comments_ranking_id_fkey"
+            columns: ["ranking_id"]
+            isOneToOne: false
+            referencedRelation: "user_rankings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          ranking_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ranking_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ranking_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_reactions_ranking_id_fkey"
             columns: ["ranking_id"]
             isOneToOne: false
             referencedRelation: "user_rankings"
