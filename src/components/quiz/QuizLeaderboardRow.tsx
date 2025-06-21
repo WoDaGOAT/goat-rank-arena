@@ -42,7 +42,7 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
         <div className={`grid grid-cols-[60px_1fr_120px_120px] items-center p-3 transition-colors duration-200 ${rowStyle}`}>
             <div className="flex items-center justify-center">{getRankIcon()}</div>
 
-            <Link to={`/user/${user.user_id}`} className="flex items-center gap-4 group overflow-hidden">
+            <Link to={`/users/${user.user_id}`} className="flex items-center gap-4 group overflow-hidden">
                 <Avatar className="h-10 w-10 border-2 border-white/20">
                     <AvatarImage src={user.avatar_url || undefined} alt={user.full_name || 'User'} />
                     <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
