@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
-import { ShareDialog } from "./ShareDialog";
+import { ShareDialog } from "./category/ShareDialog";
 import { useState } from "react";
 
 interface GlobalLeaderboardProps {
