@@ -2,7 +2,11 @@
 import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Share } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
+import { ShareDialog } from "./category/ShareDialog";
+import { useState } from "react";
 
 interface GlobalLeaderboardProps {
   athletes: Athlete[];
@@ -11,12 +15,16 @@ interface GlobalLeaderboardProps {
 }
 
 const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLeaderboardProps) => {
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const currentUrl = window.location.href;
+  const shareText = `Check out the ${sanitize(categoryName)} leaderboard on WoDaGOAT!`;
+
   return (
     <Card className="shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20">
       <CardHeader className="border-b border-white/30 bg-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5"></div>
-        <div className="relative flex items-center justify-center">
-          <div className="text-center">
+        <div className="relative flex items-center justify-between">
+          <div className="text-center flex-1">
             <h2 className="text-2xl font-bold text-white mb-1">
               {sanitize(categoryName)}
             </h2>
@@ -24,6 +32,15 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
               🎮 Live Rankings • Top 10 Champions
             </p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowShareDialog(true)}
+            className="border-white/20 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
+          >
+            <Share className="h-4 w-4 mr-2" />
+            Share
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -54,6 +71,13 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
           </div>
         )}
       </CardContent>
+
+      <ShareDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        url={currentUrl}
+        text={shareText}
+      />
     </Card>
   );
 };
