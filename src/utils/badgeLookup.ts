@@ -1,6 +1,6 @@
 
 import { Badge } from "@/types/badges";
-import { BADGES } from "@/data/badges";
+import { badgeCache } from "@/utils/badgeCache";
 import { 
   Lightbulb, 
   Sparkles, 
@@ -9,12 +9,6 @@ import {
   Book,
   LucideIcon
 } from "lucide-react";
-
-// Create a badge lookup map for O(1) performance
-const BADGE_MAP = new Map<string, Badge>();
-BADGES.forEach(badge => {
-  BADGE_MAP.set(badge.id, badge);
-});
 
 // Icon mapping for badge icons
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -47,10 +41,10 @@ export const RANK_BORDER_COLORS = [
 ] as const;
 
 /**
- * Get badge information by badge ID
+ * Get badge information by badge ID using optimized cache
  */
 export function getBadgeById(badgeId: string): Badge | null {
-  return BADGE_MAP.get(badgeId) || null;
+  return badgeCache.getBadge(badgeId);
 }
 
 /**
@@ -108,3 +102,6 @@ export function getRankFallback(rank: number) {
     label: `Rank #${rank}`
   };
 }
+
+// Pre-load badge cache on module import for better performance
+badgeCache.getBadgeStats();

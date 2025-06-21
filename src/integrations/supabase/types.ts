@@ -679,7 +679,9 @@ export type Database = {
         }[]
       }
       get_quiz_leaderboard: {
-        Args: Record<PropertyKey, never>
+        Args:
+          | Record<PropertyKey, never>
+          | { p_limit?: number; p_offset?: number }
         Returns: {
           user_id: string
           full_name: string

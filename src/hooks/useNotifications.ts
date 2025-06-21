@@ -1,167 +1,119 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
-import { Notification } from '@/types';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
+export interface Notification {
+  id: string;
+  type: string;
+  data: any;
+  is_read: boolean;
+  created_at: string;
+}
 
 export const useNotifications = () => {
-    const { user } = useAuth();
-    const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-    const { data: notifications, isLoading } = useQuery<Notification[]>({
-        queryKey: ['notifications', user?.id],
-        queryFn: async () => {
-            if (!user) return [];
-            const { data, error } = await supabase
-                .from('notifications')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(20);
+  return useQuery({
+    queryKey: ['notifications', user?.id],
+    queryFn: async (): Promise<Notification[]> => {
+      if (!user?.id) {
+        return [];
+      }
 
-            if (error) {
-                console.error("Error fetching notifications", error);
-                return [];
-            }
-            return data as Notification[];
-        },
-        enabled: !!user,
-    });
+      console.log('Fetching notifications for user:', user.id);
+      
+      // Use the new optimized index for user notifications
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to last 50 notifications for performance
 
-    const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        throw error;
+      }
 
-    const { mutate: markAllAsRead } = useMutation({
-        mutationFn: async () => {
-            if (!user) return;
-            const { error } = await supabase
-                .from('notifications')
-                .update({ is_read: true })
-                .eq('user_id', user.id)
-                .eq('is_read', false);
-            
-            if (error) {
-                console.error("Error marking notifications as read", error);
-                throw new Error("Could not update notifications");
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
-        }
-    });
+      console.log(`Notifications fetched: ${data?.length || 0}`);
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 1 * 60 * 1000, // 1 minute - notifications should be fresh
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+  });
+};
 
-    const { mutate: acceptFriendRequest, isPending: isAccepting } = useMutation({
-        mutationFn: async (friendshipId: string) => {
-            if (!user) throw new Error("User not authenticated");
-            const { error } = await supabase
-                .from('friendships')
-                .update({ status: 'accepted', updated_at: new Date().toISOString() })
-                .eq('id', friendshipId)
-                .eq('receiver_id', user.id);
-            
-            if (error) {
-                console.error("Error accepting friend request", error);
-                throw new Error("Could not accept friend request");
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
-            queryClient.invalidateQueries({ queryKey: ['friends', user?.id] });
-            toast.success("Friend request accepted!");
-        },
-        onError: (e: Error) => {
-            toast.error(e.message);
-        }
-    });
+export const useMarkNotificationAsRead = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-    const { mutate: declineFriendRequest, isPending: isDeclining } = useMutation({
-        mutationFn: async (friendshipId: string) => {
-            if (!user) throw new Error("User not authenticated");
-            const { error } = await supabase
-                .from('friendships')
-                .delete()
-                .eq('id', friendshipId)
-                .eq('receiver_id', user.id);
-            
-            if (error) {
-                console.error("Error declining friend request", error);
-                throw new Error("Could not decline friend request");
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
-            toast.info("Friend request declined.");
-        },
-        onError: (e: Error) => {
-            toast.error(e.message);
-        }
-    });
+  return useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+        .eq('user_id', user?.id);
 
-    // Enhanced realtime listener for notifications
-    useEffect(() => {
-        if (!user) return;
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      // Invalidate notifications cache to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+    },
+  });
+};
 
-        console.log('useNotifications: Setting up realtime listener for user:', user.id);
+export const useMarkAllNotificationsAsRead = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-        const channel = supabase
-            .channel(`notifications:${user.id}`)
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'notifications',
-                    filter: `user_id=eq.${user.id}`,
-                },
-                (payload) => {
-                    console.log('useNotifications: New notification received:', payload);
-                    queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
-                    const newNotification = payload.new as Notification;
-                    
-                    // Show toast notifications for different types
-                    if (newNotification.type === 'new_comment_reply') {
-                        toast.info(`${newNotification.data.replying_user_name} replied to your comment.`);
-                    } else if (newNotification.type === 'new_category') {
-                        toast.info(`A new category has been added: ${newNotification.data.category_name}`);
-                    } else if (newNotification.type === 'new_friend_request') {
-                        toast.info(`${newNotification.data.requester_name} sent you a friend request.`);
-                    } else if (newNotification.type === 'friend_request_accepted') {
-                        toast.info(`You are now friends with ${newNotification.data.receiver_name}.`);
-                    } else if (newNotification.type === 'ranking_reaction') {
-                        const reactionEmoji = newNotification.data.reaction_type === 'thumbs-up' ? '👍' 
-                            : newNotification.data.reaction_type === 'trophy' ? '🏆'
-                            : newNotification.data.reaction_type === 'flame' ? '🔥'
-                            : newNotification.data.reaction_type === 'frown' ? '😔'
-                            : '👍';
-                        toast.info(`${newNotification.data.reacting_user_name} reacted ${reactionEmoji} to your ranking "${newNotification.data.ranking_title}".`);
-                    } else if (newNotification.type === 'category_reaction') {
-                        toast.info(`${newNotification.data.reacting_user_name} reacted to the category ${newNotification.data.category_name}.`);
-                    }
-                }
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'notifications',
-                    filter: `user_id=eq.${user.id}`,
-                },
-                (payload) => {
-                    console.log('useNotifications: Notification updated:', payload);
-                    queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
-                }
-            )
-            .subscribe((status) => {
-                console.log('useNotifications: Realtime subscription status:', status);
-            });
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user?.id)
+        .eq('is_read', false);
 
-        return () => {
-            console.log('useNotifications: Cleaning up realtime listener');
-            supabase.removeChannel(channel);
-        };
-    }, [user, queryClient]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+    },
+  });
+};
 
-    return { notifications, isLoading, unreadCount, markAllAsRead, acceptFriendRequest, isAccepting, declineFriendRequest, isDeclining };
+// Get unread notification count with caching
+export const useUnreadNotificationCount = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['unread-notifications-count', user?.id],
+    queryFn: async (): Promise<number> => {
+      if (!user?.id) {
+        return 0;
+      }
+
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+
+      if (error) {
+        console.error('Error fetching unread notification count:', error);
+        throw error;
+      }
+
+      return count || 0;
+    },
+    enabled: !!user?.id,
+    staleTime: 30 * 1000, // 30 seconds - notification count should be very fresh
+    gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true, // Do refetch count on window focus
+  });
 };

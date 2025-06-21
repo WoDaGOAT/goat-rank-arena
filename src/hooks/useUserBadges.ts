@@ -1,119 +1,71 @@
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
-import { UserBadge } from '@/types/badges';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
+export interface UserBadge {
+  badge_id: string;
+  earned_at: string;
+}
 
 export const useUserBadges = () => {
-  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchUserBadges = async () => {
-      if (!user) {
-        setUserBadges([]);
-        setLoading(false);
-        return;
+  return useQuery({
+    queryKey: ['user-badges', user?.id],
+    queryFn: async (): Promise<UserBadge[]> => {
+      if (!user?.id) {
+        return [];
       }
 
-      try {
-        console.log('Fetching badges for user:', user.id);
-        
-        const { data, error } = await supabase
-          .from('user_badges')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('earned_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching user badges:', error);
-          throw error;
-        }
-
-        console.log('Raw user badges from database:', data);
-
-        // Map database records to UserBadge type with badge details from BADGES constant
-        const { BADGES } = await import('@/data/badges');
-        console.log('Available badges:', BADGES.map(b => ({ id: b.id, icon: b.icon })));
-        
-        const mappedBadges: UserBadge[] = data.map(userBadge => {
-          const badge = BADGES.find(b => b.id === userBadge.badge_id);
-          console.log(`Mapping badge ${userBadge.badge_id}: found=${!!badge}`, badge ? { name: badge.name, icon: badge.icon } : 'NOT FOUND');
-          
-          if (!badge) {
-            console.warn(`Badge definition not found for badge_id: ${userBadge.badge_id}`);
-            return null;
-          }
-          
-          return {
-            id: userBadge.id,
-            badge_id: userBadge.badge_id,
-            user_id: userBadge.user_id,
-            earned_at: userBadge.earned_at,
-            badge: badge
-          };
-        }).filter((ub): ub is UserBadge => ub !== null); // Filter out null values with type guard
-
-        console.log('Successfully mapped user badges:', mappedBadges);
-        setUserBadges(mappedBadges);
-      } catch (error) {
-        console.error('Error fetching user badges:', error);
-        setUserBadges([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserBadges();
-  }, [user]);
-
-  // Function to manually trigger badge check and refresh
-  const refreshBadges = async () => {
-    if (!user) return;
-    
-    try {
-      console.log('Manually triggering badge check for user:', user.id);
-      const { error } = await supabase.rpc('check_and_award_badges', {
-        p_user_id: user.id
-      });
+      console.log('Fetching user badges for user:', user.id);
       
+      const { data, error } = await supabase
+        .from('user_badges')
+        .select('badge_id, earned_at')
+        .eq('user_id', user.id)
+        .order('earned_at', { ascending: false });
+
       if (error) {
-        console.error('Error checking badges:', error);
-      } else {
-        console.log('Badge check completed successfully, refreshing badges...');
-        // Refetch badges after checking
-        const { data } = await supabase
-          .from('user_badges')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('earned_at', { ascending: false });
-
-        if (data) {
-          const { BADGES } = await import('@/data/badges');
-          const mappedBadges: UserBadge[] = data.map(userBadge => {
-            const badge = BADGES.find(b => b.id === userBadge.badge_id);
-            if (!badge) {
-              console.warn(`Badge definition not found for badge_id: ${userBadge.badge_id}`);
-              return null;
-            }
-            return {
-              id: userBadge.id,
-              badge_id: userBadge.badge_id,
-              user_id: userBadge.user_id,
-              earned_at: userBadge.earned_at,
-              badge: badge
-            };
-          }).filter((ub): ub is UserBadge => ub !== null);
-          
-          console.log('Refreshed badges:', mappedBadges);
-          setUserBadges(mappedBadges);
-        }
+        console.error('Error fetching user badges:', error);
+        throw error;
       }
-    } catch (error) {
-      console.error('Error calling badge check function:', error);
-    }
-  };
 
-  return { userBadges, loading, refreshBadges };
+      console.log('User badges fetched:', data);
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000, // 10 minutes - badges don't change frequently
+    gcTime: 60 * 60 * 1000, // 1 hour - keep badges in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+  });
+};
+
+// Hook for public user badges (for viewing other users' profiles)
+export const usePublicUserBadges = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ['public-user-badges', userId],
+    queryFn: async (): Promise<UserBadge[]> => {
+      if (!userId) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('user_badges')
+        .select('badge_id, earned_at')
+        .eq('user_id', userId)
+        .order('earned_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching public user badges:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!userId,
+    staleTime: 15 * 60 * 1000, // 15 minutes - public badges change even less frequently
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    refetchOnWindowFocus: false,
+  });
 };

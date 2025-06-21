@@ -1,58 +1,69 @@
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
-import { FeedItemType } from '@/components/feed/FeedItemRenderer';
-import { useEffect } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-export const useFeed = () => {
-  const queryClient = useQueryClient();
+export interface FeedItem {
+  id: string;
+  type: string;
+  data: any;
+  created_at: string;
+}
 
-  const feedQuery = useQuery<FeedItemType[]>({
-    queryKey: ['feedItems'],
-    queryFn: async () => {
+interface UseFeedOptions {
+  limit?: number;
+  offset?: number;
+}
+
+export const useFeed = (options: UseFeedOptions = {}) => {
+  const { limit = 20, offset = 0 } = options;
+
+  return useQuery({
+    queryKey: ['feed', limit, offset],
+    queryFn: async (): Promise<FeedItem[]> => {
+      console.log(`Fetching feed with limit: ${limit}, offset: ${offset}`);
+      
+      // Use the new index for optimized pagination
       const { data, error } = await supabase
         .from('feed_items')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .range(offset, offset + limit - 1);
 
       if (error) {
-        toast.error('Failed to load the feed.');
-        console.error('Error fetching feed items:', error);
-        return [];
+        console.error('Error fetching feed:', error);
+        throw error;
       }
-      return data as FeedItemType[];
+
+      console.log(`Feed items fetched: ${data?.length || 0}`);
+      return data || [];
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes - feed updates more frequently
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnWindowFocus: false,
   });
+};
 
-  // Enhanced realtime listener for feed items
-  useEffect(() => {
-    console.log('useFeed: Setting up realtime listener for feed items');
+// Hook for infinite scroll feed
+export const useInfiniteFeed = () => {
+  return useQuery({
+    queryKey: ['feed-infinite'],
+    queryFn: async (): Promise<FeedItem[]> => {
+      // Start with first 50 items for infinite scroll
+      const { data, error } = await supabase
+        .from('feed_items')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    const channel = supabase
-      .channel('feed_items_realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'feed_items',
-        },
-        (payload) => {
-          console.log('useFeed: New feed item received:', payload);
-          queryClient.invalidateQueries({ queryKey: ['feedItems'] });
-        }
-      )
-      .subscribe((status) => {
-        console.log('useFeed: Feed realtime subscription status:', status);
-      });
+      if (error) {
+        console.error('Error fetching infinite feed:', error);
+        throw error;
+      }
 
-    return () => {
-      console.log('useFeed: Cleaning up feed realtime listener');
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
-  return feedQuery;
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes for infinite scroll
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+  });
 };
