@@ -1,3 +1,4 @@
+
 export type AthleteMovement = "up" | "down" | "neutral";
 
 export interface Club {
@@ -126,6 +127,34 @@ export type Notification =
         receiver_id: string;
         receiver_name: string;
         friendship_id: string;
+      };
+    }
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'ranking_reaction';
+      data: {
+        ranking_id: string;
+        ranking_title: string;
+        reaction_type: string;
+        reacting_user_id: string;
+        reacting_user_name: string;
+      };
+    }
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'category_reaction';
+      data: {
+        category_id: string;
+        category_name: string;
+        reaction_type: string;
+        reacting_user_id: string;
+        reacting_user_name: string;
       };
     };
 
