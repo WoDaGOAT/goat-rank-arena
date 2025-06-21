@@ -1,8 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, Share2, MessageSquare } from "lucide-react";
-import { ShareDialog } from "./ShareDialog";
+import { Heart, MessageSquare } from "lucide-react";
 import { CommentDialog } from "./CommentDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -17,7 +16,6 @@ interface SocialActionsProps {
 }
 
 export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName }: SocialActionsProps) => {
-  const [showShareDialog, setShowShareDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const { user, openLoginDialog } = useAuth();
   const queryClient = useQueryClient();
@@ -80,23 +78,7 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
           <MessageSquare className="mr-2 h-4 w-4" />
           Comment
         </Button>
-        
-        <Button
-          variant="outline"
-          className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-          onClick={() => setShowShareDialog(true)}
-        >
-          <Share2 className="mr-2 h-4 w-4" />
-          Share
-        </Button>
       </div>
-      
-      <ShareDialog
-        open={showShareDialog}
-        onOpenChange={setShowShareDialog}
-        url={window.location.href}
-        text={`Check out the leaderboard for ${categoryName} on RankPulse!`}
-      />
       
       <CommentDialog
         open={showCommentDialog}
