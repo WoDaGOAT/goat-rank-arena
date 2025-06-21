@@ -2,19 +2,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-export interface UserBadge {
-  id: string;
-  badge_id: string;
-  earned_at: string;
-  badge?: {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-    rarity: string;
-  };
-}
+import { UserBadge } from "@/types/badges";
+import { badgeCache } from "@/utils/badgeCache";
 
 export const useUserBadges = () => {
   const { user } = useAuth();
@@ -41,7 +30,26 @@ export const useUserBadges = () => {
       }
 
       console.log('User badges fetched:', data);
-      return data || [];
+      
+      // Map to UserBadge type with badge details from cache
+      const mappedBadges: UserBadge[] = (data || []).map(userBadge => {
+        const badge = badgeCache.getBadge(userBadge.badge_id);
+        
+        if (!badge) {
+          console.warn(`Badge definition not found for badge_id: ${userBadge.badge_id}`);
+          return null;
+        }
+        
+        return {
+          id: userBadge.id,
+          badge_id: userBadge.badge_id,
+          user_id: user.id,
+          earned_at: userBadge.earned_at,
+          badge: badge
+        };
+      }).filter((ub): ub is UserBadge => ub !== null);
+
+      return mappedBadges;
     },
     enabled: !!user?.id,
     staleTime: 10 * 60 * 1000, // 10 minutes - badges don't change frequently
@@ -82,7 +90,25 @@ export const usePublicUserBadges = (userId: string | undefined) => {
         throw error;
       }
 
-      return data || [];
+      // Map to UserBadge type with badge details from cache
+      const mappedBadges: UserBadge[] = (data || []).map(userBadge => {
+        const badge = badgeCache.getBadge(userBadge.badge_id);
+        
+        if (!badge) {
+          console.warn(`Badge definition not found for badge_id: ${userBadge.badge_id}`);
+          return null;
+        }
+        
+        return {
+          id: userBadge.id,
+          badge_id: userBadge.badge_id,
+          user_id: userId,
+          earned_at: userBadge.earned_at,
+          badge: badge
+        };
+      }).filter((ub): ub is UserBadge => ub !== null);
+
+      return mappedBadges;
     },
     enabled: !!userId,
     staleTime: 15 * 60 * 1000, // 15 minutes - public badges change even less frequently

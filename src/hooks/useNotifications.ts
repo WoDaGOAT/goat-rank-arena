@@ -2,14 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-export interface Notification {
-  id: string;
-  type: string;
-  data: any;
-  is_read: boolean;
-  created_at: string;
-}
+import { Notification } from "@/types/index";
 
 export const useNotifications = () => {
   const { user } = useAuth();
