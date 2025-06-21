@@ -97,25 +97,25 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   const hasErrors = selectedAthletes.some(a => !!a.error);
 
   return (
-    <>
-      <div className="mb-8">
+    <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8 py-4 md:py-8">
+      <div className="mb-6 md:mb-8">
         <Button 
           asChild 
           size="lg"
-          className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 shadow-lg transition-all duration-200 font-semibold"
+          className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 shadow-lg transition-all duration-200 font-semibold text-sm sm:text-base px-3 sm:px-4 py-2"
         >
           <Link to={`/category/${category.id}`}>
-            <ChevronLeft className="mr-2 h-5 w-5" /> Back to {category.name}
+            <ChevronLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Back to {category.name}
           </Link>
         </Button>
       </div>
 
-      <header className="mb-8">
-        <h1 className="text-4xl font-extrabold text-white mb-2">Create Your {category.name} Ranking</h1>
-        <p className="text-lg text-gray-300">Search from over 200 football legends and modern stars - from Pelé to Mbappé</p>
+      <header className="mb-6 md:mb-8 text-center sm:text-left">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2">Create Your {category.name} Ranking</h1>
+        <p className="text-sm sm:text-base md:text-lg text-gray-300">Search from over 200 football legends and modern stars - from Pelé to Mbappé</p>
       </header>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto w-full flex-1">
         <RankingDetailsForm
           rankingTitle={rankingTitle}
           setRankingTitle={setRankingTitle}
@@ -123,26 +123,30 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
           setRankingDescription={setRankingDescription}
         />
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          <AthleteSearch
-            allAthletes={allFootballPlayers}
-            filteredAthletes={filteredAthletes}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedLetter={selectedLetter}
-            setSelectedLetter={setSelectedLetter}
-            addAthlete={handleAddAthlete}
-            numSelectedAthletes={selectedAthletes.length}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+          <div className="order-2 lg:order-1">
+            <AthleteSearch
+              allAthletes={allFootballPlayers}
+              filteredAthletes={filteredAthletes}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedLetter={selectedLetter}
+              setSelectedLetter={setSelectedLetter}
+              addAthlete={handleAddAthlete}
+              numSelectedAthletes={selectedAthletes.length}
+            />
+          </div>
 
-          <RankingList
-            selectedAthletes={selectedAthletes}
-            handleDragStart={handleDragStart}
-            handleDragOver={handleDragOver}
-            handleDragEnd={handleDragEnd}
-            updateAthletePoints={updateAthletePoints}
-            removeAthlete={removeAthlete}
-          />
+          <div className="order-1 lg:order-2">
+            <RankingList
+              selectedAthletes={selectedAthletes}
+              handleDragStart={handleDragStart}
+              handleDragOver={handleDragOver}
+              handleDragEnd={handleDragEnd}
+              updateAthletePoints={updateAthletePoints}
+              removeAthlete={removeAthlete}
+            />
+          </div>
         </div>
 
         <RankingActions
@@ -154,12 +158,12 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
           selectedAthleteCount={selectedAthletes.length}
         />
         {hasErrors && (
-          <p className="text-right text-red-400 mt-2">
+          <p className="text-center sm:text-right text-red-400 mt-2 text-sm">
             Please fix the validation errors before saving.
           </p>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -40,9 +40,9 @@ const CreateRankingPage = () => {
 
   if (isLoadingCategory || (user && isLoadingUserRanking)) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <main className="flex-grow flex items-center justify-center container mx-auto px-4 py-8 text-center text-white">
-          <p>Loading...</p>
+      <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+        <main className="flex-grow flex items-center justify-center container mx-auto py-4 sm:py-6 md:py-8 text-center text-white">
+          <p className="text-sm sm:text-base">Loading...</p>
         </main>
       </div>
     );
@@ -50,12 +50,12 @@ const CreateRankingPage = () => {
 
   if (userRanking) {
     return (
-     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-       <main className="flex-grow flex items-center justify-center container mx-auto px-4 py-8 text-center">
-         <div>
-          <h1 className="text-3xl font-bold text-white mb-4">Ranking Already Submitted</h1>
-          <p className="text-gray-300 mb-6">You have already submitted a ranking for {category?.name}.</p>
-            <Button asChild size="lg" className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold">
+     <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+       <main className="flex-grow flex items-center justify-center container mx-auto py-4 sm:py-6 md:py-8 text-center">
+         <div className="max-w-md mx-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Ranking Already Submitted</h1>
+          <p className="text-gray-300 mb-6 text-sm sm:text-base">You have already submitted a ranking for {category?.name}.</p>
+            <Button asChild size="lg" className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2">
             <Link to={`/category/${categoryId}`}>
               <ChevronLeft className="mr-2 h-4 w-4" /> Go Back to {category?.name}
             </Link>
@@ -68,12 +68,12 @@ const CreateRankingPage = () => {
 
   if (!category) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <main className="flex-grow flex items-center justify-center container mx-auto px-4 py-8 text-center">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-4">Category Not Found</h1>
-            <p className="text-gray-300 mb-6">The category you're looking for doesn't exist or couldn't be loaded.</p>
-            <Button asChild size="lg" className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold">
+      <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+        <main className="flex-grow flex items-center justify-center container mx-auto py-4 sm:py-6 md:py-8 text-center">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Category Not Found</h1>
+            <p className="text-gray-300 mb-6 text-sm sm:text-base">The category you're looking for doesn't exist or couldn't be loaded.</p>
+            <Button asChild size="lg" className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2">
               <Link to="/">
                 <ChevronLeft className="mr-2 h-4 w-4" /> Go Back to Categories
               </Link>
@@ -86,19 +86,7 @@ const CreateRankingPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-      <main className="container mx-auto px-4 py-8 flex-grow">
-        <div className="mb-8">
-          <Button 
-            asChild 
-            size="lg"
-            className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold"
-          >
-            <Link to={`/category/${category.id}`}>
-              <ChevronLeft className="mr-2 h-5 w-5" /> Back to {category.name}
-            </Link>
-          </Button>
-        </div>
-
+      <main className="container mx-auto flex-grow">
         <RankingEditor category={category} />
       </main>
     </div>

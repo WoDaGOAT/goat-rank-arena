@@ -27,18 +27,18 @@ const rankBgColors = [
 const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
   const MovementIcon = () => {
     if (athlete.movement === "up") {
-      return <ArrowUp className="w-4 h-4 text-green-500" />;
+      return <ArrowUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />;
     }
     if (athlete.movement === "down") {
-      return <ArrowDown className="w-4 h-4 text-red-500" />;
+      return <ArrowDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />;
     }
-    return <Minus className="w-4 h-4 text-gray-400" />;
+    return <Minus className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />;
   };
 
   const getRankIcon = () => {
-    if (position === 1) return <Crown className="w-5 h-5 text-yellow-500" />;
-    if (position === 2) return <Medal className="w-5 h-5 text-gray-400" />;
-    if (position === 3) return <Trophy className="w-5 h-5 text-amber-600" />;
+    if (position === 1) return <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />;
+    if (position === 2) return <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />;
+    if (position === 3) return <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />;
     return null;
   };
 
@@ -58,24 +58,27 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
   const getMovementBadge = () => {
     if (athlete.movement === "up") {
       return (
-        <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2 py-0.5">
-          <ArrowUp className="w-3 h-3 mr-1" />
-          Rising
+        <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-1.5 py-0.5 sm:px-2">
+          <ArrowUp className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
+          <span className="hidden sm:inline">Rising</span>
+          <span className="sm:hidden">↑</span>
         </Badge>
       );
     }
     if (athlete.movement === "down") {
       return (
-        <Badge variant="secondary" className="bg-red-500/20 text-red-300 border-red-500/30 text-xs px-2 py-0.5">
-          <ArrowDown className="w-3 h-3 mr-1" />
-          Falling
+        <Badge variant="secondary" className="bg-red-500/20 text-red-300 border-red-500/30 text-xs px-1.5 py-0.5 sm:px-2">
+          <ArrowDown className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
+          <span className="hidden sm:inline">Falling</span>
+          <span className="sm:hidden">↓</span>
         </Badge>
       );
     }
     return (
-      <Badge variant="outline" className="text-xs px-2 py-0.5 bg-white/10 text-gray-300 border-white/30">
-        <Minus className="w-3 h-3 mr-1" />
-        Stable
+      <Badge variant="outline" className="text-xs px-1.5 py-0.5 sm:px-2 bg-white/10 text-gray-300 border-white/30">
+        <Minus className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
+        <span className="hidden sm:inline">Stable</span>
+        <span className="sm:hidden">—</span>
       </Badge>
     );
   };
@@ -86,7 +89,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
     if (position <= 10)
       return (
         <span
-          className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-white text-base border-2 ${
+          className={`inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full font-bold text-white text-sm sm:text-base border-2 ${
             [
               "border-blue-400",
               "border-pink-400",
@@ -102,53 +105,95 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
           {position}
         </span>
       );
-    return <span className="text-lg font-bold text-white">{position}</span>;
+    return <span className="text-sm sm:text-lg font-bold text-white">{position}</span>;
   };
 
   const sanitizedName = sanitize(athlete.name);
 
   return (
-    <div
-      className={`grid grid-cols-[50px_60px_1fr_110px_90px] gap-4 items-center px-4 py-3 transition-all duration-200 ${getRankStyle()}`}
-    >
-      {/* Rank */}
-      <div className="flex items-center justify-center">
-        {renderRankBadge()}
-      </div>
-
-      {/* Avatar */}
-      <div className="relative">
-        <Avatar className="w-10 h-10 border-2 border-white/30 shadow-md">
-          <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
-          <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
-            {sanitizedName.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
-      </div>
-
-      {/* Name */}
-      <div>
-        <div className="font-semibold text-white text-sm leading-tight">
-          {sanitizedName}
-        </div>
-        {position <= 10 && (
-          <div className="text-xs text-gray-300 mt-0.5">
-            {getPlacementLabel()}
+    <>
+      {/* Mobile layout */}
+      <div className={`flex md:hidden items-center gap-3 px-3 py-3 transition-all duration-200 ${getRankStyle()}`}>
+        {/* Rank and Avatar */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8">
+            {renderRankBadge()}
           </div>
-        )}
+          <Avatar className="w-10 h-10 border-2 border-white/30 shadow-md">
+            <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
+            <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+              {sanitizedName.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        {/* Name and placement */}
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-white text-sm leading-tight truncate">
+            {sanitizedName}
+          </div>
+          {position <= 10 && (
+            <div className="text-xs text-gray-300 mt-0.5">
+              {getPlacementLabel()}
+            </div>
+          )}
+        </div>
+
+        {/* Movement and Points */}
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-bold text-blue-300">
+              {athlete.points.toLocaleString()}
+            </span>
+            <span className="text-xs text-gray-300">pts</span>
+          </div>
+          {getMovementBadge()}
+        </div>
       </div>
 
-      {/* Movement Badge */}
-      <div className="flex justify-center">{getMovementBadge()}</div>
+      {/* Desktop layout */}
+      <div
+        className={`hidden md:grid md:grid-cols-[50px_60px_1fr_110px_90px] gap-4 items-center px-4 py-3 transition-all duration-200 ${getRankStyle()}`}
+      >
+        {/* Rank */}
+        <div className="flex items-center justify-center">
+          {renderRankBadge()}
+        </div>
 
-      {/* Points */}
-      <div className="flex items-baseline justify-center gap-1">
-        <span className="text-lg font-bold text-blue-300">
-          {athlete.points.toLocaleString()}
-        </span>
-        <span className="text-xs text-gray-300">pts</span>
+        {/* Avatar */}
+        <div className="relative">
+          <Avatar className="w-10 h-10 border-2 border-white/30 shadow-md">
+            <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
+            <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+              {sanitizedName.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        {/* Name */}
+        <div>
+          <div className="font-semibold text-white text-sm leading-tight">
+            {sanitizedName}
+          </div>
+          {position <= 10 && (
+            <div className="text-xs text-gray-300 mt-0.5">
+              {getPlacementLabel()}
+            </div>
+          )}
+        </div>
+
+        {/* Movement Badge */}
+        <div className="flex justify-center">{getMovementBadge()}</div>
+
+        {/* Points */}
+        <div className="flex items-baseline justify-center gap-1">
+          <span className="text-lg font-bold text-blue-300">
+            {athlete.points.toLocaleString()}
+          </span>
+          <span className="text-xs text-gray-300">pts</span>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

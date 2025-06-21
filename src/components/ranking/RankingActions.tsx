@@ -15,7 +15,7 @@ interface RankingActionsProps {
 }
 
 const commonButtonStyle =
-  "h-[44px] px-6 rounded-full font-semibold text-lg leading-[44px] flex items-center justify-center py-0";
+  "h-[36px] sm:h-[44px] px-4 sm:px-6 rounded-full font-semibold text-sm sm:text-lg leading-[36px] sm:leading-[44px] flex items-center justify-center py-0";
 
 const RankingActions: React.FC<RankingActionsProps> = ({
   categoryId,
@@ -29,10 +29,10 @@ const RankingActions: React.FC<RankingActionsProps> = ({
   const showAthleteTooltip = needsMoreAthletes && !isSaving;
 
   return (
-    <div className="flex justify-end gap-4 mt-8">
+    <div className="flex flex-col sm:flex-row justify-center sm:justify-end gap-3 sm:gap-4 mt-6 sm:mt-8 px-3 sm:px-0">
       <Button
         asChild
-        className={`bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] shadow ${commonButtonStyle}`}
+        className={`bg-[#FFD9DF] text-[#AD2637] hover:bg-[#FFD0DA] shadow ${commonButtonStyle} order-2 sm:order-1`}
         disabled={isSaving}
       >
         <Link to={categoryId ? `/category/${categoryId}` : "/"}>
@@ -47,14 +47,14 @@ const RankingActions: React.FC<RankingActionsProps> = ({
               variant="cta"
               disabled={disabled || isSaving}
               onClick={onSave}
-              className={`${commonButtonStyle} ${
+              className={`${commonButtonStyle} order-1 sm:order-2 ${
                 disabled && !isSaving 
                   ? 'opacity-50 cursor-not-allowed grayscale' 
                   : ''
               } disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale`}
             >
               Submit to Leaderboard
-              <Check className="ml-2 h-5 w-5" />
+              <Check className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </TooltipTrigger>
           {showAthleteTooltip && (

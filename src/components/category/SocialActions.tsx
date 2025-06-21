@@ -198,9 +198,9 @@ export const SocialActions = ({
   }
 
   return (
-    <div className="flex items-center justify-between bg-black/20 rounded-lg p-3 border border-white/10">
-      {/* Reaction icons on the left */}
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 bg-black/20 rounded-lg p-3 border border-white/10">
+      {/* Reaction icons */}
+      <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
         {reactions.map(({ icon: Icon, label, tooltip, emoji }) => {
           const isReacted = userReaction === label;
           const count = reactionCounts[label] || 0;
@@ -212,7 +212,7 @@ export const SocialActions = ({
                 onMouseEnter={() => setHoveredReaction(label)}
                 onMouseLeave={() => setHoveredReaction(null)}
                 disabled={isLoading}
-                className={`relative group p-2 rounded-lg transition-all duration-200 hover:scale-110 border-2 ${
+                className={`relative group p-2 rounded-lg transition-all duration-200 hover:scale-110 border-2 touch-manipulation ${
                   isReacted 
                     ? label === 'thumbs-up' ? 'bg-blue-500/30 border-blue-400 text-blue-300' 
                       : label === 'trophy' ? 'bg-yellow-500/30 border-yellow-400 text-yellow-300'
@@ -222,7 +222,7 @@ export const SocialActions = ({
                 } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 title={tooltip}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                 
                 {/* Tooltip */}
                 <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap transition-opacity duration-200 z-10 ${
@@ -235,8 +235,8 @@ export const SocialActions = ({
               {/* Show count only if > 0 */}
               {count > 0 && (
                 <div className="flex items-center gap-1">
-                  <span className="text-lg">{emoji}</span>
-                  <span className={`text-sm font-bold ${
+                  <span className="text-sm sm:text-lg">{emoji}</span>
+                  <span className={`text-xs sm:text-sm font-bold ${
                     isReacted ? 'text-white' : 'text-gray-300'
                   }`}>
                     {count}
@@ -248,10 +248,10 @@ export const SocialActions = ({
         })}
       </div>
 
-      {/* Comments on the right */}
-      <div className="flex items-center gap-2 text-gray-200 bg-white/10 px-3 py-2 rounded-lg border border-white/20">
-        <span className="text-lg">💬</span>
-        <span className="text-sm font-medium">{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
+      {/* Comments */}
+      <div className="flex items-center justify-center sm:justify-end gap-2 text-gray-200 bg-white/10 px-3 py-2 rounded-lg border border-white/20">
+        <span className="text-sm sm:text-lg">💬</span>
+        <span className="text-xs sm:text-sm font-medium">{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
       </div>
     </div>
   );
