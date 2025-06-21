@@ -14,16 +14,20 @@ interface BadgeShowcaseProps {
 const BadgeShowcase = ({ userBadges }: BadgeShowcaseProps) => {
   const [filter, setFilter] = useState<'all' | 'earned' | 'locked'>('all');
   
-  const earnedBadgeIds = userBadges.map(ub => ub.badge_id);
+  // Create a set of earned badge IDs for faster lookup
+  const earnedBadgeIds = new Set(userBadges.map(ub => ub.badge_id));
   
   const filteredBadges = BADGES.filter(badge => {
-    if (filter === 'earned') return earnedBadgeIds.includes(badge.id);
-    if (filter === 'locked') return !earnedBadgeIds.includes(badge.id);
+    if (filter === 'earned') return earnedBadgeIds.has(badge.id);
+    if (filter === 'locked') return !earnedBadgeIds.has(badge.id);
     return true;
   });
 
-  const earnedCount = earnedBadgeIds.length;
+  const earnedCount = earnedBadgeIds.size;
   const totalCount = BADGES.length;
+
+  console.log('User badges:', userBadges);
+  console.log('Earned badge IDs:', Array.from(earnedBadgeIds));
 
   return (
     <Card className="w-full">
@@ -60,7 +64,9 @@ const BadgeShowcase = ({ userBadges }: BadgeShowcaseProps) => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {filteredBadges.map(badge => {
             const userBadge = userBadges.find(ub => ub.badge_id === badge.id);
-            const isEarned = !!userBadge;
+            const isEarned = earnedBadgeIds.has(badge.id);
+            
+            console.log(`Badge ${badge.id}: isEarned=${isEarned}, userBadge=`, userBadge);
             
             return (
               <BadgeCard
