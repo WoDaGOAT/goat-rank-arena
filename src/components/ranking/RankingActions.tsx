@@ -53,8 +53,8 @@ const RankingActions: React.FC<RankingActionsProps> = ({
                   : ''
               } disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale`}
             >
-              <Check className="mr-2 h-5 w-5" />
               Submit to Leaderboard
+              <Check className="ml-2 h-5 w-5" />
             </Button>
           </TooltipTrigger>
           {showAthleteTooltip && (
