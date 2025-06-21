@@ -44,10 +44,38 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
     });
 
     const getRankIcon = () => {
-        if (rank === 1) return <Crown className="w-6 h-6 text-yellow-400" />;
-        if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
-        if (rank === 3) return <Trophy className="w-6 h-6 text-amber-600" />;
-        return <span className="font-bold text-lg text-gray-400 w-6 text-center">{rank}</span>;
+        console.log(`Rendering rank icon for rank ${rank}`);
+        
+        if (rank === 1) {
+            return (
+                <div className="flex items-center justify-center w-8 h-8">
+                    <Crown className="w-6 h-6 text-yellow-400 drop-shadow-sm" />
+                </div>
+            );
+        }
+        if (rank === 2) {
+            return (
+                <div className="flex items-center justify-center w-8 h-8">
+                    <Medal className="w-6 h-6 text-gray-300 drop-shadow-sm" />
+                </div>
+            );
+        }
+        if (rank === 3) {
+            return (
+                <div className="flex items-center justify-center w-8 h-8">
+                    <Trophy className="w-6 h-6 text-amber-500 drop-shadow-sm" />
+                </div>
+            );
+        }
+        
+        // Fallback for ranks 4+ with better styling
+        return (
+            <div className="flex items-center justify-center w-8 h-8">
+                <span className="font-bold text-lg text-gray-300 leading-none">
+                    {rank}
+                </span>
+            </div>
+        );
     };
     
     const rowStyle = rank <= 3 ? `${rankBgColors[rank - 1]} border-l-4 ${rankBorderColors[rank - 1]}` : "hover:bg-white/5";
@@ -84,7 +112,9 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
 
     return (
         <div className={`grid grid-cols-[60px_1fr_120px_120px] items-center p-3 transition-colors duration-200 ${rowStyle}`}>
-            <div className="flex items-center justify-center">{getRankIcon()}</div>
+            <div className="flex items-center justify-center min-h-[48px]">
+                {getRankIcon()}
+            </div>
 
             <Link to={`/users/${user.user_id}`} className="flex items-center gap-4 group overflow-hidden">
                 <Avatar className="h-10 w-10 border-2 border-white/20">
