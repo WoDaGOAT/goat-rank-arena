@@ -27,26 +27,24 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
     enabled: !!categoryId,
   });
 
-  // Organize comments into threads with improved hierarchy
+  // Organize comments into threads with proper hierarchy
   const organizeComments = (comments: CommentWithUser[]) => {
     const topLevelComments: CommentWithUser[] = [];
     const repliesMap: { [key: string]: CommentWithUser[] } = {};
 
-    // First pass: separate top-level comments and replies
+    // Separate top-level comments and replies
     comments?.forEach((comment) => {
       if (comment.parent_comment_id) {
-        // This is a reply
         if (!repliesMap[comment.parent_comment_id]) {
           repliesMap[comment.parent_comment_id] = [];
         }
         repliesMap[comment.parent_comment_id].push(comment);
       } else {
-        // This is a top-level comment
         topLevelComments.push(comment);
       }
     });
 
-    // Sort replies by creation date (oldest first for natural conversation flow)
+    // Sort replies chronologically (oldest first for natural conversation flow)
     Object.keys(repliesMap).forEach((parentId) => {
       repliesMap[parentId].sort((a, b) => 
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -61,19 +59,19 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="p-3 sm:p-4 md:p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 mt-6 sm:mt-8">
-        <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center">
-          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-300" />
-          Community Discussion ({totalComments})
+      <div className="p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 mt-6 sm:mt-8">
+        <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+          <MessageSquare className="w-5 h-5 mr-2 text-blue-300" />
+          {totalComments} {totalComments === 1 ? 'Comment' : 'Comments'}
         </h2>
         
         <CommentForm categoryId={categoryId} />
 
-        <div className="mt-4 sm:mt-6 space-y-6">
+        <div className="mt-6 space-y-4">
           {isLoading && Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full bg-white/10" />)}
-          {error && <p className="text-red-400 text-sm sm:text-base">Could not load comments.</p>}
+          {error && <p className="text-red-400">Could not load comments.</p>}
           {topLevelComments.length === 0 && !isLoading && (
-            <p className="text-gray-400 text-center py-8 text-sm sm:text-base">Be the first to comment!</p>
+            <p className="text-gray-400 text-center py-8">Be the first to comment!</p>
           )}
           {topLevelComments.map((comment) => (
             <CommentItem
@@ -81,7 +79,6 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
               comment={comment}
               replies={repliesMap[comment.id] || []}
               categoryId={categoryId}
-              isTopLevel={true}
             />
           ))}
         </div>

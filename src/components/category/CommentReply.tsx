@@ -82,25 +82,20 @@ const CommentReply = ({ categoryId, parentCommentId, onCancel, onSuccess }: Comm
   return (
     <div className="bg-white/5 rounded-lg p-4 border border-white/10">
       <div className="flex gap-3">
-        {/* User avatar */}
-        <div className="flex-shrink-0">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || "You"} />
-            <AvatarFallback className="text-xs bg-white/20 text-white">
-              {(user?.user_metadata?.full_name || "You").charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </div>
+        <Avatar className="w-8 h-8 flex-shrink-0">
+          <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || "You"} />
+          <AvatarFallback className="text-xs bg-white/20 text-white">
+            {(user?.user_metadata?.full_name || "You").charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
 
-        {/* Reply form */}
         <div className="flex-1">
           <form onSubmit={handleSubmit} className="space-y-3">
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Add a reply..."
-              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={3}
+              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[80px]"
               disabled={isPending}
             />
             <div className="flex justify-end gap-2">

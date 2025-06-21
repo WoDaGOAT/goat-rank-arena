@@ -13,17 +13,17 @@ interface CommentItemProps {
   comment: CommentWithUser;
   replies?: CommentWithUser[];
   categoryId: string;
-  isTopLevel?: boolean;
+  isReply?: boolean;
 }
 
-const CommentItem = ({ comment, replies = [], categoryId, isTopLevel = false }: CommentItemProps) => {
+const CommentItem = ({ comment, replies = [], categoryId, isReply = false }: CommentItemProps) => {
   const { user, openLoginDialog } = useAuth();
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const [showReplies, setShowReplies] = useState(true); // Default to show replies
+  const [showReplies, setShowReplies] = useState(true);
   
   const authorName = sanitize(comment.profiles?.full_name) || "Anonymous";
   const authorAvatar = comment.profiles?.avatar_url;
-  const hasReplies = replies.length > 0;
+  const replyCount = replies.length;
 
   const handleReplyClick = () => {
     if (!user) {
@@ -38,34 +38,81 @@ const CommentItem = ({ comment, replies = [], categoryId, isTopLevel = false }: 
     setShowReplyForm(false);
   };
 
-  return (
-    <div className={`${isTopLevel ? 'border-b border-white/10 pb-6' : ''}`}>
-      {/* Main comment container */}
+  if (isReply) {
+    // Render as a nested reply with simpler structure
+    return (
       <div className="flex gap-3">
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          <Avatar className={`${isTopLevel ? 'w-10 h-10' : 'w-8 h-8'}`}>
-            <AvatarImage src={authorAvatar || undefined} alt={authorName} />
-            <AvatarFallback className={`${isTopLevel ? 'text-sm' : 'text-xs'} bg-white/20 text-white`}>
-              {authorName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-
-        {/* Comment content */}
+        <Avatar className="w-6 h-6 flex-shrink-0">
+          <AvatarImage src={authorAvatar || undefined} alt={authorName} />
+          <AvatarFallback className="text-xs bg-white/20 text-white">
+            {authorName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        
         <div className="flex-1 min-w-0">
-          {/* Header with username and timestamp */}
           <div className="flex items-center gap-2 mb-1">
-            <span className={`font-semibold text-white ${isTopLevel ? 'text-sm' : 'text-xs'}`}>
+            <span className="text-xs font-medium text-white">
               {authorName}
             </span>
-            <span className={`text-gray-400 ${isTopLevel ? 'text-xs' : 'text-xs'}`}>
+            <span className="text-xs text-gray-400">
               {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
             </span>
           </div>
+          
+          <div className="text-sm text-gray-200 mb-2 whitespace-pre-wrap break-words leading-relaxed">
+            {sanitize(comment.comment)}
+          </div>
 
-          {/* Comment text */}
-          <div className={`text-gray-200 ${isTopLevel ? 'text-sm' : 'text-sm'} mb-2 whitespace-pre-wrap break-words leading-relaxed`}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReplyClick}
+            className="text-gray-400 hover:text-white h-6 px-2 text-xs font-medium hover:bg-white/10"
+          >
+            <MessageSquare className="w-3 h-3 mr-1" />
+            Reply
+          </Button>
+
+          {showReplyForm && (
+            <div className="mt-3">
+              <CommentReply
+                categoryId={categoryId}
+                parentCommentId={comment.id}
+                onCancel={() => setShowReplyForm(false)}
+                onSuccess={handleReplySuccess}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Render as a top-level comment with full YouTube-style structure
+  return (
+    <div className="pb-4">
+      {/* Main comment */}
+      <div className="flex gap-3">
+        <Avatar className="w-10 h-10 flex-shrink-0">
+          <AvatarImage src={authorAvatar || undefined} alt={authorName} />
+          <AvatarFallback className="text-sm bg-white/20 text-white">
+            {authorName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        
+        <div className="flex-1 min-w-0">
+          {/* Comment header */}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-semibold text-white">
+              {authorName}
+            </span>
+            <span className="text-xs text-gray-400">
+              {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+            </span>
+          </div>
+          
+          {/* Comment content */}
+          <div className="text-sm text-gray-200 mb-3 whitespace-pre-wrap break-words leading-relaxed">
             {sanitize(comment.comment)}
           </div>
 
@@ -80,33 +127,11 @@ const CommentItem = ({ comment, replies = [], categoryId, isTopLevel = false }: 
               <MessageSquare className="w-3 h-3 mr-1.5" />
               Reply
             </Button>
-            
-            {/* Show/hide replies toggle for top-level comments */}
-            {hasReplies && isTopLevel && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowReplies(!showReplies)}
-                className="text-gray-400 hover:text-white h-8 px-3 text-xs font-medium hover:bg-white/10"
-              >
-                {showReplies ? (
-                  <>
-                    <ChevronUp className="w-3 h-3 mr-1.5" />
-                    Hide {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="w-3 h-3 mr-1.5" />
-                    Show {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
-                  </>
-                )}
-              </Button>
-            )}
           </div>
 
           {/* Reply form */}
           {showReplyForm && (
-            <div className="mt-3">
+            <div className="mb-4">
               <CommentReply
                 categoryId={categoryId}
                 parentCommentId={comment.id}
@@ -115,34 +140,48 @@ const CommentItem = ({ comment, replies = [], categoryId, isTopLevel = false }: 
               />
             </div>
           )}
+
+          {/* Replies section */}
+          {replyCount > 0 && (
+            <div>
+              {/* Show/hide replies button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReplies(!showReplies)}
+                className="text-blue-400 hover:text-blue-300 h-8 px-0 text-sm font-medium hover:bg-transparent mb-3"
+              >
+                {showReplies ? (
+                  <>
+                    <ChevronUp className="w-4 h-4 mr-1" />
+                    Hide {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4 mr-1" />
+                    View {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+                  </>
+                )}
+              </Button>
+
+              {/* Replies list with visual hierarchy */}
+              {showReplies && (
+                <div className="ml-8 border-l-2 border-white/10 pl-4 space-y-4">
+                  {replies.map((reply) => (
+                    <CommentItem
+                      key={reply.id}
+                      comment={reply}
+                      replies={[]}
+                      categoryId={categoryId}
+                      isReply={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Nested replies with proper indentation and threading line */}
-      {showReplies && hasReplies && isTopLevel && (
-        <div className="mt-4 ml-12 relative">
-          {/* Threading line */}
-          <div className="absolute left-0 top-0 bottom-0 w-px bg-white/20"></div>
-          
-          <div className="space-y-4 pl-4">
-            {replies.map((reply, index) => (
-              <div key={reply.id} className="relative">
-                {/* Individual reply */}
-                <CommentItem
-                  comment={reply}
-                  replies={[]}
-                  categoryId={categoryId}
-                  isTopLevel={false}
-                />
-                {/* Separator between replies */}
-                {index < replies.length - 1 && (
-                  <div className="mt-4 border-b border-white/5"></div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
