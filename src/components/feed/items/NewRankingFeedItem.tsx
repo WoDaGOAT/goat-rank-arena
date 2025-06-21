@@ -44,6 +44,13 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const [showComments, setShowComments] = useState(false);
   const sanitizedAuthorName = sanitize(author.full_name);
 
+  console.log('NewRankingFeedItem rendered:', { 
+    ranking_id, 
+    ranking_title, 
+    authorName: sanitizedAuthorName,
+    athletesCount: athletes?.length 
+  });
+
   const user = {
     id: author.id,
     full_name: sanitizedAuthorName,
@@ -100,9 +107,6 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
         <div className="p-3">
           <SocialActions 
             rankingId={ranking_id}
-            initialLikes={0}
-            isLiked={false}
-            rankingTitle={ranking_title}
           />
         </div>
         <div className="px-3 pb-3 flex justify-between items-center">

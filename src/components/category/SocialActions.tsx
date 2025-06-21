@@ -10,19 +10,11 @@ import { toast } from "sonner";
 interface SocialActionsProps {
   categoryId?: string;
   rankingId?: string;
-  initialLikes: number;
-  isLiked: boolean;
-  categoryName?: string;
-  rankingTitle?: string;
 }
 
 export const SocialActions = ({ 
   categoryId, 
-  rankingId, 
-  initialLikes, 
-  isLiked, 
-  categoryName, 
-  rankingTitle 
+  rankingId
 }: SocialActionsProps) => {
   const { user, openLoginDialog } = useAuth();
   const queryClient = useQueryClient();
@@ -31,11 +23,15 @@ export const SocialActions = ({
   const itemType = categoryId ? 'category' : 'ranking';
   const itemId = categoryId || rankingId;
   
+  console.log('SocialActions rendered:', { itemType, itemId, userId: user?.id });
+  
   // Fetch user's reactions for this item
-  const { data: userReactions = {} } = useQuery({
+  const { data: userReactions = {}, isLoading: userReactionsLoading } = useQuery({
     queryKey: ["userReactions", itemType, itemId, user?.id],
     queryFn: async () => {
       if (!user || !itemId) return {};
+      
+      console.log('Fetching user reactions for:', { itemType, itemId, userId: user.id });
       
       const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
       const { data, error } = await supabase
@@ -44,22 +40,29 @@ export const SocialActions = ({
         .eq(itemType === 'category' ? 'category_id' : 'ranking_id', itemId)
         .eq("user_id", user.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user reactions:', error);
+        throw error;
+      }
       
       const reactions: Record<string, boolean> = {};
       data.forEach(reaction => {
         reactions[reaction.reaction_type] = true;
       });
+      
+      console.log('User reactions fetched:', reactions);
       return reactions;
     },
     enabled: !!user && !!itemId,
   });
 
   // Fetch reaction counts for this item
-  const { data: reactionCounts = {} } = useQuery({
+  const { data: reactionCounts = {}, isLoading: countsLoading } = useQuery({
     queryKey: ["reactionCounts", itemType, itemId],
     queryFn: async () => {
       if (!itemId) return {};
+      
+      console.log('Fetching reaction counts for:', { itemType, itemId });
       
       const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
       const { data, error } = await supabase
@@ -67,7 +70,10 @@ export const SocialActions = ({
         .select("reaction_type")
         .eq(itemType === 'category' ? 'category_id' : 'ranking_id', itemId);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reaction counts:', error);
+        throw error;
+      }
       
       const counts: Record<string, number> = {
         'thumbs-up': 0,
@@ -80,6 +86,7 @@ export const SocialActions = ({
         counts[reaction.reaction_type] = (counts[reaction.reaction_type] || 0) + 1;
       });
       
+      console.log('Reaction counts fetched:', counts);
       return counts;
     },
     enabled: !!itemId,
@@ -97,24 +104,30 @@ export const SocialActions = ({
         .select("*", { count: "exact", head: true })
         .eq(itemType === 'category' ? 'category_id' : 'ranking_id', itemId);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching comment count:', error);
+        throw error;
+      }
       return count || 0;
     },
     enabled: !!itemId,
   });
 
-  const { mutate: toggleReaction } = useMutation({
+  const { mutate: toggleReaction, isPending } = useMutation({
     mutationFn: async (reactionType: string) => {
       if (!user || !itemId) {
         openLoginDialog();
         throw new Error("User not authenticated");
       }
 
+      console.log('Toggling reaction:', { reactionType, itemType, itemId, userId: user.id });
+
       const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
       const idColumn = itemType === 'category' ? 'category_id' : 'ranking_id';
       const wasReacted = userReactions[reactionType];
 
       if (wasReacted) {
+        console.log('Removing reaction');
         const { error } = await supabase
           .from(tableName)
           .delete()
@@ -125,6 +138,7 @@ export const SocialActions = ({
           });
         if (error) throw error;
       } else {
+        console.log('Adding reaction');
         const { error } = await supabase
           .from(tableName)
           .insert({ 
@@ -136,10 +150,12 @@ export const SocialActions = ({
       }
     },
     onSuccess: () => {
+      console.log('Reaction toggled successfully, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ["userReactions", itemType, itemId, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["reactionCounts", itemType, itemId] });
     },
     onError: (error) => {
+      console.error('Failed to toggle reaction:', error);
       if (error.message !== "User not authenticated") {
         toast.error("Failed to update reaction. Please try again.");
       }
@@ -148,10 +164,12 @@ export const SocialActions = ({
 
   const handleReactionClick = (reactionType: string) => {
     if (!user) {
+      console.log('User not authenticated, opening login dialog');
       openLoginDialog();
       return;
     }
     
+    console.log('Handling reaction click:', reactionType);
     toggleReaction(reactionType);
   };
 
@@ -161,6 +179,13 @@ export const SocialActions = ({
     { icon: Flame, label: "flame", tooltip: "Fire!", emoji: "🔥" },
     { icon: Frown, label: "frown", tooltip: "Disagree", emoji: "😔" },
   ];
+
+  const isLoading = userReactionsLoading || countsLoading || isPending;
+
+  if (!itemId) {
+    console.error('SocialActions: No itemId provided');
+    return null;
+  }
 
   return (
     <div className="flex items-center justify-between">
@@ -176,11 +201,12 @@ export const SocialActions = ({
                 onClick={() => handleReactionClick(label)}
                 onMouseEnter={() => setHoveredReaction(label)}
                 onMouseLeave={() => setHoveredReaction(null)}
+                disabled={isLoading}
                 className={`relative group p-2 rounded-full transition-all duration-200 hover:scale-110 ${
                   isReacted 
                     ? 'bg-white/20 border-2 border-white/40' 
                     : 'bg-white/5 hover:bg-white/15'
-                }`}
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title={tooltip}
               >
                 <Icon 
