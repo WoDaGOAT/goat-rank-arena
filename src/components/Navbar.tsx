@@ -47,8 +47,8 @@ const Navbar = () => {
                 to="/quiz"
                 className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group relative"
               >
-                <FileQuestion className="h-4 w-4 xl:h-5 xl:w-5 text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors" />
-                <span className="font-bold text-transparent bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text group-hover:from-fuchsia-300 group-hover:to-cyan-300">
+                <FileQuestion className="h-5 w-5 text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors drop-shadow-sm" />
+                <span className="font-bold text-transparent bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text group-hover:from-fuchsia-300 group-hover:to-cyan-300 drop-shadow-sm">
                   Quiz
                 </span>
                 {shouldShowQuizBadge && (
