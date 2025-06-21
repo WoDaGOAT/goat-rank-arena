@@ -8,10 +8,16 @@ import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import MobileNav from "./nav/MobileNav";
 import { Link } from "react-router-dom";
-import { Rss, FileQuestion, Wrench, Users, MessageSquareWarning } from "lucide-react";
+import { Rss, FileQuestion, Wrench, Users, MessageSquareWarning, Lightbulb } from "lucide-react";
+import { useUserBadges } from "@/hooks/useUserBadges";
 
 const Navbar = () => {
   const { user, loading, isAdmin, isModeratorOrAdmin } = useAuth();
+  const { userBadges, loading: badgesLoading } = useUserBadges();
+
+  // Check if user has completed their first quiz
+  const hasFirstQuizBadge = userBadges.some(badge => badge.badge_id === 'first_quiz');
+  const shouldShowQuizBadge = user && !badgesLoading && !hasFirstQuizBadge;
 
   return (
     <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50">
@@ -39,12 +45,17 @@ const Navbar = () => {
               </Link>
               <Link
                 to="/quiz"
-                className="bg-transparent focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group"
+                className="bg-transparent focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group relative"
               >
                 <FileQuestion className="h-4 w-4 xl:h-5 xl:w-5 text-fuchsia-500 transition-all group-hover:text-cyan-500 group-hover:[filter:brightness(1.2)]" />
                 <span className="font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent transition-all group-hover:[filter:brightness(1.2)]">
                   Quiz
                 </span>
+                {shouldShowQuizBadge && (
+                  <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full p-1 animate-pulse">
+                    <Lightbulb className="h-3 w-3 text-yellow-900" />
+                  </div>
+                )}
               </Link>
               
               {isModeratorOrAdmin && (
