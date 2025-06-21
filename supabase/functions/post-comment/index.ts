@@ -18,8 +18,12 @@ Deno.serve(async (req) => {
 
   try {
     console.log('📦 Parsing request body...');
-    const { categoryId, commentText } = await req.json();
-    console.log('📝 Received data:', { categoryId, commentText: commentText?.substring(0, 50) + '...' });
+    const { categoryId, commentText, parentCommentId } = await req.json();
+    console.log('📝 Received data:', { 
+      categoryId, 
+      commentText: commentText?.substring(0, 50) + '...',
+      parentCommentId: parentCommentId || 'null (top-level comment)'
+    });
     
     if (!categoryId || !commentText) {
         console.error('❌ Missing required fields:', { categoryId: !!categoryId, commentText: !!commentText });
@@ -80,9 +84,19 @@ Deno.serve(async (req) => {
     }
     
     console.log('💬 Inserting comment...');
+    // Build the insert object with conditional parent_comment_id
+    const insertData = {
+      user_id: user.id,
+      category_id: categoryId,
+      comment: commentText,
+      ...(parentCommentId && { parent_comment_id: parentCommentId })
+    };
+    
+    console.log('📝 Insert data:', insertData);
+    
     const { data: commentData, error: commentError } = await userClient
       .from("category_comments")
-      .insert({ user_id: user.id, category_id: categoryId, comment: commentText })
+      .insert(insertData)
       .select("*, profiles (id, full_name, avatar_url)")
       .single();
 
@@ -96,7 +110,10 @@ Deno.serve(async (req) => {
       throw new Error("Comment could not be created.");
     }
 
-    console.log('✅ Comment created:', { id: commentData.id });
+    console.log('✅ Comment created:', { 
+      id: commentData.id, 
+      parentId: commentData.parent_comment_id || 'none (top-level)'
+    });
 
     console.log('📝 Logging rate limit event...');
     const { error: logError } = await serviceClient.from('rate_limit_events').insert({
