@@ -20,49 +20,60 @@ const UserStatsCard = ({ stats }: UserStatsCardProps) => {
   const level = getAccuracyLevel(stats.accuracy_percentage);
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-yellow-500" />
+    <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-blue-500/30 text-white shadow-xl">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl flex items-center gap-3 text-white">
+          <Trophy className="h-6 w-6 text-yellow-500" />
           Your Performance
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Current Level:</span>
-          <Badge className={`${level.color} text-white`}>
+          <span className="text-blue-300 text-base">Current Level:</span>
+          <Badge className={`${level.color} text-white px-4 py-2 text-base font-semibold`}>
             {level.icon} {level.name}
           </Badge>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-blue-500" />
-            <div>
-              <p className="font-semibold">{stats.accuracy_percentage.toFixed(1)}%</p>
-              <p className="text-gray-600">Accuracy</p>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Target className="h-6 w-6 text-blue-400" />
             </div>
+            <div className="text-3xl font-bold text-white mb-1">
+              {stats.accuracy_percentage.toFixed(1)}%
+            </div>
+            <div className="text-blue-300 text-sm">Accuracy</div>
           </div>
-          <div className="flex items-center gap-2">
-            <Flame className="h-4 w-4 text-orange-500" />
-            <div>
-              <p className="font-semibold">{stats.current_streak}</p>
-              <p className="text-gray-600">Day Streak</p>
+          
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Flame className="h-6 w-6 text-orange-400" />
             </div>
+            <div className="text-3xl font-bold text-white mb-1">
+              {stats.current_streak}
+            </div>
+            <div className="text-blue-300 text-sm">Day Streak</div>
           </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-green-500" />
-            <div>
-              <p className="font-semibold">{stats.perfect_scores}</p>
-              <p className="text-gray-600">Perfect Scores</p>
+          
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-2">
+              <TrendingUp className="h-6 w-6 text-green-400" />
             </div>
+            <div className="text-3xl font-bold text-white mb-1">
+              {stats.perfect_scores}
+            </div>
+            <div className="text-blue-300 text-sm">Perfect Scores</div>
           </div>
-          <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-purple-500" />
-            <div>
-              <p className="font-semibold">{stats.total_quizzes}</p>
-              <p className="text-gray-600">Quizzes Taken</p>
+          
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Trophy className="h-6 w-6 text-purple-400" />
             </div>
+            <div className="text-3xl font-bold text-white mb-1">
+              {stats.total_quizzes}
+            </div>
+            <div className="text-blue-300 text-sm">Quizzes Taken</div>
           </div>
         </div>
       </CardContent>
