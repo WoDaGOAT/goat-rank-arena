@@ -1,3 +1,4 @@
+
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -5,11 +6,16 @@ import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
+import QuizActivity from '@/components/profile/QuizActivity';
+import { UserQuizAttemptForProfile } from '@/types/quiz';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PublicProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
+  const { user: currentUser } = useAuth();
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['publicProfile', userId],
@@ -32,6 +38,86 @@ const PublicProfilePage = () => {
     },
     enabled: !!userId,
   });
+
+  const { data: quizAttempts, isLoading: isLoadingQuizAttempts } = useQuery({
+    queryKey: ['userQuizAttempts', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+
+      const { data, error } = await supabase
+        .from('quiz_attempts')
+        .select(`
+          id,
+          score,
+          completed_at,
+          quizzes (
+            title,
+            quiz_questions ( id )
+          )
+        `)
+        .eq('user_id', userId)
+        .order('completed_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching user quiz attempts:', error);
+        return [];
+      }
+      
+      const attempts = data?.map(attempt => ({
+        ...attempt,
+        quizzes: Array.isArray(attempt.quizzes) ? attempt.quizzes[0] : attempt.quizzes
+      }))
+
+      return (attempts as UserQuizAttemptForProfile[]) || [];
+    },
+    enabled: !!userId,
+  });
+
+  const { data: userStats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['userStats', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+
+      const { data, error } = await supabase
+        .from('quiz_attempts')
+        .select('score, completed_at')
+        .eq('user_id', userId)
+        .order('completed_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching user stats:', error);
+        return null;
+      }
+
+      if (!data || data.length === 0) {
+        return {
+          totalQuizzes: 0,
+          totalScore: 0,
+          averageScore: 0,
+          perfectScores: 0,
+          accuracy: 0
+        };
+      }
+
+      const totalQuizzes = data.length;
+      const totalScore = data.reduce((sum, attempt) => sum + attempt.score, 0);
+      const perfectScores = data.filter(attempt => attempt.score === 5).length;
+      const averageScore = totalScore / totalQuizzes;
+      const accuracy = (totalScore / (totalQuizzes * 5)) * 100; // Based on 5 questions per quiz
+
+      return {
+        totalQuizzes,
+        totalScore,
+        averageScore: Math.round(averageScore * 10) / 10,
+        perfectScores,
+        accuracy: Math.round(accuracy * 10) / 10
+      };
+    },
+    enabled: !!userId,
+  });
+
+  const isOwnProfile = currentUser?.id === userId;
 
   const renderContent = () => {
     if (isLoading) {
@@ -60,6 +146,7 @@ const PublicProfilePage = () => {
 
     return (
        <div className="space-y-6">
+         {/* Profile Header */}
          <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={profile.avatar_url || undefined} alt={profile.full_name || ''} />
@@ -68,12 +155,51 @@ const PublicProfilePage = () => {
             <div>
               <h2 className="text-2xl font-bold">{profile.full_name || 'Anonymous User'}</h2>
               {profile.country && <p className="text-gray-400">{profile.country}</p>}
+              {profile.favorite_sports && profile.favorite_sports.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {profile.favorite_sports.map((sport: string) => (
+                    <Badge key={sport} variant="secondary" className="text-xs">
+                      {sport}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="pt-6 text-center text-gray-500 border-t border-gray-700/50">
-            <p className="pt-4">More profile details and activity will be shown here soon.</p>
-          </div>
+          {/* Quiz Statistics */}
+          {isLoadingStats ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-20 bg-white/10 rounded-lg" />
+              ))}
+            </div>
+          ) : userStats && userStats.totalQuizzes > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                <div className="text-2xl font-bold text-white">{userStats.totalQuizzes}</div>
+                <div className="text-sm text-gray-400">Quizzes Taken</div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                <div className="text-2xl font-bold text-white">{userStats.totalScore}</div>
+                <div className="text-sm text-gray-400">Total Score</div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                <div className="text-2xl font-bold text-white">{userStats.averageScore}/5</div>
+                <div className="text-sm text-gray-400">Average Score</div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                <div className="text-2xl font-bold text-white">{userStats.accuracy}%</div>
+                <div className="text-sm text-gray-400">Accuracy</div>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Quiz Activity Component */}
+          <QuizActivity 
+            quizAttempts={quizAttempts}
+            isLoading={isLoadingQuizAttempts}
+          />
        </div>
     );
   };
@@ -86,9 +212,11 @@ const PublicProfilePage = () => {
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
         <main className="container mx-auto px-4 py-12 flex-grow">
-          <Card className="max-w-2xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
+          <Card className="max-w-4xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
+              <CardTitle className="text-2xl font-bold">
+                {isOwnProfile ? "My Profile" : "User Profile"}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {renderContent()}
