@@ -1,8 +1,6 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,10 +10,13 @@ import Footer from '@/components/Footer';
 import QuizActivity from '@/components/profile/QuizActivity';
 import { UserQuizAttemptForProfile } from '@/types/quiz';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePublicUserBadges } from '@/hooks/usePublicUserBadges';
+import BadgeShowcase from '@/components/quiz/BadgeShowcase';
 
 const PublicProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user: currentUser } = useAuth();
+  const { data: userBadges, isLoading: isBadgesLoading } = usePublicUserBadges(userId);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['publicProfile', userId],
@@ -167,6 +168,30 @@ const PublicProfilePage = () => {
             </div>
           </div>
 
+          {/* Badges Section */}
+          {isBadgesLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-32 bg-white/10" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 bg-white/10 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          ) : userBadges && userBadges.length > 0 ? (
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold">Badges & Achievements</h3>
+              <BadgeShowcase badges={userBadges} />
+            </div>
+          ) : (
+            <div className="bg-white/5 p-6 rounded-lg border border-gray-700 text-center">
+              <h3 className="text-lg font-semibold mb-2">No Badges Yet</h3>
+              <p className="text-gray-400">
+                {isOwnProfile ? "Take quizzes to earn your first badge!" : "This user hasn't earned any badges yet."}
+              </p>
+            </div>
+          )}
+
           {/* Quiz Statistics */}
           {isLoadingStats ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -175,22 +200,25 @@ const PublicProfilePage = () => {
               ))}
             </div>
           ) : userStats && userStats.totalQuizzes > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
-                <div className="text-2xl font-bold text-white">{userStats.totalQuizzes}</div>
-                <div className="text-sm text-gray-400">Quizzes Taken</div>
-              </div>
-              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
-                <div className="text-2xl font-bold text-white">{userStats.totalScore}</div>
-                <div className="text-sm text-gray-400">Total Score</div>
-              </div>
-              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
-                <div className="text-2xl font-bold text-white">{userStats.averageScore}/5</div>
-                <div className="text-sm text-gray-400">Average Score</div>
-              </div>
-              <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
-                <div className="text-2xl font-bold text-white">{userStats.accuracy}%</div>
-                <div className="text-sm text-gray-400">Accuracy</div>
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold">Quiz Performance</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                  <div className="text-2xl font-bold text-white">{userStats.totalQuizzes}</div>
+                  <div className="text-sm text-gray-400">Quizzes Taken</div>
+                </div>
+                <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                  <div className="text-2xl font-bold text-white">{userStats.totalScore}</div>
+                  <div className="text-sm text-gray-400">Total Score</div>
+                </div>
+                <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                  <div className="text-2xl font-bold text-white">{userStats.averageScore}/5</div>
+                  <div className="text-sm text-gray-400">Average Score</div>
+                </div>
+                <div className="bg-white/5 p-4 rounded-lg border border-gray-700">
+                  <div className="text-2xl font-bold text-white">{userStats.accuracy}%</div>
+                  <div className="text-sm text-gray-400">Accuracy</div>
+                </div>
               </div>
             </div>
           ) : null}
@@ -205,27 +233,24 @@ const PublicProfilePage = () => {
   };
 
   return (
-    <>
-      <Navbar />
-      <div
-        className="min-h-screen flex flex-col"
-        style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
-      >
-        <main className="container mx-auto px-4 py-12 flex-grow">
-          <Card className="max-w-4xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">
-                {isOwnProfile ? "My Profile" : "User Profile"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderContent()}
-            </CardContent>
-          </Card>
-        </main>
-        <Footer />
-      </div>
-    </>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
+    >
+      <main className="container mx-auto px-4 py-12 flex-grow">
+        <Card className="max-w-4xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">
+              {isOwnProfile ? "My Profile" : "User Profile"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {renderContent()}
+          </CardContent>
+        </Card>
+      </main>
+      <Footer />
+    </div>
   );
 };
 

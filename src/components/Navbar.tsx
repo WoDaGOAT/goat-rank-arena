@@ -20,7 +20,7 @@ const Navbar = () => {
   const shouldShowQuizBadge = user && !badgesLoading && !hasFirstQuizBadge;
 
   return (
-    <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50">
+    <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50 shadow-lg">
       <div className="relative container mx-auto px-2 sm:px-4">
         {/* Single responsive row */}
         <div className="flex items-center justify-between h-16 lg:h-20">
