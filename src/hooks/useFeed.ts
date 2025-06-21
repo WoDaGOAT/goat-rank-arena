@@ -35,11 +35,12 @@ export const useFeed = (options: UseFeedOptions = {}) => {
       }
 
       console.log(`Feed items fetched: ${data?.length || 0}`);
+      console.log('Feed data preview:', data?.slice(0, 3));
       return data || [];
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes - feed updates more frequently
+    staleTime: 30 * 1000, // 30 seconds - reduced to see updates faster
     gcTime: 15 * 60 * 1000, // 15 minutes
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Enable refetch on focus to see new data
   });
 };
 

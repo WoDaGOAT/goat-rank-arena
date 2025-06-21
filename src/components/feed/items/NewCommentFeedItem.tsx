@@ -46,6 +46,16 @@ const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
     const parentAuthorName = parent_comment_author?.full_name || 'Anonymous';
     const sanitizedParentAuthorName = sanitize(parentAuthorName);
 
+    // Debug logging to see what data we're getting
+    console.log('NewCommentFeedItem data:', {
+      isReply,
+      parent_comment_id,
+      parent_comment_text,
+      parent_comment_author,
+      authorName,
+      comment_text
+    });
+
     return (
         <Card className="bg-white/5 text-white border-gray-700">
             <CardContent className="p-4">
