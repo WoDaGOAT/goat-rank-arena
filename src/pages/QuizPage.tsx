@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +16,7 @@ import { useState } from "react";
 import { Swords, Trophy, Award, TrendingUp, Calendar, Clock } from "lucide-react";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useUserQuizAttempts } from "@/hooks/useUserQuizAttempts";
+import { useUserBadges } from "@/hooks/useUserBadges";
 
 const fetchTodaysQuiz = async () => {
   const today = new Date().toISOString().split('T')[0];
@@ -52,6 +52,7 @@ const QuizPage = () => {
     
     const { stats, loading: statsLoading } = useUserStats();
     const { data: userQuizAttempts, isLoading: attemptsLoading } = useUserQuizAttempts();
+    const { userBadges, loading: badgesLoading } = useUserBadges();
 
     const { data: quiz, isLoading: quizLoading, isError: quizError } = useQuery({
         queryKey: ['todaysQuiz'],
@@ -83,6 +84,8 @@ const QuizPage = () => {
             toast.success("Quiz submitted successfully!");
             queryClient.invalidateQueries({ queryKey: ['userAttempt', user?.id, quiz?.id] });
             queryClient.invalidateQueries({ queryKey: ['userQuizAttempts', user?.id] });
+            // Trigger badge checking by refetching user badges
+            window.location.reload(); // Simple way to refresh all user data including badges
         },
         onError: (error) => {
             toast.error(`Failed to save quiz attempt: ${error.message}`);
@@ -210,7 +213,7 @@ const QuizPage = () => {
         }
 
         if (view === 'badges') {
-            return <BadgeShowcase userBadges={mockUserBadges} />;
+            return <BadgeShowcase userBadges={userBadges} />;
         }
 
         if (view === 'progress') {

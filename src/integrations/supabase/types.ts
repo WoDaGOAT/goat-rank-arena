@@ -537,6 +537,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_rankings: {
         Row: {
           category_id: string
@@ -600,6 +621,10 @@ export type Database = {
           p_user_id: string
           p_role: Database["public"]["Enums"]["app_role"]
         }
+        Returns: undefined
+      }
+      check_and_award_badges: {
+        Args: { p_user_id: string }
         Returns: undefined
       }
       create_new_ranking_feed_item: {

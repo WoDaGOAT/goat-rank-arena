@@ -3,6 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { UserQuizAttemptForProfile } from "@/types/quiz";
 import { Award, History } from "lucide-react";
+import { useUserBadges } from "@/hooks/useUserBadges";
+import BadgeCard from "@/components/quiz/BadgeCard";
+import { BADGES } from "@/data/badges";
 
 interface QuizActivityProps {
     quizAttempts: UserQuizAttemptForProfile[] | undefined;
@@ -10,6 +13,8 @@ interface QuizActivityProps {
 }
 
 const QuizActivity = ({ quizAttempts, isLoading }: QuizActivityProps) => {
+    const { userBadges, loading: badgesLoading } = useUserBadges();
+
     const getTotalQuestions = (attempt: UserQuizAttemptForProfile) => {
         return attempt.quizzes?.quiz_questions?.length || 0;
     }
@@ -52,9 +57,37 @@ const QuizActivity = ({ quizAttempts, isLoading }: QuizActivityProps) => {
             <div>
                 <h3 className="text-xl font-semibold border-b border-gray-600 pb-2 mb-3 flex items-center gap-2">
                     <Award className="h-5 w-5" />
-                    My Badges
+                    My Badges ({userBadges.length})
                 </h3>
-                <p className="text-gray-400 text-sm">Badge system coming soon! Keep taking quizzes to earn them.</p>
+                {badgesLoading ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                        {[...Array(6)].map((_, i) => (
+                            <Skeleton key={i} className="h-20 w-full bg-gray-700 rounded-md" />
+                        ))}
+                    </div>
+                ) : userBadges.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                        {userBadges.slice(0, 12).map(userBadge => (
+                            <BadgeCard
+                                key={userBadge.id}
+                                badge={userBadge.badge}
+                                userBadge={userBadge}
+                                isEarned={true}
+                                className="bg-white/5 border-gray-600"
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-400 text-sm">No badges earned yet. Complete quizzes to start earning badges!</p>
+                )}
+                
+                {userBadges.length > 12 && (
+                    <div className="mt-4 text-center">
+                        <p className="text-gray-400 text-sm">
+                            And {userBadges.length - 12} more badge{userBadges.length - 12 !== 1 ? 's' : ''}...
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );
