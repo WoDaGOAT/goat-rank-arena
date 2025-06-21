@@ -27,11 +27,12 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
     enabled: !!categoryId,
   });
 
-  // Organize comments into threads
+  // Organize comments into threads with improved hierarchy
   const organizeComments = (comments: CommentWithUser[]) => {
     const topLevelComments: CommentWithUser[] = [];
     const repliesMap: { [key: string]: CommentWithUser[] } = {};
 
+    // First pass: separate top-level comments and replies
     comments?.forEach((comment) => {
       if (comment.parent_comment_id) {
         // This is a reply
@@ -45,7 +46,7 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
       }
     });
 
-    // Sort replies by creation date (oldest first for better readability)
+    // Sort replies by creation date (oldest first for natural conversation flow)
     Object.keys(repliesMap).forEach((parentId) => {
       repliesMap[parentId].sort((a, b) => 
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -68,11 +69,11 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
         
         <CommentForm categoryId={categoryId} />
 
-        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
-          {isLoading && Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 sm:h-20 w-full bg-white/10" />)}
+        <div className="mt-4 sm:mt-6 space-y-6">
+          {isLoading && Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full bg-white/10" />)}
           {error && <p className="text-red-400 text-sm sm:text-base">Could not load comments.</p>}
           {topLevelComments.length === 0 && !isLoading && (
-            <p className="text-gray-400 text-center py-4 text-sm sm:text-base">Be the first to comment!</p>
+            <p className="text-gray-400 text-center py-8 text-sm sm:text-base">Be the first to comment!</p>
           )}
           {topLevelComments.map((comment) => (
             <CommentItem
@@ -80,6 +81,7 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
               comment={comment}
               replies={repliesMap[comment.id] || []}
               categoryId={categoryId}
+              isTopLevel={true}
             />
           ))}
         </div>
