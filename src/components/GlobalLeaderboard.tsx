@@ -3,7 +3,7 @@ import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
 import { ShareDialog } from "./category/ShareDialog";
 import { useState } from "react";
@@ -38,7 +38,7 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
             onClick={() => setShowShareDialog(true)}
             className="border-white/20 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
           >
-            <Share className="h-4 w-4 mr-2" />
+            <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
         </div>
