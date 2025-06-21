@@ -1,11 +1,13 @@
 
 import React, { useState } from "react";
-import { Menu, X, Rss, FileQuestion, Wrench, Users, MessageSquareWarning } from "lucide-react";
+import { Menu, X, Rss, FileQuestion, Trophy, CircleUser, UserPlus, LogIn, Info, Mail, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import LoginDialog from "@/components/auth/LoginDialog";
+import SignupDialog from "@/components/auth/SignupDialog";
 
 interface Category {
   id: string;
@@ -17,7 +19,9 @@ interface Category {
 
 const MobileNav = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, isAdmin, isModeratorOrAdmin } = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
+  const { user, logout, profile } = useAuth();
 
   const { data: allCategories } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -56,6 +60,20 @@ const MobileNav = () => {
     setIsOpen(false);
   };
 
+  const handleAuthAction = (action: 'login' | 'signup') => {
+    setIsOpen(false);
+    if (action === 'login') {
+      setLoginOpen(true);
+    } else {
+      setSignupOpen(true);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setIsOpen(false);
+  };
+
   return (
     <>
       {/* Mobile menu button */}
@@ -63,133 +81,237 @@ const MobileNav = () => {
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(true)}
-        className="lg:hidden h-10 w-10 p-0 hover:bg-white/10"
+        className="lg:hidden h-10 w-10 p-0 hover:bg-white/10 text-white"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Mobile menu overlay */}
-      <div className={`fixed inset-0 z-[9999] lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      {/* Full-screen mobile menu overlay */}
+      <div className={`fixed inset-0 z-[9999] lg:hidden transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {/* Background overlay */}
         <div 
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-black/30"
           onClick={() => setIsOpen(false)}
         />
         
-        {/* Menu panel */}
-        <div className={`absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-gray-900 border-l border-gray-700 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-lg font-semibold text-white">Menu</h2>
+        {/* Menu panel - full screen slide from top */}
+        <div className={`absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 transform transition-transform duration-300 ${isOpen ? 'translate-y-0' : '-translate-y-full'}`}>
+          {/* Header with close button */}
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <h2 className="text-2xl font-bold text-white">Menu</h2>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-white/10"
+              className="h-10 w-10 p-0 text-white hover:bg-white/10 rounded-full"
+              aria-label="Close menu"
             >
-              <X className="h-5 w-5" />
+              <X className="h-6 w-6" />
             </Button>
           </div>
 
-          {/* Menu content */}
-          <div className="overflow-y-auto h-full pb-20">
-            {/* Primary Navigation */}
-            <div className="p-4 space-y-2 border-b border-gray-700">
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">Navigation</h3>
+          {/* Menu content - scrollable */}
+          <div className="overflow-y-auto h-full pb-24 px-6 pt-8">
+            {/* Main Navigation Section */}
+            <div className="space-y-6 mb-12">
+              <h3 className="text-sm font-semibold text-purple-200 uppercase tracking-wider">Main Navigation</h3>
               
-              <Link
-                to="/feed"
-                onClick={handleLinkClick}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                <Rss className="h-5 w-5 text-gray-400" />
-                <span className="text-white font-medium">Feed</span>
-              </Link>
-
-              <Link
-                to="/quiz"
-                onClick={handleLinkClick}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors group"
-              >
-                <FileQuestion className="h-5 w-5 text-fuchsia-500 transition-all group-hover:text-cyan-500" />
-                <span className="font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">Quiz</span>
-              </Link>
-
-              {/* Admin Navigation */}
-              {(isModeratorOrAdmin || isAdmin) && (
-                <>
-                  <div className="pt-2">
-                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Admin</h4>
+              <div className="space-y-4">
+                <Link
+                  to="/feed"
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group"
+                >
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                    <Rss className="h-6 w-6 text-white" />
                   </div>
-                  
-                  {isModeratorOrAdmin && (
-                    <Link
-                      to="/admin/comments"
-                      onClick={handleLinkClick}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                      <MessageSquareWarning className="h-5 w-5 text-gray-400" />
-                      <span className="text-white font-medium">Comment Moderation</span>
-                    </Link>
-                  )}
+                  <div>
+                    <span className="text-lg font-medium text-white block">Feed</span>
+                    <span className="text-sm text-purple-200">Latest rankings & discussions</span>
+                  </div>
+                </Link>
 
-                  {isAdmin && (
-                    <>
-                      <Link
-                        to="/admin/create-quiz"
-                        onClick={handleLinkClick}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors"
-                      >
-                        <Wrench className="h-5 w-5 text-gray-400" />
-                        <span className="text-white font-medium">Create Quiz</span>
-                      </Link>
-                      <Link
-                        to="/admin/users"
-                        onClick={handleLinkClick}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors"
-                      >
-                        <Users className="h-5 w-5 text-gray-400" />
-                        <span className="text-white font-medium">Manage Users</span>
-                      </Link>
-                    </>
-                  )}
-                </>
-              )}
+                <Link
+                  to="/quiz"
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group"
+                >
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:scale-105 transition-transform">
+                    <FileQuestion className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-lg font-bold bg-gradient-to-r from-fuchsia-300 to-cyan-300 bg-clip-text text-transparent block">Quiz</span>
+                    <span className="text-sm text-purple-200">Test your sports knowledge</span>
+                  </div>
+                </Link>
+
+                <Link
+                  to="/"
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group"
+                >
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-lg font-medium text-white block">Daily Ranking</span>
+                    <span className="text-sm text-purple-200">Today's featured GOAT debate</span>
+                  </div>
+                </Link>
+              </div>
             </div>
 
-            {/* Categories */}
-            <div className="p-4 space-y-4">
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">Categories</h3>
+            {/* Categories Section */}
+            <div className="space-y-6 mb-12">
+              <h3 className="text-sm font-semibold text-purple-200 uppercase tracking-wider">Categories</h3>
               
-              {menuItems.map((item) => (
-                <div key={item.id} className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-300 uppercase tracking-wide">
-                    {item.name}
-                  </h4>
-                  <div className="space-y-1 ml-2">
-                    {item.children?.map((subItem) => (
-                      <Link
-                        key={subItem.id}
-                        to={`/category/${subItem.id}`}
-                        onClick={handleLinkClick}
-                        className="block p-3 rounded-lg hover:bg-gray-800 transition-colors"
-                      >
-                        <div className="text-sm font-medium text-white">
-                          {subItem.name}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">
-                          {subItem.description || "No description"}
-                        </p>
-                      </Link>
-                    ))}
+              <div className="space-y-4">
+                {menuItems.map((item) => (
+                  <div key={item.id} className="space-y-3">
+                    <h4 className="text-lg font-semibold text-white">
+                      {item.name}
+                    </h4>
+                    <div className="space-y-2 ml-4">
+                      {item.children?.map((subItem) => (
+                        <Link
+                          key={subItem.id}
+                          to={`/category/${subItem.id}`}
+                          onClick={handleLinkClick}
+                          className="block p-3 rounded-lg hover:bg-white/10 transition-colors"
+                        >
+                          <div className="text-base font-medium text-white">
+                            {subItem.name}
+                          </div>
+                          <p className="text-sm text-purple-200 mt-1 line-clamp-2">
+                            {subItem.description || "Rank the greatest athletes"}
+                          </p>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* User Section */}
+            <div className="space-y-6 mb-12">
+              <h3 className="text-sm font-semibold text-purple-200 uppercase tracking-wider">Account</h3>
+              
+              <div className="space-y-4">
+                {user ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      onClick={handleLinkClick}
+                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group"
+                    >
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                        <CircleUser className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-lg font-medium text-white block">Profile</span>
+                        <span className="text-sm text-purple-200">{profile?.full_name || 'Manage your account'}</span>
+                      </div>
+                    </Link>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-red-500/20 transition-colors group w-full text-left"
+                    >
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 group-hover:bg-red-500/30 transition-colors">
+                        <X className="h-6 w-6 text-red-300" />
+                      </div>
+                      <div>
+                        <span className="text-lg font-medium text-red-300 block">Sign Out</span>
+                        <span className="text-sm text-red-200">Log out of your account</span>
+                      </div>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleAuthAction('signup')}
+                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group w-full text-left"
+                    >
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500 group-hover:bg-blue-600 transition-colors">
+                        <UserPlus className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-lg font-medium text-white block">Sign Up</span>
+                        <span className="text-sm text-purple-200">Create your WoDaGOAT account</span>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleAuthAction('login')}
+                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group w-full text-left"
+                    >
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                        <LogIn className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-lg font-medium text-white block">Log In</span>
+                        <span className="text-sm text-purple-200">Access your account</span>
+                      </div>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Support Section */}
+            <div className="space-y-6 border-t border-white/10 pt-8">
+              <h3 className="text-sm font-semibold text-purple-200 uppercase tracking-wider">Support</h3>
+              
+              <div className="space-y-4">
+                <Link
+                  to="/contact"
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group"
+                >
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                    <Mail className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-lg font-medium text-white block">Contact</span>
+                    <span className="text-sm text-purple-200">Get in touch with us</span>
+                  </div>
+                </Link>
+                
+                <div className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                    <Info className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-lg font-medium text-white block">About</span>
+                    <span className="text-sm text-purple-200">Learn about WoDaGOAT</span>
                   </div>
                 </div>
-              ))}
+                
+                <div className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors group">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                    <HelpCircle className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-lg font-medium text-white block">Help</span>
+                    <span className="text-sm text-purple-200">FAQ and support docs</span>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Footer spacing */}
+            <div className="h-8"></div>
           </div>
         </div>
       </div>
+
+      {/* Auth Dialogs */}
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <SignupDialog>
+        <div style={{ display: 'none' }} />
+      </SignupDialog>
     </>
   );
 };
