@@ -23,57 +23,60 @@ const Navbar = () => {
             <Logo />
           </div>
 
-          {/* Center: Desktop Navigation (hidden on mobile) */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-4 text-base font-medium">
-            <Link
-              to="/feed"
-              className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
-            >
-              <Rss className="h-4 w-4 xl:h-5 xl:w-5" />
-              <span>Feed</span>
-            </Link>
-            <Link
-              to="/quiz"
-              className="bg-transparent focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group"
-            >
-              <FileQuestion className="h-4 w-4 xl:h-5 xl:w-5 text-fuchsia-500 transition-all group-hover:text-cyan-500 group-hover:[filter:brightness(1.2)]" />
-              <span className="font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent transition-all group-hover:[filter:brightness(1.2)]">
-                Quiz
-              </span>
-            </Link>
-            
-            {isModeratorOrAdmin && (
+          {/* Center: Spacer for desktop (empty div to maintain layout) */}
+          <div className="hidden lg:flex flex-1"></div>
+
+          {/* Right: Desktop Navigation + Auth/User Menu + Mobile Menu */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Desktop Navigation (hidden on mobile) */}
+            <div className="hidden lg:flex items-center gap-2 xl:gap-4 text-base font-medium mr-4">
               <Link
-                to="/admin/comments"
+                to="/feed"
                 className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
               >
-                <MessageSquareWarning className="h-4 w-4 xl:h-5 xl:w-5" />
-                <span>Comments</span>
+                <Rss className="h-4 w-4 xl:h-5 xl:w-5" />
+                <span>Feed</span>
               </Link>
-            )}
-            
-            {isAdmin && (
-              <>
+              <Link
+                to="/quiz"
+                className="bg-transparent focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group"
+              >
+                <FileQuestion className="h-4 w-4 xl:h-5 xl:w-5 text-fuchsia-500 transition-all group-hover:text-cyan-500 group-hover:[filter:brightness(1.2)]" />
+                <span className="font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent transition-all group-hover:[filter:brightness(1.2)]">
+                  Quiz
+                </span>
+              </Link>
+              
+              {isModeratorOrAdmin && (
                 <Link
-                  to="/admin/create-quiz"
+                  to="/admin/comments"
                   className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
                 >
-                  <Wrench className="h-4 w-4 xl:h-5 xl:w-5" />
-                  <span>Create Quiz</span>
+                  <MessageSquareWarning className="h-4 w-4 xl:h-5 xl:w-5" />
+                  <span>Comments</span>
                 </Link>
-                <Link
-                  to="/admin/users"
-                  className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
-                >
-                  <Users className="h-4 w-4 xl:h-5 xl:w-5" />
-                  <span>Manage Users</span>
-                </Link>
-              </>
-            )}
-          </div>
+              )}
+              
+              {isAdmin && (
+                <>
+                  <Link
+                    to="/admin/create-quiz"
+                    className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
+                  >
+                    <Wrench className="h-4 w-4 xl:h-5 xl:w-5" />
+                    <span>Create Quiz</span>
+                  </Link>
+                  <Link
+                    to="/admin/users"
+                    className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
+                  >
+                    <Users className="h-4 w-4 xl:h-5 xl:w-5" />
+                    <span>Manage Users</span>
+                  </Link>
+                </>
+              )}
+            </div>
 
-          {/* Right: Auth/User Menu + Mobile Menu */}
-          <div className="flex items-center gap-2 sm:gap-3">
             {/* Auth buttons or user menu - always visible */}
             {loading ? (
               <div className="flex items-center gap-2">
