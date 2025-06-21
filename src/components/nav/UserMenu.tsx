@@ -29,10 +29,15 @@ const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
+        <Button 
+          variant="ghost" 
+          className="relative h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 rounded-full p-0 hover:bg-white/10"
+        >
+          <Avatar className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12">
             <AvatarImage src={profile.avatar_url || undefined} alt={sanitize(profile.full_name) || 'User'} />
-            <AvatarFallback>{profile.full_name ? sanitize(profile.full_name.charAt(0)) : 'U'}</AvatarFallback>
+            <AvatarFallback className="text-xs sm:text-sm lg:text-base">
+              {profile.full_name ? sanitize(profile.full_name.charAt(0)) : 'U'}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
