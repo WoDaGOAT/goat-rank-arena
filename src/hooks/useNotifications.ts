@@ -128,6 +128,15 @@ export const useNotifications = () => {
                         toast.info(`${newNotification.data.requester_name} sent you a friend request.`);
                     } else if (newNotification.type === 'friend_request_accepted') {
                         toast.info(`You are now friends with ${newNotification.data.receiver_name}.`);
+                    } else if (newNotification.type === 'ranking_reaction') {
+                        const reactionEmoji = newNotification.data.reaction_type === 'thumbs-up' ? '👍' 
+                            : newNotification.data.reaction_type === 'trophy' ? '🏆'
+                            : newNotification.data.reaction_type === 'flame' ? '🔥'
+                            : newNotification.data.reaction_type === 'frown' ? '😔'
+                            : '👍';
+                        toast.info(`${newNotification.data.reacting_user_name} reacted ${reactionEmoji} to your ranking "${newNotification.data.ranking_title}".`);
+                    } else if (newNotification.type === 'category_reaction') {
+                        toast.info(`${newNotification.data.reacting_user_name} reacted to the category ${newNotification.data.category_name}.`);
                     }
                 }
             )

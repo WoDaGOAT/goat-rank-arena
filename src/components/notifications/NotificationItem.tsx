@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Layers, UserPlus, Users } from 'lucide-react';
+import { MessageSquare, Layers, UserPlus, Users, Heart, Trophy, Flame, ThumbsUp, Frown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 
@@ -43,9 +43,44 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
                         You and <span className="font-semibold">{notification.data.receiver_name || 'Someone'}</span> are now friends.
                     </p>
                 );
+            case 'ranking_reaction':
+                const reactionEmoji = notification.data.reaction_type === 'thumbs-up' ? '👍' 
+                    : notification.data.reaction_type === 'trophy' ? '🏆'
+                    : notification.data.reaction_type === 'flame' ? '🔥'
+                    : notification.data.reaction_type === 'frown' ? '😔'
+                    : '👍';
+                
+                return (
+                    <p>
+                        <span className="font-semibold">{notification.data.reacting_user_name || 'Someone'}</span> reacted {reactionEmoji} to your ranking{' '}
+                        <span className="font-semibold">"{notification.data.ranking_title}"</span>.
+                    </p>
+                );
+            case 'category_reaction':
+                return (
+                    <p>
+                        <span className="font-semibold">{notification.data.reacting_user_name || 'Someone'}</span> reacted to the category{' '}
+                        <span className="font-semibold">{notification.data.category_name}</span>.
+                    </p>
+                );
             default:
                 const _exhaustiveCheck: never = notification;
                 return <p>You have a new notification.</p>;
+        }
+    };
+    
+    const getReactionIcon = (reactionType: string) => {
+        switch (reactionType) {
+            case 'thumbs-up':
+                return <ThumbsUp className="w-5 h-5 text-blue-400" />;
+            case 'trophy':
+                return <Trophy className="w-5 h-5 text-yellow-400" />;
+            case 'flame':
+                return <Flame className="w-5 h-5 text-orange-400" />;
+            case 'frown':
+                return <Frown className="w-5 h-5 text-red-400" />;
+            default:
+                return <Heart className="w-5 h-5 text-pink-400" />;
         }
     };
     
@@ -57,6 +92,10 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         ? <UserPlus className="w-5 h-5 text-purple-400" />
         : notification.type === 'friend_request_accepted'
         ? <Users className="w-5 h-5 text-teal-400" />
+        : notification.type === 'ranking_reaction'
+        ? getReactionIcon(notification.data.reaction_type)
+        : notification.type === 'category_reaction'
+        ? getReactionIcon(notification.data.reaction_type)
         : <MessageSquare className="w-5 h-5 text-gray-400" />;
 
     const handleAccept = (e: React.MouseEvent) => {
@@ -115,6 +154,28 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         );
     }
 
+    if (notification.type === 'ranking_reaction') {
+        return (
+            <Link 
+                to={`/user-ranking/${notification.data.ranking_id}`} 
+                className="block p-3 hover:bg-white/10 rounded-md transition-colors"
+            >
+                {content}
+            </Link>
+        );
+    }
+
+    if (notification.type === 'category_reaction') {
+        return (
+            <Link 
+                to={`/category/${notification.data.category_id}`} 
+                className="block p-3 hover:bg-white/10 rounded-md transition-colors"
+            >
+                {content}
+            </Link>
+        );
+    }
+
     return (
         <div className="block p-3 hover:bg-white/10 rounded-md transition-colors cursor-default">
             {content}
@@ -123,4 +184,3 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
 };
 
 export default NotificationItem;
-
