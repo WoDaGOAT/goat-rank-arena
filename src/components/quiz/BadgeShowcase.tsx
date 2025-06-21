@@ -5,7 +5,7 @@ import { BADGES } from "@/data/badges";
 import BadgeCard from "./BadgeCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, RefreshCw } from "lucide-react";
+import { Trophy, Shield } from "lucide-react";
 import { useUserBadges } from "@/hooks/useUserBadges";
 
 interface BadgeShowcaseProps {
@@ -30,13 +30,14 @@ const BadgeShowcase = ({ userBadges }: BadgeShowcaseProps) => {
 
   console.log('BadgeShowcase - User badges:', userBadges);
   console.log('BadgeShowcase - Earned badge IDs:', Array.from(earnedBadgeIds));
+  console.log('BadgeShowcase - Available badges:', BADGES.map(b => ({ id: b.id, icon: b.icon })));
 
   return (
     <Card className="w-full bg-white/5 border-white/20 text-white">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-yellow-500" />
+            <Trophy className="h-5 w-5 text-yellow-500" />
             Badge Collection ({earnedCount}/{totalCount})
           </CardTitle>
           <Button
@@ -45,7 +46,7 @@ const BadgeShowcase = ({ userBadges }: BadgeShowcaseProps) => {
             size="sm"
             className="bg-white/10 border-white/20 text-white hover:bg-white/20"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <Shield className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
@@ -79,7 +80,7 @@ const BadgeShowcase = ({ userBadges }: BadgeShowcaseProps) => {
       <CardContent>
         {earnedCount === 0 && (
           <div className="text-center py-8">
-            <Award className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400 mb-2">No badges earned yet!</p>
             <p className="text-sm text-gray-500">Complete quizzes to start earning badges.</p>
           </div>

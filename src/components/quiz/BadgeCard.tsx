@@ -4,17 +4,10 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Lightbulb, 
-  Flame, 
-  Target, 
-  Stars, 
-  BarChart, 
-  Medal, 
-  Crown, 
   Sparkles, 
-  Heart, 
-  BookOpen, 
+  Trophy, 
   Shield, 
-  TrendingUp,
+  Book,
   LucideIcon
 } from "lucide-react";
 
@@ -41,17 +34,10 @@ const rarityIconColors = {
 
 const iconMap: Record<string, LucideIcon> = {
   lightbulb: Lightbulb,
-  flame: Flame,
-  target: Target,
-  stars: Stars,
-  'bar-chart': BarChart,
-  medal: Medal,
-  crown: Crown,
   sparkles: Sparkles,
-  heart: Heart,
-  'book-open': BookOpen,
-  'shield-star': Shield,
-  'trending-up': TrendingUp,
+  trophy: Trophy,
+  shield: Shield,
+  book: Book,
 };
 
 // Detailed requirements for each badge
@@ -72,8 +58,10 @@ const badgeRequirements: Record<string, string> = {
 };
 
 const BadgeCard = ({ badge, userBadge, isEarned, className }: BadgeCardProps) => {
-  const IconComponent = iconMap[badge.icon] || Sparkles;
+  const IconComponent = iconMap[badge.icon] || Sparkles; // Use Sparkles as fallback
   const requirement = badgeRequirements[badge.id] || badge.description;
+  
+  console.log(`BadgeCard rendering - Badge: ${badge.id}, Icon: ${badge.icon}, IsEarned: ${isEarned}, UserBadge:`, userBadge);
   
   return (
     <TooltipProvider>

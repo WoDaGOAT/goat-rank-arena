@@ -35,20 +35,27 @@ export const useUserBadges = () => {
 
         // Map database records to UserBadge type with badge details from BADGES constant
         const { BADGES } = await import('@/data/badges');
+        console.log('Available badges:', BADGES.map(b => ({ id: b.id, icon: b.icon })));
+        
         const mappedBadges: UserBadge[] = data.map(userBadge => {
           const badge = BADGES.find(b => b.id === userBadge.badge_id);
-          console.log(`Mapping badge ${userBadge.badge_id}: found=${!!badge}`);
+          console.log(`Mapping badge ${userBadge.badge_id}: found=${!!badge}`, badge ? { name: badge.name, icon: badge.icon } : 'NOT FOUND');
+          
+          if (!badge) {
+            console.warn(`Badge definition not found for badge_id: ${userBadge.badge_id}`);
+            return null;
+          }
           
           return {
             id: userBadge.id,
             badge_id: userBadge.badge_id,
             user_id: userBadge.user_id,
             earned_at: userBadge.earned_at,
-            badge: badge!
+            badge: badge
           };
-        }).filter(ub => ub.badge); // Filter out badges that don't exist in BADGES
+        }).filter((ub): ub is UserBadge => ub !== null); // Filter out null values with type guard
 
-        console.log('Mapped user badges:', mappedBadges);
+        console.log('Successfully mapped user badges:', mappedBadges);
         setUserBadges(mappedBadges);
       } catch (error) {
         console.error('Error fetching user badges:', error);
@@ -86,15 +93,20 @@ export const useUserBadges = () => {
           const { BADGES } = await import('@/data/badges');
           const mappedBadges: UserBadge[] = data.map(userBadge => {
             const badge = BADGES.find(b => b.id === userBadge.badge_id);
+            if (!badge) {
+              console.warn(`Badge definition not found for badge_id: ${userBadge.badge_id}`);
+              return null;
+            }
             return {
               id: userBadge.id,
               badge_id: userBadge.badge_id,
               user_id: userBadge.user_id,
               earned_at: userBadge.earned_at,
-              badge: badge!
+              badge: badge
             };
-          }).filter(ub => ub.badge);
+          }).filter((ub): ub is UserBadge => ub !== null);
           
+          console.log('Refreshed badges:', mappedBadges);
           setUserBadges(mappedBadges);
         }
       }
