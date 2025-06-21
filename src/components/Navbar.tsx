@@ -60,7 +60,7 @@ const Navbar = () => {
               {isAdmin && (
                 <>
                   <Link
-                    to="/admin/create-quiz"
+                    to="/admin/quizzes/new"
                     className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
                   >
                     <Wrench className="h-4 w-4 xl:h-5 xl:w-5" />
