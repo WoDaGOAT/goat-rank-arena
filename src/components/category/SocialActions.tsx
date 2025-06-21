@@ -190,54 +190,54 @@ export const SocialActions = ({
   return (
     <div className="flex items-center justify-between">
       {/* Reaction icons on the left */}
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         {reactions.map(({ icon: Icon, label, tooltip, emoji }) => {
           const isReacted = userReactions[label];
           const count = reactionCounts[label] || 0;
           
           return (
-            <div key={label} className="flex flex-col items-center">
+            <div key={label} className="flex flex-col items-center gap-1">
               <button
                 onClick={() => handleReactionClick(label)}
                 onMouseEnter={() => setHoveredReaction(label)}
                 onMouseLeave={() => setHoveredReaction(null)}
                 disabled={isLoading}
-                className={`relative group p-2 rounded-full transition-all duration-200 hover:scale-110 ${
+                className={`relative group p-3 rounded-lg transition-all duration-200 hover:scale-105 shadow-md border ${
                   isReacted 
-                    ? 'bg-white/20 border-2 border-white/40' 
-                    : 'bg-white/5 hover:bg-white/15'
-                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    ? 'bg-white/25 border-white/50 shadow-white/20' 
+                    : 'bg-white/15 border-white/20 hover:bg-white/25 hover:border-white/40'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 title={tooltip}
               >
                 <Icon 
-                  className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-200 ${
+                  className={`h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200 ${
                     isReacted
-                      ? label === 'thumbs-up' ? 'text-blue-400' 
-                        : label === 'trophy' ? 'text-yellow-400'
-                        : label === 'flame' ? 'text-orange-400'
-                        : 'text-red-400'
+                      ? label === 'thumbs-up' ? 'text-blue-300' 
+                        : label === 'trophy' ? 'text-yellow-300'
+                        : label === 'flame' ? 'text-orange-300'
+                        : 'text-red-300'
                       : hoveredReaction === label 
-                        ? label === 'thumbs-up' ? 'text-blue-400' 
-                          : label === 'trophy' ? 'text-yellow-400'
-                          : label === 'flame' ? 'text-orange-400'
-                          : 'text-red-400'
-                        : 'text-gray-300 hover:text-white'
+                        ? label === 'thumbs-up' ? 'text-blue-200' 
+                          : label === 'trophy' ? 'text-yellow-200'
+                          : label === 'flame' ? 'text-orange-200'
+                          : 'text-red-200'
+                        : 'text-gray-200 hover:text-white'
                   }`} 
                 />
                 
                 {/* Tooltip */}
-                <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity duration-200 ${
+                <div className={`absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition-opacity duration-200 z-10 ${
                   hoveredReaction === label ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}>
                   {tooltip}
                 </div>
               </button>
               
-              {/* Reaction count */}
-              <div className="flex items-center mt-1">
-                <span className="text-xs mr-1">{emoji}</span>
-                <span className={`text-xs font-medium transition-colors ${
-                  isReacted ? 'text-white' : 'text-gray-400'
+              {/* Reaction count - always show, even if 0 */}
+              <div className="flex items-center gap-1 min-h-[20px]">
+                <span className="text-sm">{emoji}</span>
+                <span className={`text-sm font-semibold transition-colors ${
+                  isReacted ? 'text-white' : count > 0 ? 'text-gray-200' : 'text-gray-400'
                 }`}>
                   {count}
                 </span>
@@ -248,9 +248,9 @@ export const SocialActions = ({
       </div>
 
       {/* Comments on the right */}
-      <div className="flex items-center text-white">
-        <span className="mr-2">💬</span>
-        <span className="text-sm sm:text-base">{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
+      <div className="flex items-center gap-2 text-gray-200 bg-white/10 px-3 py-2 rounded-lg border border-white/20">
+        <span className="text-lg">💬</span>
+        <span className="text-sm sm:text-base font-medium">{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
       </div>
     </div>
   );
