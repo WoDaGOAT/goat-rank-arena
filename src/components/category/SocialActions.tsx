@@ -81,26 +81,9 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Main actions row */}
-      <div className="flex items-center justify-center gap-6">
-        <Button
-          variant="outline"
-          className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-          onClick={() => toggleLike()}
-        >
-          <Heart className={`mr-2 h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-          {initialLikes} {initialLikes === 1 ? 'Like' : 'Likes'}
-        </Button>
-        
-        <div className="flex items-center text-white">
-          <span className="mr-2">💬</span>
-          <span>{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
-        </div>
-      </div>
-
-      {/* Reaction icons row */}
-      <div className="flex items-center justify-center gap-3">
+    <div className="flex items-center justify-between">
+      {/* Reaction icons on the left */}
+      <div className="flex items-center gap-3">
         {reactions.map(({ icon: Icon, label, tooltip }) => (
           <button
             key={label}
@@ -129,6 +112,22 @@ export const SocialActions = ({ categoryId, initialLikes, isLiked, categoryName 
             </div>
           </button>
         ))}
+      </div>
+
+      {/* Likes and comments on the right */}
+      <div className="flex items-center gap-6">
+        <button
+          onClick={() => toggleLike()}
+          className="flex items-center text-white hover:text-gray-300 transition-colors"
+        >
+          <Heart className={`mr-2 h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+          <span>{initialLikes} {initialLikes === 1 ? 'Like' : 'Likes'}</span>
+        </button>
+        
+        <div className="flex items-center text-white">
+          <span className="mr-2">💬</span>
+          <span>{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
+        </div>
       </div>
     </div>
   );
