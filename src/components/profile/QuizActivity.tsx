@@ -2,10 +2,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { UserQuizAttemptForProfile } from "@/types/quiz";
-import { Award, History } from "lucide-react";
+import { Award, History, Target } from "lucide-react";
 import { useUserBadges } from "@/hooks/useUserBadges";
 import BadgeCard from "@/components/quiz/BadgeCard";
-import { BADGES } from "@/data/badges";
 
 interface QuizActivityProps {
     quizAttempts: UserQuizAttemptForProfile[] | undefined;
@@ -15,42 +14,87 @@ interface QuizActivityProps {
 const QuizActivity = ({ quizAttempts, isLoading }: QuizActivityProps) => {
     const { userBadges, loading: badgesLoading } = useUserBadges();
 
-    const getTotalQuestions = (attempt: UserQuizAttemptForProfile) => {
-        return attempt.quizzes?.quiz_questions?.length || 0;
-    }
+    const getScoreColor = (score: number) => {
+        if (score === 5) return "text-yellow-400 font-bold"; // Perfect score
+        if (score >= 4) return "text-green-400 font-semibold"; // Excellent
+        if (score >= 3) return "text-blue-400"; // Good
+        if (score >= 2) return "text-orange-400"; // Okay
+        return "text-gray-400"; // Needs improvement
+    };
+
+    const getScoreLabel = (score: number) => {
+        if (score === 5) return "Perfect! 🏆";
+        if (score >= 4) return "Excellent!";
+        if (score >= 3) return "Good job!";
+        if (score >= 2) return "Not bad!";
+        return "Keep trying!";
+    };
 
     return (
         <div className="space-y-6 pt-4">
             <div>
                 <h3 className="text-xl font-semibold border-b border-gray-600 pb-2 mb-3 flex items-center gap-2">
                     <History className="h-5 w-5" />
-                    My Quiz History
+                    My Daily Quiz History
                 </h3>
-                 {isLoading ? (
+                {isLoading ? (
                     <div className="space-y-3">
-                        <Skeleton className="h-12 w-full bg-gray-700 rounded-md" />
-                        <Skeleton className="h-12 w-full bg-gray-700 rounded-md" />
+                        <Skeleton className="h-16 w-full bg-gray-700 rounded-md" />
+                        <Skeleton className="h-16 w-full bg-gray-700 rounded-md" />
                     </div>
                 ) : quizAttempts && quizAttempts.length > 0 ? (
                     <ul className="space-y-3 text-gray-300">
                         {quizAttempts.map(attempt => (
-                            <li key={attempt.id} className="text-sm p-3 bg-white/5 rounded-lg border border-gray-700/50">
-                                <div className="flex justify-between items-center">
-                                    <span className="font-semibold text-white">
-                                        {attempt.quizzes?.title || 'Daily Quiz'}
-                                    </span>
-                                    <span className="font-bold text-primary text-lg">
-                                        {attempt.score} / {getTotalQuestions(attempt)}
-                                    </span>
+                            <li key={attempt.id} className="p-4 bg-white/5 rounded-lg border border-gray-700/50 hover:bg-white/10 transition-colors">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <span className="font-semibold text-white block mb-1">
+                                            {attempt.quizzes?.title || 'Daily Quiz'}
+                                        </span>
+                                        <div className="text-gray-400 text-xs">
+                                            {format(new Date(attempt.completed_at), 'MMM d, yyyy, p')}
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className={`text-2xl font-bold ${getScoreColor(attempt.score)}`}>
+                                            {attempt.score}/5
+                                        </div>
+                                        <div className="text-xs text-gray-400">
+                                            {getScoreLabel(attempt.score)}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-gray-400 text-xs mt-1">
-                                  {format(new Date(attempt.completed_at), 'MMM d, yyyy, p')}
+                                
+                                {/* Progress bar for visual representation */}
+                                <div className="mt-3">
+                                    <div className="w-full bg-gray-700 rounded-full h-2">
+                                        <div 
+                                            className={`h-2 rounded-full transition-all ${
+                                                attempt.score === 5 ? 'bg-yellow-500' :
+                                                attempt.score >= 4 ? 'bg-green-500' :
+                                                attempt.score >= 3 ? 'bg-blue-500' :
+                                                attempt.score >= 2 ? 'bg-orange-500' : 'bg-gray-500'
+                                            }`}
+                                            style={{ width: `${(attempt.score / 5) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="flex justify-between mt-1 text-xs text-gray-500">
+                                        <span>0</span>
+                                        <span className="flex items-center gap-1">
+                                            <Target className="h-3 w-3" />
+                                            Max: 5 points
+                                        </span>
+                                    </div>
                                 </div>
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-gray-400 text-sm">No quizzes taken yet. Take today's quiz!</p>
+                    <div className="text-center py-8">
+                        <div className="text-4xl mb-4">🎯</div>
+                        <p className="text-gray-400 text-sm mb-2">No daily quizzes taken yet</p>
+                        <p className="text-gray-500 text-xs">Take today's 5-question quiz to start your journey!</p>
+                    </div>
                 )}
             </div>
             
@@ -78,7 +122,11 @@ const QuizActivity = ({ quizAttempts, isLoading }: QuizActivityProps) => {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-gray-400 text-sm">No badges earned yet. Complete quizzes to start earning badges!</p>
+                    <div className="text-center py-8">
+                        <div className="text-4xl mb-4">🏆</div>
+                        <p className="text-gray-400 text-sm mb-2">No badges earned yet</p>
+                        <p className="text-gray-500 text-xs">Complete daily quizzes to start earning badges!</p>
+                    </div>
                 )}
                 
                 {userBadges.length > 12 && (

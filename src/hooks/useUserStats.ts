@@ -40,22 +40,21 @@ export const useUserStats = () => {
           return;
         }
 
-        // Calculate stats
+        // Calculate stats with 5-question standardization
         const totalQuizzes = attempts.length;
         let totalCorrect = 0;
-        let totalQuestions = 0;
         let perfectScores = 0;
         
         attempts.forEach(attempt => {
-          // Handle the quiz data structure properly
-          const quiz = Array.isArray(attempt.quizzes) ? attempt.quizzes[0] : attempt.quizzes;
-          const questionCount = quiz?.quiz_questions?.length || 0;
           totalCorrect += attempt.score;
-          totalQuestions += questionCount;
-          if (attempt.score === questionCount && questionCount > 0) {
+          // Perfect score is now 5/5 for all daily quizzes
+          if (attempt.score === 5) {
             perfectScores++;
           }
         });
+
+        // All daily quizzes now have exactly 5 questions
+        const totalQuestions = totalQuizzes * 5;
 
         // Calculate streaks
         const { current_streak, longest_streak } = calculateStreaks(attempts);
@@ -84,12 +83,17 @@ export const useUserStats = () => {
   return { stats, loading };
 };
 
-// Helper function to calculate streaks
+// Helper function to calculate streaks based on consecutive days
 const calculateStreaks = (attempts: any[]) => {
   if (attempts.length === 0) return { current_streak: 0, longest_streak: 0 };
 
-  const attemptDates = attempts.map(a => new Date(a.completed_at).toDateString());
-  const uniqueDates = [...new Set(attemptDates)].sort();
+  // Get unique dates when user took quizzes
+  const attemptDates = attempts
+    .map(a => new Date(a.completed_at).toDateString())
+    .filter((date, index, arr) => arr.indexOf(date) === index)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+  if (attemptDates.length === 0) return { current_streak: 0, longest_streak: 0 };
 
   let currentStreak = 0;
   let longestStreak = 0;
@@ -98,18 +102,21 @@ const calculateStreaks = (attempts: any[]) => {
   const today = new Date().toDateString();
   const yesterday = new Date(Date.now() - 86400000).toDateString();
 
-  // Check if today or yesterday is included for current streak
-  if (uniqueDates.includes(today) || uniqueDates.includes(yesterday)) {
+  // Check if user has taken quiz today or yesterday for current streak
+  const lastAttemptDate = attemptDates[attemptDates.length - 1];
+  
+  if (lastAttemptDate === today || lastAttemptDate === yesterday) {
     currentStreak = 1;
     
     // Calculate current streak backwards from most recent date
-    const startDate = uniqueDates.includes(today) ? today : yesterday;
-    let checkDate = new Date(startDate);
-    
-    for (let i = uniqueDates.length - 1; i >= 0; i--) {
-      if (uniqueDates[i] === checkDate.toDateString()) {
-        currentStreak = Math.max(currentStreak, uniqueDates.length - i);
-        checkDate.setDate(checkDate.getDate() - 1);
+    for (let i = attemptDates.length - 2; i >= 0; i--) {
+      const prevDate = new Date(attemptDates[i]);
+      const currDate = new Date(attemptDates[i + 1]);
+      const diffTime = currDate.getTime() - prevDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        currentStreak++;
       } else {
         break;
       }
@@ -117,9 +124,9 @@ const calculateStreaks = (attempts: any[]) => {
   }
 
   // Calculate longest streak
-  for (let i = 1; i < uniqueDates.length; i++) {
-    const prevDate = new Date(uniqueDates[i - 1]);
-    const currDate = new Date(uniqueDates[i]);
+  for (let i = 1; i < attemptDates.length; i++) {
+    const prevDate = new Date(attemptDates[i - 1]);
+    const currDate = new Date(attemptDates[i]);
     const diffTime = currDate.getTime() - prevDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 

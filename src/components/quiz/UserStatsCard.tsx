@@ -2,7 +2,7 @@
 import { UserStats } from "@/types/badges";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Target, Flame, TrendingUp } from "lucide-react";
+import { Trophy, Target, Flame, TrendingUp, Award } from "lucide-react";
 
 interface UserStatsCardProps {
   stats: UserStats;
@@ -24,7 +24,7 @@ const UserStatsCard = ({ stats }: UserStatsCardProps) => {
       <CardHeader className="pb-4">
         <CardTitle className="text-xl flex items-center gap-3 text-white">
           <Trophy className="h-6 w-6 text-yellow-500" />
-          Your Performance
+          Your Daily Quiz Performance
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -58,24 +58,43 @@ const UserStatsCard = ({ stats }: UserStatsCardProps) => {
           
           <div className="text-center">
             <div className="flex items-center justify-center mb-2">
-              <TrendingUp className="h-6 w-6 text-green-400" />
+              <Award className="h-6 w-6 text-yellow-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-1">
               {stats.perfect_scores}
             </div>
-            <div className="text-blue-300 text-sm">Perfect Scores</div>
+            <div className="text-blue-300 text-sm">Perfect 5/5</div>
           </div>
           
           <div className="text-center">
             <div className="flex items-center justify-center mb-2">
-              <Trophy className="h-6 w-6 text-purple-400" />
+              <TrendingUp className="h-6 w-6 text-green-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-1">
               {stats.total_quizzes}
             </div>
-            <div className="text-blue-300 text-sm">Quizzes Taken</div>
+            <div className="text-blue-300 text-sm">Daily Quizzes</div>
           </div>
         </div>
+
+        {/* New 5-question format stats */}
+        <div className="border-t border-gray-600 pt-4">
+          <div className="text-center">
+            <div className="text-lg font-semibold text-white mb-2">
+              {stats.total_correct} / {stats.total_questions} Questions Correct
+            </div>
+            <div className="text-sm text-gray-400">
+              Each daily quiz has exactly 5 questions worth 1 point each
+            </div>
+          </div>
+        </div>
+
+        {stats.longest_streak > stats.current_streak && (
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <div className="text-sm text-gray-400">Best Streak</div>
+            <div className="text-lg font-bold text-orange-400">{stats.longest_streak} days</div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

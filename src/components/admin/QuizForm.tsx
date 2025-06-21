@@ -24,9 +24,10 @@ import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
+import { CalendarIcon, PlusCircle, Trash2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const answerSchema = z.object({
   answer_text: z.string().min(1, "Answer text cannot be empty."),
@@ -42,7 +43,7 @@ const quizFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
   topic: z.string().optional(),
   active_date: z.date({ required_error: "An active date is required." }),
-  questions: z.array(questionSchema).min(1, "Must have at least one question."),
+  questions: z.array(questionSchema).length(5, "Daily quizzes must have exactly 5 questions."),
 });
 
 type QuizFormValues = z.infer<typeof quizFormSchema>;
@@ -56,11 +57,15 @@ const QuizForm = () => {
     defaultValues: {
       title: "",
       topic: "",
-      questions: [],
+      questions: Array(5).fill(null).map((_, index) => ({
+        question_text: "",
+        answers: [{ answer_text: "" }, { answer_text: "" }],
+        correct_answer_index: -1,
+      })),
     },
   });
 
-  const { fields: questionFields, append: appendQuestion, remove: removeQuestion } = useFieldArray({
+  const { fields: questionFields } = useFieldArray({
     control: form.control,
     name: "questions",
   });
@@ -87,8 +92,8 @@ const QuizForm = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("Quiz created successfully!");
-      queryClient.invalidateQueries({ queryKey: ['todaysQuiz'] }); // Invalidate any quiz queries
+      toast.success("5-question daily quiz created successfully!");
+      queryClient.invalidateQueries({ queryKey: ['todaysQuiz'] });
       navigate("/quiz");
     },
     onError: (error) => {
@@ -103,9 +108,17 @@ const QuizForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <Alert className="bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Daily Quiz Format:</strong> All daily quizzes must have exactly 5 questions. Each question awards 1 point for a maximum score of 5 points per quiz.
+          </AlertDescription>
+        </Alert>
+
         <Card className="bg-white/5 border-white/10">
           <CardHeader>
             <CardTitle>Quiz Details</CardTitle>
+            <CardDescription>Create a new 5-question daily quiz for WoDaGOAT users</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
@@ -162,40 +175,48 @@ const QuizForm = () => {
           </CardContent>
         </Card>
 
-        {questionFields.map((questionItem, qIndex) => (
-          <Card key={questionItem.id} className="bg-white/5 border-white/10 relative">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Question {qIndex + 1}</CardTitle>
-                <Button type="button" variant="ghost" size="icon" onClick={() => removeQuestion(qIndex)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name={`questions.${qIndex}.question_text`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Question Text</FormLabel>
-                    <FormControl><Input placeholder="What is the question?" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <AnswerFields form={form} qIndex={qIndex} />
-            </CardContent>
-          </Card>
-        ))}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Questions (5 Required)</h3>
+            <div className="text-sm text-muted-foreground">
+              Progress: {questionFields.filter((_, index) => form.watch(`questions.${index}.question_text`)).length}/5
+            </div>
+          </div>
+          
+          {questionFields.map((questionItem, qIndex) => (
+            <Card key={questionItem.id} className="bg-white/5 border-white/10 relative">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-base">Question {qIndex + 1} of 5</CardTitle>
+                  <div className="text-xs text-muted-foreground">1 point</div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name={`questions.${qIndex}.question_text`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Question Text</FormLabel>
+                      <FormControl><Input placeholder="What is the question?" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <AnswerFields form={form} qIndex={qIndex} />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-        <Button type="button" variant="outline" onClick={() => appendQuestion({ question_text: "", answers: [{ answer_text: "" }, { answer_text: "" }], correct_answer_index: -1 })}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Question
-        </Button>
-
-        <Button type="submit" disabled={createQuizMutation.isPending}>
-          {createQuizMutation.isPending ? "Creating..." : "Create Quiz"}
-        </Button>
+        <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg">
+          <div className="text-sm text-muted-foreground">
+            Total Questions: 5 • Maximum Score: 5 points
+          </div>
+          <Button type="submit" disabled={createQuizMutation.isPending} size="lg">
+            {createQuizMutation.isPending ? "Creating Quiz..." : "Create 5-Question Quiz"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
@@ -235,9 +256,11 @@ const AnswerFields = ({ form, qIndex }: { form: any, qIndex: number }) => {
                         </FormItem>
                       )}
                     />
-                    <Button type="button" size="icon" variant="ghost" onClick={() => remove(aIndex)} className="shrink-0 text-red-400 hover:text-red-300">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {fields.length > 2 && (
+                      <Button type="button" size="icon" variant="ghost" onClick={() => remove(aIndex)} className="shrink-0 text-red-400 hover:text-red-300">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </FormItem>
                 ))}
               </RadioGroup>
