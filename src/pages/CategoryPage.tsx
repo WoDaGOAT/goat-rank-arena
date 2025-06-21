@@ -41,35 +41,7 @@ const CategoryPage = () => {
     enabled: !!categoryId,
   });
 
-  // Fetch likes data
-  const { data: likesData, isLoading: isLoadingLikes } = useQuery({
-    queryKey: ['categoryLikes', categoryId],
-    queryFn: async () => {
-      const { count, error: countError } = await supabase
-        .from('category_likes')
-        .select('*', { count: 'exact', head: true })
-        .eq('category_id', categoryId || "");
-      
-      if (countError) throw countError;
-
-      let isLiked = false;
-      if (user) {
-        const { data: likeData, error: likeError } = await supabase
-          .from('category_likes')
-          .select('id')
-          .eq('category_id', categoryId || "")
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (likeError) throw likeError;
-        isLiked = !!likeData;
-      }
-
-      return { count: count || 0, isLiked };
-    },
-    enabled: !!categoryId
-  });
-
-  if (isLoadingCategory || isLoadingLikes) {
+  if (isLoadingCategory) {
      return (
       <>
         <Helmet>
@@ -118,9 +90,6 @@ const CategoryPage = () => {
   const socialActions = (
     <SocialActions 
       categoryId={categoryId!} 
-      initialLikes={likesData?.count ?? 0}
-      isLiked={likesData?.isLiked ?? false}
-      categoryName={dbCategory.name}
     />
   );
 
