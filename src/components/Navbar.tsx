@@ -40,15 +40,15 @@ const Navbar = () => {
                 to="/feed"
                 className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
               >
-                <Rss className="h-4 w-4 xl:h-5 xl:w-5" />
-                <span>Feed</span>
+                <Rss className="h-4 w-4 xl:h-5 xl:w-5 text-white" />
+                <span className="text-white">Feed</span>
               </Link>
               <Link
                 to="/quiz"
-                className="bg-transparent focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group relative"
+                className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 group relative"
               >
-                <FileQuestion className="h-4 w-4 xl:h-5 xl:w-5 text-fuchsia-500 transition-all group-hover:text-cyan-500 group-hover:[filter:brightness(1.2)]" />
-                <span className="font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent transition-all group-hover:[filter:brightness(1.2)]">
+                <FileQuestion className="h-4 w-4 xl:h-5 xl:w-5 text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors" />
+                <span className="font-bold text-transparent bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text group-hover:from-fuchsia-300 group-hover:to-cyan-300">
                   Quiz
                 </span>
                 {shouldShowQuizBadge && (
@@ -63,8 +63,8 @@ const Navbar = () => {
                   to="/admin/comments"
                   className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
                 >
-                  <MessageSquareWarning className="h-4 w-4 xl:h-5 xl:w-5" />
-                  <span>Comments</span>
+                  <MessageSquareWarning className="h-4 w-4 xl:h-5 xl:w-5 text-white" />
+                  <span className="text-white">Comments</span>
                 </Link>
               )}
               
@@ -74,15 +74,15 @@ const Navbar = () => {
                     to="/admin/quizzes/new"
                     className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
                   >
-                    <Wrench className="h-4 w-4 xl:h-5 xl:w-5" />
-                    <span>Create Quiz</span>
+                    <Wrench className="h-4 w-4 xl:h-5 xl:w-5 text-white" />
+                    <span className="text-white">Create Quiz</span>
                   </Link>
                   <Link
                     to="/admin/users"
                     className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
                   >
-                    <Users className="h-4 w-4 xl:h-5 xl:w-5" />
-                    <span>Manage Users</span>
+                    <Users className="h-4 w-4 xl:h-5 xl:w-5 text-white" />
+                    <span className="text-white">Manage Users</span>
                   </Link>
                 </>
               )}
