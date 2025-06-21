@@ -31,7 +31,9 @@ export const useNotifications = () => {
       }
 
       console.log(`Notifications fetched: ${data?.length || 0}`);
-      return data || [];
+      
+      // Cast the database response to the proper Notification discriminated union type
+      return (data || []) as Notification[];
     },
     enabled: !!user?.id,
     staleTime: 1 * 60 * 1000, // 1 minute - notifications should be fresh
