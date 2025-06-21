@@ -3,12 +3,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from "react-router-dom";
-import { BarChart3, MessageSquare, ThumbsUp, Trophy, Flame, Frown } from "lucide-react";
+import { BarChart3, MessageSquare } from "lucide-react";
 import RankedAthleteRow from './RankedAthleteRow';
 import UserHoverCard from "../../profile/UserHoverCard";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { sanitize } from "@/lib/sanitize";
+import { SocialActions } from "../../category/SocialActions";
 
 export interface RankedAthlete {
   id: string;
@@ -96,22 +97,22 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
         )}
       </CardContent>
       <div className="border-t border-gray-700/50">
-        <div className="p-3 flex justify-between items-center">
-            <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><ThumbsUp className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><Trophy className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><Flame className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full w-8 h-8"><Frown className="h-4 w-4" /></Button>
-            </div>
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" onClick={() => setShowComments(s => !s)} className="text-gray-400 hover:text-white hover:bg-gray-800 flex items-center gap-2 px-3">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Comments</span>
-                </Button>
-                <p className="text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
-                </p>
-            </div>
+        <div className="p-3">
+          <SocialActions 
+            categoryId={category_id}
+            initialLikes={0}
+            isLiked={false}
+            categoryName={category_name}
+          />
+        </div>
+        <div className="px-3 pb-3 flex justify-between items-center">
+          <Button variant="ghost" size="sm" onClick={() => setShowComments(s => !s)} className="text-gray-400 hover:text-white hover:bg-gray-800 flex items-center gap-2 px-3">
+              <MessageSquare className="h-4 w-4" />
+              <span>Comments</span>
+          </Button>
+          <p className="text-xs text-gray-500">
+              {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+          </p>
         </div>
         {showComments && (
             <div className="p-4 border-t border-gray-700/50 bg-black/20">
