@@ -8,16 +8,62 @@ import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import MobileNav from "./nav/MobileNav";
 import { Link } from "react-router-dom";
-import { Rss, FileQuestion, Wrench, Users, MessageSquareWarning, Lightbulb } from "lucide-react";
+import { Rss, FileQuestion, Wrench, Users, MessageSquareWarning, Lightbulb, Trophy, Award } from "lucide-react";
 import { useUserBadges } from "@/hooks/useUserBadges";
+import { useUserStats } from "@/hooks/useUserStats";
 
 const Navbar = () => {
   const { user, loading, isAdmin, isModeratorOrAdmin } = useAuth();
   const { userBadges, loading: badgesLoading } = useUserBadges();
+  const { stats, loading: statsLoading } = useUserStats();
 
-  // Check if user has completed their first quiz
-  const hasFirstQuizBadge = userBadges.some(badge => badge.badge_id === 'first_quiz');
-  const shouldShowQuizBadge = user && !badgesLoading && !hasFirstQuizBadge;
+  // Enhanced badge notification logic
+  const getBadgeNotification = () => {
+    if (!user || badgesLoading || statsLoading) return null;
+
+    console.log('Badge notification check:', {
+      userBadges: userBadges.map(b => b.badge_id),
+      stats,
+      totalBadges: userBadges.length
+    });
+
+    // Check for first quiz notification (for new users)
+    const hasFirstQuizBadge = userBadges.some(badge => badge.badge_id === 'first_quiz');
+    if (!hasFirstQuizBadge) {
+      return {
+        icon: Lightbulb,
+        color: "text-yellow-900",
+        bgColor: "bg-yellow-500",
+        message: "Take your first quiz!"
+      };
+    }
+
+    // Check for perfect score achievement
+    const hasPerfectScoreBadge = userBadges.some(badge => badge.badge_id === 'perfect_score');
+    if (stats && stats.total_quizzes >= 1 && !hasPerfectScoreBadge && stats.accuracy_percentage < 100) {
+      return {
+        icon: Trophy,
+        color: "text-blue-900",
+        bgColor: "bg-blue-500",
+        message: "Try for a perfect score!"
+      };
+    }
+
+    // Check for streak opportunities
+    const hasStreakBadge = userBadges.some(badge => badge.badge_id === 'streak_3' || badge.badge_id === 'streak_10');
+    if (stats && stats.current_streak === 0 && stats.total_quizzes >= 1 && !hasStreakBadge) {
+      return {
+        icon: Award,
+        color: "text-purple-900",
+        bgColor: "bg-purple-500",
+        message: "Start a quiz streak!"
+      };
+    }
+
+    return null;
+  };
+
+  const badgeNotification = getBadgeNotification();
 
   return (
     <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm text-gray-200 border-b border-gray-700/50 shadow-lg">
@@ -51,9 +97,12 @@ const Navbar = () => {
                 <span className="font-bold text-transparent bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text group-hover:from-fuchsia-300 group-hover:to-cyan-300 drop-shadow-sm">
                   Quiz
                 </span>
-                {shouldShowQuizBadge && (
-                  <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full p-1 animate-pulse">
-                    <Lightbulb className="h-3 w-3 text-yellow-900" />
+                {badgeNotification && (
+                  <div 
+                    className={`absolute -top-1 -right-1 ${badgeNotification.bgColor} rounded-full p-1 animate-pulse`}
+                    title={badgeNotification.message}
+                  >
+                    <badgeNotification.icon className={`h-3 w-3 ${badgeNotification.color}`} />
                   </div>
                 )}
               </Link>
