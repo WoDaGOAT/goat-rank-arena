@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
-import { ShareDialog } from "./category/ShareDialog";
+import { ShareDialog } from "./ShareDialog";
 import { useState } from "react";
 
 interface GlobalLeaderboardProps {
@@ -24,7 +24,8 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
       <CardHeader className="border-b border-white/30 bg-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5"></div>
         <div className="relative flex items-center justify-between">
-          <div className="text-center flex-1">
+          <div className="flex-1"></div>
+          <div className="text-center">
             <h2 className="text-2xl font-bold text-white mb-1">
               {sanitize(categoryName)}
             </h2>
@@ -32,15 +33,17 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
               🎮 Live Rankings • Top 10 Champions
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowShareDialog(true)}
-            className="border-white/20 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
+          <div className="flex-1 flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowShareDialog(true)}
+              className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
