@@ -2,7 +2,7 @@
 import { UserStats } from "@/types/badges";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Target, Flame, TrendingUp, Award, BookOpen, ShieldStar, Heart, Sparkles } from "lucide-react";
+import { Trophy, Target, Flame, TrendingUp, Award, BookOpen, Shield, Heart, Sparkles } from "lucide-react";
 
 interface UserStatsCardProps {
   stats: UserStats;
@@ -11,7 +11,7 @@ interface UserStatsCardProps {
 const UserStatsCard = ({ stats }: UserStatsCardProps) => {
   const getAccuracyLevel = (accuracy: number) => {
     if (accuracy >= 90) return { name: "GOAT", color: "bg-yellow-500", icon: TrendingUp };
-    if (accuracy >= 75) return { name: "Legend", color: "bg-purple-500", icon: ShieldStar };
+    if (accuracy >= 75) return { name: "Legend", color: "bg-purple-500", icon: Shield };
     if (accuracy >= 60) return { name: "Expert", color: "bg-blue-500", icon: BookOpen };
     if (accuracy >= 45) return { name: "Foot Lover", color: "bg-green-500", icon: Heart };
     return { name: "Newcomer", color: "bg-gray-500", icon: Sparkles };

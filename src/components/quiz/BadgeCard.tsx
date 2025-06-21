@@ -13,7 +13,7 @@ import {
   Sparkles, 
   Heart, 
   BookOpen, 
-  ShieldStar, 
+  Shield, 
   TrendingUp,
   LucideIcon
 } from "lucide-react";
@@ -50,7 +50,7 @@ const iconMap: Record<string, LucideIcon> = {
   sparkles: Sparkles,
   heart: Heart,
   'book-open': BookOpen,
-  'shield-star': ShieldStar,
+  'shield-star': Shield,
   'trending-up': TrendingUp,
 };
 
