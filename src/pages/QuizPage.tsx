@@ -45,6 +45,24 @@ const fetchUserAttempt = async (userId: string, quizId: string) => {
     return data as QuizAttempt | null;
 };
 
+// Function to manually check and award badges
+const checkAndAwardBadges = async (userId: string) => {
+  try {
+    console.log('Manually triggering badge check for user:', userId);
+    const { error } = await supabase.rpc('check_and_award_badges', {
+      p_user_id: userId
+    });
+    
+    if (error) {
+      console.error('Error checking badges:', error);
+    } else {
+      console.log('Badge check completed successfully');
+    }
+  } catch (error) {
+    console.error('Error calling badge check function:', error);
+  }
+};
+
 const QuizPage = () => {
     const { user, loading: authLoading } = useAuth();
     const queryClient = useQueryClient();
@@ -70,6 +88,8 @@ const QuizPage = () => {
         mutationFn: async ({ score, answers }: { score: number, answers: UserAnswerSelection }) => {
             if (!user || !quiz) throw new Error("User or quiz not found");
             
+            console.log('Saving quiz attempt for user:', user.id, 'with score:', score);
+            
             const { error } = await supabase.from('quiz_attempts').insert({
                 user_id: user.id,
                 quiz_id: quiz.id,
@@ -79,13 +99,18 @@ const QuizPage = () => {
             });
 
             if (error) throw new Error(error.message);
+            
+            console.log('Quiz attempt saved, now checking badges...');
+            
+            // Manually trigger badge checking after saving
+            await checkAndAwardBadges(user.id);
         },
         onSuccess: () => {
             toast.success("Quiz submitted successfully!");
             queryClient.invalidateQueries({ queryKey: ['userAttempt', user?.id, quiz?.id] });
             queryClient.invalidateQueries({ queryKey: ['userQuizAttempts', user?.id] });
-            // Trigger badge checking by refetching user badges
-            window.location.reload(); // Simple way to refresh all user data including badges
+            queryClient.invalidateQueries({ queryKey: ['userBadges', user?.id] });
+            queryClient.invalidateQueries({ queryKey: ['userStats', user?.id] });
         },
         onError: (error) => {
             toast.error(`Failed to save quiz attempt: ${error.message}`);
@@ -186,6 +211,20 @@ const QuizPage = () => {
                 <div className="space-y-6">
                     <QuizResult score={userAttempt.score} totalQuestions={quiz.quiz_questions.length} />
                     {stats && <UserStatsCard stats={stats} />}
+                    {user && (
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                            <Button 
+                                onClick={() => checkAndAwardBadges(user.id)}
+                                className="w-full"
+                                variant="outline"
+                            >
+                                🏆 Check for New Badges
+                            </Button>
+                            <p className="text-xs text-gray-400 mt-2 text-center">
+                                Click to manually check if you've earned any new badges
+                            </p>
+                        </div>
+                    )}
                 </div>
             );
         }
