@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { sanitize } from "@/lib/sanitize";
+import { MessageSquare, Reply } from "lucide-react";
 
 export interface ProfileInfo {
   id?: string;
@@ -16,6 +17,9 @@ export interface NewCommentFeedData {
   comment_text: string;
   category_id: string;
   category_name: string;
+  parent_comment_id?: string | null;
+  parent_comment_text?: string | null;
+  parent_comment_author?: ProfileInfo | null;
 }
 
 interface NewCommentFeedItemProps {
@@ -24,11 +28,23 @@ interface NewCommentFeedItemProps {
 }
 
 const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
-    const { author, comment_text, category_id, category_name } = data;
+    const { 
+      author, 
+      comment_text, 
+      category_id, 
+      category_name,
+      parent_comment_id,
+      parent_comment_text,
+      parent_comment_author
+    } = data;
     
     const authorName = author?.full_name || 'Anonymous';
     const authorAvatar = author?.avatar_url;
     const sanitizedAuthorName = sanitize(authorName);
+
+    const isReply = !!parent_comment_id;
+    const parentAuthorName = parent_comment_author?.full_name || 'Anonymous';
+    const sanitizedParentAuthorName = sanitize(parentAuthorName);
 
     return (
         <Card className="bg-white/5 text-white border-gray-700">
@@ -39,9 +55,20 @@ const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
                         <AvatarFallback>{sanitizedAuthorName?.charAt(0) || 'A'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                        <p>
+                        <p className="flex items-center gap-1">
+                            {isReply && <Reply className="w-4 h-4 text-blue-300" />}
                             <span className="font-bold">{sanitizedAuthorName}</span>
-                            {' '} commented on {' '}
+                            {isReply ? (
+                                <>
+                                    {' '} replied to {' '}
+                                    <span className="font-bold text-blue-300">{sanitizedParentAuthorName}</span>
+                                    {' '} on {' '}
+                                </>
+                            ) : (
+                                <>
+                                    {' '} commented on {' '}
+                                </>
+                            )}
                             <Link to={`/category/${category_id}`} className="font-bold hover:underline text-blue-300">{sanitize(category_name)}</Link>
                         </p>
                         <p className="text-xs text-gray-400">
@@ -49,6 +76,19 @@ const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
                         </p>
                     </div>
                 </div>
+
+                {/* Show parent comment context for replies */}
+                {isReply && parent_comment_text && (
+                    <div className="border-l-2 border-gray-600 pl-4 ml-5 mb-3 bg-white/5 rounded-r-lg p-2">
+                        <div className="flex items-center gap-2 mb-1">
+                            <MessageSquare className="w-3 h-3 text-gray-400" />
+                            <span className="text-xs text-gray-400">Replying to:</span>
+                        </div>
+                        <p className="text-gray-400 text-sm italic">"{sanitize(parent_comment_text)}"</p>
+                    </div>
+                )}
+
+                {/* The actual comment/reply */}
                 <div className="border-l-2 border-gray-700 pl-4 ml-5">
                   <p className="text-gray-300 italic">"{sanitize(comment_text)}"</p>
                 </div>
