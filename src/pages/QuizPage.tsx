@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,7 +71,7 @@ const QuizPage = () => {
     
     const { stats, loading: statsLoading } = useUserStats();
     const { data: userQuizAttempts, isLoading: attemptsLoading } = useUserQuizAttempts();
-    const { userBadges, loading: badgesLoading } = useUserBadges();
+    const { userBadges, loading: badgesLoading, refreshBadges } = useUserBadges();
 
     const { data: quiz, isLoading: quizLoading, isError: quizError } = useQuery({
         queryKey: ['todaysQuiz'],
@@ -100,17 +101,20 @@ const QuizPage = () => {
 
             if (error) throw new Error(error.message);
             
-            console.log('Quiz attempt saved, now checking badges...');
-            
-            // Manually trigger badge checking after saving
-            await checkAndAwardBadges(user.id);
+            console.log('Quiz attempt saved successfully');
         },
-        onSuccess: () => {
+        onSuccess: async () => {
             toast.success("Quiz submitted successfully!");
             queryClient.invalidateQueries({ queryKey: ['userAttempt', user?.id, quiz?.id] });
             queryClient.invalidateQueries({ queryKey: ['userQuizAttempts', user?.id] });
-            queryClient.invalidateQueries({ queryKey: ['userBadges', user?.id] });
             queryClient.invalidateQueries({ queryKey: ['userStats', user?.id] });
+            
+            // Refresh badges after quiz completion (the trigger should award them automatically)
+            if (refreshBadges) {
+                setTimeout(() => {
+                    refreshBadges();
+                }, 1000); // Small delay to ensure trigger has completed
+            }
         },
         onError: (error) => {
             toast.error(`Failed to save quiz attempt: ${error.message}`);
@@ -214,14 +218,14 @@ const QuizPage = () => {
                     {user && (
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                             <Button 
-                                onClick={() => checkAndAwardBadges(user.id)}
+                                onClick={refreshBadges}
                                 className="w-full"
                                 variant="outline"
                             >
                                 🏆 Check for New Badges
                             </Button>
                             <p className="text-xs text-gray-400 mt-2 text-center">
-                                Click to manually check if you've earned any new badges
+                                Click to check if you've earned any new badges
                             </p>
                         </div>
                     )}

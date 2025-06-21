@@ -18,13 +18,18 @@ export const useUserBadges = () => {
       }
 
       try {
+        console.log('Fetching badges for user:', user.id);
+        
         const { data, error } = await supabase
           .from('user_badges')
           .select('*')
           .eq('user_id', user.id)
           .order('earned_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching user badges:', error);
+          throw error;
+        }
 
         console.log('Raw user badges from database:', data);
 
@@ -47,6 +52,7 @@ export const useUserBadges = () => {
         setUserBadges(mappedBadges);
       } catch (error) {
         console.error('Error fetching user badges:', error);
+        setUserBadges([]);
       } finally {
         setLoading(false);
       }
@@ -55,5 +61,47 @@ export const useUserBadges = () => {
     fetchUserBadges();
   }, [user]);
 
-  return { userBadges, loading };
+  // Function to manually trigger badge check and refresh
+  const refreshBadges = async () => {
+    if (!user) return;
+    
+    try {
+      console.log('Manually triggering badge check for user:', user.id);
+      const { error } = await supabase.rpc('check_and_award_badges', {
+        p_user_id: user.id
+      });
+      
+      if (error) {
+        console.error('Error checking badges:', error);
+      } else {
+        console.log('Badge check completed successfully, refreshing badges...');
+        // Refetch badges after checking
+        const { data } = await supabase
+          .from('user_badges')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('earned_at', { ascending: false });
+
+        if (data) {
+          const { BADGES } = await import('@/data/badges');
+          const mappedBadges: UserBadge[] = data.map(userBadge => {
+            const badge = BADGES.find(b => b.id === userBadge.badge_id);
+            return {
+              id: userBadge.id,
+              badge_id: userBadge.badge_id,
+              user_id: userBadge.user_id,
+              earned_at: userBadge.earned_at,
+              badge: badge!
+            };
+          }).filter(ub => ub.badge);
+          
+          setUserBadges(mappedBadges);
+        }
+      }
+    } catch (error) {
+      console.error('Error calling badge check function:', error);
+    }
+  };
+
+  return { userBadges, loading, refreshBadges };
 };
