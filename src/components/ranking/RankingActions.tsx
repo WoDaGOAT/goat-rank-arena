@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Send } from "lucide-react";
+import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import React from "react";
 
@@ -53,7 +53,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
                   : ''
               } disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale`}
             >
-              <Send className="mr-2 h-5 w-5" />
+              <Check className="mr-2 h-5 w-5" />
               Submit to Leaderboard
             </Button>
           </TooltipTrigger>
