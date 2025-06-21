@@ -1,3 +1,4 @@
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -30,18 +31,18 @@ const ContactForm = () => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      const { error } = await supabase.functions.invoke('contact-form', {
+      console.log('Sending contact form data:', data);
+      const { data: result, error } = await supabase.functions.invoke('contact-form', {
         body: data,
       });
+      
       if (error) {
-        // The edge function might return a string error, let's parse it if possible
-        try {
-          const parsedError = JSON.parse(error.message);
-          throw new Error(parsedError.error || "An unknown error occurred.");
-        } catch (e) {
-          throw new Error(error.message || "An unknown error occurred.");
-        }
+        console.error('Contact form error:', error);
+        throw new Error(error.message || "Failed to send message");
       }
+      
+      console.log('Contact form success:', result);
+      return result;
     },
     onSuccess: () => {
       toast.success('Your message has been sent!', {
@@ -50,6 +51,7 @@ const ContactForm = () => {
       form.reset();
     },
     onError: (error) => {
+      console.error('Contact form mutation error:', error);
       toast.error('Failed to send message', {
         description: error.message,
       });
