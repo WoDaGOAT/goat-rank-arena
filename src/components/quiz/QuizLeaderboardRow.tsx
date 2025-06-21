@@ -35,6 +35,13 @@ const badgeRarityColors = {
 };
 
 const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
+    // Debug logging
+    console.log(`QuizLeaderboardRow for user ${user.user_id} at rank ${rank}:`, {
+        highest_badge_id: user.highest_badge_id,
+        highest_badge_name: user.highest_badge_name,
+        highest_badge_rarity: user.highest_badge_rarity,
+        user_object: user
+    });
 
     const getRankIcon = () => {
         if (rank === 1) return <Crown className="w-6 h-6 text-yellow-400" />;
@@ -46,8 +53,19 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
     const rowStyle = rank <= 3 ? `${rankBgColors[rank - 1]} border-l-4 ${rankBorderColors[rank - 1]}` : "hover:bg-white/5";
 
     const getBadgeDisplay = () => {
-        if (user.highest_badge_name) {
+        // More detailed debugging
+        console.log('getBadgeDisplay called with:', {
+            badge_name: user.highest_badge_name,
+            badge_rarity: user.highest_badge_rarity,
+            type_of_badge_name: typeof user.highest_badge_name,
+            type_of_badge_rarity: typeof user.highest_badge_rarity
+        });
+
+        // Check if badge data exists and is not null/empty
+        if (user.highest_badge_name && user.highest_badge_name.trim() !== '') {
             const rarityColor = badgeRarityColors[user.highest_badge_rarity as keyof typeof badgeRarityColors] || "text-gray-400";
+            console.log(`Displaying badge: ${user.highest_badge_name} with rarity: ${user.highest_badge_rarity} and color: ${rarityColor}`);
+            
             return (
                 <div className="flex items-center gap-1">
                     <Award className={`w-3 h-3 ${rarityColor}`} />
@@ -56,11 +74,12 @@ const QuizLeaderboardRow = ({ user, rank }: QuizLeaderboardRowProps) => {
             );
         }
         
-        // Fallback for users without badges
+        // Fallback for users without badges or with null/empty badge names
+        console.log(`No badge found for user ${user.user_id}, using rank fallback for rank ${rank}`);
         if (rank === 1) return <span className="text-sm text-yellow-400">Quiz Champion</span>;
         if (rank === 2) return <span className="text-sm text-gray-300">2nd Place</span>;
         if (rank === 3) return <span className="text-sm text-amber-500">3rd Place</span>;
-        return <span className="text-sm text-gray-400">Rank {rank}</span>;
+        return <span className="text-sm text-gray-400">Rank #{rank}</span>;
     };
 
     return (

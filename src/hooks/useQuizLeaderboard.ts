@@ -15,12 +15,33 @@ export interface QuizLeaderboardUser {
 }
 
 const fetchQuizLeaderboard = async (): Promise<QuizLeaderboardUser[]> => {
+    console.log('Fetching quiz leaderboard...');
     const { data, error } = await supabase.rpc('get_quiz_leaderboard');
 
     if (error) {
-        toast.error('Could not fetch quiz leaderboard.');
         console.error('Error fetching quiz leaderboard:', error);
+        toast.error('Could not fetch quiz leaderboard.');
         throw new Error('Could not fetch quiz leaderboard');
+    }
+
+    console.log('Raw leaderboard data from database:', data);
+    
+    // Log each user's badge data
+    if (data && Array.isArray(data)) {
+        data.forEach((user, index) => {
+            console.log(`Leaderboard user ${index + 1}:`, {
+                user_id: user.user_id,
+                full_name: user.full_name,
+                highest_badge_id: user.highest_badge_id,
+                highest_badge_name: user.highest_badge_name,
+                highest_badge_rarity: user.highest_badge_rarity,
+                data_types: {
+                    badge_id_type: typeof user.highest_badge_id,
+                    badge_name_type: typeof user.highest_badge_name,
+                    badge_rarity_type: typeof user.highest_badge_rarity
+                }
+            });
+        });
     }
 
     return (data as QuizLeaderboardUser[]) || [];
