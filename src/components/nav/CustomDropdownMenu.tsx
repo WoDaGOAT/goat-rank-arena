@@ -154,9 +154,11 @@ const CustomDropdownMenu = () => {
                                         flex items-center gap-1 px-3 md:px-6 py-2 md:py-3
                                         text-sm md:text-lg font-semibold text-white 
                                         transition-all duration-200 rounded-lg
-                                        hover:bg-white/20 hover:scale-105
-                                        ${isOpen ? 'bg-white/20 scale-105' : ''}
-                                        ${isActive ? 'bg-gradient-to-r from-fuchsia-500/30 to-cyan-500/30 border-2 border-fuchsia-400/50 shadow-lg' : ''}
+                                        ${isActive 
+                                            ? 'bg-gradient-to-r from-fuchsia-500/30 to-cyan-500/30 border-2 border-fuchsia-400/50 shadow-lg hover:from-fuchsia-500/20 hover:to-cyan-500/20 hover:border-fuchsia-400/30' 
+                                            : 'hover:bg-white/10 hover:scale-105'
+                                        }
+                                        ${isOpen && !isActive ? 'bg-white/20 scale-105' : ''}
                                     `}
                                     disabled={!hasChildren}
                                 >
