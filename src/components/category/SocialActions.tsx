@@ -25,33 +25,29 @@ export const SocialActions = ({
   
   console.log('SocialActions rendered:', { itemType, itemId, userId: user?.id });
   
-  // Fetch user's reactions for this item
-  const { data: userReactions = {}, isLoading: userReactionsLoading } = useQuery({
-    queryKey: ["userReactions", itemType, itemId, user?.id],
+  // Fetch user's reaction for this item (should be only one)
+  const { data: userReaction = null, isLoading: userReactionLoading } = useQuery({
+    queryKey: ["userReaction", itemType, itemId, user?.id],
     queryFn: async () => {
-      if (!user || !itemId) return {};
+      if (!user || !itemId) return null;
       
-      console.log('Fetching user reactions for:', { itemType, itemId, userId: user.id });
+      console.log('Fetching user reaction for:', { itemType, itemId, userId: user.id });
       
       const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
       const { data, error } = await supabase
         .from(tableName)
         .select("reaction_type")
         .eq(itemType === 'category' ? 'category_id' : 'ranking_id', itemId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .maybeSingle();
       
       if (error) {
-        console.error('Error fetching user reactions:', error);
+        console.error('Error fetching user reaction:', error);
         throw error;
       }
       
-      const reactions: Record<string, boolean> = {};
-      data.forEach(reaction => {
-        reactions[reaction.reaction_type] = true;
-      });
-      
-      console.log('User reactions fetched:', reactions);
-      return reactions;
+      console.log('User reaction fetched:', data?.reaction_type || 'none');
+      return data?.reaction_type || null;
     },
     enabled: !!user && !!itemId,
   });
@@ -120,14 +116,14 @@ export const SocialActions = ({
         throw new Error("User not authenticated");
       }
 
-      console.log('Toggling reaction:', { reactionType, itemType, itemId, userId: user.id });
+      console.log('Toggling reaction:', { reactionType, itemType, itemId, userId: user.id, currentReaction: userReaction });
 
       const tableName = itemType === 'category' ? 'category_reactions' : 'ranking_reactions';
       const idColumn = itemType === 'category' ? 'category_id' : 'ranking_id';
-      const wasReacted = userReactions[reactionType];
 
-      if (wasReacted) {
-        console.log('Removing reaction');
+      // If clicking the same reaction, remove it
+      if (userReaction === reactionType) {
+        console.log('Removing current reaction');
         const { error } = await supabase
           .from(tableName)
           .delete()
@@ -138,7 +134,21 @@ export const SocialActions = ({
           });
         if (error) throw error;
       } else {
-        console.log('Adding reaction');
+        // Remove any existing reaction first, then add the new one
+        if (userReaction) {
+          console.log('Removing existing reaction:', userReaction);
+          const { error: deleteError } = await supabase
+            .from(tableName)
+            .delete()
+            .match({ 
+              user_id: user.id, 
+              [idColumn]: itemId,
+              reaction_type: userReaction
+            });
+          if (deleteError) throw deleteError;
+        }
+        
+        console.log('Adding new reaction:', reactionType);
         const { error } = await supabase
           .from(tableName)
           .insert({ 
@@ -151,7 +161,7 @@ export const SocialActions = ({
     },
     onSuccess: () => {
       console.log('Reaction toggled successfully, invalidating queries');
-      queryClient.invalidateQueries({ queryKey: ["userReactions", itemType, itemId, user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["userReaction", itemType, itemId, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["reactionCounts", itemType, itemId] });
     },
     onError: (error) => {
@@ -180,7 +190,7 @@ export const SocialActions = ({
     { icon: Frown, label: "frown", tooltip: "Disagree", emoji: "😔" },
   ];
 
-  const isLoading = userReactionsLoading || countsLoading || isPending;
+  const isLoading = userReactionLoading || countsLoading || isPending;
 
   if (!itemId) {
     console.error('SocialActions: No itemId provided');
@@ -188,60 +198,51 @@ export const SocialActions = ({
   }
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between bg-black/20 rounded-lg p-3 border border-white/10">
       {/* Reaction icons on the left */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2">
         {reactions.map(({ icon: Icon, label, tooltip, emoji }) => {
-          const isReacted = userReactions[label];
+          const isReacted = userReaction === label;
           const count = reactionCounts[label] || 0;
           
           return (
-            <div key={label} className="flex flex-col items-center gap-1">
+            <div key={label} className="flex items-center gap-1">
               <button
                 onClick={() => handleReactionClick(label)}
                 onMouseEnter={() => setHoveredReaction(label)}
                 onMouseLeave={() => setHoveredReaction(null)}
                 disabled={isLoading}
-                className={`relative group p-3 rounded-lg transition-all duration-200 hover:scale-105 shadow-md border ${
+                className={`relative group p-2 rounded-lg transition-all duration-200 hover:scale-110 border-2 ${
                   isReacted 
-                    ? 'bg-white/25 border-white/50 shadow-white/20' 
-                    : 'bg-white/15 border-white/20 hover:bg-white/25 hover:border-white/40'
+                    ? label === 'thumbs-up' ? 'bg-blue-500/30 border-blue-400 text-blue-300' 
+                      : label === 'trophy' ? 'bg-yellow-500/30 border-yellow-400 text-yellow-300'
+                      : label === 'flame' ? 'bg-orange-500/30 border-orange-400 text-orange-300'
+                      : 'bg-red-500/30 border-red-400 text-red-300'
+                    : 'bg-white/10 border-white/20 text-gray-300 hover:bg-white/20 hover:border-white/40 hover:text-white'
                 } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 title={tooltip}
               >
-                <Icon 
-                  className={`h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200 ${
-                    isReacted
-                      ? label === 'thumbs-up' ? 'text-blue-300' 
-                        : label === 'trophy' ? 'text-yellow-300'
-                        : label === 'flame' ? 'text-orange-300'
-                        : 'text-red-300'
-                      : hoveredReaction === label 
-                        ? label === 'thumbs-up' ? 'text-blue-200' 
-                          : label === 'trophy' ? 'text-yellow-200'
-                          : label === 'flame' ? 'text-orange-200'
-                          : 'text-red-200'
-                        : 'text-gray-200 hover:text-white'
-                  }`} 
-                />
+                <Icon className="h-4 w-4" />
                 
                 {/* Tooltip */}
-                <div className={`absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-3 py-1 rounded-md whitespace-nowrap transition-opacity duration-200 z-10 ${
+                <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap transition-opacity duration-200 z-10 ${
                   hoveredReaction === label ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}>
                   {tooltip}
                 </div>
               </button>
               
-              {/* Reaction count - always show, even if 0 */}
-              <div className="flex items-center gap-1 min-h-[20px]">
-                <span className="text-sm">{emoji}</span>
-                <span className={`text-sm font-semibold transition-colors ${
-                  isReacted ? 'text-white' : count > 0 ? 'text-gray-200' : 'text-gray-400'
-                }`}>
-                  {count}
-                </span>
-              </div>
+              {/* Show count only if > 0 */}
+              {count > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-lg">{emoji}</span>
+                  <span className={`text-sm font-bold ${
+                    isReacted ? 'text-white' : 'text-gray-300'
+                  }`}>
+                    {count}
+                  </span>
+                </div>
+              )}
             </div>
           );
         })}
@@ -250,7 +251,7 @@ export const SocialActions = ({
       {/* Comments on the right */}
       <div className="flex items-center gap-2 text-gray-200 bg-white/10 px-3 py-2 rounded-lg border border-white/20">
         <span className="text-lg">💬</span>
-        <span className="text-sm sm:text-base font-medium">{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
+        <span className="text-sm font-medium">{commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}</span>
       </div>
     </div>
   );
