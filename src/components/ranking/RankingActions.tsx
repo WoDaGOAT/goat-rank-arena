@@ -54,7 +54,7 @@ const RankingActions: React.FC<RankingActionsProps> = ({
               } disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale`}
             >
               <Save className="mr-2 h-5 w-5" />
-              {saveLabel}
+              Add to Global Leaderboard
             </Button>
           </TooltipTrigger>
           {showAthleteTooltip && (
