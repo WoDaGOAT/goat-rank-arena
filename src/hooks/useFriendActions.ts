@@ -26,7 +26,7 @@ export const useFriendActions = () => {
     },
     onSuccess: (_, receiverId) => {
       toast.success('Friend request sent!');
-      queryClient.invalidateQueries({ queryKey: ['friendshipStatus', user?.id, receiverId] });
+      queryClient.invalidateQueries({ queryKey: ['friendship-status', user?.id, receiverId] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -44,7 +44,7 @@ export const useFriendActions = () => {
     },
     onSuccess: () => {
       toast.success('Friend request accepted!');
-      queryClient.invalidateQueries({ queryKey: ['friendshipStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['friendship-status'] });
       queryClient.invalidateQueries({ queryKey: ['publicFriends'] });
     },
     onError: (error: Error) => {
@@ -63,7 +63,7 @@ export const useFriendActions = () => {
     },
     onSuccess: () => {
       toast.success('Friend removed.');
-      queryClient.invalidateQueries({ queryKey: ['friendshipStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['friendship-status'] });
       queryClient.invalidateQueries({ queryKey: ['publicFriends'] });
     },
     onError: (error: Error) => {
