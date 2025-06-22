@@ -388,6 +388,9 @@ export type Database = {
           active_date: string
           created_at: string
           id: string
+          publication_datetime: string
+          status: string | null
+          timezone: string | null
           title: string
           topic: string | null
         }
@@ -395,6 +398,9 @@ export type Database = {
           active_date: string
           created_at?: string
           id?: string
+          publication_datetime: string
+          status?: string | null
+          timezone?: string | null
           title: string
           topic?: string | null
         }
@@ -402,6 +408,9 @@ export type Database = {
           active_date?: string
           created_at?: string
           id?: string
+          publication_datetime?: string
+          status?: string | null
+          timezone?: string | null
           title?: string
           topic?: string | null
         }
@@ -638,12 +647,22 @@ export type Database = {
         Returns: undefined
       }
       create_quiz: {
-        Args: {
-          p_title: string
-          p_topic: string
-          p_active_date: string
-          p_questions: Json
-        }
+        Args:
+          | {
+              p_title: string
+              p_topic: string
+              p_active_date: string
+              p_questions: Json
+            }
+          | {
+              p_title: string
+              p_topic: string
+              p_active_date: string
+              p_questions: Json
+              p_publication_datetime?: string
+              p_status?: string
+              p_timezone?: string
+            }
         Returns: string
       }
       delete_app_user: {
@@ -653,6 +672,20 @@ export type Database = {
       delete_comment_as_admin: {
         Args: { p_comment_id: string }
         Returns: undefined
+      }
+      get_admin_quizzes: {
+        Args: { p_status?: string }
+        Returns: {
+          quiz_id: string
+          title: string
+          topic: string
+          active_date: string
+          publication_datetime: string
+          status: string
+          timezone: string
+          created_at: string
+          question_count: number
+        }[]
       }
       get_all_comments_for_admin: {
         Args: Record<PropertyKey, never>
@@ -691,6 +724,16 @@ export type Database = {
           highest_badge_id: string
           highest_badge_name: string
           highest_badge_rarity: string
+        }[]
+      }
+      get_todays_quiz: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          quiz_id: string
+          title: string
+          topic: string
+          active_date: string
+          publication_datetime: string
         }[]
       }
       get_user_status: {

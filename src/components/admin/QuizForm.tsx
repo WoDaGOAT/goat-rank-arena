@@ -1,6 +1,6 @@
-
 "use client";
 
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
@@ -24,9 +24,10 @@ import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CalendarIcon, PlusCircle, Trash2, Info } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CalendarIcon, PlusCircle, Trash2, Info, Clock, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const answerSchema = z.object({
@@ -43,10 +44,27 @@ const quizFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters."),
   topic: z.string().optional(),
   active_date: z.date({ required_error: "An active date is required." }),
+  publication_datetime: z.date({ required_error: "A publication date and time is required." }),
+  status: z.enum(['draft', 'scheduled', 'published'], { required_error: "Please select a status." }),
+  timezone: z.string().default("UTC"),
+  publication_time: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
   questions: z.array(questionSchema).length(5, "Daily quizzes must have exactly 5 questions."),
 });
 
 type QuizFormValues = z.infer<typeof quizFormSchema>;
+
+const TIMEZONES = [
+  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+  { value: "America/New_York", label: "Eastern Time (ET)" },
+  { value: "America/Chicago", label: "Central Time (CT)" },
+  { value: "America/Denver", label: "Mountain Time (MT)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
+  { value: "Europe/London", label: "Greenwich Mean Time (GMT)" },
+  { value: "Europe/Paris", label: "Central European Time (CET)" },
+  { value: "Asia/Tokyo", label: "Japan Standard Time (JST)" },
+  { value: "Asia/Shanghai", label: "China Standard Time (CST)" },
+  { value: "Australia/Sydney", label: "Australian Eastern Time (AET)" },
+];
 
 const QuizForm = () => {
   const navigate = useNavigate();
@@ -57,6 +75,9 @@ const QuizForm = () => {
     defaultValues: {
       title: "",
       topic: "",
+      status: "draft",
+      timezone: "UTC",
+      publication_time: "09:00",
       questions: Array(5).fill(null).map((_, index) => ({
         question_text: "",
         answers: [{ answer_text: "" }, { answer_text: "" }],
@@ -70,6 +91,21 @@ const QuizForm = () => {
     name: "questions",
   });
 
+  // Watch for changes to combine date and time
+  const watchedDate = form.watch("active_date");
+  const watchedTime = form.watch("publication_time");
+  const watchedTimezone = form.watch("timezone");
+
+  // Update publication_datetime when date or time changes
+  React.useEffect(() => {
+    if (watchedDate && watchedTime) {
+      const [hours, minutes] = watchedTime.split(':').map(Number);
+      const combinedDateTime = new Date(watchedDate);
+      combinedDateTime.setHours(hours, minutes, 0, 0);
+      form.setValue("publication_datetime", combinedDateTime);
+    }
+  }, [watchedDate, watchedTime, form]);
+
   const createQuizMutation = useMutation({
     mutationFn: async (values: QuizFormValues) => {
       const formattedQuestions = values.questions.map((q, qIndex) => ({
@@ -81,18 +117,28 @@ const QuizForm = () => {
         })),
       }));
 
+      // Create publication datetime by combining date and time
+      const [hours, minutes] = values.publication_time.split(':').map(Number);
+      const publicationDateTime = new Date(values.active_date);
+      publicationDateTime.setHours(hours, minutes, 0, 0);
+
       const { data, error } = await supabase.rpc('create_quiz', {
         p_title: values.title,
         p_topic: values.topic || null,
         p_active_date: format(values.active_date, 'yyyy-MM-dd'),
         p_questions: formattedQuestions,
+        p_publication_datetime: publicationDateTime.toISOString(),
+        p_status: values.status,
+        p_timezone: values.timezone,
       });
 
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      toast.success("5-question daily quiz created successfully!");
+    onSuccess: (_, variables) => {
+      const statusMessage = variables.status === 'published' ? 'published' : 
+                           variables.status === 'scheduled' ? 'scheduled' : 'saved as draft';
+      toast.success(`5-question daily quiz ${statusMessage} successfully!`);
       queryClient.invalidateQueries({ queryKey: ['todaysQuiz'] });
       navigate("/quiz");
     },
@@ -104,6 +150,15 @@ const QuizForm = () => {
   function onSubmit(data: QuizFormValues) {
     createQuizMutation.mutate(data);
   }
+
+  const getStatusDescription = (status: string) => {
+    switch (status) {
+      case 'draft': return 'Save quiz without publishing';
+      case 'scheduled': return 'Schedule quiz for automatic publication';
+      case 'published': return 'Publish quiz immediately';
+      default: return '';
+    }
+  };
 
   return (
     <Form {...form}>
@@ -165,13 +220,132 @@ const QuizForm = () => {
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                      <Calendar 
+                        mode="single" 
+                        selected={field.value} 
+                        onSelect={field.onChange} 
+                        disabled={(date) => date < new Date()}
+                        initialFocus 
+                      />
                     </PopoverContent>
                   </Popover>
+                  <FormDescription>
+                    The date when this quiz will be available to users
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/5 border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Publication Settings
+            </CardTitle>
+            <CardDescription>Configure when and how this quiz will be published</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Publication Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select publication status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    {getStatusDescription(field.value)}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="publication_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Publication Time</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="time" 
+                        {...field}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Time when the quiz will be published
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="timezone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Timezone
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select timezone" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60">
+                        {TIMEZONES.map((tz) => (
+                          <SelectItem key={tz.value} value={tz.value}>
+                            {tz.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Timezone for publication time
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {form.watch("status") === "scheduled" && (
+              <Alert className="bg-yellow-50 border-yellow-200">
+                <Clock className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Scheduled Publication:</strong> This quiz will be automatically published on{" "}
+                  {watchedDate && format(watchedDate, "PPP")} at {watchedTime} ({watchedTimezone}).
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {form.watch("status") === "published" && (
+              <Alert className="bg-green-50 border-green-200">
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Immediate Publication:</strong> This quiz will be published immediately and available to users.
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
 
@@ -214,7 +388,10 @@ const QuizForm = () => {
             Total Questions: 5 • Maximum Score: 5 points
           </div>
           <Button type="submit" disabled={createQuizMutation.isPending} size="lg">
-            {createQuizMutation.isPending ? "Creating Quiz..." : "Create 5-Question Quiz"}
+            {createQuizMutation.isPending ? "Creating Quiz..." : 
+             form.watch("status") === "published" ? "Publish Quiz Now" :
+             form.watch("status") === "scheduled" ? "Schedule Quiz" :
+             "Save as Draft"}
           </Button>
         </div>
       </form>
