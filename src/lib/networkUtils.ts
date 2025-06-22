@@ -13,7 +13,50 @@ export const isExternalResourceError = (error: any): boolean => {
          errorMessage.includes('ERR_FAILED') ||
          errorMessage.includes('chrome-extension') ||
          errorMessage.includes('fbevents.js') ||
-         errorMessage.includes('connect.facebook.net');
+         errorMessage.includes('connect.facebook.net') ||
+         errorMessage.includes('WebSocket connection to') ||
+         errorMessage.includes('ws://') ||
+         errorMessage.includes('wss://') ||
+         errorMessage.includes('Failed to construct') ||
+         errorMessage.includes('NetworkError') ||
+         errorMessage.includes('NETWORK_ERROR');
+};
+
+/**
+ * Checks if an error is caused by development tools or Hot Module Replacement
+ */
+export const isDevelopmentToolError = (error: any): boolean => {
+  const errorMessage = error?.message || error?.toString() || '';
+  
+  return errorMessage.includes('HMR') ||
+         errorMessage.includes('hot reload') ||
+         errorMessage.includes('dev-server') ||
+         errorMessage.includes('webpack') ||
+         errorMessage.includes('vite') ||
+         errorMessage.includes('localhost') ||
+         errorMessage.includes('127.0.0.1') ||
+         errorMessage.includes('::1');
+};
+
+/**
+ * Checks if we're in development environment
+ */
+export const isDevelopmentEnvironment = (): boolean => {
+  return import.meta.env.DEV || import.meta.env.MODE === 'development';
+};
+
+/**
+ * Filters and categorizes errors to suppress external noise
+ */
+export const shouldSuppressError = (error: any): boolean => {
+  if (isDevelopmentEnvironment()) {
+    // In development, suppress external tool errors
+    if (isDevelopmentToolError(error) || isExternalResourceError(error)) {
+      return true;
+    }
+  }
+  
+  return isExternalResourceError(error);
 };
 
 /**
@@ -33,7 +76,7 @@ export const safeFetch = async (url: string, options?: RequestInit) => {
     
     return response;
   } catch (error) {
-    if (isExternalResourceError(error)) {
+    if (shouldSuppressError(error)) {
       console.warn('External resource fetch failed (likely blocked):', url);
       return null;
     }
@@ -60,7 +103,7 @@ export const loadScript = (src: string): Promise<void> => {
     
     script.onload = () => resolve();
     script.onerror = (error) => {
-      if (isExternalResourceError(error)) {
+      if (shouldSuppressError(error)) {
         console.warn('External script blocked or failed to load:', src);
         resolve(); // Don't reject for external resource errors
       } else {
@@ -70,4 +113,18 @@ export const loadScript = (src: string): Promise<void> => {
     
     document.head.appendChild(script);
   });
+};
+
+/**
+ * Enhanced console logging with error categorization
+ */
+export const logError = (error: any, context?: string) => {
+  if (shouldSuppressError(error)) {
+    // Use a less intrusive log level for external errors
+    console.debug(`[External Error${context ? ` - ${context}` : ''}]:`, error.message || error);
+    return;
+  }
+  
+  // Log actual application errors normally
+  console.error(`[App Error${context ? ` - ${context}` : ''}]:`, error);
 };
