@@ -4,42 +4,21 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
-import { format } from "date-fns";
+
 import { QuizDetailsSection } from "./quiz/QuizDetailsSection";
 import { PublicationSettingsSection } from "./quiz/PublicationSettingsSection";
 import { QuestionCard } from "./quiz/QuestionCard";
-
-const answerSchema = z.object({
-  answer_text: z.string().min(1, "Answer text cannot be empty."),
-});
-
-const questionSchema = z.object({
-  question_text: z.string().min(1, "Question text cannot be empty."),
-  answers: z.array(answerSchema).min(2, "Must have at least two answers."),
-  correct_answer_index: z.number().min(0, "A correct answer must be selected."),
-});
-
-const quizFormSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters."),
-  topic: z.string().optional(),
-  active_date: z.date({ required_error: "An active date is required." }),
-  status: z.enum(['draft', 'scheduled', 'published'], { required_error: "Please select a status." }),
-  timezone: z.string().default("UTC"),
-  publication_time: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
-  questions: z.array(questionSchema).length(5, "Daily quizzes must have exactly 5 questions."),
-});
-
-type QuizFormValues = z.infer<typeof quizFormSchema>;
+import { quizFormSchema, QuizFormValues, getDefaultQuizFormValues } from "@/types/quiz-form";
 
 const QuizForm = () => {
   const navigate = useNavigate();
@@ -47,18 +26,7 @@ const QuizForm = () => {
 
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizFormSchema),
-    defaultValues: {
-      title: "",
-      topic: "",
-      status: "draft",
-      timezone: "UTC",
-      publication_time: "09:00",
-      questions: Array(5).fill(null).map(() => ({
-        question_text: "",
-        answers: [{ answer_text: "" }, { answer_text: "" }],
-        correct_answer_index: 0,
-      })),
-    },
+    defaultValues: getDefaultQuizFormValues(),
   });
 
   const { fields: questionFields } = useFieldArray({

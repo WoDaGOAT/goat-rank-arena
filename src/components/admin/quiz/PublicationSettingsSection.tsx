@@ -8,20 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Clock, Globe, Info } from "lucide-react";
 import { format } from "date-fns";
-
-interface QuizFormValues {
-  title: string;
-  topic: string;
-  active_date: Date;
-  status: 'draft' | 'scheduled' | 'published';
-  timezone: string;
-  publication_time: string;
-  questions: Array<{
-    question_text: string;
-    answers: Array<{ answer_text: string }>;
-    correct_answer_index: number;
-  }>;
-}
+import { QuizFormValues } from "@/types/quiz-form";
 
 interface PublicationSettingsSectionProps {
   form: UseFormReturn<QuizFormValues>;

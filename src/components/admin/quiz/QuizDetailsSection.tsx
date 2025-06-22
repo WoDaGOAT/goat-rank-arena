@@ -10,20 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-
-interface QuizFormValues {
-  title: string;
-  topic: string;
-  active_date: Date;
-  status: 'draft' | 'scheduled' | 'published';
-  timezone: string;
-  publication_time: string;
-  questions: Array<{
-    question_text: string;
-    answers: Array<{ answer_text: string }>;
-    correct_answer_index: number;
-  }>;
-}
+import { QuizFormValues } from "@/types/quiz-form";
 
 interface QuizDetailsSectionProps {
   form: UseFormReturn<QuizFormValues>;

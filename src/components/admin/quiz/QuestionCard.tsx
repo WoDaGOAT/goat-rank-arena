@@ -7,20 +7,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
-
-interface QuizFormValues {
-  title: string;
-  topic: string;
-  active_date: Date;
-  status: 'draft' | 'scheduled' | 'published';
-  timezone: string;
-  publication_time: string;
-  questions: Array<{
-    question_text: string;
-    answers: Array<{ answer_text: string }>;
-    correct_answer_index: number;
-  }>;
-}
+import { QuizFormValues } from "@/types/quiz-form";
 
 interface QuestionCardProps {
   form: UseFormReturn<QuizFormValues>;
@@ -64,7 +51,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ form, questionIndex 
                 <FormControl>
                   <RadioGroup
                     onValueChange={(value) => field.onChange(parseInt(value))}
-                    value={field.value?.toString() || ""}
+                    value={field.value?.toString() || "0"}
                     className="space-y-2"
                   >
                     {answerFields.map((answerItem, answerIndex) => (
