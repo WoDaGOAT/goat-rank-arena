@@ -1,8 +1,6 @@
-
 import { Athlete, AthleteMovement } from "@/types";
 
-// Expanded database to exactly 200 soccer players.
-// Player IDs after #55 are generic for demonstration. Add more real players' details for production!
+// Clean database of real soccer players only - no numbered placeholders
 const allFootballPlayers: Athlete[] = [
   {
     id: "pele",
@@ -1203,31 +1201,7 @@ const allFootballPlayers: Athlete[] = [
       { name: 'UEFA Champions League', type: 'continental' }
     ],
     positions: ['Second Striker', 'Attacking Midfielder']
-  },
-
-  // Add athlete objects with placeholder (minimal) info for ranks 56-200
-  ...Array.from({ length: 145 }, (_, i) => {
-    const idx = i + 56;
-    return {
-      id: `player-${idx}`,
-      rank: idx,
-      name: `Player ${idx}`,
-      imageUrl: "photo-1493962853295-0fd70327578a",
-      points: 10000 - Math.floor(Math.random() * 5000) + idx, // Varied points
-      movement: (idx % 3 === 0 ? "up" : idx % 3 === 1 ? "down" : "neutral") as AthleteMovement,
-      dateOfBirth: `1980-01-${(idx % 28 + 1).toString().padStart(2, '0')}`,
-      isActive: idx % 2 === 0,
-      countryOfOrigin: "Country",
-      nationality: "Nationality",
-      clubs: [
-        { name: `Club ${idx}`, country: "Country", league: "League", yearsActive: "2000-2010" }
-      ],
-      competitions: [
-        { name: "League", type: "domestic" }
-      ],
-      positions: ["Position"]
-    } as Athlete;
-  }),
+  }
 ];
 
 export default allFootballPlayers;
