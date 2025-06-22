@@ -43,7 +43,7 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
   const watchedStatus = form.watch("status");
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-white/20">
+    <Card className="bg-white shadow-xl border border-gray-200">
       <CardHeader className="border-b border-gray-100">
         <CardTitle className="flex items-center gap-2 text-gray-800">
           <Clock className="h-5 w-5 text-purple-600" />
@@ -53,7 +53,7 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
           Configure when and how this quiz will be published
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6 pt-6">
+      <CardContent className="space-y-6 pt-6 bg-white">
         <FormField
           control={form.control}
           name="status"
@@ -62,7 +62,7 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
               <FormLabel className="text-gray-700 font-medium">Publication Status</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="bg-white/70 border-gray-200 focus:border-purple-400">
+                  <SelectTrigger className="bg-gray-50 border-gray-300 focus:border-purple-500">
                     <SelectValue placeholder="Select publication status" />
                   </SelectTrigger>
                 </FormControl>
@@ -91,7 +91,7 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
                   <Input 
                     type="time" 
                     {...field}
-                    className="w-full bg-white/70 border-gray-200 focus:border-purple-400"
+                    className="w-full bg-gray-50 border-gray-300 focus:border-purple-500"
                   />
                 </FormControl>
                 <FormDescription className="text-gray-500">
@@ -113,7 +113,7 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
                 </FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-white/70 border-gray-200 focus:border-purple-400">
+                    <SelectTrigger className="bg-gray-50 border-gray-300 focus:border-purple-500">
                       <SelectValue placeholder="Select timezone" />
                     </SelectTrigger>
                   </FormControl>

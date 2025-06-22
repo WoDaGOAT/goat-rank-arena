@@ -97,7 +97,7 @@ const QuizForm = () => {
           <QuizDetailsSection form={form} />
           <PublicationSettingsSection form={form} />
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6 space-y-6">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 space-y-6">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
               <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
                 Questions (5 Required)
@@ -125,7 +125,7 @@ const QuizForm = () => {
             ))}
           </div>
 
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6">
             <div className="flex justify-between items-center">
               <div className="text-sm text-gray-600">
                 <div className="font-medium">Quiz Summary</div>

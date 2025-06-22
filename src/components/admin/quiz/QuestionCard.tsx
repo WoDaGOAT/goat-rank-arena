@@ -24,10 +24,10 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ form, questionIndex 
   const isCompleted = questionText && questionText.trim().length > 0;
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm shadow-md border border-white/30 relative overflow-hidden">
+    <Card className="bg-white shadow-lg border border-gray-200 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500" />
       
-      <CardHeader className="border-b border-gray-100">
+      <CardHeader className="border-b border-gray-100 bg-white">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -50,7 +50,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ form, questionIndex 
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-6 pt-6">
+      <CardContent className="space-y-6 pt-6 bg-white">
         <FormField
           control={form.control}
           name={`questions.${questionIndex}.question_text`}
@@ -64,7 +64,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ form, questionIndex 
                 <Input 
                   placeholder="What is the question?" 
                   {...field} 
-                  className="bg-white/80 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20"
+                  className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
                 />
               </FormControl>
               <FormMessage />
@@ -88,7 +88,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ form, questionIndex 
                     className="space-y-3"
                   >
                     {answerFields.map((answerItem, answerIndex) => (
-                      <FormItem key={answerItem.id} className="flex items-center space-x-3 space-y-0 p-3 rounded-lg bg-gray-50/80 border border-gray-100">
+                      <FormItem key={answerItem.id} className="flex items-center space-x-3 space-y-0 p-3 rounded-lg bg-gray-50 border border-gray-200">
                         <FormControl>
                           <RadioGroupItem 
                             value={answerIndex.toString()} 
@@ -104,7 +104,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ form, questionIndex 
                                 <Input 
                                   placeholder={`Answer ${answerIndex + 1}`} 
                                   {...field} 
-                                  className="bg-white/80 border-gray-200 focus:border-blue-400"
+                                  className="bg-white border-gray-300 focus:border-blue-500"
                                 />
                               </FormControl>
                             </FormItem>
