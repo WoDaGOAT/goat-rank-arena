@@ -97,9 +97,6 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
             </Avatar>
             <div className="min-w-0 flex-1">
               <div className="font-semibold text-white text-sm sm:text-base truncate">{athlete.name}</div>
-              <div className="text-xs sm:text-sm text-gray-300">
-                Original: {athlete.points} pts
-              </div>
             </div>
           </div>
           <Button

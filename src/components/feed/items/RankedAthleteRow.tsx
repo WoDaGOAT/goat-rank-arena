@@ -16,10 +16,6 @@ const RankedAthleteRow = ({ athlete }: RankedAthleteRowProps) => {
                 <AvatarFallback>{athlete.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex-grow font-semibold text-white">{athlete.name}</div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-bold text-blue-300">{athlete.points.toLocaleString()}</span>
-              <span className="text-xs text-gray-400">pts</span>
-            </div>
         </div>
     );
 };
