@@ -156,6 +156,36 @@ export type Notification =
         reacting_user_id: string;
         reacting_user_name: string;
       };
+    }
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'quiz_completed';
+      data: {
+        quiz_id: string;
+        quiz_title: string;
+        score: number;
+        total_questions: number;
+        user_name: string;
+        completed_at: string;
+      };
+    }
+  | {
+      id: string;
+      user_id: string;
+      is_read: boolean;
+      created_at: string;
+      type: 'badge_earned';
+      data: {
+        badge_id: string;
+        badge_name: string;
+        badge_description: string;
+        badge_rarity: string;
+        user_name: string;
+        earned_at: string;
+      };
     };
 
 // Enhanced placeholder images with more athlete mappings
