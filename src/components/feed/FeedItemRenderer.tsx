@@ -7,19 +7,23 @@ import { AcceptedFriendshipFeedData } from './items/AcceptedFriendshipFeedItem';
 import AcceptedFriendshipFeedItem from './items/AcceptedFriendshipFeedItem';
 import { NewRankingFeedData } from './items/NewRankingFeedItem';
 import NewRankingFeedItem from './items/NewRankingFeedItem';
+import { QuizCompletedFeedData } from './items/QuizCompletedFeedItem';
+import QuizCompletedFeedItem from './items/QuizCompletedFeedItem';
+import { BadgeEarnedFeedData } from './items/BadgeEarnedFeedItem';
+import BadgeEarnedFeedItem from './items/BadgeEarnedFeedItem';
 
-type FeedItemData = NewUserFeedData | NewCommentFeedData | AcceptedFriendshipFeedData | NewRankingFeedData;
+type FeedItemData = NewUserFeedData | NewCommentFeedData | AcceptedFriendshipFeedData | NewRankingFeedData | QuizCompletedFeedData | BadgeEarnedFeedData;
 
 export interface FeedItemType {
   id: string;
   created_at: string;
-  type: 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking';
+  type: 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' | 'quiz_completed' | 'badge_earned';
   data: FeedItemData;
 }
 
 // Type guard to ensure feed item has correct type
-function isValidFeedItemType(type: string): type is 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' {
-  return ['new_user', 'new_comment', 'accepted_friendship', 'new_ranking'].includes(type);
+function isValidFeedItemType(type: string): type is 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' | 'quiz_completed' | 'badge_earned' {
+  return ['new_user', 'new_comment', 'accepted_friendship', 'new_ranking', 'quiz_completed', 'badge_earned'].includes(type);
 }
 
 interface FeedItemRendererProps {
@@ -52,6 +56,10 @@ const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
       return <AcceptedFriendshipFeedItem data={typedItem.data as AcceptedFriendshipFeedData} createdAt={typedItem.created_at} />;
     case 'new_ranking':
       return <NewRankingFeedItem data={typedItem.data as NewRankingFeedData} createdAt={typedItem.created_at} />;
+    case 'quiz_completed':
+      return <QuizCompletedFeedItem data={typedItem.data as QuizCompletedFeedData} createdAt={typedItem.created_at} />;
+    case 'badge_earned':
+      return <BadgeEarnedFeedItem data={typedItem.data as BadgeEarnedFeedData} createdAt={typedItem.created_at} />;
     default:
       return null;
   }
