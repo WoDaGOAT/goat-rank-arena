@@ -8,6 +8,7 @@ import { sanitize } from "@/lib/sanitize";
 import { MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import CommentReply from "./CommentReply";
+import { Link } from "react-router-dom";
 
 interface CommentItemProps {
   comment: CommentWithUser;
@@ -24,6 +25,7 @@ const CommentItem = ({ comment, replies = [], categoryId, isReply = false, allCo
   
   const authorName = sanitize(comment.profiles?.full_name) || "Anonymous";
   const authorAvatar = comment.profiles?.avatar_url;
+  const authorId = comment.profiles?.id;
   
   // For nested comments, find replies to this specific comment
   const directReplies = isReply 
@@ -49,18 +51,37 @@ const CommentItem = ({ comment, replies = [], categoryId, isReply = false, allCo
     // Render as a nested reply with simpler structure but support for further nesting
     return (
       <div className="flex gap-3">
-        <Avatar className="w-6 h-6 flex-shrink-0">
-          <AvatarImage src={authorAvatar || undefined} alt={authorName} />
-          <AvatarFallback className="text-xs bg-white/20 text-white">
-            {authorName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        {/* Make avatar clickable */}
+        {authorId ? (
+          <Link to={`/users/${authorId}`}>
+            <Avatar className="w-6 h-6 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
+              <AvatarImage src={authorAvatar || undefined} alt={authorName} />
+              <AvatarFallback className="text-xs bg-white/20 text-white">
+                {authorName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+        ) : (
+          <Avatar className="w-6 h-6 flex-shrink-0">
+            <AvatarImage src={authorAvatar || undefined} alt={authorName} />
+            <AvatarFallback className="text-xs bg-white/20 text-white">
+              {authorName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        )}
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-white">
-              {authorName}
-            </span>
+            {/* Make user name clickable */}
+            {authorId ? (
+              <Link to={`/users/${authorId}`} className="text-xs font-medium text-white hover:text-blue-300 hover:underline transition-colors">
+                {authorName}
+              </Link>
+            ) : (
+              <span className="text-xs font-medium text-white">
+                {authorName}
+              </span>
+            )}
             <span className="text-xs text-gray-400">
               {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
             </span>
@@ -141,19 +162,38 @@ const CommentItem = ({ comment, replies = [], categoryId, isReply = false, allCo
     <div className="pb-4">
       {/* Main comment */}
       <div className="flex gap-3">
-        <Avatar className="w-10 h-10 flex-shrink-0">
-          <AvatarImage src={authorAvatar || undefined} alt={authorName} />
-          <AvatarFallback className="text-sm bg-white/20 text-white">
-            {authorName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        {/* Make avatar clickable */}
+        {authorId ? (
+          <Link to={`/users/${authorId}`}>
+            <Avatar className="w-10 h-10 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
+              <AvatarImage src={authorAvatar || undefined} alt={authorName} />
+              <AvatarFallback className="text-sm bg-white/20 text-white">
+                {authorName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+        ) : (
+          <Avatar className="w-10 h-10 flex-shrink-0">
+            <AvatarImage src={authorAvatar || undefined} alt={authorName} />
+            <AvatarFallback className="text-sm bg-white/20 text-white">
+              {authorName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        )}
         
         <div className="flex-1 min-w-0">
           {/* Comment header */}
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-semibold text-white">
-              {authorName}
-            </span>
+            {/* Make user name clickable */}
+            {authorId ? (
+              <Link to={`/users/${authorId}`} className="text-sm font-semibold text-white hover:text-blue-300 hover:underline transition-colors">
+                {authorName}
+              </Link>
+            ) : (
+              <span className="text-sm font-semibold text-white">
+                {authorName}
+              </span>
+            )}
             <span className="text-xs text-gray-400">
               {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
             </span>
