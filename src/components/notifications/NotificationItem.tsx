@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Layers, UserPlus, Users, Heart, Trophy, Flame, ThumbsUp, Frown } from 'lucide-react';
+import { MessageSquare, Layers, UserPlus, Users, Heart, Trophy, Flame, ThumbsUp, Frown, Award, Star, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 
@@ -63,6 +63,26 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
                         <span className="font-semibold">{notification.data.category_name}</span>.
                     </p>
                 );
+            case 'quiz_completed':
+                const score = notification.data.score || 0;
+                const totalQuestions = notification.data.total_questions || 5;
+                const accuracy = Math.round((score / totalQuestions) * 100);
+                
+                return (
+                    <p>
+                        You completed <span className="font-semibold">{notification.data.quiz_title}</span>{' '}
+                        with a score of <span className="font-semibold">{score}/{totalQuestions}</span>{' '}
+                        ({accuracy}% accuracy).
+                    </p>
+                );
+            case 'badge_earned':
+                return (
+                    <p>
+                        Congratulations! You earned the{' '}
+                        <span className="font-semibold">{notification.data.badge_name}</span> badge.{' '}
+                        <span className="text-gray-400">{notification.data.badge_description}</span>
+                    </p>
+                );
             default:
                 const _exhaustiveCheck: never = notification;
                 return <p>You have a new notification.</p>;
@@ -83,6 +103,21 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
                 return <Heart className="w-5 h-5 text-pink-400" />;
         }
     };
+
+    const getQuizIcon = (accuracy: number) => {
+        if (accuracy === 100) return <Star className="w-5 h-5 text-yellow-400" />;
+        if (accuracy >= 80) return <Trophy className="w-5 h-5 text-green-400" />;
+        return <Target className="w-5 h-5 text-blue-400" />;
+    };
+
+    const getBadgeIcon = (badgeRarity: string) => {
+        switch (badgeRarity) {
+            case 'legendary': return <Star className="w-5 h-5 text-yellow-400" />;
+            case 'epic': return <Trophy className="w-5 h-5 text-purple-400" />;
+            case 'rare': return <Award className="w-5 h-5 text-blue-400" />;
+            default: return <Award className="w-5 h-5 text-green-400" />;
+        }
+    };
     
     const icon = notification.type === 'new_comment_reply' 
         ? <MessageSquare className="w-5 h-5 text-blue-400" />
@@ -96,6 +131,10 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         ? getReactionIcon(notification.data.reaction_type)
         : notification.type === 'category_reaction'
         ? getReactionIcon(notification.data.reaction_type)
+        : notification.type === 'quiz_completed'
+        ? getQuizIcon(Math.round(((notification.data.score || 0) / (notification.data.total_questions || 5)) * 100))
+        : notification.type === 'badge_earned'
+        ? getBadgeIcon(notification.data.badge_rarity || 'common')
         : <MessageSquare className="w-5 h-5 text-gray-400" />;
 
     const handleAccept = (e: React.MouseEvent) => {
@@ -176,6 +215,7 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         );
     }
 
+    // Quiz completed and badge earned notifications are not clickable but still show content
     return (
         <div className="block p-3 hover:bg-white/10 rounded-md transition-colors cursor-default">
             {content}

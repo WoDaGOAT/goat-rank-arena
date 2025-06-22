@@ -748,6 +748,8 @@ export type Database = {
         | "friend_request_accepted"
         | "ranking_reaction"
         | "category_reaction"
+        | "quiz_completed"
+        | "badge_earned"
       user_status: "active" | "banned"
     }
     CompositeTypes: {
@@ -881,6 +883,8 @@ export const Constants = {
         "friend_request_accepted",
         "ranking_reaction",
         "category_reaction",
+        "quiz_completed",
+        "badge_earned",
       ],
       user_status: ["active", "banned"],
     },
