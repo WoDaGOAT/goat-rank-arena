@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Layers, UserPlus, Users, Heart, Trophy, Flame, ThumbsUp, Frown, Award, Star, Target } from 'lucide-react';
+import { MessageCircle, FolderPlus, Users, Handshake, Trophy, Flame, ThumbsUp, Frown, Award, Star, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 
@@ -100,14 +100,22 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
             case 'frown':
                 return <Frown className="w-5 h-5 text-red-400" />;
             default:
-                return <Heart className="w-5 h-5 text-pink-400" />;
+                return <ThumbsUp className="w-5 h-5 text-blue-400" />;
         }
     };
 
     const getQuizIcon = (accuracy: number) => {
-        if (accuracy === 100) return <Star className="w-5 h-5 text-yellow-400" />;
-        if (accuracy >= 80) return <Trophy className="w-5 h-5 text-green-400" />;
-        return <Target className="w-5 h-5 text-blue-400" />;
+        if (accuracy === 100) {
+            return (
+                <div className="relative">
+                    <Star className="w-5 h-5 text-yellow-400" />
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full opacity-80"></div>
+                </div>
+            );
+        }
+        if (accuracy >= 80) return <Trophy className="w-5 h-5 text-yellow-500" />;
+        if (accuracy >= 60) return <Award className="w-5 h-5 text-blue-400" />;
+        return <Target className="w-5 h-5 text-gray-400" />;
     };
 
     const getBadgeIcon = (badgeRarity: string) => {
@@ -119,23 +127,49 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         }
     };
     
-    const icon = notification.type === 'new_comment_reply' 
-        ? <MessageSquare className="w-5 h-5 text-blue-400" />
-        : notification.type === 'new_category'
-        ? <Layers className="w-5 h-5 text-green-400" />
-        : notification.type === 'new_friend_request'
-        ? <UserPlus className="w-5 h-5 text-purple-400" />
-        : notification.type === 'friend_request_accepted'
-        ? <Users className="w-5 h-5 text-teal-400" />
-        : notification.type === 'ranking_reaction'
-        ? getReactionIcon(notification.data.reaction_type)
-        : notification.type === 'category_reaction'
-        ? getReactionIcon(notification.data.reaction_type)
-        : notification.type === 'quiz_completed'
-        ? getQuizIcon(Math.round(((notification.data.score || 0) / (notification.data.total_questions || 5)) * 100))
-        : notification.type === 'badge_earned'
-        ? getBadgeIcon(notification.data.badge_rarity || 'common')
-        : <MessageSquare className="w-5 h-5 text-gray-400" />;
+    const getNotificationIcon = () => {
+        switch (notification.type) {
+            case 'new_comment_reply':
+                return (
+                    <div className="relative">
+                        <MessageCircle className="w-5 h-5 text-blue-400" />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-300 rounded-full"></div>
+                    </div>
+                );
+            case 'new_category':
+                return (
+                    <div className="relative">
+                        <FolderPlus className="w-5 h-5 text-purple-400" />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-300 rounded-full opacity-80"></div>
+                    </div>
+                );
+            case 'new_friend_request':
+                return (
+                    <div className="relative">
+                        <Users className="w-5 h-5 text-teal-400" />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-teal-300 rounded-full"></div>
+                    </div>
+                );
+            case 'friend_request_accepted':
+                return (
+                    <div className="relative">
+                        <Handshake className="w-5 h-5 text-green-400" />
+                        <div className="absolute top-0 right-0 w-2 h-2 bg-green-300 rounded-full opacity-80"></div>
+                    </div>
+                );
+            case 'ranking_reaction':
+                return getReactionIcon(notification.data.reaction_type);
+            case 'category_reaction':
+                return getReactionIcon(notification.data.reaction_type);
+            case 'quiz_completed':
+                const accuracy = Math.round(((notification.data.score || 0) / (notification.data.total_questions || 5)) * 100);
+                return getQuizIcon(accuracy);
+            case 'badge_earned':
+                return getBadgeIcon(notification.data.badge_rarity || 'common');
+            default:
+                return <MessageCircle className="w-5 h-5 text-gray-400" />;
+        }
+    };
 
     const handleAccept = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -159,7 +193,7 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
                 <div className="w-2 h-2 rounded-full bg-blue-500 absolute top-2 left-[-4px]"></div>
             )}
             <div className="flex-shrink-0 pt-1">
-                {icon}
+                {getNotificationIcon()}
             </div>
             <div className="flex-1">
                 <div className={cn("text-sm", notification.is_read ? "text-gray-400" : "text-white")}>
