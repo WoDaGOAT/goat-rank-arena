@@ -1,10 +1,9 @@
+
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
 import QuizActivity from '@/components/profile/QuizActivity';
@@ -12,6 +11,9 @@ import { UserQuizAttemptForProfile } from '@/types/quiz';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePublicUserBadges } from '@/hooks/usePublicUserBadges';
 import BadgeShowcase from '@/components/quiz/BadgeShowcase';
+import EnhancedProfileHeader from '@/components/profile/EnhancedProfileHeader';
+import PublicRankingActivity from '@/components/profile/PublicRankingActivity';
+import PublicFriendsList from '@/components/profile/PublicFriendsList';
 
 const PublicProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -29,7 +31,7 @@ const PublicProfilePage = () => {
         .single();
       
       if (error) {
-        if (error.code !== 'PGRST116') { // Ignore "no rows found" error
+        if (error.code !== 'PGRST116') {
             console.error('Error fetching public profile:', error);
             toast.error('Failed to load profile.');
         }
@@ -105,7 +107,7 @@ const PublicProfilePage = () => {
       const totalScore = data.reduce((sum, attempt) => sum + attempt.score, 0);
       const perfectScores = data.filter(attempt => attempt.score === 5).length;
       const averageScore = totalScore / totalQuizzes;
-      const accuracy = (totalScore / (totalQuizzes * 5)) * 100; // Based on 5 questions per quiz
+      const accuracy = (totalScore / (totalQuizzes * 5)) * 100;
 
       return {
         totalQuizzes,
@@ -123,11 +125,18 @@ const PublicProfilePage = () => {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-20 w-20 rounded-full bg-white/10" />
-          <div>
-            <Skeleton className="h-6 w-48 mb-2 bg-white/10" />
-            <Skeleton className="h-4 w-32 bg-white/10" />
+        <div className="space-y-6">
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-20 w-20 rounded-full bg-white/10" />
+            <div className="flex-1">
+              <Skeleton className="h-6 w-48 mb-2 bg-white/10" />
+              <Skeleton className="h-4 w-32 bg-white/10" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-20 bg-white/10 rounded-lg" />
+            ))}
           </div>
         </div>
       );
@@ -146,53 +155,11 @@ const PublicProfilePage = () => {
     }
 
     return (
-       <div className="space-y-6">
-         {/* Profile Header */}
-         <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={profile.avatar_url || undefined} alt={profile.full_name || ''} />
-              <AvatarFallback>{profile.full_name?.charAt(0) || 'U'}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 className="text-2xl font-bold">{profile.full_name || 'Anonymous User'}</h2>
-              {profile.country && <p className="text-gray-400">{profile.country}</p>}
-              {profile.favorite_sports && profile.favorite_sports.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {profile.favorite_sports.map((sport: string) => (
-                    <Badge key={sport} variant="secondary" className="text-xs">
-                      {sport}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+       <div className="space-y-8">
+         {/* Enhanced Profile Header */}
+         <EnhancedProfileHeader profile={profile} isOwnProfile={isOwnProfile} />
 
-          {/* Badges Section */}
-          {isBadgesLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-6 w-32 bg-white/10" />
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-24 bg-white/10 rounded-lg" />
-                ))}
-              </div>
-            </div>
-          ) : userBadges && userBadges.length > 0 ? (
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold">Badges & Achievements</h3>
-              <BadgeShowcase userBadges={userBadges} />
-            </div>
-          ) : (
-            <div className="bg-white/5 p-6 rounded-lg border border-gray-700 text-center">
-              <h3 className="text-lg font-semibold mb-2">No Badges Yet</h3>
-              <p className="text-gray-400">
-                {isOwnProfile ? "Take quizzes to earn your first badge!" : "This user hasn't earned any badges yet."}
-              </p>
-            </div>
-          )}
-
-          {/* Quiz Statistics */}
+          {/* Statistics Cards */}
           {isLoadingStats ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
@@ -222,6 +189,40 @@ const PublicProfilePage = () => {
               </div>
             </div>
           ) : null}
+
+          {/* Badges Section */}
+          {isBadgesLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-32 bg-white/10" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 bg-white/10 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          ) : userBadges && userBadges.length > 0 ? (
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold">Badges & Achievements</h3>
+              <BadgeShowcase userBadges={userBadges} />
+            </div>
+          ) : (
+            <div className="bg-white/5 p-6 rounded-lg border border-gray-700 text-center">
+              <h3 className="text-lg font-semibold mb-2">No Badges Yet</h3>
+              <p className="text-gray-400">
+                {isOwnProfile ? "Take quizzes to earn your first badge!" : "This user hasn't earned any badges yet."}
+              </p>
+            </div>
+          )}
+
+          {/* Rankings Activity */}
+          {userId && (
+            <PublicRankingActivity userId={userId} isOwnProfile={isOwnProfile} />
+          )}
+
+          {/* Friends List */}
+          {userId && (
+            <PublicFriendsList userId={userId} isOwnProfile={isOwnProfile} />
+          )}
 
           {/* Quiz Activity Component */}
           <QuizActivity 

@@ -2,8 +2,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
+interface FriendshipStatus {
+  id: string;
+  status: string;
+  requester_id: string;
+}
+
 export const useFriendshipStatus = (currentUserId: string | undefined, otherUserId: string | undefined) => {
-  return useQuery({
+  return useQuery<FriendshipStatus | null>({
     queryKey: ['friendship-status', currentUserId, otherUserId],
     queryFn: async () => {
       if (!currentUserId || !otherUserId || currentUserId === otherUserId) {
@@ -12,9 +18,9 @@ export const useFriendshipStatus = (currentUserId: string | undefined, otherUser
 
       const { data, error } = await supabase
         .from('friendships')
-        .select('status, requester_id')
+        .select('id, status, requester_id')
         .or(`and(requester_id.eq.${currentUserId},receiver_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},receiver_id.eq.${currentUserId})`)
-        .maybeSingle(); // Use maybeSingle instead of single to handle no results
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching friendship status:', error);
