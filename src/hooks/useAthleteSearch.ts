@@ -10,7 +10,17 @@ export const useAthleteSearch = (selectedAthletes: SelectedAthlete[]) => {
 
   const filteredAthletes = useMemo(() => {
     return allFootballPlayers.filter(athlete => {
-      const matchesSearch = athlete.name.toLowerCase().includes(searchTerm.toLowerCase());
+      // Split search term into individual words and clean them
+      const searchWords = searchTerm.toLowerCase().trim().split(/\s+/).filter(word => word.length > 0);
+      
+      // Split athlete name into individual words
+      const nameWords = athlete.name.toLowerCase().split(/\s+/);
+      
+      // Check if all search words match at least one word in the athlete's name
+      const matchesSearch = searchWords.length === 0 || searchWords.every(searchWord => 
+        nameWords.some(nameWord => nameWord.includes(searchWord))
+      );
+      
       const matchesLetter = selectedLetter === "" || athlete.name.charAt(0).toUpperCase() === selectedLetter;
       const notSelected = !selectedAthletes.some(selected => selected.id === athlete.id);
       
