@@ -48,7 +48,7 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
       </CardHeader>
       <CardContent className="p-0">
         {/* Header row - hidden on mobile */}
-        <div className="hidden md:grid md:grid-cols-[50px_60px_1fr_110px_90px] gap-4 items-center px-4 py-3 bg-white/5 border-b border-white/20 text-xs font-bold text-gray-300 uppercase tracking-wide">
+        <div className="hidden md:grid md:grid-cols-[50px_80px_1fr_110px_90px] gap-4 items-center px-4 py-3 bg-white/5 border-b border-white/20 text-xs font-bold text-gray-300 uppercase tracking-wide">
           <div className="text-center">#</div>
           <div></div>
           <div>Player</div>

@@ -113,15 +113,15 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
   return (
     <>
       {/* Mobile layout */}
-      <div className={`flex md:hidden items-center gap-3 px-3 py-3 transition-all duration-200 ${getRankStyle()}`}>
+      <div className={`flex md:hidden items-center gap-3 px-3 py-4 transition-all duration-200 ${getRankStyle()}`}>
         {/* Rank and Avatar */}
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-8">
             {renderRankBadge()}
           </div>
-          <Avatar className="w-10 h-10 border-2 border-white/30 shadow-md">
+          <Avatar className="w-14 h-14 border-2 border-white/30 shadow-lg hover:shadow-xl transition-shadow duration-200">
             <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
-            <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+            <AvatarFallback className="bg-white/20 text-white text-lg font-semibold">
               {sanitizedName.charAt(0)}
             </AvatarFallback>
           </Avatar>
@@ -153,7 +153,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
 
       {/* Desktop layout */}
       <div
-        className={`hidden md:grid md:grid-cols-[50px_60px_1fr_110px_90px] gap-4 items-center px-4 py-3 transition-all duration-200 ${getRankStyle()}`}
+        className={`hidden md:grid md:grid-cols-[50px_80px_1fr_110px_90px] gap-4 items-center px-4 py-4 transition-all duration-200 ${getRankStyle()}`}
       >
         {/* Rank */}
         <div className="flex items-center justify-center">
@@ -162,9 +162,9 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
 
         {/* Avatar */}
         <div className="relative">
-          <Avatar className="w-10 h-10 border-2 border-white/30 shadow-md">
+          <Avatar className="w-16 h-16 border-3 border-white/40 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
             <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
-            <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+            <AvatarFallback className="bg-white/20 text-white text-lg font-semibold">
               {sanitizedName.charAt(0)}
             </AvatarFallback>
           </Avatar>
@@ -172,11 +172,11 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
 
         {/* Name */}
         <div>
-          <div className="font-semibold text-white text-sm leading-tight">
+          <div className="font-semibold text-white text-base leading-tight">
             {sanitizedName}
           </div>
           {position <= 10 && (
-            <div className="text-xs text-gray-300 mt-0.5">
+            <div className="text-sm text-gray-300 mt-0.5">
               {getPlacementLabel()}
             </div>
           )}
