@@ -1,101 +1,99 @@
 
 import { Button } from "@/components/ui/button";
-import { UserPlus, UserCheck, UserX, Clock } from "lucide-react";
 import { useFriendshipStatus } from "@/hooks/useFriendshipStatus";
 import { useFriendActions } from "@/hooks/useFriendActions";
 import { useAuth } from "@/contexts/AuthContext";
-import { Skeleton } from "@/components/ui/skeleton";
+import { UserPlus, Clock, Check, UserMinus } from "lucide-react";
 
 interface FriendButtonProps {
   userId: string;
 }
 
 const FriendButton = ({ userId }: FriendButtonProps) => {
-  const { user: currentUser, openLoginDialog } = useAuth();
-  const { data: friendship, isLoading } = useFriendshipStatus(currentUser?.id, userId);
+  const { user } = useAuth();
+  const { data: friendshipStatus } = useFriendshipStatus(user?.id, userId);
   const { sendFriendRequest, acceptFriendRequest, removeFriend } = useFriendActions();
 
-  if (!currentUser) {
-    return (
-      <Button onClick={openLoginDialog} className="flex items-center gap-2">
-        <UserPlus className="w-4 h-4" />
-        Add Friend
-      </Button>
-    );
-  }
-
-  if (currentUser.id === userId) {
+  if (!user || user.id === userId) {
     return null;
   }
 
-  if (isLoading) {
-    return <Skeleton className="h-10 w-32 bg-white/10" />;
-  }
+  const getButtonContent = () => {
+    if (sendFriendRequest.isPending) {
+      return {
+        text: "Sending...",
+        icon: Clock,
+        variant: "secondary" as const,
+        disabled: true
+      };
+    }
 
-  const handleSendRequest = () => {
-    sendFriendRequest.mutate(userId);
-  };
+    if (!friendshipStatus) {
+      return {
+        text: "Add Friend",
+        icon: UserPlus,
+        variant: "default" as const,
+        disabled: false,
+        onClick: () => sendFriendRequest.mutate(userId)
+      };
+    }
 
-  const handleAcceptRequest = () => {
-    if (friendship?.id) {
-      acceptFriendRequest.mutate(friendship.id);
+    switch (friendshipStatus.status) {
+      case 'pending':
+        if (friendshipStatus.requester_id === user.id) {
+          return {
+            text: "Request Sent",
+            icon: Clock,
+            variant: "secondary" as const,
+            disabled: true
+          };
+        } else {
+          return {
+            text: "Accept Request",
+            icon: Check,
+            variant: "default" as const,
+            disabled: false,
+            onClick: () => acceptFriendRequest.mutate(friendshipStatus.id)
+          };
+        }
+      case 'accepted':
+        return {
+          text: "Friends",
+          icon: Check,
+          variant: "outline" as const,
+          disabled: false,
+          onClick: () => removeFriend.mutate(friendshipStatus.id)
+        };
+      case 'blocked':
+        return {
+          text: "Blocked",
+          icon: UserMinus,
+          variant: "destructive" as const,
+          disabled: true
+        };
+      default:
+        return {
+          text: "Add Friend",
+          icon: UserPlus,
+          variant: "default" as const,
+          disabled: false,
+          onClick: () => sendFriendRequest.mutate(userId)
+        };
     }
   };
 
-  const handleRemoveFriend = () => {
-    if (friendship?.id) {
-      removeFriend.mutate(friendship.id);
-    }
-  };
-
-  const status = friendship?.status;
-  const isRequestReceived = status === 'pending' && friendship?.requester_id === userId;
-  const isRequestSent = status === 'pending' && friendship?.requester_id === currentUser.id;
-
-  if (status === 'accepted') {
-    return (
-      <Button variant="outline" onClick={handleRemoveFriend} className="flex items-center gap-2">
-        <UserCheck className="w-4 h-4" />
-        Friends
-      </Button>
-    );
-  }
-
-  if (isRequestReceived) {
-    return (
-      <Button onClick={handleAcceptRequest} className="flex items-center gap-2">
-        <UserCheck className="w-4 h-4" />
-        Accept Request
-      </Button>
-    );
-  }
-
-  if (isRequestSent) {
-    return (
-      <Button variant="outline" disabled className="flex items-center gap-2">
-        <Clock className="w-4 h-4" />
-        Request Sent
-      </Button>
-    );
-  }
-
-  if (status === 'blocked') {
-    return (
-      <Button variant="destructive" disabled className="flex items-center gap-2">
-        <UserX className="w-4 h-4" />
-        Blocked
-      </Button>
-    );
-  }
+  const buttonConfig = getButtonContent();
+  const IconComponent = buttonConfig.icon;
 
   return (
-    <Button 
-      onClick={handleSendRequest} 
-      disabled={sendFriendRequest.isPending}
-      className="flex items-center gap-2"
+    <Button
+      variant={buttonConfig.variant}
+      disabled={buttonConfig.disabled}
+      onClick={buttonConfig.onClick}
+      className="w-full sm:w-auto bg-white text-gray-900 hover:bg-gray-100 border border-gray-300 font-medium"
     >
-      <UserPlus className="w-4 h-4" />
-      {sendFriendRequest.isPending ? "Sending..." : "Add Friend"}
+      <IconComponent className="w-4 h-4 mr-2" />
+      {buttonConfig.text}
     </Button>
   );
 };
