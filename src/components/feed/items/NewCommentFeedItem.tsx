@@ -60,18 +60,42 @@ const NewCommentFeedItem = ({ data, createdAt }: NewCommentFeedItemProps) => {
         <Card className="bg-white/5 text-white border-gray-700">
             <CardContent className="p-4">
                  <div className="flex items-start gap-4 mb-2">
-                    <Avatar>
-                        <AvatarImage src={authorAvatar || undefined} alt={sanitizedAuthorName || 'User'}/>
-                        <AvatarFallback>{sanitizedAuthorName?.charAt(0) || 'A'}</AvatarFallback>
-                    </Avatar>
+                    {/* Make avatar clickable */}
+                    {author?.id ? (
+                        <Link to={`/users/${author.id}`}>
+                            <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+                                <AvatarImage src={authorAvatar || undefined} alt={sanitizedAuthorName || 'User'}/>
+                                <AvatarFallback>{sanitizedAuthorName?.charAt(0) || 'A'}</AvatarFallback>
+                            </Avatar>
+                        </Link>
+                    ) : (
+                        <Avatar>
+                            <AvatarImage src={authorAvatar || undefined} alt={sanitizedAuthorName || 'User'}/>
+                            <AvatarFallback>{sanitizedAuthorName?.charAt(0) || 'A'}</AvatarFallback>
+                        </Avatar>
+                    )}
                     <div className="flex-1">
                         <p className="flex items-center gap-1">
                             {isReply && <Reply className="w-4 h-4 text-blue-300" />}
-                            <span className="font-bold">{sanitizedAuthorName}</span>
+                            {/* Make author name clickable */}
+                            {author?.id ? (
+                                <Link to={`/users/${author.id}`} className="font-bold hover:underline hover:text-blue-300 transition-colors">
+                                    {sanitizedAuthorName}
+                                </Link>
+                            ) : (
+                                <span className="font-bold">{sanitizedAuthorName}</span>
+                            )}
                             {isReply ? (
                                 <>
                                     {' '} replied to {' '}
-                                    <span className="font-bold text-blue-300">{sanitizedParentAuthorName}</span>
+                                    {/* Make parent author name clickable if available */}
+                                    {parent_comment_author?.id ? (
+                                        <Link to={`/users/${parent_comment_author.id}`} className="font-bold text-blue-300 hover:underline">
+                                            {sanitizedParentAuthorName}
+                                        </Link>
+                                    ) : (
+                                        <span className="font-bold text-blue-300">{sanitizedParentAuthorName}</span>
+                                    )}
                                     {' '} on {' '}
                                 </>
                             ) : (
