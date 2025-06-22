@@ -137,7 +137,6 @@ class ErrorBoundary extends Component<Props, State> {
                 <>
                   <br />
                   <strong>Dev Error:</strong> {this.state.error?.message}
-                </br>
                 </>
               )}
             </AlertDescription>
