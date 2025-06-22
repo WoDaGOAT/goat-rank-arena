@@ -1,15 +1,41 @@
-
 import { UserStats } from "@/types/badges";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Target, Flame, TrendingUp, Award, BookOpen, Shield, Heart, Sparkles } from "lucide-react";
+import { useUserBadges } from "@/hooks/useUserBadges";
 
 interface UserStatsCardProps {
   stats: UserStats;
 }
 
 const UserStatsCard = ({ stats }: UserStatsCardProps) => {
-  const getAccuracyLevel = (accuracy: number) => {
+  const { userBadges } = useUserBadges();
+
+  const getBadgeLevel = () => {
+    // Priority order for badges (highest to lowest)
+    const badgePriority = [
+      { id: 'goat', name: "GOAT", color: "bg-yellow-500", icon: TrendingUp },
+      { id: 'legend', name: "Legend", color: "bg-purple-500", icon: Shield },
+      { id: 'expert', name: "Expert", color: "bg-blue-500", icon: BookOpen },
+      { id: 'triple_perfect', name: "Hat Trick", color: "bg-orange-500", icon: Award },
+      { id: 'perfect_score', name: "Perfect Score", color: "bg-green-500", icon: Trophy },
+      { id: 'streak_10', name: "10-Day Streak", color: "bg-red-500", icon: Flame },
+      { id: 'foot_lover', name: "Foot Lover", color: "bg-green-500", icon: Heart },
+      { id: 'streak_3', name: "3-Day Streak", color: "bg-orange-400", icon: Flame },
+      { id: 'first_quiz', name: "First Quiz", color: "bg-blue-400", icon: Sparkles },
+      { id: 'newcomer', name: "Newcomer", color: "bg-gray-500", icon: Sparkles }
+    ];
+
+    // Find the highest priority badge the user has earned
+    for (const badgeLevel of badgePriority) {
+      const hasBadge = userBadges.some(userBadge => userBadge.badge_id === badgeLevel.id);
+      if (hasBadge) {
+        return badgeLevel;
+      }
+    }
+
+    // Fallback to accuracy-based level if no badges found
+    const accuracy = stats.accuracy_percentage;
     if (accuracy >= 90) return { name: "GOAT", color: "bg-yellow-500", icon: TrendingUp };
     if (accuracy >= 75) return { name: "Legend", color: "bg-purple-500", icon: Shield };
     if (accuracy >= 60) return { name: "Expert", color: "bg-blue-500", icon: BookOpen };
@@ -17,7 +43,7 @@ const UserStatsCard = ({ stats }: UserStatsCardProps) => {
     return { name: "Newcomer", color: "bg-gray-500", icon: Sparkles };
   };
 
-  const level = getAccuracyLevel(stats.accuracy_percentage);
+  const level = getBadgeLevel();
   const LevelIcon = level.icon;
 
   return (
@@ -90,6 +116,16 @@ const UserStatsCard = ({ stats }: UserStatsCardProps) => {
             </div>
           </div>
         </div>
+
+        {/* Show earned badges count */}
+        {userBadges.length > 0 && (
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <div className="text-sm text-gray-400">Badges Earned</div>
+            <div className="text-lg font-bold text-blue-400">
+              {userBadges.length} badge{userBadges.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+        )}
 
         {stats.longest_streak > stats.current_streak && (
           <div className="bg-white/5 rounded-lg p-3 text-center">

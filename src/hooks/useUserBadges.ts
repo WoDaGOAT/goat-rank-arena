@@ -1,4 +1,3 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,9 +51,9 @@ export const useUserBadges = () => {
       return mappedBadges;
     },
     enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000, // 10 minutes - badges don't change frequently
+    staleTime: 5 * 60 * 1000, // 5 minutes - reduced to pick up new badges faster
     gcTime: 60 * 60 * 1000, // 1 hour - keep badges in cache longer
-    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnWindowFocus: true, // Refetch when window gains focus to pick up new badges
   });
 
   const refreshBadges = () => {
