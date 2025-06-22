@@ -153,7 +153,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
 
       {/* Desktop layout */}
       <div
-        className={`hidden md:grid md:grid-cols-[50px_80px_1fr_110px_90px] gap-4 items-center px-4 py-4 transition-all duration-200 ${getRankStyle()}`}
+        className={`hidden md:grid md:grid-cols-[50px_72px_1fr_110px_90px] gap-4 items-center px-4 py-4 transition-all duration-200 ${getRankStyle()}`}
       >
         {/* Rank */}
         <div className="flex items-center justify-center">
@@ -161,8 +161,8 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
         </div>
 
         {/* Avatar */}
-        <div className="relative">
-          <Avatar className="w-16 h-16 border-3 border-white/40 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
+        <div className="relative flex justify-center">
+          <Avatar className="w-14 h-14 border-2 border-white/30 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
             <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
             <AvatarFallback className="bg-white/20 text-white text-lg font-semibold">
               {sanitizedName.charAt(0)}
