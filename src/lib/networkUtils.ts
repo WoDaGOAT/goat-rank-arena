@@ -11,6 +11,7 @@ export const isExternalResourceError = (error: any): boolean => {
   
   return errorMessage.includes('ERR_BLOCKED_BY_CLIENT') ||
          errorMessage.includes('ERR_FAILED') ||
+         errorMessage.includes('ERR_NETWORK_CHANGED') ||
          errorMessage.includes('chrome-extension') ||
          errorMessage.includes('fbevents.js') ||
          errorMessage.includes('connect.facebook.net') ||
@@ -19,7 +20,13 @@ export const isExternalResourceError = (error: any): boolean => {
          errorMessage.includes('wss://') ||
          errorMessage.includes('Failed to construct') ||
          errorMessage.includes('NetworkError') ||
-         errorMessage.includes('NETWORK_ERROR');
+         errorMessage.includes('NETWORK_ERROR') ||
+         errorMessage.includes('404') ||
+         errorMessage.includes('502') ||
+         errorMessage.includes('Bad Gateway') ||
+         errorMessage.includes('Failed to load resource') ||
+         errorMessage.includes('sandbox') ||
+         errorMessage.includes('lovableproject.com');
 };
 
 /**
@@ -35,7 +42,9 @@ export const isDevelopmentToolError = (error: any): boolean => {
          errorMessage.includes('vite') ||
          errorMessage.includes('localhost') ||
          errorMessage.includes('127.0.0.1') ||
-         errorMessage.includes('::1');
+         errorMessage.includes('::1') ||
+         errorMessage.includes('sandbox') ||
+         errorMessage.includes('lovableproject.com');
 };
 
 /**

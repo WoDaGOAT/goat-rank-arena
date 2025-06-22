@@ -52,19 +52,30 @@ class DevelopmentConsole {
   private shouldSuppressConsoleError(message: string): boolean {
     return message.includes('WebSocket connection') ||
            message.includes('ERR_BLOCKED_BY_CLIENT') ||
+           message.includes('ERR_NETWORK_CHANGED') ||
+           message.includes('ERR_FAILED') ||
            message.includes('chrome-extension') ||
            message.includes('Failed to fetch') ||
            message.includes('NetworkError') ||
            message.includes('net::') ||
            message.includes('ws://') ||
-           message.includes('wss://');
+           message.includes('wss://') ||
+           message.includes('404') ||
+           message.includes('502') ||
+           message.includes('Bad Gateway') ||
+           message.includes('dev-server') ||
+           message.includes('sandbox') ||
+           message.includes('lovableproject.com') ||
+           message.includes('Failed to load resource');
   }
 
   private shouldSuppressConsoleWarning(message: string): boolean {
     return message.includes('External resource') ||
            message.includes('likely blocked') ||
            message.includes('HMR') ||
-           message.includes('hot reload');
+           message.includes('hot reload') ||
+           message.includes('dev-server') ||
+           message.includes('Failed to load resource');
   }
 
   private reportSuppressedErrors() {
