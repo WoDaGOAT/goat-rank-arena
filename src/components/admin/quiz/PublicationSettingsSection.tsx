@@ -6,7 +6,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Clock, Globe, Info } from "lucide-react";
+import { Clock, Globe, Info, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { QuizFormValues } from "@/types/quiz-form";
 
@@ -43,34 +43,36 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
   const watchedStatus = form.watch("status");
 
   return (
-    <Card className="bg-white/5 border-white/10">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
+    <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-white/20">
+      <CardHeader className="border-b border-gray-100">
+        <CardTitle className="flex items-center gap-2 text-gray-800">
+          <Clock className="h-5 w-5 text-purple-600" />
           Publication Settings
         </CardTitle>
-        <CardDescription>Configure when and how this quiz will be published</CardDescription>
+        <CardDescription className="text-gray-600">
+          Configure when and how this quiz will be published
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 pt-6">
         <FormField
           control={form.control}
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Publication Status</FormLabel>
+              <FormLabel className="text-gray-700 font-medium">Publication Status</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white/70 border-gray-200 focus:border-purple-400">
                     <SelectValue placeholder="Select publication status" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
+                <SelectContent className="bg-white shadow-xl border">
+                  <SelectItem value="draft">📝 Draft</SelectItem>
+                  <SelectItem value="scheduled">⏰ Scheduled</SelectItem>
+                  <SelectItem value="published">🚀 Published</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>
+              <FormDescription className="text-gray-500">
                 {getStatusDescription(field.value)}
               </FormDescription>
               <FormMessage />
@@ -84,15 +86,15 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
             name="publication_time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Publication Time</FormLabel>
+                <FormLabel className="text-gray-700 font-medium">Publication Time</FormLabel>
                 <FormControl>
                   <Input 
                     type="time" 
                     {...field}
-                    className="w-full"
+                    className="w-full bg-white/70 border-gray-200 focus:border-purple-400"
                   />
                 </FormControl>
-                <FormDescription>
+                <FormDescription className="text-gray-500">
                   Time when the quiz will be published
                 </FormDescription>
                 <FormMessage />
@@ -105,17 +107,17 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
             name="timezone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2">
+                <FormLabel className="flex items-center gap-2 text-gray-700 font-medium">
                   <Globe className="h-4 w-4" />
                   Timezone
                 </FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white/70 border-gray-200 focus:border-purple-400">
                       <SelectValue placeholder="Select timezone" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="max-h-60">
+                  <SelectContent className="max-h-60 bg-white shadow-xl border">
                     {TIMEZONES.map((tz) => (
                       <SelectItem key={tz.value} value={tz.value}>
                         {tz.label}
@@ -123,7 +125,7 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
                     ))}
                   </SelectContent>
                 </Select>
-                <FormDescription>
+                <FormDescription className="text-gray-500">
                   Timezone for publication time
                 </FormDescription>
                 <FormMessage />
@@ -133,9 +135,9 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
         </div>
 
         {watchedStatus === "scheduled" && watchedDate && (
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <Clock className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="bg-yellow-50 border-yellow-200 shadow-sm">
+            <Calendar className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
               <strong>Scheduled Publication:</strong> This quiz will be automatically published on{" "}
               {format(watchedDate, "PPP")} at {watchedTime} ({watchedTimezone}).
             </AlertDescription>
@@ -143,9 +145,9 @@ export const PublicationSettingsSection: React.FC<PublicationSettingsSectionProp
         )}
 
         {watchedStatus === "published" && (
-          <Alert className="bg-green-50 border-green-200">
-            <Info className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="bg-green-50 border-green-200 shadow-sm">
+            <Info className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
               <strong>Immediate Publication:</strong> This quiz will be published immediately and available to users.
             </AlertDescription>
           </Alert>
