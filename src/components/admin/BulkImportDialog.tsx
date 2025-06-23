@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import {
   Dialog,
@@ -16,6 +15,7 @@ import { Upload, FileText, AlertCircle, CheckCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import ColumnMappingStep from "./ColumnMappingStep";
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -41,11 +41,14 @@ interface ImportResult {
 
 const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
   const [file, setFile] = useState<File | null>(null);
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [csvData, setCsvData] = useState<string[][]>([]);
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [parsedData, setParsedData] = useState<ParsedAthlete[]>([]);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [step, setStep] = useState<"upload" | "preview" | "import" | "complete">("upload");
+  const [step, setStep] = useState<"upload" | "mapping" | "preview" | "import" | "complete">("upload");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -53,13 +56,13 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile && selectedFile.type === "text/csv") {
       setFile(selectedFile);
-      parseCSV(selectedFile);
+      parseCSVHeaders(selectedFile);
     } else {
       toast.error("Please select a valid CSV file");
     }
   };
 
-  const parseCSV = async (file: File) => {
+  const parseCSVHeaders = async (file: File) => {
     try {
       setIsProcessing(true);
       setProgress(10);
@@ -71,53 +74,72 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
         throw new Error("CSV file must have a header row and at least one data row");
       }
 
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      const dataRows = lines.slice(1).map(line => 
+        line.split(',').map(v => v.trim().replace(/^"|"$/g, ''))
+      );
+
+      setCsvHeaders(headers);
+      setCsvData(dataRows);
+      setStep("mapping");
+      setProgress(100);
+      
+      toast.success(`CSV file loaded successfully. Found ${headers.length} columns and ${dataRows.length} rows.`);
+    } catch (error: any) {
+      console.error("Error parsing CSV:", error);
+      toast.error(error.message || "Failed to parse CSV file");
+    } finally {
+      setIsProcessing(false);
+      setProgress(0);
+    }
+  };
+
+  const handleMappingComplete = (mapping: Record<string, string>) => {
+    setColumnMapping(mapping);
+    parseDataWithMapping(mapping);
+  };
+
+  const parseDataWithMapping = (mapping: Record<string, string>) => {
+    try {
+      setIsProcessing(true);
+      setProgress(10);
+
       const data: ParsedAthlete[] = [];
 
-      setProgress(30);
+      for (const row of csvData) {
+        if (row.length < csvHeaders.length) continue;
 
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-        
-        if (values.length < headers.length) continue;
+        const athlete: ParsedAthlete = { name: "" };
 
-        const athlete: ParsedAthlete = {
-          name: "",
-        };
+        csvHeaders.forEach((header, index) => {
+          const dbField = mapping[header];
+          const value = row[index]?.trim();
+          
+          if (!value || dbField === "skip") return;
 
-        headers.forEach((header, index) => {
-          const value = values[index]?.trim();
-          if (!value) return;
-
-          switch (header) {
+          switch (dbField) {
             case "name":
               athlete.name = value;
               break;
             case "country_of_origin":
-            case "country":
               athlete.country_of_origin = value;
               break;
             case "nationality":
               athlete.nationality = value;
               break;
             case "date_of_birth":
-            case "birth_date":
               athlete.date_of_birth = value;
               break;
             case "date_of_death":
-            case "death_date":
               athlete.date_of_death = value;
               break;
             case "is_active":
-            case "active":
               athlete.is_active = value.toLowerCase() === "true" || value.toLowerCase() === "yes" || value === "1";
               break;
             case "positions":
-            case "position":
               athlete.positions = value.split(';').map(p => p.trim()).filter(Boolean);
               break;
             case "profile_picture_url":
-            case "image_url":
               athlete.profile_picture_url = value;
               break;
           }
@@ -135,8 +157,8 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
       
       toast.success(`Successfully parsed ${data.length} athletes from CSV`);
     } catch (error: any) {
-      console.error("Error parsing CSV:", error);
-      toast.error(error.message || "Failed to parse CSV file");
+      console.error("Error parsing data with mapping:", error);
+      toast.error(error.message || "Failed to parse CSV data");
     } finally {
       setIsProcessing(false);
       setProgress(0);
@@ -149,7 +171,6 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
       setStep("import");
       setProgress(0);
 
-      // Convert parsed data to the format expected by the bulk insert function
       const athletesData = parsedData.map(athlete => ({
         id: crypto.randomUUID(),
         name: athlete.name,
@@ -177,7 +198,6 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
       setStep("complete");
       setProgress(100);
 
-      // Refresh queries
       queryClient.invalidateQueries({ queryKey: ["athletesAdmin"] });
       queryClient.invalidateQueries({ queryKey: ["athleteStats"] });
       queryClient.invalidateQueries({ queryKey: ["athletes"] });
@@ -193,6 +213,9 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
 
   const resetDialog = () => {
     setFile(null);
+    setCsvHeaders([]);
+    setCsvData([]);
+    setColumnMapping({});
     setParsedData([]);
     setImportResult(null);
     setIsProcessing(false);
@@ -208,13 +231,25 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
     onOpenChange(false);
   };
 
+  const goBackToUpload = () => {
+    setStep("upload");
+    setCsvHeaders([]);
+    setCsvData([]);
+    setColumnMapping({});
+  };
+
+  const goBackToMapping = () => {
+    setStep("mapping");
+    setParsedData([]);
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Bulk Import Athletes from CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file to import multiple athletes at once. The system will automatically detect duplicates and skip them.
+            Upload a CSV file to import multiple athletes at once. You'll be able to map your CSV columns to database fields.
           </DialogDescription>
         </DialogHeader>
 
@@ -227,7 +262,7 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
                   Upload CSV File
                 </CardTitle>
                 <CardDescription>
-                  Your CSV should include columns like: name, country_of_origin, nationality, date_of_birth, positions, is_active
+                  Select your CSV file. We'll detect the columns and let you map them to the appropriate fields.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -250,16 +285,25 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
                   />
 
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Expected CSV Format:</h4>
-                    <code className="text-sm">
-                      name,country_of_origin,nationality,date_of_birth,positions,is_active
-                      <br />
-                      Lionel Messi,Argentina,Argentine,1987-06-24,Forward;Right Winger,true
-                    </code>
+                    <h4 className="font-medium mb-2">What happens next:</h4>
+                    <ol className="text-sm space-y-1 list-decimal list-inside">
+                      <li>We'll read your CSV headers</li>
+                      <li>You'll map columns to database fields</li>
+                      <li>Preview the mapped data</li>
+                      <li>Import the athletes</li>
+                    </ol>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {step === "mapping" && (
+            <ColumnMappingStep
+              csvHeaders={csvHeaders}
+              onMappingComplete={handleMappingComplete}
+              onBack={goBackToUpload}
+            />
           )}
 
           {step === "preview" && (
@@ -270,7 +314,7 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
                   Preview Import Data
                 </CardTitle>
                 <CardDescription>
-                  Review the parsed data before importing. {parsedData.length} athletes found.
+                  Review the mapped data before importing. {parsedData.length} athletes found.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -374,8 +418,8 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
           
           {step === "preview" && (
             <>
-              <Button variant="outline" onClick={resetDialog}>
-                Upload Different File
+              <Button variant="outline" onClick={goBackToMapping}>
+                Back to Mapping
               </Button>
               <Button onClick={handleImport} disabled={isProcessing}>
                 Import {parsedData.length} Athletes
