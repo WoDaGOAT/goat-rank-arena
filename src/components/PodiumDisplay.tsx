@@ -1,11 +1,14 @@
-import { Athlete, getPlaceholderImageUrl } from "@/types";
+
+import { Athlete } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Crown } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
+
 interface PodiumDisplayProps {
   athletes: Athlete[];
 }
+
 const PodiumDisplay = ({
   athletes
 }: PodiumDisplayProps) => {
@@ -17,18 +20,21 @@ const PodiumDisplay = ({
         </div>
       </div>;
   }
+
   const topThree = athletes.slice(0, 3);
   const [first, second, third] = topThree;
+
   const renderAthlete = (athlete: Athlete, position: number, podiumHeight: string) => {
     const isFirst = position === 1;
     const avatarSize = isFirst ? "w-16 h-16" : "w-14 h-14";
     const nameSize = isFirst ? "text-sm" : "text-xs";
     const badgeColor = position === 1 ? 'bg-yellow-500' : position === 2 ? 'bg-gray-400' : 'bg-amber-600';
+
     return <div className="flex flex-col items-center">
         {/* Avatar and crown section */}
         <div className="relative mb-3">
           <Avatar className={`${avatarSize} border-2 border-white/30 shadow-lg transition-transform hover:scale-110`}>
-            <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitize(athlete.name)} />
+            <AvatarImage src={athlete.imageUrl || "/placeholder.svg"} alt={sanitize(athlete.name)} />
             <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
               {sanitize(athlete.name).charAt(0)}
             </AvatarFallback>
@@ -66,6 +72,7 @@ const PodiumDisplay = ({
         </div>
       </div>;
   };
+
   return <div className="flex items-end justify-center gap-2 h-60 px-4">
       {/* Second place (left) - medium height */}
       {second && renderAthlete(second, 2, "h-16")}
@@ -82,4 +89,5 @@ const PodiumDisplay = ({
       {third && renderAthlete(third, 3, "h-12")}
     </div>;
 };
+
 export default PodiumDisplay;
