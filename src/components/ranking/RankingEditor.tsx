@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import allFootballPlayers from "@/data/footballPlayers";
 import { Category, Athlete } from "@/types";
 import { ChevronLeft } from "lucide-react";
 import RankingDetailsForm from "@/components/ranking/RankingDetailsForm";
@@ -126,7 +124,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           <div className="order-2 lg:order-1">
             <AthleteSearch
-              allAthletes={allFootballPlayers}
+              allAthletes={filteredAthletes}
               filteredAthletes={filteredAthletes}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}

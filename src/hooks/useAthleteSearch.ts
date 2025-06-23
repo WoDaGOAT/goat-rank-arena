@@ -4,34 +4,58 @@ import { useAthletes, DatabaseAthlete } from "./useAthletes";
 import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 import { Athlete } from "@/types";
 
-export const useAthleteSearch = () => {
+export const useAthleteSearch = (excludedAthletes: Athlete[] = []) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState<string>("");
   const { data: athletes = [], isLoading } = useAthletes();
 
   const filteredAthletes = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return athletes.map(athlete => mapDatabaseAthleteToUIAthlete(athlete));
+    let filtered = athletes.map(athlete => mapDatabaseAthleteToUIAthlete(athlete));
+
+    // Exclude already selected athletes
+    if (excludedAthletes.length > 0) {
+      const excludedIds = excludedAthletes.map(a => a.id);
+      filtered = filtered.filter(athlete => !excludedIds.includes(athlete.id));
     }
 
-    const lowercaseSearch = searchTerm.toLowerCase();
-    return athletes
-      .filter((athlete: DatabaseAthlete) => {
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter((athlete: Athlete) => {
         const nameMatch = athlete.name.toLowerCase().includes(lowercaseSearch);
-        const countryMatch = athlete.country_of_origin?.toLowerCase().includes(lowercaseSearch);
+        const countryMatch = athlete.countryOfOrigin?.toLowerCase().includes(lowercaseSearch);
         const nationalityMatch = athlete.nationality?.toLowerCase().includes(lowercaseSearch);
         const positionMatch = athlete.positions?.some(position => 
           position.toLowerCase().includes(lowercaseSearch)
         );
         
         return nameMatch || countryMatch || nationalityMatch || positionMatch;
-      })
-      .map(athlete => mapDatabaseAthleteToUIAthlete(athlete));
-  }, [athletes, searchTerm]);
+      });
+    }
+
+    // Filter by selected letter
+    if (selectedLetter) {
+      filtered = filtered.filter(athlete => 
+        athlete.name.charAt(0).toLowerCase() === selectedLetter.toLowerCase()
+      );
+    }
+
+    return filtered;
+  }, [athletes, searchTerm, selectedLetter, excludedAthletes]);
+
+  const resetSearch = () => {
+    setSearchTerm("");
+    setSelectedLetter("");
+  };
 
   return {
     searchTerm,
     setSearchTerm,
+    selectedLetter,
+    setSelectedLetter,
     athletes: filteredAthletes,
+    filteredAthletes,
     isLoading,
+    resetSearch,
   };
 };
