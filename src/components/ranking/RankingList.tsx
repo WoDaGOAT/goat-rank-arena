@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X, Search } from "lucide-react";
 import React from "react";
-import { Athlete, getPlaceholderImageUrl } from "@/types";
+import { Athlete } from "@/types";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -55,7 +55,7 @@ const RankingList: React.FC<RankingListProps> = ({
               {index + 1}
             </div>
             <Avatar className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-white/30">
-              <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={athlete.name} />
+              <AvatarImage src={athlete.imageUrl || "/placeholder.svg"} alt={athlete.name} />
               <AvatarFallback className="bg-white/20 text-white text-xs sm:text-sm">
                 {athlete.name.charAt(0)}
               </AvatarFallback>
