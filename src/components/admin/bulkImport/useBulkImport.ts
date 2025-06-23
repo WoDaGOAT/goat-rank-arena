@@ -68,9 +68,10 @@ export const useBulkImport = () => {
     } catch (error: any) {
       console.error("Error parsing CSV:", error);
       toast.error(error.message || "Failed to parse CSV file");
+      setProgress(0);
+      setStep("upload");
     } finally {
       setIsProcessing(false);
-      setProgress(0);
     }
   };
 
@@ -154,9 +155,10 @@ export const useBulkImport = () => {
     } catch (error: any) {
       console.error("Error parsing data with mapping:", error);
       toast.error(error.message || "Failed to parse CSV data");
+      setProgress(0);
+      setStep("mapping");
     } finally {
       setIsProcessing(false);
-      setProgress(0);
     }
   };
 
@@ -180,8 +182,9 @@ export const useBulkImport = () => {
 
       setProgress(25);
 
+      // Pass athletesData directly without JSON.stringify - Supabase handles JSONB conversion
       const { data, error } = await supabase.rpc("bulk_insert_athletes", {
-        p_athletes: JSON.stringify(athletesData),
+        p_athletes: athletesData,
         p_update_mode: updateMode
       });
 
@@ -206,6 +209,8 @@ export const useBulkImport = () => {
     } catch (error: any) {
       console.error("Error importing athletes:", error);
       toast.error(error.message || "Failed to import athletes");
+      setProgress(0);
+      setStep("preview");
     } finally {
       setIsProcessing(false);
     }
