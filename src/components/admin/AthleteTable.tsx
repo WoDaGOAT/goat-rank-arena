@@ -17,7 +17,7 @@ import EditAthleteDialog from "./EditAthleteDialog";
 import DeleteAthleteDialog from "./DeleteAthleteDialog";
 import { useAthleteEnrichment } from "@/hooks/useAthleteEnrichment";
 import { format } from "date-fns";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 interface AthleteTableProps {
   searchTerm: string;
