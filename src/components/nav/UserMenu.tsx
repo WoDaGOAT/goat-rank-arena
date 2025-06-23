@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -7,27 +8,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { User, UserCog, Users, PlusCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
-import { useUserRoles } from "@/hooks/useUserRoles";
 
 const UserMenu = () => {
-  const { user, logout } = useAuth();
-  const { data: userRoles } = useUserRoles();
-  
-  const isAdmin = userRoles?.some(role => role.role === 'admin');
-  const isModerator = userRoles?.some(role => role.role === 'moderator');
+  const { user, profile, isAdmin, isModerator, logout } = useAuth();
 
   if (!user) return null;
+
+  // Get display name from profile or user metadata
+  const displayName = profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar_url || "/placeholder.svg"} alt={user?.full_name || "User Avatar"} />
-            <AvatarFallback>{user?.full_name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={`${displayName} Avatar`} />
+            <AvatarFallback>{displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
