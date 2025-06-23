@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
@@ -60,7 +59,7 @@ const CustomDropdownMenu = () => {
       }
     });
 
-    // Map to menu structure with icons - only showing specific categories for GOAT
+    // Map to menu structure with icons
     const menuMapping: Record<string, string> = {
       'GOAT': '🐐',
       'Greatest of This Season': '🏆',
@@ -70,34 +69,18 @@ const CustomDropdownMenu = () => {
     return rootCategories
       .filter(category => menuMapping[category.name])
       .map(category => {
-        // For GOAT category, only show the specific subcategories in the exact order
+        // For GOAT category, show all children in the order they appear in database
+        // (which should now be the correct 9 categories after our migration)
         if (category.name === 'GOAT') {
-          const orderedGoatCategories = [
-            'GOAT Footballer',
-            'GOAT Goalkeeper', 
-            'GOAT Defender',
-            'GOAT Midfielder',
-            'GOAT Attacker', // This matches what we renamed Forward to
-            'GOAT Free-Kick Taker',
-            'GOAT Long Shot',
-            'GOAT Header Game', // This matches what we renamed Header to
-            'GOAT Skills'
-          ];
-          
-          const filteredChildren = orderedGoatCategories
-            .map(name => category.children.find(child => child.name === name))
-            .filter(Boolean)
-            .map(child => ({
-              id: child!.id,
-              name: child!.name,
-              description: child!.description || undefined
-            }));
-
           return {
             id: category.id,
             name: category.name,
             icon: menuMapping[category.name],
-            children: filteredChildren
+            children: category.children.map(child => ({
+              id: child.id,
+              name: child.name,
+              description: child.description || undefined
+            }))
           };
         }
         
