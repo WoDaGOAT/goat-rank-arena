@@ -21,13 +21,65 @@ const AthleteManagementPage = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
 
-  // Get athlete statistics
+  // Get athlete statistics using direct queries
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["athleteStats"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_athlete_stats");
-      if (error) throw error;
-      return data[0];
+      // Get total athletes count
+      const { count: totalAthletes, error: totalError } = await supabase
+        .from("athletes")
+        .select("*", { count: "exact", head: true });
+
+      if (totalError) throw totalError;
+
+      // Get active athletes count
+      const { count: activeAthletes, error: activeError } = await supabase
+        .from("athletes")
+        .select("*", { count: "exact", head: true })
+        .eq("is_active", true);
+
+      if (activeError) throw activeError;
+
+      // Get inactive athletes count
+      const { count: inactiveAthletes, error: inactiveError } = await supabase
+        .from("athletes")
+        .select("*", { count: "exact", head: true })
+        .eq("is_active", false);
+
+      if (inactiveError) throw inactiveError;
+
+      // Get unique countries count
+      const { data: countriesData, error: countriesError } = await supabase
+        .from("athletes")
+        .select("country_of_origin")
+        .not("country_of_origin", "is", null);
+
+      if (countriesError) throw countriesError;
+
+      const uniqueCountries = new Set(countriesData.map(item => item.country_of_origin));
+
+      // Get unique positions count
+      const { data: positionsData, error: positionsError } = await supabase
+        .from("athletes")
+        .select("positions")
+        .not("positions", "is", null);
+
+      if (positionsError) throw positionsError;
+
+      const allPositions = new Set();
+      positionsData.forEach(item => {
+        if (item.positions) {
+          item.positions.forEach(position => allPositions.add(position));
+        }
+      });
+
+      return {
+        total_athletes: totalAthletes || 0,
+        active_athletes: activeAthletes || 0,
+        inactive_athletes: inactiveAthletes || 0,
+        countries_count: uniqueCountries.size,
+        positions_count: allPositions.size
+      };
     },
   });
 
