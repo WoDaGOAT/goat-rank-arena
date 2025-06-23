@@ -14,7 +14,10 @@ export const performBulkImport = async (
     date_of_birth: athlete.date_of_birth || null,
     date_of_death: athlete.date_of_death || null,
     is_active: athlete.is_active !== undefined ? athlete.is_active : true,
-    positions: athlete.positions || null,
+    // Ensure positions is always properly formatted as an array or null
+    positions: athlete.positions && Array.isArray(athlete.positions) && athlete.positions.length > 0 
+      ? athlete.positions.filter(pos => pos && pos.trim() !== '') 
+      : null,
     profile_picture_url: athlete.profile_picture_url || null,
   }));
 
