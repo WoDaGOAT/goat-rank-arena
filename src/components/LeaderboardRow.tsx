@@ -1,5 +1,5 @@
 
-import { Athlete, getPlaceholderImageUrl } from "@/types";
+import { Athlete } from "@/types";
 import { ArrowUp, ArrowDown, Minus, Crown, Medal, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -120,7 +120,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
             {renderRankBadge()}
           </div>
           <Avatar className="w-14 h-14 border-2 border-white/30 shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
+            <AvatarImage src={athlete.imageUrl || "/placeholder.svg"} alt={sanitizedName} />
             <AvatarFallback className="bg-white/20 text-white text-lg font-semibold">
               {sanitizedName.charAt(0)}
             </AvatarFallback>
@@ -163,7 +163,7 @@ const LeaderboardRow = ({ athlete, position }: LeaderboardRowProps) => {
         {/* Avatar */}
         <div className="relative flex justify-center">
           <Avatar className="w-14 h-14 border-2 border-white/30 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
-            <AvatarImage src={getPlaceholderImageUrl(athlete.imageUrl)} alt={sanitizedName} />
+            <AvatarImage src={athlete.imageUrl || "/placeholder.svg"} alt={sanitizedName} />
             <AvatarFallback className="bg-white/20 text-white text-lg font-semibold">
               {sanitizedName.charAt(0)}
             </AvatarFallback>
