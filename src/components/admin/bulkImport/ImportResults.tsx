@@ -1,13 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, CheckCircle } from "lucide-react";
-
-interface ImportResult {
-  inserted_count: number;
-  updated_count: number;
-  skipped_count: number;
-  errors: string[];
-}
+import { ImportResult } from "./types";
 
 interface ImportResultsProps {
   importResult: ImportResult;

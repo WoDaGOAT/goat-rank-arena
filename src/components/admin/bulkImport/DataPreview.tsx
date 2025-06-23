@@ -2,22 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
-
-interface ParsedAthlete {
-  name: string;
-  country_of_origin?: string;
-  nationality?: string;
-  date_of_birth?: string;
-  date_of_death?: string;
-  is_active?: boolean;
-  positions?: string[];
-  profile_picture_url?: string;
-}
-
-interface DuplicateInfo {
-  name: string;
-  willBeUpdated: boolean;
-}
+import { ParsedAthlete, DuplicateInfo } from "./types";
 
 interface DataPreviewProps {
   parsedData: ParsedAthlete[];

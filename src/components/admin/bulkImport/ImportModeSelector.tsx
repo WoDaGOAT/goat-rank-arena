@@ -4,11 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw } from "lucide-react";
-
-interface DuplicateInfo {
-  name: string;
-  willBeUpdated: boolean;
-}
+import { DuplicateInfo } from "./types";
 
 interface ImportModeSelectorProps {
   updateMode: boolean;
