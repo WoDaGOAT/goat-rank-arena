@@ -60,7 +60,7 @@ const CustomDropdownMenu = () => {
       }
     });
 
-    // Map to menu structure with icons
+    // Map to menu structure with icons - only showing specific categories for GOAT
     const menuMapping: Record<string, string> = {
       'GOAT': '🐐',
       'Greatest of This Season': '🏆',
@@ -69,16 +69,50 @@ const CustomDropdownMenu = () => {
 
     return rootCategories
       .filter(category => menuMapping[category.name])
-      .map(category => ({
-        id: category.id,
-        name: category.name,
-        icon: menuMapping[category.name],
-        children: category.children.map(child => ({
-          id: child.id,
-          name: child.name,
-          description: child.description || undefined
-        }))
-      }))
+      .map(category => {
+        // For GOAT category, only show the specific subcategories in the exact order
+        if (category.name === 'GOAT') {
+          const orderedGoatCategories = [
+            'GOAT Footballer',
+            'GOAT Goalkeeper', 
+            'GOAT Defender',
+            'GOAT Midfielder',
+            'GOAT Attacker', // This matches what we renamed Forward to
+            'GOAT Free-Kick Taker',
+            'GOAT Long Shot',
+            'GOAT Header Game', // This matches what we renamed Header to
+            'GOAT Skills'
+          ];
+          
+          const filteredChildren = orderedGoatCategories
+            .map(name => category.children.find(child => child.name === name))
+            .filter(Boolean)
+            .map(child => ({
+              id: child!.id,
+              name: child!.name,
+              description: child!.description || undefined
+            }));
+
+          return {
+            id: category.id,
+            name: category.name,
+            icon: menuMapping[category.name],
+            children: filteredChildren
+          };
+        }
+        
+        // For other categories, show all children normally
+        return {
+          id: category.id,
+          name: category.name,
+          icon: menuMapping[category.name],
+          children: category.children.map(child => ({
+            id: child.id,
+            name: child.name,
+            description: child.description || undefined
+          }))
+        };
+      })
       .sort((a, b) => {
         const order = ['GOAT', 'Greatest of This Season', 'Competitions'];
         return order.indexOf(a.name) - order.indexOf(b.name);
