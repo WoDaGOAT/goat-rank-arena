@@ -12,10 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit, Trash2, ChevronLeft, ChevronRight, Database } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import EditAthleteDialog from "./EditAthleteDialog";
 import DeleteAthleteDialog from "./DeleteAthleteDialog";
+import { useAthleteEnrichment } from "@/hooks/useAthleteEnrichment";
 import { format } from "date-fns";
 
 interface AthleteTableProps {
@@ -28,7 +29,10 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
   const [page, setPage] = useState(0);
   const [editingAthlete, setEditingAthlete] = useState<any>(null);
   const [deletingAthlete, setDeletingAthlete] = useState<any>(null);
+  const [enrichingAthleteId, setEnrichingAthleteId] = useState<string | null>(null);
   const limit = 20;
+
+  const { enrichAthlete, isEnriching } = useAthleteEnrichment();
 
   const { data: athleteData, isLoading, refetch } = useQuery({
     queryKey: ["athletesAdmin", searchTerm, countryFilter, activeFilter, page],
@@ -58,10 +62,30 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
     setDeletingAthlete(athlete);
   };
 
+  const handleEnrichAthlete = async (athleteId: string) => {
+    setEnrichingAthleteId(athleteId);
+    const result = await enrichAthlete({ athleteId });
+    setEnrichingAthleteId(null);
+    
+    if (result && result.updated > 0) {
+      refetch();
+    }
+  };
+
   const onAthleteUpdated = () => {
     refetch();
     setEditingAthlete(null);
     setDeletingAthlete(null);
+  };
+
+  // Helper function to check if athlete has missing data
+  const hasMissingData = (athlete: any) => {
+    return !athlete.country_of_origin || 
+           !athlete.nationality || 
+           !athlete.date_of_birth || 
+           !athlete.positions || 
+           athlete.positions.length === 0 || 
+           !athlete.profile_picture_url;
   };
 
   if (isLoading) {
@@ -108,7 +132,16 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                       </AvatarFallback>
                     </Avatar>
                   </TableCell>
-                  <TableCell className="font-medium">{athlete.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      {athlete.name}
+                      {hasMissingData(athlete) && (
+                        <Badge variant="outline" className="text-xs text-orange-600">
+                          Missing Data
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>{athlete.country_of_origin || "N/A"}</TableCell>
                   <TableCell>{athlete.nationality || "N/A"}</TableCell>
                   <TableCell>
@@ -122,6 +155,9 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                         <Badge variant="outline" className="text-xs">
                           +{athlete.positions.length - 2}
                         </Badge>
+                      )}
+                      {(!athlete.positions || athlete.positions.length === 0) && (
+                        <span className="text-gray-400 text-sm">N/A</span>
                       )}
                     </div>
                   </TableCell>
@@ -138,6 +174,17 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      {hasMissingData(athlete) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEnrichAthlete(athlete.id)}
+                          disabled={isEnriching || enrichingAthleteId === athlete.id}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <Database className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"

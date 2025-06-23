@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, UserPlus, Upload, Search, Filter } from "lucide-react";
+import { Users, UserPlus, Upload, Search, Filter, Database } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import AthleteTable from "@/components/admin/AthleteTable";
 import AddAthleteDialog from "@/components/admin/AddAthleteDialog";
 import BulkImportDialog from "@/components/admin/BulkImportDialog";
+import AthleteEnrichment from "@/components/admin/AthleteEnrichment";
 import { toast } from "sonner";
 
 const AthleteManagementPage = () => {
@@ -22,7 +23,7 @@ const AthleteManagementPage = () => {
   const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
 
   // Get athlete statistics using direct queries
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ["athleteStats"],
     queryFn: async () => {
       // Get total athletes count
@@ -73,12 +74,21 @@ const AthleteManagementPage = () => {
         }
       });
 
+      // Get athletes with missing data count
+      const { count: missingDataCount, error: missingDataError } = await supabase
+        .from("athletes")
+        .select("*", { count: "exact", head: true })
+        .or("country_of_origin.is.null,nationality.is.null,date_of_birth.is.null,positions.is.null,profile_picture_url.is.null");
+
+      if (missingDataError) throw missingDataError;
+
       return {
         total_athletes: totalAthletes || 0,
         active_athletes: activeAthletes || 0,
         inactive_athletes: inactiveAthletes || 0,
         countries_count: uniqueCountries.size,
-        positions_count: allPositions.size
+        positions_count: allPositions.size,
+        missing_data_count: missingDataCount || 0
       };
     },
   });
@@ -106,18 +116,23 @@ const AthleteManagementPage = () => {
     setActiveFilter("all");
   };
 
+  const handleEnrichmentComplete = () => {
+    refetchStats();
+    toast.success("Athlete data has been refreshed");
+  };
+
   return (
     <div className="space-y-8 p-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-white">Athlete Management</h1>
         <p className="text-muted-foreground">
-          Manage athletes, add new ones, and import bulk data from CSV files.
+          Manage athletes, add new ones, import bulk data, and enrich missing information.
         </p>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Athletes</CardTitle>
@@ -177,94 +192,136 @@ const AthleteManagementPage = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2">
-          <UserPlus className="h-4 w-4" />
-          Add New Athlete
-        </Button>
-        <Button 
-          variant="outline" 
-          onClick={() => setShowBulkImportDialog(true)}
-          className="flex items-center gap-2"
-        >
-          <Upload className="h-4 w-4" />
-          Bulk Import from CSV
-        </Button>
-      </div>
-
-      {/* Search and Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Search & Filter Athletes
-          </CardTitle>
-          <CardDescription>
-            Search by name, country, nationality, or position. Use filters to narrow down results.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search athletes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Missing Data</CardTitle>
+            <Database className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {statsLoading ? "..." : stats?.missing_data_count || 0}
             </div>
-            
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Filter by country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {countries?.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          </CardContent>
+        </Card>
+      </div>
 
-            <Select value={activeFilter} onValueChange={setActiveFilter}>
-              <SelectTrigger className="w-full md:w-[150px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="true">Active</SelectItem>
-                <SelectItem value="false">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+      {/* Tabs for different management sections */}
+      <Tabs defaultValue="athletes" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="athletes">Athletes Database</TabsTrigger>
+          <TabsTrigger value="enrichment">Data Enrichment</TabsTrigger>
+          <TabsTrigger value="import">Bulk Import</TabsTrigger>
+        </TabsList>
 
-            <Button variant="outline" onClick={resetFilters}>
-              Clear Filters
+        <TabsContent value="athletes" className="space-y-6">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              Add New Athlete
             </Button>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Athletes Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Athletes Database</CardTitle>
-          <CardDescription>
-            View and manage all athletes in the system.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AthleteTable
-            searchTerm={searchTerm}
-            countryFilter={countryFilter === "all" ? "" : countryFilter}
-            activeFilter={activeFilter === "all" ? "" : activeFilter}
-          />
-        </CardContent>
-      </Card>
+          {/* Search and Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Search & Filter Athletes
+              </CardTitle>
+              <CardDescription>
+                Search by name, country, nationality, or position. Use filters to narrow down results.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search athletes..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                
+                <Select value={countryFilter} onValueChange={setCountryFilter}>
+                  <SelectTrigger className="w-full md:w-[200px]">
+                    <SelectValue placeholder="Filter by country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Countries</SelectItem>
+                    {countries?.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={activeFilter} onValueChange={setActiveFilter}>
+                  <SelectTrigger className="w-full md:w-[150px]">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button variant="outline" onClick={resetFilters}>
+                  Clear Filters
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Athletes Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Athletes Database</CardTitle>
+              <CardDescription>
+                View and manage all athletes in the system.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AthleteTable
+                searchTerm={searchTerm}
+                countryFilter={countryFilter === "all" ? "" : countryFilter}
+                activeFilter={activeFilter === "all" ? "" : activeFilter}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="enrichment" className="space-y-6">
+          <AthleteEnrichment onEnrichmentComplete={handleEnrichmentComplete} />
+        </TabsContent>
+
+        <TabsContent value="import" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Bulk Import Athletes
+              </CardTitle>
+              <CardDescription>
+                Import multiple athletes from CSV files with automatic data validation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => setShowBulkImportDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Import from CSV
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Dialogs */}
       <AddAthleteDialog

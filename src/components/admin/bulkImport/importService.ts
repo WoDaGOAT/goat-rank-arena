@@ -21,7 +21,7 @@ export const performBulkImport = async (
     profile_picture_url: athlete.profile_picture_url || null,
   }));
 
-  // Pass athletesData directly without JSON.stringify - Supabase handles JSONB conversion
+  // Use the updated bulk_insert_athletes function with update mode support
   const { data, error } = await supabase.rpc("bulk_insert_athletes", {
     p_athletes: athletesData,
     p_update_mode: updateMode
