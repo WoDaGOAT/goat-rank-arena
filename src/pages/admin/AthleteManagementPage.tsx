@@ -58,7 +58,7 @@ const AthleteManagementPage = () => {
     <div className="space-y-8 p-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Athlete Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Athlete Management</h1>
         <p className="text-muted-foreground">
           Manage athletes, add new ones, and import bulk data from CSV files.
         </p>
