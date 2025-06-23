@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,6 +17,7 @@ import EditAthleteDialog from "./EditAthleteDialog";
 import DeleteAthleteDialog from "./DeleteAthleteDialog";
 import { useAthleteEnrichment } from "@/hooks/useAthleteEnrichment";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
 
 interface AthleteTableProps {
   searchTerm: string;
@@ -54,6 +54,35 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
   const totalCount = athletes[0]?.total_count || 0;
   const totalPages = Math.ceil(totalCount / limit);
 
+  // Enhanced helper function to check data quality
+  const getDataQualityInfo = (athlete: any) => {
+    const missingFields = [];
+    const lowQualityFields = [];
+
+    if (!athlete.country_of_origin) missingFields.push('Country');
+    if (!athlete.nationality) missingFields.push('Nationality');
+    if (!athlete.date_of_birth) missingFields.push('Birth Date');
+    if (!athlete.positions || athlete.positions.length === 0) missingFields.push('Positions');
+    if (!athlete.profile_picture_url) missingFields.push('Photo');
+
+    // Check for low quality data
+    if (athlete.nationality && (
+      athlete.nationality.toLowerCase().includes('professional') ||
+      athlete.nationality.length < 4
+    )) {
+      lowQualityFields.push('Nationality');
+    }
+
+    if (athlete.country_of_origin && (
+      athlete.country_of_origin.toLowerCase().includes('professional') ||
+      athlete.country_of_origin.length < 4
+    )) {
+      lowQualityFields.push('Country');
+    }
+
+    return { missingFields, lowQualityFields, needsEnrichment: missingFields.length > 0 || lowQualityFields.length > 0 };
+  };
+
   const handleEdit = (athlete: any) => {
     setEditingAthlete(athlete);
   };
@@ -68,7 +97,10 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
     setEnrichingAthleteId(null);
     
     if (result && result.updated > 0) {
+      toast.success("Athlete data enriched with validated information!");
       refetch();
+    } else {
+      toast.info("No new valid data found for this athlete");
     }
   };
 
@@ -76,16 +108,6 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
     refetch();
     setEditingAthlete(null);
     setDeletingAthlete(null);
-  };
-
-  // Helper function to check if athlete has missing data
-  const hasMissingData = (athlete: any) => {
-    return !athlete.country_of_origin || 
-           !athlete.nationality || 
-           !athlete.date_of_birth || 
-           !athlete.positions || 
-           athlete.positions.length === 0 || 
-           !athlete.profile_picture_url;
   };
 
   if (isLoading) {
@@ -122,88 +144,113 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                 </TableCell>
               </TableRow>
             ) : (
-              athletes.map((athlete) => (
-                <TableRow key={athlete.id}>
-                  <TableCell>
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={athlete.profile_picture_url || "/placeholder.svg"} />
-                      <AvatarFallback>
-                        {athlete.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      {athlete.name}
-                      {hasMissingData(athlete) && (
-                        <Badge variant="outline" className="text-xs text-orange-600">
-                          Missing Data
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{athlete.country_of_origin || "N/A"}</TableCell>
-                  <TableCell>{athlete.nationality || "N/A"}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {athlete.positions?.slice(0, 2).map((position: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {position}
-                        </Badge>
-                      ))}
-                      {athlete.positions?.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{athlete.positions.length - 2}
-                        </Badge>
-                      )}
-                      {(!athlete.positions || athlete.positions.length === 0) && (
-                        <span className="text-gray-400 text-sm">N/A</span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={athlete.is_active ? "default" : "secondary"}>
-                      {athlete.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {athlete.date_of_birth 
-                      ? format(new Date(athlete.date_of_birth), "MMM dd, yyyy")
-                      : "N/A"
-                    }
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      {hasMissingData(athlete) && (
+              athletes.map((athlete) => {
+                const qualityInfo = getDataQualityInfo(athlete);
+                return (
+                  <TableRow key={athlete.id}>
+                    <TableCell>
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={athlete.profile_picture_url || "/placeholder.svg"} />
+                        <AvatarFallback>
+                          {athlete.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {athlete.name}
+                        {qualityInfo.missingFields.length > 0 && (
+                          <Badge variant="outline" className="text-xs text-orange-600">
+                            Missing: {qualityInfo.missingFields.length}
+                          </Badge>
+                        )}
+                        {qualityInfo.lowQualityFields.length > 0 && (
+                          <Badge variant="outline" className="text-xs text-red-600">
+                            Low Quality: {qualityInfo.lowQualityFields.length}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className={
+                        athlete.country_of_origin && 
+                        (athlete.country_of_origin.toLowerCase().includes('professional') || athlete.country_of_origin.length < 4)
+                          ? "text-red-600" : ""
+                      }>
+                        {athlete.country_of_origin || "N/A"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={
+                        athlete.nationality && 
+                        (athlete.nationality.toLowerCase().includes('professional') || athlete.nationality.length < 4)
+                          ? "text-red-600" : ""
+                      }>
+                        {athlete.nationality || "N/A"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {athlete.positions?.slice(0, 2).map((position: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {position}
+                          </Badge>
+                        ))}
+                        {athlete.positions?.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{athlete.positions.length - 2}
+                          </Badge>
+                        )}
+                        {(!athlete.positions || athlete.positions.length === 0) && (
+                          <span className="text-gray-400 text-sm">N/A</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={athlete.is_active ? "default" : "secondary"}>
+                        {athlete.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {athlete.date_of_birth 
+                        ? format(new Date(athlete.date_of_birth), "MMM dd, yyyy")
+                        : "N/A"
+                      }
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        {qualityInfo.needsEnrichment && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEnrichAthlete(athlete.id)}
+                            disabled={isEnriching || enrichingAthleteId === athlete.id}
+                            className="text-blue-600 hover:text-blue-700"
+                            title={`Fix: ${[...qualityInfo.missingFields, ...qualityInfo.lowQualityFields].join(', ')}`}
+                          >
+                            <Database className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEnrichAthlete(athlete.id)}
-                          disabled={isEnriching || enrichingAthleteId === athlete.id}
-                          className="text-blue-600 hover:text-blue-700"
+                          onClick={() => handleEdit(athlete)}
                         >
-                          <Database className="h-4 w-4" />
+                          <Edit className="h-4 w-4" />
                         </Button>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(athlete)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(athlete)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(athlete)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

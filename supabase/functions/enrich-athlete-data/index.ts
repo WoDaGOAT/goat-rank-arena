@@ -15,24 +15,144 @@ interface AthleteEnrichmentData {
   profile_picture_url?: string;
 }
 
-interface WikipediaSearchResult {
-  query?: {
-    pages?: Record<string, {
-      title: string;
-      extract?: string;
-      thumbnail?: {
-        source: string;
+interface WikidataResponse {
+  entities?: Record<string, {
+    claims?: Record<string, Array<{
+      mainsnak?: {
+        datavalue?: {
+          value?: any;
+        };
       };
-    }>;
-  };
+    }>>;
+    labels?: Record<string, { value: string }>;
+  }>;
 }
 
-// Fetch athlete data from Wikipedia API
+// Valid countries/nationalities whitelist (partial list for validation)
+const VALID_COUNTRIES = new Set([
+  'Algeria', 'Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Cameroon', 'Canada', 'Chile', 'Colombia',
+  'Croatia', 'Czech Republic', 'Denmark', 'Egypt', 'England', 'France', 'Germany', 'Ghana', 'Greece', 'Hungary',
+  'Iceland', 'Iran', 'Ireland', 'Italy', 'Japan', 'Mexico', 'Morocco', 'Netherlands', 'Nigeria', 'Norway',
+  'Peru', 'Poland', 'Portugal', 'Russia', 'Saudi Arabia', 'Senegal', 'Serbia', 'South Korea', 'Spain', 'Sweden',
+  'Switzerland', 'Tunisia', 'Turkey', 'Ukraine', 'United States', 'Uruguay', 'Wales', 'Scottish', 'Irish',
+  'Welsh', 'English', 'British', 'American', 'Canadian', 'Australian', 'South African', 'Egyptian', 'Moroccan',
+  'Algerian', 'Tunisian', 'Ghanaian', 'Nigerian', 'Senegalese', 'Cameroonian', 'Ivorian', 'Malian', 'Burkinabe'
+]);
+
+const VALID_POSITIONS = new Set([
+  'Goalkeeper', 'Defender', 'Centre-back', 'Left-back', 'Right-back', 'Midfielder', 'Defensive midfielder',
+  'Central midfielder', 'Attacking midfielder', 'Left midfielder', 'Right midfielder', 'Winger', 'Left winger',
+  'Right winger', 'Forward', 'Striker', 'Centre-forward', 'Left forward', 'Right forward', 'Attacking midfielder'
+]);
+
+// Improved text parsing with better validation
+function extractNationalityFromText(text: string): string | null {
+  const cleanText = text.toLowerCase();
+  
+  // More sophisticated patterns for nationality extraction
+  const nationalityPatterns = [
+    /(?:is|was)\s+(?:a|an)\s+([a-z]{4,20})\s+(?:footballer|soccer player|player|athlete)/,
+    /([a-z]{4,20})\s+(?:footballer|soccer player|player|athlete)/,
+    /(?:born|from)\s+(?:in\s+)?([a-z\s]{4,25})(?:\s+and|\s+but|\s+on|\.|,)/,
+    /(?:representing|represents)\s+([a-z\s]{4,25})(?:\s+at|\s+in|\.|,)/
+  ];
+
+  for (const pattern of nationalityPatterns) {
+    const match = cleanText.match(pattern);
+    if (match && match[1]) {
+      const candidate = capitalizeWords(match[1].trim());
+      
+      // Validate the extracted nationality
+      if (isValidNationality(candidate)) {
+        return candidate;
+      }
+    }
+  }
+
+  return null;
+}
+
+function extractPositionsFromText(text: string): string[] {
+  const cleanText = text.toLowerCase();
+  const foundPositions: string[] = [];
+  
+  // More comprehensive position patterns
+  const positionPatterns = [
+    /(?:plays|playing|positioned)\s+as\s+(?:a|an)\s+([a-z\s-]+?)(?:\s+(?:for|at|in)|\.|\,)/,
+    /(?:position|role)(?:s)?\s*:?\s*([a-z\s,-]+?)(?:\s+(?:for|at|in)|\.|\,)/,
+    /(goalkeeper|defender|midfielder|forward|striker|winger)(?:s)?/g
+  ];
+
+  for (const pattern of positionPatterns) {
+    const matches = cleanText.matchAll(new RegExp(pattern.source, 'g'));
+    for (const match of matches) {
+      if (match[1]) {
+        const positions = match[1].split(/[,&]/).map(p => {
+          const normalized = normalizePosition(p.trim());
+          return normalized ? capitalizeWords(normalized) : null;
+        }).filter(Boolean);
+        
+        foundPositions.push(...positions);
+      }
+    }
+  }
+
+  // Remove duplicates and validate
+  const uniquePositions = [...new Set(foundPositions)];
+  return uniquePositions.filter(pos => isValidPosition(pos)).slice(0, 3); // Limit to 3 positions
+}
+
+function isValidNationality(nationality: string): boolean {
+  if (!nationality || nationality.length < 4 || nationality.length > 25) return false;
+  
+  // Check against whitelist
+  if (VALID_COUNTRIES.has(nationality)) return true;
+  
+  // Additional validation - reject obvious non-nationalities
+  const invalidWords = ['professional', 'former', 'current', 'active', 'retired', 'young', 'old', 'best', 'greatest'];
+  const lowerNationality = nationality.toLowerCase();
+  
+  return !invalidWords.some(word => lowerNationality.includes(word));
+}
+
+function isValidPosition(position: string): boolean {
+  if (!position || position.length < 3) return false;
+  
+  // Check against known positions
+  return VALID_POSITIONS.has(position) || 
+         [...VALID_POSITIONS].some(validPos => 
+           validPos.toLowerCase().includes(position.toLowerCase()) ||
+           position.toLowerCase().includes(validPos.toLowerCase())
+         );
+}
+
+function normalizePosition(position: string): string | null {
+  const positionMap: Record<string, string> = {
+    'gk': 'Goalkeeper',
+    'cb': 'Centre-back',
+    'lb': 'Left-back',
+    'rb': 'Right-back',
+    'cdm': 'Defensive midfielder',
+    'cm': 'Central midfielder',
+    'cam': 'Attacking midfielder',
+    'lm': 'Left midfielder',
+    'rm': 'Right midfielder',
+    'lw': 'Left winger',
+    'rw': 'Right winger',
+    'cf': 'Centre-forward',
+    'st': 'Striker'
+  };
+
+  const lower = position.toLowerCase().trim();
+  return positionMap[lower] || position;
+}
+
+// Fetch from Wikipedia with improved data extraction
 async function fetchFromWikipedia(athleteName: string): Promise<AthleteEnrichmentData> {
   try {
     console.log(`Fetching data for athlete: ${athleteName}`);
     
-    // Search for the athlete on Wikipedia
+    // Try multiple Wikipedia endpoints for better data
     const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(athleteName)}`;
     
     const response = await fetch(searchUrl);
@@ -46,48 +166,23 @@ async function fetchFromWikipedia(athleteName: string): Promise<AthleteEnrichmen
 
     const enrichmentData: AthleteEnrichmentData = {};
 
-    // Extract basic info from the summary
+    // Extract nationality with improved validation
     if (data.extract) {
-      const extract = data.extract.toLowerCase();
-      
-      // Try to extract nationality/country from common patterns
-      const nationalityPatterns = [
-        /is an? ([a-z\s]+) (footballer|basketball player|tennis player|athlete)/,
-        /([a-z\s]+) (footballer|basketball player|tennis player|athlete)/,
-        /born.*in ([a-z\s]+)/
-      ];
-
-      for (const pattern of nationalityPatterns) {
-        const match = extract.match(pattern);
-        if (match && match[1]) {
-          const country = match[1].trim();
-          if (country.length > 2 && country.length < 30) {
-            enrichmentData.nationality = capitalizeWords(country);
-            enrichmentData.country_of_origin = capitalizeWords(country);
-            break;
-          }
-        }
+      const nationality = extractNationalityFromText(data.extract);
+      if (nationality) {
+        enrichmentData.nationality = nationality;
+        enrichmentData.country_of_origin = nationality;
       }
 
-      // Try to extract position information
-      const positionPatterns = [
-        /plays? as an? ([a-z\s]+)/,
-        /position[s]?[:\s]+([a-z\s,]+)/,
-        /(goalkeeper|defender|midfielder|forward|striker|winger)/
-      ];
-
-      for (const pattern of positionPatterns) {
-        const match = extract.match(pattern);
-        if (match && match[1]) {
-          const positions = match[1].split(',').map(p => capitalizeWords(p.trim()));
-          enrichmentData.positions = positions.filter(p => p.length > 2);
-          break;
-        }
+      // Extract positions with better validation
+      const positions = extractPositionsFromText(data.extract);
+      if (positions.length > 0) {
+        enrichmentData.positions = positions;
       }
     }
 
-    // Extract thumbnail image if available
-    if (data.thumbnail?.source) {
+    // Extract thumbnail image if available and valid
+    if (data.thumbnail?.source && data.thumbnail.source.includes('upload.wikimedia.org')) {
       enrichmentData.profile_picture_url = data.thumbnail.source;
     }
 
@@ -104,16 +199,16 @@ function capitalizeWords(str: string): string {
   return str.replace(/\b\w/g, l => l.toUpperCase());
 }
 
-// Validate and merge enrichment data with existing athlete data
+// Enhanced merge function with better validation
 function mergeAthleteData(existing: any, enrichment: AthleteEnrichmentData) {
   const merged = { ...existing };
 
-  // Only update fields that are currently null or empty
-  if (!existing.country_of_origin && enrichment.country_of_origin) {
+  // Only update fields that are currently null/empty AND the new data is valid
+  if (!existing.country_of_origin && enrichment.country_of_origin && isValidNationality(enrichment.country_of_origin)) {
     merged.country_of_origin = enrichment.country_of_origin;
   }
   
-  if (!existing.nationality && enrichment.nationality) {
+  if (!existing.nationality && enrichment.nationality && isValidNationality(enrichment.nationality)) {
     merged.nationality = enrichment.nationality;
   }
   
@@ -121,8 +216,12 @@ function mergeAthleteData(existing: any, enrichment: AthleteEnrichmentData) {
     merged.date_of_birth = enrichment.date_of_birth;
   }
   
-  if ((!existing.positions || existing.positions.length === 0) && enrichment.positions) {
-    merged.positions = enrichment.positions;
+  if ((!existing.positions || existing.positions.length === 0) && enrichment.positions && enrichment.positions.length > 0) {
+    // Validate all positions before adding
+    const validPositions = enrichment.positions.filter(pos => isValidPosition(pos));
+    if (validPositions.length > 0) {
+      merged.positions = validPositions;
+    }
   }
   
   if (!existing.profile_picture_url && enrichment.profile_picture_url) {
@@ -219,15 +318,27 @@ Deno.serve(async (req) => {
         // Fetch enrichment data
         const enrichmentData = await fetchFromWikipedia(athlete.name);
 
-        // Check if we have any new data to add
+        // Check if we have any valid new data to add
         const hasNewData = Object.keys(enrichmentData).some(key => {
           const currentValue = athlete[key];
           const newValue = enrichmentData[key as keyof AthleteEnrichmentData];
-          return newValue && (!currentValue || (Array.isArray(currentValue) && currentValue.length === 0));
+          
+          if (!newValue) return false;
+          if (currentValue && (!Array.isArray(currentValue) || currentValue.length > 0)) return false;
+          
+          // Additional validation for specific fields
+          if ((key === 'nationality' || key === 'country_of_origin') && typeof newValue === 'string') {
+            return isValidNationality(newValue);
+          }
+          if (key === 'positions' && Array.isArray(newValue)) {
+            return newValue.some(pos => isValidPosition(pos));
+          }
+          
+          return true;
         });
 
         if (!hasNewData) {
-          console.log(`No new data found for ${athlete.name}`);
+          console.log(`No valid new data found for ${athlete.name}`);
           results.details.push({
             athlete_name: athlete.name,
             status: 'no_new_data',
