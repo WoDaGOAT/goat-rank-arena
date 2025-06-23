@@ -7,6 +7,7 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { HelmetProvider } from "react-helmet-async";
 import { isSupabaseConfigured } from "./lib/supabase";
 import CommentManagementPage from "./pages/admin/CommentManagementPage";
+import AthleteManagementPage from "@/pages/admin/AthleteManagementPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -93,9 +94,9 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Router>
             <AuthProvider>
-              <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+              <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
                 <Navbar />
-                <main className="flex-grow">
+                <main className="flex-1">
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                       <Route path="/" element={<Index />} />
@@ -113,6 +114,7 @@ function App() {
                       <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
                       <Route path="/admin/create-quiz" element={<Navigate to="/admin/quizzes/new" replace />} />
                       <Route path="/admin/comments" element={<CommentManagementPage />} />
+                      <Route path="/admin/athletes" element={<AthleteManagementPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>

@@ -751,6 +751,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      bulk_insert_athletes: {
+        Args: { p_athletes: Json }
+        Returns: {
+          inserted_count: number
+          skipped_count: number
+          errors: string[]
+        }[]
+      }
       check_and_award_badges: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -830,6 +838,16 @@ export type Database = {
           roles: Database["public"]["Enums"]["app_role"][]
         }[]
       }
+      get_athlete_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_athletes: number
+          active_athletes: number
+          inactive_athletes: number
+          countries_count: number
+          positions_count: number
+        }[]
+      }
       get_quiz_leaderboard: {
         Args:
           | Record<PropertyKey, never>
@@ -877,6 +895,29 @@ export type Database = {
           p_role: Database["public"]["Enums"]["app_role"]
         }
         Returns: undefined
+      }
+      search_athletes_admin: {
+        Args: {
+          p_search_term?: string
+          p_country_filter?: string
+          p_active_filter?: boolean
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          country_of_origin: string
+          nationality: string
+          date_of_birth: string
+          date_of_death: string
+          is_active: boolean
+          positions: string[]
+          profile_picture_url: string
+          created_at: string
+          updated_at: string
+          total_count: number
+        }[]
       }
       set_user_status: {
         Args: {
