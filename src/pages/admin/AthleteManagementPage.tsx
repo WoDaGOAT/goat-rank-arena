@@ -16,8 +16,8 @@ import { toast } from "sonner";
 
 const AthleteManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [countryFilter, setCountryFilter] = useState<string>("");
-  const [activeFilter, setActiveFilter] = useState<string>("");
+  const [countryFilter, setCountryFilter] = useState<string>("all");
+  const [activeFilter, setActiveFilter] = useState<string>("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
 
@@ -50,8 +50,8 @@ const AthleteManagementPage = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setCountryFilter("");
-    setActiveFilter("");
+    setCountryFilter("all");
+    setActiveFilter("all");
   };
 
   return (
@@ -170,7 +170,7 @@ const AthleteManagementPage = () => {
                 <SelectValue placeholder="Filter by country" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Countries</SelectItem>
+                <SelectItem value="all">All Countries</SelectItem>
                 {countries?.map((country) => (
                   <SelectItem key={country} value={country}>
                     {country}
@@ -184,7 +184,7 @@ const AthleteManagementPage = () => {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="true">Active</SelectItem>
                 <SelectItem value="false">Inactive</SelectItem>
               </SelectContent>
@@ -208,8 +208,8 @@ const AthleteManagementPage = () => {
         <CardContent>
           <AthleteTable
             searchTerm={searchTerm}
-            countryFilter={countryFilter}
-            activeFilter={activeFilter}
+            countryFilter={countryFilter === "all" ? "" : countryFilter}
+            activeFilter={activeFilter === "all" ? "" : activeFilter}
           />
         </CardContent>
       </Card>
