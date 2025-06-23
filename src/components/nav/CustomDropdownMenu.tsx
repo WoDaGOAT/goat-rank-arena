@@ -3,6 +3,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+
+interface Category {
+  id: string;
+  name: string;
+  description: string | null;
+  parent_id: string | null;
+  children?: Category[];
+}
 
 interface MenuItem {
   id: string;
@@ -21,49 +31,59 @@ const CustomDropdownMenu = () => {
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const isMobile = useIsMobile();
 
-  // Static menu items with predefined categories
-  const menuItems: MenuItem[] = [
-    {
-      id: "goat",
-      name: "GOAT",
-      icon: "🐐",
-      children: [
-        { id: "goat-footballer", name: "GOAT Footballer", description: "Greatest footballer of all time" },
-        { id: "goat-goalkeeper", name: "GOAT Goalkeeper", description: "Greatest goalkeeper of all time" },
-        { id: "goat-defender", name: "GOAT Defender", description: "Greatest defender of all time" },
-        { id: "goat-midfielder", name: "GOAT Midfielder", description: "Greatest midfielder of all time" },
-        { id: "goat-forward", name: "GOAT Forward", description: "Greatest forward of all time" },
-        { id: "goat-free-kick", name: "GOAT Free-Kick Taker", description: "Greatest free-kick taker of all time" },
-        { id: "goat-long-shot", name: "GOAT Long Shot", description: "Greatest long shot specialist of all time" },
-        { id: "goat-header", name: "GOAT Header", description: "Greatest header specialist of all time" },
-        { id: "goat-skills", name: "GOAT Skills", description: "Greatest skills specialist of all time" }
-      ]
+  // Fetch categories from database
+  const { data: allCategories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('categories').select('*');
+      if (error) throw new Error(error.message);
+      return data || [];
     },
-    {
-      id: "season",
-      name: "Greatest of This Season",
-      icon: "🏆",
-      children: [
-        { id: "season-footballer", name: "GOAT Footballer (Season)", description: "Best footballer this season" },
-        { id: "season-goalkeeper", name: "GOAT Goalkeeper (Season)", description: "Best goalkeeper this season" },
-        { id: "season-defender", name: "GOAT Defender (Season)", description: "Best defender this season" },
-        { id: "season-midfielder", name: "GOAT Midfielder (Season)", description: "Best midfielder this season" },
-        { id: "season-forward", name: "GOAT Forward (Season)", description: "Best forward this season" }
-      ]
-    },
-    {
-      id: "competitions",
-      name: "Competitions",
-      icon: "🌍",
-      children: [
-        { id: "serie-a", name: "GOAT Serie A (Italy)", description: "Greatest Serie A player" },
-        { id: "ligue-1", name: "GOAT Ligue 1 (France)", description: "Greatest Ligue 1 player" },
-        { id: "premier-league", name: "GOAT Premier League (UK)", description: "Greatest Premier League player" },
-        { id: "bundesliga", name: "GOAT Bundesliga (Germany)", description: "Greatest Bundesliga player" },
-        { id: "laliga", name: "GOAT LaLiga (Spain)", description: "Greatest LaLiga player" }
-      ]
-    }
-  ];
+  });
+
+  // Build menu items from database categories
+  const menuItems: MenuItem[] = React.useMemo(() => {
+    if (!allCategories) return [];
+    
+    // Build parent-child tree
+    const categoriesById = new Map(allCategories.map(c => [c.id, { ...c, children: [] as Category[] }]));
+    const rootCategories: (Category & { children: Category[] })[] = [];
+    
+    allCategories.forEach(category => {
+      if (category.parent_id) {
+        const parent = categoriesById.get(category.parent_id);
+        if (parent) {
+          parent.children.push(categoriesById.get(category.id)!);
+        }
+      } else {
+        rootCategories.push(categoriesById.get(category.id)!);
+      }
+    });
+
+    // Map to menu structure with icons
+    const menuMapping: Record<string, string> = {
+      'GOAT': '🐐',
+      'Greatest of This Season': '🏆',
+      'Competitions': '🌍'
+    };
+
+    return rootCategories
+      .filter(category => menuMapping[category.name])
+      .map(category => ({
+        id: category.id,
+        name: category.name,
+        icon: menuMapping[category.name],
+        children: category.children.map(child => ({
+          id: child.id,
+          name: child.name,
+          description: child.description || undefined
+        }))
+      }))
+      .sort((a, b) => {
+        const order = ['GOAT', 'Greatest of This Season', 'Competitions'];
+        return order.indexOf(a.name) - order.indexOf(b.name);
+      });
+  }, [allCategories]);
 
   // Close dropdown when clicking outside or scrolling
   useEffect(() => {
@@ -129,7 +149,7 @@ const CustomDropdownMenu = () => {
                       {subItem.name}
                     </div>
                     <p className="text-xs text-gray-400 mt-1 line-clamp-2">
-                      {subItem.description || "No description"}
+                      {subItem.description || "Rank the greatest athletes"}
                     </p>
                   </Link>
                 ))}
@@ -200,7 +220,7 @@ const CustomDropdownMenu = () => {
                               {subItem.name}
                             </div>
                             <p className="text-xs text-gray-400 leading-snug line-clamp-2">
-                              {subItem.description || "No description"}
+                              {subItem.description || "Rank the greatest athletes"}
                             </p>
                           </Link>
                         ))}
