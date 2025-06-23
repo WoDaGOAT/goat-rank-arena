@@ -9,7 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SocialActions } from "@/components/category/SocialActions";
 import CommentSection from "@/components/category/CommentSection";
 import { useAuth } from "@/contexts/AuthContext";
-import { allAthletes } from "@/data/mockAthletes";
+import { useAthletes } from "@/hooks/useAthletes";
+import { mapDatabaseAthletesToUIAthletes } from "@/utils/athleteDataMapper";
 import { Helmet } from "react-helmet-async";
 
 type DbCategory = {
@@ -33,7 +34,7 @@ const CategoryPage = () => {
         .select('*')
         .eq('id', categoryId || "")
         .single();
-      if (error && error.code !== 'PGRST116') { // Ignore 'exact one row' error if not found
+      if (error && error.code !== 'PGRST116') {
         throw error;
       }
       return data;
@@ -41,7 +42,21 @@ const CategoryPage = () => {
     enabled: !!categoryId,
   });
 
-  if (isLoadingCategory) {
+  // Fetch real athletes from the database
+  const { data: dbAthletes, isLoading: isLoadingAthletes } = useAthletes();
+
+  // Transform athletes into leaderboard format with mock ranking data
+  const leaderboardAthletes = dbAthletes ? mapDatabaseAthletesToUIAthletes(dbAthletes).map((athlete, index) => ({
+    ...athlete,
+    rank: index + 1,
+    points: Math.max(1000 - (index * 50) + Math.random() * 100, 100), // Mock points with some randomization
+    movement: index % 3 === 0 ? "up" as const : index % 3 === 1 ? "down" as const : "neutral" as const,
+    imageUrl: athlete.imageUrl // This will now use the real profile_picture_url from the database
+  })).sort((a, b) => b.points - a.points) : [];
+
+  const isLoading = isLoadingCategory || isLoadingAthletes;
+
+  if (isLoading) {
      return (
       <>
         <Helmet>
@@ -121,7 +136,7 @@ const CategoryPage = () => {
 
             <div className="mb-6 sm:mb-8">
               <GlobalLeaderboard 
-                athletes={allAthletes} 
+                athletes={leaderboardAthletes} 
                 categoryName="Global Leaderboard" 
                 socialActions={socialActions}
               />
