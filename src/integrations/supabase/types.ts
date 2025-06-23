@@ -752,9 +752,12 @@ export type Database = {
         Returns: undefined
       }
       bulk_insert_athletes: {
-        Args: { p_athletes: Json }
+        Args:
+          | { p_athletes: Json }
+          | { p_athletes: Json; p_update_mode?: boolean }
         Returns: {
           inserted_count: number
+          updated_count: number
           skipped_count: number
           errors: string[]
         }[]

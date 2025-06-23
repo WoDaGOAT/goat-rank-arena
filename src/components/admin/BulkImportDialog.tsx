@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, AlertCircle, CheckCircle, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Upload, FileText, AlertCircle, CheckCircle, X, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,8 +37,14 @@ interface ParsedAthlete {
 
 interface ImportResult {
   inserted_count: number;
+  updated_count: number;
   skipped_count: number;
   errors: string[];
+}
+
+interface DuplicateInfo {
+  name: string;
+  willBeUpdated: boolean;
 }
 
 const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
@@ -45,6 +53,8 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
   const [csvData, setCsvData] = useState<string[][]>([]);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [parsedData, setParsedData] = useState<ParsedAthlete[]>([]);
+  const [duplicates, setDuplicates] = useState<DuplicateInfo[]>([]);
+  const [updateMode, setUpdateMode] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -99,7 +109,7 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
     parseDataWithMapping(mapping);
   };
 
-  const parseDataWithMapping = (mapping: Record<string, string>) => {
+  const parseDataWithMapping = async (mapping: Record<string, string>) => {
     try {
       setIsProcessing(true);
       setProgress(10);
@@ -150,12 +160,32 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
         }
       }
 
+      setProgress(50);
+
+      // Check for existing athletes to detect duplicates
+      const athleteNames = data.map(a => a.name);
+      const { data: existingAthletes, error } = await supabase
+        .from("athletes")
+        .select("name")
+        .in("name", athleteNames);
+
+      if (error) throw error;
+
+      const existingNames = new Set(existingAthletes?.map(a => a.name) || []);
+      const duplicateInfo: DuplicateInfo[] = data
+        .filter(athlete => existingNames.has(athlete.name))
+        .map(athlete => ({
+          name: athlete.name,
+          willBeUpdated: updateMode
+        }));
+
+      setDuplicates(duplicateInfo);
       setProgress(80);
       setParsedData(data);
       setStep("preview");
       setProgress(100);
       
-      toast.success(`Successfully parsed ${data.length} athletes from CSV`);
+      toast.success(`Successfully parsed ${data.length} athletes from CSV. ${duplicateInfo.length} duplicates detected.`);
     } catch (error: any) {
       console.error("Error parsing data with mapping:", error);
       toast.error(error.message || "Failed to parse CSV data");
@@ -186,7 +216,8 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
       setProgress(25);
 
       const { data, error } = await supabase.rpc("bulk_insert_athletes", {
-        p_athletes: JSON.stringify(athletesData)
+        p_athletes: JSON.stringify(athletesData),
+        p_update_mode: updateMode
       });
 
       setProgress(75);
@@ -202,7 +233,11 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
       queryClient.invalidateQueries({ queryKey: ["athleteStats"] });
       queryClient.invalidateQueries({ queryKey: ["athletes"] });
 
-      toast.success(`Import completed! Added ${result.inserted_count} athletes, skipped ${result.skipped_count} duplicates`);
+      const message = updateMode 
+        ? `Import completed! Added ${result.inserted_count} new athletes, updated ${result.updated_count} existing athletes, skipped ${result.skipped_count}`
+        : `Import completed! Added ${result.inserted_count} athletes, skipped ${result.skipped_count} duplicates`;
+      
+      toast.success(message);
     } catch (error: any) {
       console.error("Error importing athletes:", error);
       toast.error(error.message || "Failed to import athletes");
@@ -217,6 +252,8 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
     setCsvData([]);
     setColumnMapping({});
     setParsedData([]);
+    setDuplicates([]);
+    setUpdateMode(false);
     setImportResult(null);
     setIsProcessing(false);
     setProgress(0);
@@ -241,6 +278,7 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
   const goBackToMapping = () => {
     setStep("mapping");
     setParsedData([]);
+    setDuplicates([]);
   };
 
   return (
@@ -249,7 +287,7 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
         <DialogHeader>
           <DialogTitle>Bulk Import Athletes from CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file to import multiple athletes at once. You'll be able to map your CSV columns to database fields.
+            Upload a CSV file to import multiple athletes at once. You can choose to update existing athletes or insert only new ones.
           </DialogDescription>
         </DialogHeader>
 
@@ -289,6 +327,7 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
                     <ol className="text-sm space-y-1 list-decimal list-inside">
                       <li>We'll read your CSV headers</li>
                       <li>You'll map columns to database fields</li>
+                      <li>Choose import mode (insert only or update existing)</li>
                       <li>Preview the mapped data</li>
                       <li>Import the athletes</li>
                     </ol>
@@ -307,45 +346,123 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
           )}
 
           {step === "preview" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  Preview Import Data
-                </CardTitle>
-                <CardDescription>
-                  Review the mapped data before importing. {parsedData.length} athletes found.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-80 overflow-y-auto">
-                  <div className="grid gap-2">
-                    {parsedData.slice(0, 10).map((athlete, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded">
-                        <div>
-                          <p className="font-medium">{athlete.name}</p>
-                          <p className="text-sm text-gray-500">
-                            {athlete.country_of_origin} • {athlete.nationality}
-                          </p>
-                        </div>
-                        <div className="flex gap-1">
-                          {athlete.positions?.map((pos, i) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {pos}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                    {parsedData.length > 10 && (
-                      <p className="text-center text-sm text-gray-500 py-2">
-                        ... and {parsedData.length - 10} more athletes
-                      </p>
-                    )}
+            <div className="space-y-4">
+              {/* Import Mode Selection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <RefreshCw className="h-5 w-5" />
+                    Import Mode
+                  </CardTitle>
+                  <CardDescription>
+                    Choose how to handle duplicate athletes (matched by name).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="update-mode"
+                      checked={updateMode}
+                      onCheckedChange={(checked) => {
+                        setUpdateMode(checked);
+                        // Update duplicate info when mode changes
+                        setDuplicates(prev => prev.map(d => ({ ...d, willBeUpdated: checked })));
+                      }}
+                    />
+                    <Label htmlFor="update-mode" className="flex flex-col">
+                      <span className="font-medium">
+                        {updateMode ? "Insert & Update Mode" : "Insert Only Mode"}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {updateMode 
+                          ? "Update existing athletes with new information from CSV"
+                          : "Skip existing athletes, only add new ones"
+                        }
+                      </span>
+                    </Label>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+
+                  {duplicates.length > 0 && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                      <p className="text-sm font-medium text-yellow-800">
+                        {duplicates.length} duplicate athlete(s) detected:
+                      </p>
+                      <div className="mt-2 max-h-20 overflow-y-auto">
+                        {duplicates.slice(0, 5).map((duplicate, index) => (
+                          <div key={index} className="text-sm text-yellow-700 flex items-center gap-2">
+                            <span>{duplicate.name}</span>
+                            <Badge variant={duplicate.willBeUpdated ? "default" : "secondary"} className="text-xs">
+                              {duplicate.willBeUpdated ? "Will Update" : "Will Skip"}
+                            </Badge>
+                          </div>
+                        ))}
+                        {duplicates.length > 5 && (
+                          <p className="text-xs text-yellow-600 mt-1">
+                            ... and {duplicates.length - 5} more
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Data Preview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    Preview Import Data
+                  </CardTitle>
+                  <CardDescription>
+                    Review the mapped data before importing. {parsedData.length} athletes found.
+                    {updateMode && duplicates.length > 0 && (
+                      <span className="block mt-1 text-blue-600">
+                        {duplicates.filter(d => d.willBeUpdated).length} athletes will be updated.
+                      </span>
+                    )}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="max-h-80 overflow-y-auto">
+                    <div className="grid gap-2">
+                      {parsedData.slice(0, 10).map((athlete, index) => {
+                        const isDuplicate = duplicates.some(d => d.name === athlete.name);
+                        return (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded">
+                            <div>
+                              <p className="font-medium flex items-center gap-2">
+                                {athlete.name}
+                                {isDuplicate && (
+                                  <Badge variant={updateMode ? "default" : "secondary"} className="text-xs">
+                                    {updateMode ? "Update" : "Skip"}
+                                  </Badge>
+                                )}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {athlete.country_of_origin} • {athlete.nationality}
+                              </p>
+                            </div>
+                            <div className="flex gap-1">
+                              {athlete.positions?.map((pos, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">
+                                  {pos}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {parsedData.length > 10 && (
+                        <p className="text-center text-sm text-gray-500 py-2">
+                          ... and {parsedData.length - 10} more athletes
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
           {step === "import" && (
@@ -359,7 +476,9 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
               <CardContent>
                 <div className="space-y-4">
                   <Progress value={progress} className="w-full" />
-                  <p className="text-sm text-center">Processing {parsedData.length} athletes...</p>
+                  <p className="text-sm text-center">
+                    Processing {parsedData.length} athletes in {updateMode ? "update" : "insert-only"} mode...
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -375,14 +494,20 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-4 gap-4 text-center">
                     <div className="bg-green-50 p-4 rounded">
                       <p className="text-2xl font-bold text-green-600">{importResult.inserted_count}</p>
-                      <p className="text-sm text-green-700">Added</p>
+                      <p className="text-sm text-green-700">Inserted</p>
                     </div>
+                    {updateMode && (
+                      <div className="bg-blue-50 p-4 rounded">
+                        <p className="text-2xl font-bold text-blue-600">{importResult.updated_count}</p>
+                        <p className="text-sm text-blue-700">Updated</p>
+                      </div>
+                    )}
                     <div className="bg-yellow-50 p-4 rounded">
                       <p className="text-2xl font-bold text-yellow-600">{importResult.skipped_count}</p>
-                      <p className="text-sm text-yellow-700">Skipped (Duplicates)</p>
+                      <p className="text-sm text-yellow-700">Skipped</p>
                     </div>
                     <div className="bg-red-50 p-4 rounded">
                       <p className="text-2xl font-bold text-red-600">{importResult.errors.length}</p>
@@ -422,7 +547,7 @@ const BulkImportDialog = ({ open, onOpenChange }: BulkImportDialogProps) => {
                 Back to Mapping
               </Button>
               <Button onClick={handleImport} disabled={isProcessing}>
-                Import {parsedData.length} Athletes
+                {updateMode ? "Import & Update" : "Import New Only"} ({parsedData.length} Athletes)
               </Button>
             </>
           )}
