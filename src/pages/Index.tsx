@@ -6,9 +6,12 @@ import { Category, Athlete } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
-import footballPlayers from "@/data/footballPlayers";
+import { useAthletes } from "@/hooks/useAthletes";
+import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 
 const Index = () => {
+  const { data: athletes = [] } = useAthletes();
+
   const { data: categories, isLoading, isError } = useQuery<Category[]>({
     queryKey: ["featuredSubcategories"],
     queryFn: async () => {
@@ -95,31 +98,15 @@ const Index = () => {
             // Convert to leaderboard format and sort by total score
             const athleteObjects = Object.entries(athleteScores)
               .map(([athleteId, { totalScore }]) => {
-                // Find athlete data from footballPlayers
-                const athleteData = footballPlayers.find(player => player.id === athleteId);
+                // Find athlete data from database
+                const athleteData = athletes.find(athlete => athlete.id === athleteId);
                 
                 if (!athleteData) {
                   console.warn(`Athlete data not found for ID: ${athleteId}`);
                   return null;
                 }
 
-                const athlete: Athlete = {
-                  id: athleteData.id,
-                  rank: 0, // Will be set after sorting
-                  name: athleteData.name,
-                  imageUrl: athleteData.imageUrl,
-                  points: totalScore,
-                  movement: "neutral" as const,
-                  dateOfBirth: athleteData.dateOfBirth || "",
-                  dateOfDeath: athleteData.dateOfDeath,
-                  isActive: athleteData.isActive || true,
-                  countryOfOrigin: athleteData.countryOfOrigin || "",
-                  clubs: athleteData.clubs || [],
-                  competitions: athleteData.competitions || [],
-                  positions: athleteData.positions || [],
-                  nationality: athleteData.nationality || ""
-                };
-
+                const athlete = mapDatabaseAthleteToUIAthlete(athleteData, 0, totalScore);
                 return athlete;
               })
               .filter((athlete): athlete is Athlete => athlete !== null);

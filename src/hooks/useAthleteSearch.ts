@@ -1,43 +1,37 @@
 
 import { useState, useMemo } from "react";
+import { useAthletes, DatabaseAthlete } from "./useAthletes";
+import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 import { Athlete } from "@/types";
-import allFootballPlayers from "@/data/footballPlayers";
-import { SelectedAthlete } from "./useRankingManager";
 
-export const useAthleteSearch = (selectedAthletes: SelectedAthlete[]) => {
+export const useAthleteSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLetter, setSelectedLetter] = useState<string>("");
+  const { data: athletes = [], isLoading } = useAthletes();
 
   const filteredAthletes = useMemo(() => {
-    return allFootballPlayers.filter(athlete => {
-      // Split search term into individual words and clean them
-      const searchWords = searchTerm.toLowerCase().trim().split(/\s+/).filter(word => word.length > 0);
-      
-      // Split athlete name into individual words
-      const nameWords = athlete.name.toLowerCase().split(/\s+/);
-      
-      // Check if all search words match at least one word in the athlete's name
-      const matchesSearch = searchWords.length === 0 || searchWords.every(searchWord => 
-        nameWords.some(nameWord => nameWord.includes(searchWord))
-      );
-      
-      const matchesLetter = selectedLetter === "" || athlete.name.charAt(0).toUpperCase() === selectedLetter;
-      const notSelected = !selectedAthletes.some(selected => selected.id === athlete.id);
-      
-      return matchesSearch && matchesLetter && notSelected;
-    });
-  }, [searchTerm, selectedLetter, selectedAthletes]);
+    if (!searchTerm.trim()) {
+      return athletes.map(athlete => mapDatabaseAthleteToUIAthlete(athlete));
+    }
 
-  const resetSearch = () => {
-    setSearchTerm("");
-  };
+    const lowercaseSearch = searchTerm.toLowerCase();
+    return athletes
+      .filter((athlete: DatabaseAthlete) => {
+        const nameMatch = athlete.name.toLowerCase().includes(lowercaseSearch);
+        const countryMatch = athlete.country_of_origin?.toLowerCase().includes(lowercaseSearch);
+        const nationalityMatch = athlete.nationality?.toLowerCase().includes(lowercaseSearch);
+        const positionMatch = athlete.positions?.some(position => 
+          position.toLowerCase().includes(lowercaseSearch)
+        );
+        
+        return nameMatch || countryMatch || nationalityMatch || positionMatch;
+      })
+      .map(athlete => mapDatabaseAthleteToUIAthlete(athlete));
+  }, [athletes, searchTerm]);
 
   return {
     searchTerm,
     setSearchTerm,
-    selectedLetter,
-    setSelectedLetter,
-    filteredAthletes,
-    resetSearch
+    athletes: filteredAthletes,
+    isLoading,
   };
 };

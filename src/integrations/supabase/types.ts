@@ -9,6 +9,118 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      athlete_clubs: {
+        Row: {
+          athlete_id: string | null
+          club_name: string
+          country: string | null
+          created_at: string
+          id: string
+          league: string | null
+          years_active: string | null
+        }
+        Insert: {
+          athlete_id?: string | null
+          club_name: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          league?: string | null
+          years_active?: string | null
+        }
+        Update: {
+          athlete_id?: string | null
+          club_name?: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          league?: string | null
+          years_active?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_clubs_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      athlete_competitions: {
+        Row: {
+          athlete_id: string | null
+          competition_name: string
+          competition_type: string | null
+          created_at: string
+          id: string
+        }
+        Insert: {
+          athlete_id?: string | null
+          competition_name: string
+          competition_type?: string | null
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          athlete_id?: string | null
+          competition_name?: string
+          competition_type?: string | null
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_competitions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      athletes: {
+        Row: {
+          country_of_origin: string | null
+          created_at: string
+          date_of_birth: string | null
+          date_of_death: string | null
+          id: string
+          is_active: boolean
+          name: string
+          nationality: string | null
+          positions: string[] | null
+          profile_picture_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          country_of_origin?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          date_of_death?: string | null
+          id: string
+          is_active?: boolean
+          name: string
+          nationality?: string | null
+          positions?: string[] | null
+          profile_picture_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country_of_origin?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          date_of_death?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          nationality?: string | null
+          positions?: string[] | null
+          profile_picture_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -442,6 +554,13 @@ export type Database = {
           ranking_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ranking_athletes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ranking_athletes_ranking_id_fkey"
             columns: ["ranking_id"]
