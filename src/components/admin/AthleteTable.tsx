@@ -18,6 +18,7 @@ import DeleteAthleteDialog from "./DeleteAthleteDialog";
 import { useAthleteEnrichment } from "@/hooks/useAthleteEnrichment";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import EnrichmentPreviewDialog from "./EnrichmentPreviewDialog";
 
 interface AthleteTableProps {
   searchTerm: string;
@@ -30,6 +31,8 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
   const [editingAthlete, setEditingAthlete] = useState<any>(null);
   const [deletingAthlete, setDeletingAthlete] = useState<any>(null);
   const [enrichingAthleteId, setEnrichingAthleteId] = useState<string | null>(null);
+  const [selectedAthleteForEnrichment, setSelectedAthleteForEnrichment] = useState<any>(null);
+  const [showEnrichmentDialog, setShowEnrichmentDialog] = useState(false);
   const limit = 20;
 
   const { enrichAthlete, isEnriching } = useAthleteEnrichment();
@@ -54,33 +57,14 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
   const totalCount = athletes[0]?.total_count || 0;
   const totalPages = Math.ceil(totalCount / limit);
 
-  // Enhanced helper function to check data quality
-  const getDataQualityInfo = (athlete: any) => {
-    const missingFields = [];
-    const lowQualityFields = [];
-
-    if (!athlete.country_of_origin) missingFields.push('Country');
-    if (!athlete.nationality) missingFields.push('Nationality');
-    if (!athlete.date_of_birth) missingFields.push('Birth Date');
-    if (!athlete.positions || athlete.positions.length === 0) missingFields.push('Positions');
-    if (!athlete.profile_picture_url) missingFields.push('Photo');
-
-    // Check for low quality data
-    if (athlete.nationality && (
-      athlete.nationality.toLowerCase().includes('professional') ||
-      athlete.nationality.length < 4
-    )) {
-      lowQualityFields.push('Nationality');
-    }
-
-    if (athlete.country_of_origin && (
-      athlete.country_of_origin.toLowerCase().includes('professional') ||
-      athlete.country_of_origin.length < 4
-    )) {
-      lowQualityFields.push('Country');
-    }
-
-    return { missingFields, lowQualityFields, needsEnrichment: missingFields.length > 0 || lowQualityFields.length > 0 };
+  // Simplified function to check if athlete has truly missing data
+  const hasMissingData = (athlete: any) => {
+    return !athlete.country_of_origin || 
+           !athlete.nationality || 
+           !athlete.date_of_birth || 
+           !athlete.positions || 
+           athlete.positions.length === 0 || 
+           !athlete.profile_picture_url;
   };
 
   const handleEdit = (athlete: any) => {
@@ -91,16 +75,46 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
     setDeletingAthlete(athlete);
   };
 
-  const handleEnrichAthlete = async (athleteId: string) => {
-    setEnrichingAthleteId(athleteId);
-    const result = await enrichAthlete({ athleteId });
-    setEnrichingAthleteId(null);
+  const handleEnrichAthlete = async (athlete: any) => {
+    setEnrichingAthleteId(athlete.id);
     
-    if (result && result.updated > 0) {
-      toast.success("Athlete data enriched with validated information!");
-      refetch();
-    } else {
-      toast.info("No new valid data found for this athlete");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("You must be logged in to perform this action");
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('enrich-athlete-data', {
+        body: { single_athlete_id: athlete.id },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Enrichment error:', error);
+        toast.error(`Enrichment failed: ${error.message}`);
+        return;
+      }
+
+      if (data?.athlete_suggestions && data.athlete_suggestions.length > 0) {
+        const athleteWithSuggestions = data.athlete_suggestions[0];
+        if (athleteWithSuggestions.suggestions.length > 0) {
+          setSelectedAthleteForEnrichment(athleteWithSuggestions);
+          setShowEnrichmentDialog(true);
+        } else {
+          toast.info("No high-quality enrichment opportunities found for this athlete");
+        }
+      } else {
+        toast.info("No enrichment opportunities found for this athlete");
+      }
+
+    } catch (error) {
+      console.error('Error during enrichment:', error);
+      toast.error("Failed to scan for enrichment opportunities");
+    } finally {
+      setEnrichingAthleteId(null);
     }
   };
 
@@ -108,6 +122,12 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
     refetch();
     setEditingAthlete(null);
     setDeletingAthlete(null);
+  };
+
+  const handleEnrichmentComplete = () => {
+    refetch();
+    setShowEnrichmentDialog(false);
+    setSelectedAthleteForEnrichment(null);
   };
 
   if (isLoading) {
@@ -121,32 +141,31 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-16">Photo</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Country</TableHead>
-              <TableHead>Nationality</TableHead>
-              <TableHead>Positions</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date of Birth</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {athletes.length === 0 ? (
+    <>
+      <div className="space-y-4">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
-                  No athletes found matching your criteria.
-                </TableCell>
+                <TableHead className="w-16">Photo</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Country</TableHead>
+                <TableHead>Nationality</TableHead>
+                <TableHead>Positions</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date of Birth</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ) : (
-              athletes.map((athlete) => {
-                const qualityInfo = getDataQualityInfo(athlete);
-                return (
+            </TableHeader>
+            <TableBody>
+              {athletes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    No athletes found matching your criteria.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                athletes.map((athlete) => (
                   <TableRow key={athlete.id}>
                     <TableCell>
                       <Avatar className="h-10 w-10">
@@ -157,37 +176,13 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                       </Avatar>
                     </TableCell>
                     <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {athlete.name}
-                        {qualityInfo.missingFields.length > 0 && (
-                          <Badge variant="outline" className="text-xs text-orange-600">
-                            Missing: {qualityInfo.missingFields.length}
-                          </Badge>
-                        )}
-                        {qualityInfo.lowQualityFields.length > 0 && (
-                          <Badge variant="outline" className="text-xs text-red-600">
-                            Low Quality: {qualityInfo.lowQualityFields.length}
-                          </Badge>
-                        )}
-                      </div>
+                      {athlete.name}
                     </TableCell>
                     <TableCell>
-                      <span className={
-                        athlete.country_of_origin && 
-                        (athlete.country_of_origin.toLowerCase().includes('professional') || athlete.country_of_origin.length < 4)
-                          ? "text-red-600" : ""
-                      }>
-                        {athlete.country_of_origin || "N/A"}
-                      </span>
+                      {athlete.country_of_origin || "N/A"}
                     </TableCell>
                     <TableCell>
-                      <span className={
-                        athlete.nationality && 
-                        (athlete.nationality.toLowerCase().includes('professional') || athlete.nationality.length < 4)
-                          ? "text-red-600" : ""
-                      }>
-                        {athlete.nationality || "N/A"}
-                      </span>
+                      {athlete.nationality || "N/A"}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
@@ -219,14 +214,14 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        {qualityInfo.needsEnrichment && (
+                        {hasMissingData(athlete) && (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleEnrichAthlete(athlete.id)}
+                            onClick={() => handleEnrichAthlete(athlete)}
                             disabled={isEnriching || enrichingAthleteId === athlete.id}
                             className="text-blue-600 hover:text-blue-700"
-                            title={`Fix: ${[...qualityInfo.missingFields, ...qualityInfo.lowQualityFields].join(', ')}`}
+                            title="Find high-quality data to enrich this athlete's profile"
                           >
                             <Database className="h-4 w-4" />
                           </Button>
@@ -249,64 +244,71 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                       </div>
                     </TableCell>
                   </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              Showing {page * limit + 1} to {Math.min((page + 1) * limit, totalCount)} of {totalCount} results
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <span className="text-sm">
+                Page {page + 1} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages - 1}
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Dialogs */}
+        {editingAthlete && (
+          <EditAthleteDialog
+            athlete={editingAthlete}
+            open={!!editingAthlete}
+            onOpenChange={(open) => !open && setEditingAthlete(null)}
+            onAthleteUpdated={onAthleteUpdated}
+          />
+        )}
+
+        {deletingAthlete && (
+          <DeleteAthleteDialog
+            athlete={deletingAthlete}
+            open={!!deletingAthlete}
+            onOpenChange={(open) => !open && setDeletingAthlete(null)}
+            onAthleteDeleted={onAthleteUpdated}
+          />
+        )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Showing {page * limit + 1} to {Math.min((page + 1) * limit, totalCount)} of {totalCount} results
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(page - 1)}
-              disabled={page === 0}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <span className="text-sm">
-              Page {page + 1} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(page + 1)}
-              disabled={page >= totalPages - 1}
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Dialogs */}
-      {editingAthlete && (
-        <EditAthleteDialog
-          athlete={editingAthlete}
-          open={!!editingAthlete}
-          onOpenChange={(open) => !open && setEditingAthlete(null)}
-          onAthleteUpdated={onAthleteUpdated}
-        />
-      )}
-
-      {deletingAthlete && (
-        <DeleteAthleteDialog
-          athlete={deletingAthlete}
-          open={!!deletingAthlete}
-          onOpenChange={(open) => !open && setDeletingAthlete(null)}
-          onAthleteDeleted={onAthleteUpdated}
-        />
-      )}
-    </div>
+      <EnrichmentPreviewDialog
+        open={showEnrichmentDialog}
+        onOpenChange={setShowEnrichmentDialog}
+        athleteData={selectedAthleteForEnrichment}
+        onApprovalComplete={handleEnrichmentComplete}
+      />
+    </>
   );
 };
 

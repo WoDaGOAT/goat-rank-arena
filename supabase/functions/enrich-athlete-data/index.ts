@@ -15,45 +15,85 @@ interface AthleteEnrichmentData {
   profile_picture_url?: string;
 }
 
-interface WikidataResponse {
-  entities?: Record<string, {
-    claims?: Record<string, Array<{
-      mainsnak?: {
-        datavalue?: {
-          value?: any;
-        };
-      };
-    }>>;
-    labels?: Record<string, { value: string }>;
-  }>;
+interface EnrichmentSuggestion {
+  field: string;
+  current_value: any;
+  suggested_value: any;
+  confidence: 'high' | 'medium' | 'low';
+  source: string;
 }
 
-// Valid countries/nationalities whitelist (partial list for validation)
+// Comprehensive valid countries/nationalities whitelist
 const VALID_COUNTRIES = new Set([
-  'Algeria', 'Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Cameroon', 'Canada', 'Chile', 'Colombia',
-  'Croatia', 'Czech Republic', 'Denmark', 'Egypt', 'England', 'France', 'Germany', 'Ghana', 'Greece', 'Hungary',
-  'Iceland', 'Iran', 'Ireland', 'Italy', 'Japan', 'Mexico', 'Morocco', 'Netherlands', 'Nigeria', 'Norway',
-  'Peru', 'Poland', 'Portugal', 'Russia', 'Saudi Arabia', 'Senegal', 'Serbia', 'South Korea', 'Spain', 'Sweden',
-  'Switzerland', 'Tunisia', 'Turkey', 'Ukraine', 'United States', 'Uruguay', 'Wales', 'Scottish', 'Irish',
-  'Welsh', 'English', 'British', 'American', 'Canadian', 'Australian', 'South African', 'Egyptian', 'Moroccan',
-  'Algerian', 'Tunisian', 'Ghanaian', 'Nigerian', 'Senegalese', 'Cameroonian', 'Ivorian', 'Malian', 'Burkinabe'
+  'Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Canada', 'Chile', 'Colombia',
+  'Croatia', 'Czech Republic', 'Denmark', 'Egypt', 'England', 'France', 'Germany', 'Ghana',
+  'Greece', 'Hungary', 'Iceland', 'Iran', 'Ireland', 'Italy', 'Japan', 'Mexico', 'Morocco',
+  'Netherlands', 'Nigeria', 'Norway', 'Peru', 'Poland', 'Portugal', 'Russia', 'Saudi Arabia',
+  'Senegal', 'Serbia', 'South Korea', 'Spain', 'Sweden', 'Switzerland', 'Tunisia', 'Turkey',
+  'Ukraine', 'United States', 'Uruguay', 'Wales', 'Scotland', 'American', 'Canadian',
+  'Australian', 'South African', 'Egyptian', 'Moroccan', 'Algerian', 'Tunisian', 'Ghanaian',
+  'Nigerian', 'Senegalese', 'Cameroonian', 'Ivorian', 'Malian', 'Burkinabe', 'British',
+  'English', 'Scottish', 'Welsh', 'Irish', 'Portuguese', 'Spanish', 'French', 'German',
+  'Italian', 'Dutch', 'Belgian', 'Swedish', 'Norwegian', 'Danish', 'Finnish', 'Swiss'
 ]);
 
 const VALID_POSITIONS = new Set([
-  'Goalkeeper', 'Defender', 'Centre-back', 'Left-back', 'Right-back', 'Midfielder', 'Defensive midfielder',
-  'Central midfielder', 'Attacking midfielder', 'Left midfielder', 'Right midfielder', 'Winger', 'Left winger',
-  'Right winger', 'Forward', 'Striker', 'Centre-forward', 'Left forward', 'Right forward', 'Attacking midfielder'
+  'Goalkeeper', 'Defender', 'Centre-back', 'Left-back', 'Right-back', 'Midfielder',
+  'Defensive midfielder', 'Central midfielder', 'Attacking midfielder', 'Left midfielder',
+  'Right midfielder', 'Winger', 'Left winger', 'Right winger', 'Forward', 'Striker',
+  'Centre-forward', 'Left forward', 'Right forward', 'Second striker', 'False 9',
+  'Wing-back', 'Sweeper', 'Libero', 'Box-to-box midfielder', 'Playmaker'
 ]);
 
-// Improved text parsing with better validation
+// Enhanced validation functions
+function isHighQualityNationality(nationality: string): boolean {
+  if (!nationality || nationality.length < 4 || nationality.length > 20) return false;
+  
+  // Check against comprehensive whitelist
+  if (VALID_COUNTRIES.has(nationality)) return true;
+  
+  // Reject obvious invalid patterns
+  const invalidPatterns = [
+    /professional/i, /former/i, /current/i, /active/i, /retired/i, /player/i,
+    /footballer/i, /soccer/i, /football/i, /sport/i, /athlete/i, /club/i,
+    /team/i, /league/i, /position/i, /midfielder/i, /defender/i, /forward/i
+  ];
+  
+  return !invalidPatterns.some(pattern => pattern.test(nationality));
+}
+
+function isHighQualityPosition(position: string): boolean {
+  if (!position || position.length < 3) return false;
+  
+  // Check against known positions
+  return VALID_POSITIONS.has(position) || 
+         [...VALID_POSITIONS].some(validPos => 
+           validPos.toLowerCase().includes(position.toLowerCase()) ||
+           position.toLowerCase().includes(validPos.toLowerCase())
+         );
+}
+
+function isValidImageUrl(url: string): boolean {
+  if (!url) return false;
+  
+  // Only accept high-quality sources
+  const validSources = [
+    'upload.wikimedia.org',
+    'commons.wikimedia.org'
+  ];
+  
+  return validSources.some(source => url.includes(source)) &&
+         (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png'));
+}
+
 function extractNationalityFromText(text: string): string | null {
   const cleanText = text.toLowerCase();
   
-  // More sophisticated patterns for nationality extraction
+  // Enhanced patterns for nationality extraction
   const nationalityPatterns = [
-    /(?:is|was)\s+(?:a|an)\s+([a-z]{4,20})\s+(?:footballer|soccer player|player|athlete)/,
-    /([a-z]{4,20})\s+(?:footballer|soccer player|player|athlete)/,
-    /(?:born|from)\s+(?:in\s+)?([a-z\s]{4,25})(?:\s+and|\s+but|\s+on|\.|,)/,
+    /(?:is|was)\s+(?:a|an)\s+([a-z]{4,20})\s+(?:footballer|soccer player|player)/,
+    /([a-z]{4,20})\s+(?:international|national team|footballer)/,
+    /(?:born|from)\s+(?:in\s+)?([a-z\s]{4,25})(?:\s+and|\s+but|\.|,)/,
     /(?:representing|represents)\s+([a-z\s]{4,25})(?:\s+at|\s+in|\.|,)/
   ];
 
@@ -61,9 +101,7 @@ function extractNationalityFromText(text: string): string | null {
     const match = cleanText.match(pattern);
     if (match && match[1]) {
       const candidate = capitalizeWords(match[1].trim());
-      
-      // Validate the extracted nationality
-      if (isValidNationality(candidate)) {
+      if (isHighQualityNationality(candidate)) {
         return candidate;
       }
     }
@@ -76,7 +114,6 @@ function extractPositionsFromText(text: string): string[] {
   const cleanText = text.toLowerCase();
   const foundPositions: string[] = [];
   
-  // More comprehensive position patterns
   const positionPatterns = [
     /(?:plays|playing|positioned)\s+as\s+(?:a|an)\s+([a-z\s-]+?)(?:\s+(?:for|at|in)|\.|\,)/,
     /(?:position|role)(?:s)?\s*:?\s*([a-z\s,-]+?)(?:\s+(?:for|at|in)|\.|\,)/,
@@ -97,62 +134,41 @@ function extractPositionsFromText(text: string): string[] {
     }
   }
 
-  // Remove duplicates and validate
+  // Filter and return only high-quality positions
   const uniquePositions = [...new Set(foundPositions)];
-  return uniquePositions.filter(pos => isValidPosition(pos)).slice(0, 3); // Limit to 3 positions
-}
-
-function isValidNationality(nationality: string): boolean {
-  if (!nationality || nationality.length < 4 || nationality.length > 25) return false;
-  
-  // Check against whitelist
-  if (VALID_COUNTRIES.has(nationality)) return true;
-  
-  // Additional validation - reject obvious non-nationalities
-  const invalidWords = ['professional', 'former', 'current', 'active', 'retired', 'young', 'old', 'best', 'greatest'];
-  const lowerNationality = nationality.toLowerCase();
-  
-  return !invalidWords.some(word => lowerNationality.includes(word));
-}
-
-function isValidPosition(position: string): boolean {
-  if (!position || position.length < 3) return false;
-  
-  // Check against known positions
-  return VALID_POSITIONS.has(position) || 
-         [...VALID_POSITIONS].some(validPos => 
-           validPos.toLowerCase().includes(position.toLowerCase()) ||
-           position.toLowerCase().includes(validPos.toLowerCase())
-         );
+  return uniquePositions.filter(pos => isHighQualityPosition(pos)).slice(0, 3);
 }
 
 function normalizePosition(position: string): string | null {
   const positionMap: Record<string, string> = {
-    'gk': 'Goalkeeper',
-    'cb': 'Centre-back',
-    'lb': 'Left-back',
-    'rb': 'Right-back',
-    'cdm': 'Defensive midfielder',
-    'cm': 'Central midfielder',
-    'cam': 'Attacking midfielder',
-    'lm': 'Left midfielder',
-    'rm': 'Right midfielder',
-    'lw': 'Left winger',
-    'rw': 'Right winger',
-    'cf': 'Centre-forward',
-    'st': 'Striker'
+    'gk': 'Goalkeeper', 'goalkeeper': 'Goalkeeper',
+    'cb': 'Centre-back', 'center-back': 'Centre-back', 'centre-back': 'Centre-back',
+    'lb': 'Left-back', 'left-back': 'Left-back',
+    'rb': 'Right-back', 'right-back': 'Right-back',
+    'cdm': 'Defensive midfielder', 'defensive midfielder': 'Defensive midfielder',
+    'cm': 'Central midfielder', 'central midfielder': 'Central midfielder',
+    'cam': 'Attacking midfielder', 'attacking midfielder': 'Attacking midfielder',
+    'lm': 'Left midfielder', 'left midfielder': 'Left midfielder',
+    'rm': 'Right midfielder', 'right midfielder': 'Right midfielder',
+    'lw': 'Left winger', 'left winger': 'Left winger',
+    'rw': 'Right winger', 'right winger': 'Right winger',
+    'cf': 'Centre-forward', 'center-forward': 'Centre-forward',
+    'st': 'Striker', 'striker': 'Striker'
   };
 
   const lower = position.toLowerCase().trim();
   return positionMap[lower] || position;
 }
 
-// Fetch from Wikipedia with improved data extraction
+function capitalizeWords(str: string): string {
+  return str.replace(/\b\w/g, l => l.toUpperCase());
+}
+
+// Enhanced Wikipedia fetching with better data extraction
 async function fetchFromWikipedia(athleteName: string): Promise<AthleteEnrichmentData> {
   try {
-    console.log(`Fetching data for athlete: ${athleteName}`);
+    console.log(`Fetching high-quality data for athlete: ${athleteName}`);
     
-    // Try multiple Wikipedia endpoints for better data
     const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(athleteName)}`;
     
     const response = await fetch(searchUrl);
@@ -166,27 +182,27 @@ async function fetchFromWikipedia(athleteName: string): Promise<AthleteEnrichmen
 
     const enrichmentData: AthleteEnrichmentData = {};
 
-    // Extract nationality with improved validation
     if (data.extract) {
+      // Extract nationality with strict validation
       const nationality = extractNationalityFromText(data.extract);
-      if (nationality) {
+      if (nationality && isHighQualityNationality(nationality)) {
         enrichmentData.nationality = nationality;
         enrichmentData.country_of_origin = nationality;
       }
 
-      // Extract positions with better validation
+      // Extract positions with strict validation
       const positions = extractPositionsFromText(data.extract);
       if (positions.length > 0) {
         enrichmentData.positions = positions;
       }
     }
 
-    // Extract thumbnail image if available and valid
-    if (data.thumbnail?.source && data.thumbnail.source.includes('upload.wikimedia.org')) {
+    // Only accept high-quality images
+    if (data.thumbnail?.source && isValidImageUrl(data.thumbnail.source)) {
       enrichmentData.profile_picture_url = data.thumbnail.source;
     }
 
-    console.log(`Enrichment data for ${athleteName}:`, enrichmentData);
+    console.log(`High-quality enrichment data for ${athleteName}:`, enrichmentData);
     return enrichmentData;
 
   } catch (error) {
@@ -195,40 +211,58 @@ async function fetchFromWikipedia(athleteName: string): Promise<AthleteEnrichmen
   }
 }
 
-function capitalizeWords(str: string): string {
-  return str.replace(/\b\w/g, l => l.toUpperCase());
-}
+// Generate enrichment suggestions instead of direct updates
+function generateEnrichmentSuggestions(existing: any, enrichment: AthleteEnrichmentData): EnrichmentSuggestion[] {
+  const suggestions: EnrichmentSuggestion[] = [];
 
-// Enhanced merge function with better validation
-function mergeAthleteData(existing: any, enrichment: AthleteEnrichmentData) {
-  const merged = { ...existing };
-
-  // Only update fields that are currently null/empty AND the new data is valid
-  if (!existing.country_of_origin && enrichment.country_of_origin && isValidNationality(enrichment.country_of_origin)) {
-    merged.country_of_origin = enrichment.country_of_origin;
+  // Country suggestion
+  if (!existing.country_of_origin && enrichment.country_of_origin && isHighQualityNationality(enrichment.country_of_origin)) {
+    suggestions.push({
+      field: 'country_of_origin',
+      current_value: null,
+      suggested_value: enrichment.country_of_origin,
+      confidence: 'high',
+      source: 'Wikipedia'
+    });
   }
   
-  if (!existing.nationality && enrichment.nationality && isValidNationality(enrichment.nationality)) {
-    merged.nationality = enrichment.nationality;
+  // Nationality suggestion
+  if (!existing.nationality && enrichment.nationality && isHighQualityNationality(enrichment.nationality)) {
+    suggestions.push({
+      field: 'nationality',
+      current_value: null,
+      suggested_value: enrichment.nationality,
+      confidence: 'high',
+      source: 'Wikipedia'
+    });
   }
   
-  if (!existing.date_of_birth && enrichment.date_of_birth) {
-    merged.date_of_birth = enrichment.date_of_birth;
-  }
-  
+  // Positions suggestion
   if ((!existing.positions || existing.positions.length === 0) && enrichment.positions && enrichment.positions.length > 0) {
-    // Validate all positions before adding
-    const validPositions = enrichment.positions.filter(pos => isValidPosition(pos));
+    const validPositions = enrichment.positions.filter(pos => isHighQualityPosition(pos));
     if (validPositions.length > 0) {
-      merged.positions = validPositions;
+      suggestions.push({
+        field: 'positions',
+        current_value: existing.positions || [],
+        suggested_value: validPositions,
+        confidence: 'high',
+        source: 'Wikipedia'
+      });
     }
   }
   
-  if (!existing.profile_picture_url && enrichment.profile_picture_url) {
-    merged.profile_picture_url = enrichment.profile_picture_url;
+  // Profile picture suggestion
+  if (!existing.profile_picture_url && enrichment.profile_picture_url && isValidImageUrl(enrichment.profile_picture_url)) {
+    suggestions.push({
+      field: 'profile_picture_url',
+      current_value: null,
+      suggested_value: enrichment.profile_picture_url,
+      confidence: 'high',
+      source: 'Wikipedia'
+    });
   }
 
-  return merged;
+  return suggestions;
 }
 
 Deno.serve(async (req) => {
@@ -238,7 +272,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { athlete_ids, single_athlete_id } = await req.json();
+    const { athlete_ids, single_athlete_id, apply_suggestions } = await req.json();
 
     // Check if user is admin
     const authHeader = req.headers.get('Authorization');
@@ -265,6 +299,34 @@ Deno.serve(async (req) => {
       return new Response('Forbidden: Admin access required', { status: 403, headers: corsHeaders });
     }
 
+    // If applying suggestions, handle the update
+    if (apply_suggestions) {
+      const { athlete_id, suggestions } = apply_suggestions;
+      
+      const updateData: any = {};
+      suggestions.forEach((suggestion: any) => {
+        updateData[suggestion.field] = suggestion.suggested_value;
+      });
+      
+      updateData.updated_at = new Date().toISOString();
+
+      const { error: updateError } = await supabase
+        .from('athletes')
+        .update(updateData)
+        .eq('id', athlete_id);
+
+      if (updateError) {
+        return new Response(
+          JSON.stringify({ error: 'Failed to apply suggestions', details: updateError.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(JSON.stringify({ success: true, updated: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     let athletesToProcess: string[] = [];
 
     if (single_athlete_id) {
@@ -276,8 +338,8 @@ Deno.serve(async (req) => {
       const { data: athletes, error } = await supabase
         .from('athletes')
         .select('id, name')
-        .or('country_of_origin.is.null,nationality.is.null,date_of_birth.is.null,positions.is.null,profile_picture_url.is.null')
-        .limit(20); // Process in batches
+        .or('country_of_origin.is.null,nationality.is.null,positions.is.null,profile_picture_url.is.null')
+        .limit(20);
 
       if (error) {
         console.error('Error fetching athletes:', error);
@@ -287,16 +349,16 @@ Deno.serve(async (req) => {
       athletesToProcess = athletes?.map(a => a.id) || [];
     }
 
-    console.log(`Processing ${athletesToProcess.length} athletes for data enrichment`);
+    console.log(`Processing ${athletesToProcess.length} athletes for enrichment suggestions`);
 
     const results = {
       processed: 0,
-      updated: 0,
+      suggestions_found: 0,
       errors: [] as string[],
-      details: [] as any[]
+      athlete_suggestions: [] as any[]
     };
 
-    // Process each athlete
+    // Process each athlete to generate suggestions
     for (const athleteId of athletesToProcess) {
       try {
         results.processed++;
@@ -318,61 +380,19 @@ Deno.serve(async (req) => {
         // Fetch enrichment data
         const enrichmentData = await fetchFromWikipedia(athlete.name);
 
-        // Check if we have any valid new data to add
-        const hasNewData = Object.keys(enrichmentData).some(key => {
-          const currentValue = athlete[key];
-          const newValue = enrichmentData[key as keyof AthleteEnrichmentData];
-          
-          if (!newValue) return false;
-          if (currentValue && (!Array.isArray(currentValue) || currentValue.length > 0)) return false;
-          
-          // Additional validation for specific fields
-          if ((key === 'nationality' || key === 'country_of_origin') && typeof newValue === 'string') {
-            return isValidNationality(newValue);
-          }
-          if (key === 'positions' && Array.isArray(newValue)) {
-            return newValue.some(pos => isValidPosition(pos));
-          }
-          
-          return true;
-        });
+        // Generate suggestions
+        const suggestions = generateEnrichmentSuggestions(athlete, enrichmentData);
 
-        if (!hasNewData) {
-          console.log(`No valid new data found for ${athlete.name}`);
-          results.details.push({
+        if (suggestions.length > 0) {
+          results.suggestions_found++;
+          results.athlete_suggestions.push({
+            athlete_id: athlete.id,
             athlete_name: athlete.name,
-            status: 'no_new_data',
-            data_found: enrichmentData
+            suggestions
           });
-          continue;
-        }
-
-        // Merge and update athlete data
-        const mergedData = mergeAthleteData(athlete, enrichmentData);
-
-        const { error: updateError } = await supabase
-          .from('athletes')
-          .update({
-            country_of_origin: mergedData.country_of_origin,
-            nationality: mergedData.nationality,
-            date_of_birth: mergedData.date_of_birth,
-            positions: mergedData.positions,
-            profile_picture_url: mergedData.profile_picture_url,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', athleteId);
-
-        if (updateError) {
-          console.error(`Error updating athlete ${athlete.name}:`, updateError);
-          results.errors.push(`Failed to update ${athlete.name}: ${updateError.message}`);
+          console.log(`Found ${suggestions.length} high-quality suggestions for ${athlete.name}`);
         } else {
-          results.updated++;
-          console.log(`Successfully updated ${athlete.name}`);
-          results.details.push({
-            athlete_name: athlete.name,
-            status: 'updated',
-            data_added: enrichmentData
-          });
+          console.log(`No high-quality suggestions found for ${athlete.name}`);
         }
 
         // Add delay to avoid rate limiting
@@ -384,7 +404,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Enrichment results:', results);
+    console.log('Enrichment suggestions results:', results);
 
     return new Response(JSON.stringify(results), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

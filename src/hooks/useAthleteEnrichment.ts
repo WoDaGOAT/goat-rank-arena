@@ -36,15 +36,15 @@ export const useAthleteEnrichment = () => {
 
       if (error) {
         console.error('Enrichment error:', error);
-        toast.error(`Enrichment failed: ${error.message}`);
+        toast.error(`Enrichment scan failed: ${error.message}`);
         return null;
       }
 
       return data;
 
     } catch (error) {
-      console.error('Error during enrichment:', error);
-      toast.error("Failed to enrich athlete data");
+      console.error('Error during enrichment scan:', error);
+      toast.error("Failed to scan for enrichment opportunities");
       return null;
     } finally {
       setIsEnriching(false);
