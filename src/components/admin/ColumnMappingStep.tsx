@@ -21,7 +21,6 @@ const DATABASE_FIELDS = [
   { value: "is_active", label: "Active Status" },
   { value: "positions", label: "Positions" },
   { value: "profile_picture_url", label: "Profile Picture URL" },
-  { value: "skip", label: "Skip this column" },
 ];
 
 const ColumnMappingStep = ({ csvHeaders, onMappingComplete, onBack }: ColumnMappingStepProps) => {
@@ -46,35 +45,48 @@ const ColumnMappingStep = ({ csvHeaders, onMappingComplete, onBack }: ColumnMapp
         autoMapping[header] = "positions";
       } else if (lowerHeader === "profile_picture_url" || lowerHeader === "image_url" || lowerHeader === "photo") {
         autoMapping[header] = "profile_picture_url";
-      } else {
-        autoMapping[header] = "skip";
       }
     });
     return autoMapping;
   });
 
   const handleMappingChange = (csvColumn: string, dbField: string) => {
-    setMapping(prev => ({
-      ...prev,
-      [csvColumn]: dbField
-    }));
+    if (dbField === "unmapped") {
+      // Remove the mapping for this column
+      setMapping(prev => {
+        const newMapping = { ...prev };
+        delete newMapping[csvColumn];
+        return newMapping;
+      });
+    } else {
+      setMapping(prev => ({
+        ...prev,
+        [csvColumn]: dbField
+      }));
+    }
   };
 
-  const getUsedFields = () => {
-    return Object.values(mapping).filter(field => field !== "skip");
+  const getMappedFields = () => {
+    return Object.values(mapping);
   };
 
   const isFieldUsed = (field: string) => {
-    return getUsedFields().includes(field);
+    return getMappedFields().includes(field);
   };
 
   const hasRequiredFields = () => {
-    const usedFields = getUsedFields();
-    return usedFields.includes("name");
+    const mappedFields = getMappedFields();
+    return mappedFields.includes("name");
   };
 
   const canProceed = () => {
-    return hasRequiredFields() && Object.keys(mapping).length === csvHeaders.length;
+    return hasRequiredFields();
+  };
+
+  const handleContinue = () => {
+    // Only pass the columns that have been explicitly mapped
+    const filteredMapping = { ...mapping };
+    onMappingComplete(filteredMapping);
   };
 
   return (
@@ -85,13 +97,13 @@ const ColumnMappingStep = ({ csvHeaders, onMappingComplete, onBack }: ColumnMapp
           Map CSV Columns to Database Fields
         </CardTitle>
         <CardDescription>
-          Match your CSV columns to the corresponding database fields. The "Name" field is required.
+          Match your CSV columns to the corresponding database fields. The "Name" field is required. Other columns are optional - you can leave them unmapped if not needed.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4">
           {csvHeaders.map((header, index) => {
-            const selectedField = mapping[header] || "skip";
+            const selectedField = mapping[header];
             const dbField = DATABASE_FIELDS.find(field => field.value === selectedField);
             
             return (
@@ -105,30 +117,33 @@ const ColumnMappingStep = ({ csvHeaders, onMappingComplete, onBack }: ColumnMapp
                 
                 <div className="flex-1">
                   <Select
-                    value={selectedField}
+                    value={selectedField || "unmapped"}
                     onValueChange={(value) => handleMappingChange(header, value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select database field" />
+                      <SelectValue placeholder="Select database field or leave unmapped" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="unmapped">
+                        Leave unmapped
+                      </SelectItem>
                       {DATABASE_FIELDS.map((field) => (
                         <SelectItem 
                           key={field.value} 
                           value={field.value}
-                          disabled={field.value !== "skip" && field.value !== selectedField && isFieldUsed(field.value)}
+                          disabled={field.value !== selectedField && isFieldUsed(field.value)}
                         >
                           {field.label}
                           {field.required && <Badge variant="destructive" className="ml-2 text-xs">Required</Badge>}
-                          {field.value !== "skip" && field.value !== selectedField && isFieldUsed(field.value) && (
+                          {field.value !== selectedField && isFieldUsed(field.value) && (
                             <Badge variant="secondary" className="ml-2 text-xs">Used</Badge>
                           )}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {dbField?.required && selectedField === "skip" && (
-                    <div className="text-xs text-red-600 mt-1">This field is required</div>
+                  {!selectedField && (
+                    <div className="text-xs text-muted-foreground mt-1">Column will be ignored during import</div>
                   )}
                 </div>
               </div>
@@ -147,10 +162,9 @@ const ColumnMappingStep = ({ csvHeaders, onMappingComplete, onBack }: ColumnMapp
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="text-blue-800 font-medium mb-2">Mapping Summary</div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            {Object.entries(mapping)
-              .filter(([_, dbField]) => dbField !== "skip")
-              .map(([csvCol, dbField]) => {
+          {Object.keys(mapping).length > 0 ? (
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {Object.entries(mapping).map(([csvCol, dbField]) => {
                 const field = DATABASE_FIELDS.find(f => f.value === dbField);
                 return (
                   <div key={csvCol} className="flex justify-between">
@@ -159,7 +173,10 @@ const ColumnMappingStep = ({ csvHeaders, onMappingComplete, onBack }: ColumnMapp
                   </div>
                 );
               })}
-          </div>
+            </div>
+          ) : (
+            <div className="text-blue-600 text-sm">No columns mapped yet</div>
+          )}
         </div>
 
         <div className="flex gap-4">
@@ -167,7 +184,7 @@ const ColumnMappingStep = ({ csvHeaders, onMappingComplete, onBack }: ColumnMapp
             Back to Upload
           </Button>
           <Button 
-            onClick={() => onMappingComplete(mapping)} 
+            onClick={handleContinue} 
             disabled={!canProceed()}
           >
             Continue to Preview
