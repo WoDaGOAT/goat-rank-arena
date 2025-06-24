@@ -17,7 +17,7 @@ export const mapDatabaseAthleteToUIAthlete = (
     imageUrl: dbAthlete.profile_picture_url || "/placeholder.svg", // Use the actual profile picture URL
     points,
     movement: "neutral" as const,
-    dateOfBirth: dbAthlete.date_of_birth || "",
+    dateOfBirth: dbAthlete.year_of_birth ? dbAthlete.year_of_birth.toString() : "",
     dateOfDeath: dbAthlete.date_of_death || undefined,
     isActive: dbAthlete.is_active,
     countryOfOrigin: dbAthlete.country_of_origin || "",

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -16,7 +17,6 @@ import { supabase } from "@/lib/supabase";
 import EditAthleteDialog from "./EditAthleteDialog";
 import DeleteAthleteDialog from "./DeleteAthleteDialog";
 import { useAthleteEnrichment } from "@/hooks/useAthleteEnrichment";
-import { format } from "date-fns";
 import { toast } from "sonner";
 import EnrichmentPreviewDialog from "./EnrichmentPreviewDialog";
 
@@ -61,7 +61,7 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
   const hasMissingData = (athlete: any) => {
     return !athlete.country_of_origin || 
            !athlete.nationality || 
-           !athlete.date_of_birth || 
+           !athlete.year_of_birth || 
            !athlete.positions || 
            athlete.positions.length === 0 || 
            !athlete.profile_picture_url;
@@ -153,7 +153,7 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                 <TableHead>Nationality</TableHead>
                 <TableHead>Positions</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Date of Birth</TableHead>
+                <TableHead>Year of Birth</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -207,10 +207,7 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {athlete.date_of_birth 
-                        ? format(new Date(athlete.date_of_birth), "MMM dd, yyyy")
-                        : "N/A"
-                      }
+                      {athlete.year_of_birth || "N/A"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

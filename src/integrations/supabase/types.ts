@@ -916,7 +916,7 @@ export type Database = {
           name: string
           country_of_origin: string
           nationality: string
-          date_of_birth: string
+          year_of_birth: number
           date_of_death: string
           is_active: boolean
           positions: string[]

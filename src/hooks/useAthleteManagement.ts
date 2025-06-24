@@ -9,7 +9,7 @@ interface AthleteData {
   name: string;
   country_of_origin?: string;
   nationality?: string;
-  date_of_birth?: string;
+  year_of_birth?: number;
   date_of_death?: string;
   is_active: boolean;
   positions?: string[];
@@ -28,7 +28,7 @@ export const useAthleteManagement = () => {
           name: athleteData.name,
           country_of_origin: athleteData.country_of_origin || null,
           nationality: athleteData.nationality || null,
-          date_of_birth: athleteData.date_of_birth || null,
+          year_of_birth: athleteData.year_of_birth || null,
           date_of_death: athleteData.date_of_death || null,
           is_active: athleteData.is_active,
           positions: athleteData.positions || null,
@@ -59,7 +59,7 @@ export const useAthleteManagement = () => {
           name: athleteData.name,
           country_of_origin: athleteData.country_of_origin || null,
           nationality: athleteData.nationality || null,
-          date_of_birth: athleteData.date_of_birth || null,
+          year_of_birth: athleteData.year_of_birth || null,
           date_of_death: athleteData.date_of_death || null,
           is_active: athleteData.is_active,
           positions: athleteData.positions || null,

@@ -78,7 +78,7 @@ const AthleteManagementPage = () => {
       const { count: missingDataCount, error: missingDataError } = await supabase
         .from("athletes")
         .select("*", { count: "exact", head: true })
-        .or("country_of_origin.is.null,nationality.is.null,date_of_birth.is.null,positions.is.null,profile_picture_url.is.null");
+        .or("country_of_origin.is.null,nationality.is.null,year_of_birth.is.null,positions.is.null,profile_picture_url.is.null");
 
       if (missingDataError) throw missingDataError;
 

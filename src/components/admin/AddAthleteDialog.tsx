@@ -34,7 +34,7 @@ const athleteSchema = z.object({
   name: z.string().min(1, "Name is required"),
   country_of_origin: z.string().optional(),
   nationality: z.string().optional(),
-  date_of_birth: z.string().optional(),
+  year_of_birth: z.number().min(1800).max(new Date().getFullYear()).optional().or(z.literal("")),
   date_of_death: z.string().optional(),
   is_active: z.boolean().default(true),
   profile_picture_url: z.string().optional(),
@@ -59,7 +59,7 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
       name: "",
       country_of_origin: "",
       nationality: "",
-      date_of_birth: "",
+      year_of_birth: "" as any,
       date_of_death: "",
       is_active: true,
       profile_picture_url: "",
@@ -86,7 +86,7 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
         name: data.name,
         country_of_origin: data.country_of_origin || null,
         nationality: data.nationality || null,
-        date_of_birth: data.date_of_birth || null,
+        year_of_birth: data.year_of_birth && data.year_of_birth !== "" ? Number(data.year_of_birth) : null,
         date_of_death: data.date_of_death || null,
         is_active: data.is_active,
         positions: positions.length > 0 ? positions : null,
@@ -172,12 +172,19 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
 
               <FormField
                 control={form.control}
-                name="date_of_birth"
+                name="year_of_birth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
+                    <FormLabel>Year of Birth</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input 
+                        type="number" 
+                        placeholder="YYYY" 
+                        min="1800" 
+                        max={new Date().getFullYear()}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

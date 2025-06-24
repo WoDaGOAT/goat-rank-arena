@@ -6,7 +6,7 @@ export interface DatabaseAthlete {
   id: string;
   name: string;
   profile_picture_url: string | null;
-  date_of_birth: string | null;
+  year_of_birth: number | null;
   date_of_death: string | null;
   is_active: boolean;
   country_of_origin: string | null;
