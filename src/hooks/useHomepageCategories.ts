@@ -49,6 +49,7 @@ export const useHomepageCategories = () => {
         "GOAT Midfielder",
         "GOAT Attacker",
         "GOAT Free-Kick Taker",
+        "Current GOAT Footballer",
       ];
 
       // Fetch all featured categories
@@ -58,7 +59,7 @@ export const useHomepageCategories = () => {
         .eq("parent_id", parentCategory.id)
         .in("name", featuredCategories)
         .order("name")
-        .limit(9);
+        .limit(10);
 
       if (categoriesError) {
         toast.error("Failed to load categories.");
