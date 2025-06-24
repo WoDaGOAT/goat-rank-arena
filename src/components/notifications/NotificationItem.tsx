@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -185,11 +186,6 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
             declineFriendRequest(notification.data.friendship_id);
         }
     };
-
-    // Don't show declined friend requests in the UI
-    if (notification.type === 'new_friend_request' && notification.data.status === 'declined') {
-        return null;
-    }
 
     const content = (
         <div className="flex items-start gap-3 relative">
