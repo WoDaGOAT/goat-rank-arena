@@ -100,16 +100,20 @@ export const useNotifications = () => {
       let unreadCount = 0;
       
       for (const notification of allNotifications || []) {
-        if (notification.type === 'new_friend_request' && notification.data?.friendship_id) {
-          const { data: friendship } = await supabase
-            .from('friendships')
-            .select('status')
-            .eq('id', notification.data.friendship_id)
-            .maybeSingle();
-          
-          // Only count if the friendship is still pending
-          if (friendship?.status === 'pending') {
-            unreadCount++;
+        if (notification.type === 'new_friend_request') {
+          // Type cast the data to access friendship_id
+          const notificationData = notification.data as any;
+          if (notificationData?.friendship_id) {
+            const { data: friendship } = await supabase
+              .from('friendships')
+              .select('status')
+              .eq('id', notificationData.friendship_id)
+              .maybeSingle();
+            
+            // Only count if the friendship is still pending
+            if (friendship?.status === 'pending') {
+              unreadCount++;
+            }
           }
         } else {
           // Count all other notification types
