@@ -9,11 +9,14 @@ interface FeaturedLeaderboardProps {
   goatFootballer: Category | null;
 }
 
-const CreateRankingButton = ({ categoryId }: { categoryId: string }) => (
+const CreateRankingFAB = ({ categoryId }: { categoryId: string }) => (
   <Link to={`/category/${categoryId}/rank`}>
-    <Button variant="cta" size="lg" className="w-full">
-      <Plus className="w-5 h-5 mr-2" />
-      Create Your GOAT Footballer Ranking
+    <Button 
+      variant="cta" 
+      size="lg" 
+      className="fixed bottom-6 right-6 z-50 rounded-full w-16 h-16 p-0 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110"
+    >
+      <Plus className="w-8 h-8" />
     </Button>
   </Link>
 );
@@ -27,7 +30,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
             athletes={goatFootballer.leaderboard}
             categoryName={goatFootballer.name}
           />
-          <CreateRankingButton categoryId={goatFootballer.id} />
+          <CreateRankingFAB categoryId={goatFootballer.id} />
         </>
       ) : (
         <div className="text-center text-muted-foreground">
