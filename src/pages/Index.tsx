@@ -4,6 +4,7 @@ import HomepageHeader from "@/components/home/HomepageHeader";
 import FeaturedLeaderboard from "@/components/home/FeaturedLeaderboard";
 import CategoriesGrid from "@/components/home/CategoriesGrid";
 import LoadMoreCategories from "@/components/home/LoadMoreCategories";
+import FeedPreview from "@/components/home/FeedPreview";
 import { useHomepageCategories } from "@/hooks/useHomepageCategories";
 
 const Index = () => {
@@ -53,6 +54,9 @@ const Index = () => {
 
               {/* Load More Categories Section */}
               <LoadMoreCategories />
+
+              {/* Feed Preview Section */}
+              <FeedPreview />
             </>
           )}
         </div>
