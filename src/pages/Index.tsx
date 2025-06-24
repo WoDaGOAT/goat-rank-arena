@@ -1,4 +1,3 @@
-
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -157,9 +156,6 @@ const Index = () => {
         style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
       >
         <div className="container mx-auto px-4 py-12 flex-grow">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-10">
-                Explore GOAT Debates
-            </h2>
             {isLoading && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {Array.from({ length: 6 }).map((_, i) => (
