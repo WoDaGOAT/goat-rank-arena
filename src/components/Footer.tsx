@@ -14,7 +14,7 @@ const Footer = () => {
               href="https://www.instagram.com/wodagoatofficial/" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
+              className="text-gray-300 hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
               <Instagram className="h-10 w-10" />
             </a>
@@ -22,7 +22,7 @@ const Footer = () => {
               href="https://www.youtube.com/@WODAGOAT" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
+              className="text-gray-300 hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
               <Youtube className="h-10 w-10" />
             </a>
@@ -30,7 +30,7 @@ const Footer = () => {
               href="https://www.tiktok.com/@wodagoatofficial" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
+              className="text-gray-300 hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
               <TikTokIcon className="h-10 w-10" />
             </a>
@@ -38,7 +38,7 @@ const Footer = () => {
               href="https://www.facebook.com/profile.php?id=61570524337540" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
+              className="text-gray-300 hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
               <Facebook className="h-10 w-10" />
             </a>
@@ -46,7 +46,7 @@ const Footer = () => {
               href="https://x.com/_WODAGOAT" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
+              className="text-gray-300 hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
               <X className="h-10 w-10" />
             </a>
