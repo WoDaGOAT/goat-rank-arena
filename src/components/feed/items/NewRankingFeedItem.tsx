@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from 'date-fns';
@@ -24,11 +25,18 @@ export interface RankedAthlete {
   imageUrl?: string;
 }
 
+// Updated interface to match actual database structure
 export interface NewRankingFeedData {
-  user: ProfileInfo | null;
-  category: CategoryInfo | null;
+  // Support both formats for backward compatibility
+  user?: ProfileInfo | null;
+  author?: ProfileInfo | null;
+  category?: CategoryInfo | null;
+  category_id?: string;
+  category_name?: string;
   ranking_title: string;
-  top_athletes: RankedAthlete[];
+  ranking_id?: string;
+  top_athletes?: RankedAthlete[];
+  athletes?: any; // Can be array or JSONB
 }
 
 interface NewRankingFeedItemProps {
@@ -37,30 +45,53 @@ interface NewRankingFeedItemProps {
 }
 
 const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
-  const { user, category, ranking_title, top_athletes } = data;
+  console.log('NewRankingFeedItem received data:', data); // Debug log
   
-  console.log('NewRankingFeedItem data:', data); // Debug log
+  // Handle both data formats (user vs author)
+  const userProfile = data.user || data.author;
+  
+  // Handle both category formats (object vs separate fields)
+  const category = data.category || (data.category_id && data.category_name ? {
+    id: data.category_id,
+    name: data.category_name
+  } : null);
+  
+  // Handle both athlete formats (top_athletes vs athletes)
+  let athletesArray: RankedAthlete[] = [];
+  if (data.top_athletes && Array.isArray(data.top_athletes)) {
+    athletesArray = data.top_athletes;
+  } else if (data.athletes) {
+    // Handle JSONB or array format
+    if (Array.isArray(data.athletes)) {
+      athletesArray = data.athletes;
+    } else if (typeof data.athletes === 'string') {
+      try {
+        const parsed = JSON.parse(data.athletes);
+        athletesArray = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn('Failed to parse athletes data:', e);
+        athletesArray = [];
+      }
+    }
+  }
   
   // Don't render if we don't have valid user data
-  if (!user?.full_name || user.full_name.trim() === '' || !category?.name) {
-    console.log('NewRankingFeedItem: Missing required data', { user, category }); // Debug log
+  if (!userProfile?.full_name || userProfile.full_name.trim() === '' || !category?.name) {
+    console.log('NewRankingFeedItem: Missing required data', { userProfile, category }); // Debug log
     return null;
   }
   
-  const userName = user.full_name;
-  const userAvatar = user.avatar_url;
+  const userName = userProfile.full_name;
+  const userAvatar = userProfile.avatar_url;
   const sanitizedUserName = sanitize(userName);
   const categoryName = category.name;
-
-  // Ensure top_athletes is an array
-  const athletesArray = Array.isArray(top_athletes) ? top_athletes : [];
 
   return (
     <Card className="bg-white/5 text-white border-gray-700">
       <CardContent className="p-4">
         <div className="flex items-start gap-4 mb-3">
-          {user.id ? (
-            <Link to={`/users/${user.id}`}>
+          {userProfile.id ? (
+            <Link to={`/users/${userProfile.id}`}>
               <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
                 <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName}/>
                 <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
@@ -75,8 +106,8 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
           <div className="flex-1">
             <p className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-yellow-400" />
-              {user.id ? (
-                <Link to={`/users/${user.id}`} className="font-bold hover:underline hover:text-blue-300 transition-colors">
+              {userProfile.id ? (
+                <Link to={`/users/${userProfile.id}`} className="font-bold hover:underline hover:text-blue-300 transition-colors">
                   {sanitizedUserName}
                 </Link>
               ) : (
@@ -95,8 +126,8 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
 
         {/* Ranking preview */}
         <div className="bg-white/10 rounded-lg p-4 ml-5">
-          {ranking_title && ranking_title.trim() && (
-            <h4 className="font-semibold text-blue-300 mb-3">{sanitize(ranking_title)}</h4>
+          {data.ranking_title && data.ranking_title.trim() && (
+            <h4 className="font-semibold text-blue-300 mb-3">{sanitize(data.ranking_title)}</h4>
           )}
           
           {/* Show top 3 athletes */}
