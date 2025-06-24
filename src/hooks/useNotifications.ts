@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Notification } from "@/types/index";
+import { toast } from "@/hooks/use-toast";
 
 export const useNotifications = () => {
   const { user } = useAuth();
@@ -17,13 +18,12 @@ export const useNotifications = () => {
 
       console.log('Fetching notifications for user:', user.id);
       
-      // Use the new optimized index for user notifications
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(50); // Limit to last 50 notifications for performance
+        .limit(50);
 
       if (error) {
         console.error('Error fetching notifications:', error);
@@ -32,12 +32,11 @@ export const useNotifications = () => {
 
       console.log(`Notifications fetched: ${data?.length || 0}`);
       
-      // Cast the database response to the proper Notification discriminated union type
       return (data || []) as Notification[];
     },
     enabled: !!user?.id,
-    staleTime: 1 * 60 * 1000, // 1 minute - notifications should be fresh
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 1 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -62,9 +61,9 @@ export const useNotifications = () => {
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 30 * 1000, // 30 seconds - notification count should be very fresh
-    gcTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true, // Do refetch count on window focus
+    staleTime: 30 * 1000,
+    gcTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 
   const markAllAsReadMutation = useMutation({
@@ -91,9 +90,27 @@ export const useNotifications = () => {
         .eq('id', friendshipId);
 
       if (error) throw error;
+      return friendshipId;
     },
-    onSuccess: () => {
+    onSuccess: (friendshipId) => {
+      toast({
+        title: "Friend request accepted!",
+        description: "You are now friends and can see each other's activity.",
+      });
+      
+      // Invalidate all friendship-related queries
       queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['unread-notifications-count', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['friendship-status'] });
+      queryClient.invalidateQueries({ queryKey: ['publicFriends'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to accept friend request",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -105,9 +122,25 @@ export const useNotifications = () => {
         .eq('id', friendshipId);
 
       if (error) throw error;
+      return friendshipId;
     },
-    onSuccess: () => {
+    onSuccess: (friendshipId) => {
+      toast({
+        title: "Friend request declined",
+        description: "The friend request has been declined.",
+      });
+      
+      // Invalidate all friendship-related queries
       queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['unread-notifications-count', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['friendship-status'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to decline friend request",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -140,7 +173,6 @@ export const useMarkNotificationAsRead = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      // Invalidate notifications cache to refresh the list
       queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['unread-notifications-count', user?.id] });
     },
@@ -168,7 +200,6 @@ export const useMarkAllNotificationsAsRead = () => {
   });
 };
 
-// Get unread notification count with caching
 export const useUnreadNotificationCount = () => {
   const { user } = useAuth();
 
@@ -193,8 +224,8 @@ export const useUnreadNotificationCount = () => {
       return count || 0;
     },
     enabled: !!user?.id,
-    staleTime: 30 * 1000, // 30 seconds - notification count should be very fresh
-    gcTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true, // Do refetch count on window focus
+    staleTime: 30 * 1000,
+    gcTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 };

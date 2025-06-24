@@ -1,7 +1,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useFriendActions = () => {
@@ -25,11 +25,18 @@ export const useFriendActions = () => {
       }
     },
     onSuccess: (_, receiverId) => {
-      toast.success('Friend request sent!');
+      toast({
+        title: "Friend request sent!",
+        description: "Your friend request has been sent successfully.",
+      });
       queryClient.invalidateQueries({ queryKey: ['friendship-status', user?.id, receiverId] });
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast({
+        title: "Failed to send friend request",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -47,11 +54,18 @@ export const useFriendActions = () => {
       if (error) throw new Error('Failed to cancel friend request.');
     },
     onSuccess: (_, receiverId) => {
-      toast.success('Friend request cancelled!');
+      toast({
+        title: "Friend request cancelled",
+        description: "Your friend request has been cancelled.",
+      });
       queryClient.invalidateQueries({ queryKey: ['friendship-status', user?.id, receiverId] });
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast({
+        title: "Failed to cancel friend request",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -65,12 +79,21 @@ export const useFriendActions = () => {
       if (error) throw new Error('Failed to accept friend request.');
     },
     onSuccess: () => {
-      toast.success('Friend request accepted!');
+      toast({
+        title: "Friend request accepted!",
+        description: "You are now friends and can see each other's activity.",
+      });
       queryClient.invalidateQueries({ queryKey: ['friendship-status'] });
       queryClient.invalidateQueries({ queryKey: ['publicFriends'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast({
+        title: "Failed to accept friend request",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -84,12 +107,19 @@ export const useFriendActions = () => {
       if (error) throw new Error('Failed to remove friend.');
     },
     onSuccess: () => {
-      toast.success('Friend removed.');
+      toast({
+        title: "Friend removed",
+        description: "You are no longer friends with this user.",
+      });
       queryClient.invalidateQueries({ queryKey: ['friendship-status'] });
       queryClient.invalidateQueries({ queryKey: ['publicFriends'] });
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast({
+        title: "Failed to remove friend",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 

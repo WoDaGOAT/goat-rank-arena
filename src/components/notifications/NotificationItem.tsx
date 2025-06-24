@@ -187,6 +187,11 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         }
     };
 
+    // Don't show declined friend requests in the UI
+    if (notification.type === 'new_friend_request' && notification.data.status === 'declined') {
+        return null;
+    }
+
     const content = (
         <div className="flex items-start gap-3 relative">
             {!notification.is_read && (
@@ -201,10 +206,21 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
                 </div>
                  {notification.type === 'new_friend_request' && (
                     <div className="flex items-center gap-2 mt-2">
-                        <Button size="sm" onClick={handleAccept} disabled={isAccepting || isDeclining}>
+                        <Button 
+                            size="sm" 
+                            onClick={handleAccept} 
+                            disabled={isAccepting || isDeclining}
+                            className="bg-green-600 hover:bg-green-700"
+                        >
                             {isAccepting ? "Accepting..." : "Accept"}
                         </Button>
-                        <Button variant="outline" size="sm" onClick={handleDecline} disabled={isAccepting || isDeclining}>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleDecline} 
+                            disabled={isAccepting || isDeclining}
+                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                        >
                             {isDeclining ? "Declining..." : "Decline"}
                         </Button>
                     </div>
@@ -249,7 +265,6 @@ const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequ
         );
     }
 
-    // Quiz completed and badge earned notifications are not clickable but still show content
     return (
         <div className="block p-3 hover:bg-white/10 rounded-md transition-colors cursor-default">
             {content}
