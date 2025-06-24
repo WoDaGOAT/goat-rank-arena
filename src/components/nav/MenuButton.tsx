@@ -24,7 +24,6 @@ const MenuButton = ({ item, isOpen, onClick }: MenuButtonProps) => {
         ${isOpen ? 'bg-white/20' : ''}
       `}
     >
-      <span className="text-lg">{item.icon}</span>
       <span className="whitespace-nowrap">{item.name}</span>
       <ChevronDown 
         className={`w-4 h-4 xl:w-5 xl:h-5 transition-transform duration-200 ${

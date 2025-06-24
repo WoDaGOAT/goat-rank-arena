@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -54,19 +53,13 @@ const CustomDropdownMenu = () => {
       }
     });
 
-    // Map to menu structure with icons
-    const menuMapping: Record<string, string> = {
-      'GOAT': '🐐',
-      'Current GOAT': '🏆',
-      'Competitions': '🌍'
-    };
-
+    // Map to menu structure without icons (keeping icon property for compatibility)
     return rootCategories
-      .filter(category => menuMapping[category.name])
+      .filter(category => ['GOAT', 'Current GOAT', 'Competitions'].includes(category.name))
       .map(category => ({
         id: category.id,
         name: category.name,
-        icon: menuMapping[category.name],
+        icon: '', // Empty icon since we're not using them
         children: category.children.map(child => ({
           id: child.id,
           name: child.name,
