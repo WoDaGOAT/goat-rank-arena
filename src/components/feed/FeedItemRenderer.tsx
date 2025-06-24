@@ -36,6 +36,8 @@ interface FeedItemRendererProps {
 }
 
 const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
+  console.log('FeedItemRenderer received item:', item); // Debug log
+  
   // Type guard to ensure we only render valid feed item types
   if (!isValidFeedItemType(item.type)) {
     console.warn(`Unknown feed item type: ${item.type}`);
@@ -47,21 +49,27 @@ const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
     type: item.type
   };
 
-  switch (typedItem.type) {
-    case 'new_user':
-      return <NewUserFeedItem data={typedItem.data as NewUserFeedData} createdAt={typedItem.created_at} />;
-    case 'new_comment':
-      return <NewCommentFeedItem data={typedItem.data as NewCommentFeedData} createdAt={typedItem.created_at} />;
-    case 'accepted_friendship':
-      return <AcceptedFriendshipFeedItem data={typedItem.data as AcceptedFriendshipFeedData} createdAt={typedItem.created_at} />;
-    case 'new_ranking':
-      return <NewRankingFeedItem data={typedItem.data as NewRankingFeedData} createdAt={typedItem.created_at} />;
-    case 'quiz_completed':
-      return <QuizCompletedFeedItem data={typedItem.data as QuizCompletedFeedData} createdAt={typedItem.created_at} />;
-    case 'badge_earned':
-      return <BadgeEarnedFeedItem data={typedItem.data as BadgeEarnedFeedData} createdAt={typedItem.created_at} />;
-    default:
-      return null;
+  try {
+    switch (typedItem.type) {
+      case 'new_user':
+        return <NewUserFeedItem data={typedItem.data as NewUserFeedData} createdAt={typedItem.created_at} />;
+      case 'new_comment':
+        return <NewCommentFeedItem data={typedItem.data as NewCommentFeedData} createdAt={typedItem.created_at} />;
+      case 'accepted_friendship':
+        return <AcceptedFriendshipFeedItem data={typedItem.data as AcceptedFriendshipFeedData} createdAt={typedItem.created_at} />;
+      case 'new_ranking':
+        console.log('Rendering new_ranking item with data:', typedItem.data); // Debug log
+        return <NewRankingFeedItem data={typedItem.data as NewRankingFeedData} createdAt={typedItem.created_at} />;
+      case 'quiz_completed':
+        return <QuizCompletedFeedItem data={typedItem.data as QuizCompletedFeedData} createdAt={typedItem.created_at} />;
+      case 'badge_earned':
+        return <BadgeEarnedFeedItem data={typedItem.data as BadgeEarnedFeedData} createdAt={typedItem.created_at} />;
+      default:
+        return null;
+    }
+  } catch (error) {
+    console.error('Error rendering feed item:', error, typedItem);
+    return null;
   }
 };
 

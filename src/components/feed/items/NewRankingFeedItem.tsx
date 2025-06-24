@@ -40,8 +40,11 @@ interface NewRankingFeedItemProps {
 const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const { user, category, ranking_title, top_athletes } = data;
   
+  console.log('NewRankingFeedItem data:', data); // Debug log
+  
   // Don't render if we don't have valid user data
   if (!user?.full_name || user.full_name.trim() === '' || !category?.name) {
+    console.log('NewRankingFeedItem: Missing required data', { user, category }); // Debug log
     return null;
   }
   
@@ -50,6 +53,9 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const sanitizedUserName = sanitize(userName);
   const categoryName = category.name;
   const rankingTitle = sanitize(ranking_title) || 'Untitled Ranking';
+
+  // Ensure top_athletes is an array
+  const athletesArray = Array.isArray(top_athletes) ? top_athletes : [];
 
   return (
     <Card className="bg-white/5 text-white border-gray-700">
@@ -95,14 +101,20 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
           
           {/* Show top 3 athletes */}
           <div className="space-y-2">
-            {top_athletes?.slice(0, 3).map((athlete) => (
+            {athletesArray?.slice(0, 3).map((athlete) => (
               <RankedAthleteRow key={athlete.id} athlete={athlete} />
             ))}
           </div>
           
-          {top_athletes && top_athletes.length > 3 && (
+          {athletesArray && athletesArray.length > 3 && (
             <p className="text-xs text-gray-400 mt-2 text-center">
-              +{top_athletes.length - 3} more athletes
+              +{athletesArray.length - 3} more athletes
+            </p>
+          )}
+          
+          {(!athletesArray || athletesArray.length === 0) && (
+            <p className="text-xs text-gray-400 text-center">
+              No athletes in this ranking yet
             </p>
           )}
         </div>

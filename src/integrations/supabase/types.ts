@@ -772,7 +772,7 @@ export type Database = {
           | {
               p_ranking_id: string
               p_athletes: Json
-              p_ranking_description: string
+              p_ranking_description?: string
             }
         Returns: undefined
       }
