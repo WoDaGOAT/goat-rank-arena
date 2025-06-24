@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
