@@ -12,7 +12,7 @@ interface Category {
 
 export const useCategories = () => {
   return useQuery<Category[]>({
-    queryKey: ['categories', 'v2'], // Updated cache key to force fresh fetch
+    queryKey: ['categories', 'v3'], // Updated cache key to force fresh fetch
     queryFn: async () => {
       const { data, error } = await supabase.from('categories').select('*');
       if (error) throw new Error(error.message);
