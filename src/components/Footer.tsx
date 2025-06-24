@@ -6,21 +6,36 @@ const Footer = () => {
   return (
     <footer className="py-8 text-center text-muted-foreground border-t border-gray-700/50 mt-12">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-sm">&copy; {new Date().getFullYear()} wodagoat. All rights reserved.</p>
+        <div className="flex flex-col items-center gap-6">
+          {/* Social media icons - centered and more prominent */}
+          <div className="flex gap-6">
+            <a 
+              href="https://facebook.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+            >
+              <Facebook className="h-8 w-8" />
+            </a>
+            <a 
+              href="https://instagram.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+            >
+              <Instagram className="h-8 w-8" />
+            </a>
+          </div>
+          
+          {/* Navigation links */}
           <div className="flex gap-6 items-center">
-            <Link to="/contact" className="text-sm hover:text-primary-foreground transition-colors">Contact</Link>
-            <Link to="/gdpr" className="text-sm hover:text-primary-foreground transition-colors">GDPR</Link>
-            <Link to="/privacy-policy" className="text-sm hover:text-primary-foreground transition-colors">Privacy Policy</Link>
+            <Link to="/contact" className="text-sm hover:text-primary transition-colors">Contact</Link>
+            <Link to="/gdpr" className="text-sm hover:text-primary transition-colors">GDPR</Link>
+            <Link to="/privacy-policy" className="text-sm hover:text-primary transition-colors">Privacy Policy</Link>
           </div>
-          <div className="flex gap-4">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
-              <Facebook className="h-5 w-5" />
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
-              <Instagram className="h-5 w-5" />
-            </a>
-          </div>
+          
+          {/* Copyright */}
+          <p className="text-sm">&copy; {new Date().getFullYear()} wodagoat. All rights reserved.</p>
         </div>
       </div>
     </footer>
