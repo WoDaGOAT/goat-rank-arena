@@ -9,16 +9,19 @@ interface FeaturedLeaderboardProps {
   goatFootballer: Category | null;
 }
 
-const CreateRankingFAB = ({ categoryId }: { categoryId: string }) => (
-  <Link to={`/category/${categoryId}/rank`}>
+const CreateRankingButton = ({ categoryId }: { categoryId: string }) => (
+  <div className="mb-6">
     <Button 
+      asChild 
       variant="cta" 
-      size="lg" 
-      className="fixed bottom-6 right-6 z-50 rounded-full w-16 h-16 p-0 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110"
+      className="rounded-full shadow-2xl hover:scale-105 transition-transform w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12"
     >
-      <Plus className="w-8 h-8" />
+      <Link to={`/category/${categoryId}/rank`} title="Create Your Ranking">
+        <Plus className="h-6 w-6 sm:h-7 sm:w-7 md:h-6 md:w-6 md:mr-2 shrink-0" />
+        <span className="hidden md:inline font-semibold">Create Ranking</span>
+      </Link>
     </Button>
-  </Link>
+  </div>
 );
 
 const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
@@ -26,11 +29,11 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
     <div className="lg:col-span-2 space-y-6">
       {goatFootballer ? (
         <>
+          <CreateRankingButton categoryId={goatFootballer.id} />
           <GlobalLeaderboard
             athletes={goatFootballer.leaderboard}
             categoryName={goatFootballer.name}
           />
-          <CreateRankingFAB categoryId={goatFootballer.id} />
         </>
       ) : (
         <div className="text-center text-muted-foreground">
