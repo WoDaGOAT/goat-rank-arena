@@ -7,7 +7,7 @@ import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 
 export const useAdditionalCategories = () => {
   return useQuery<Category[]>({
-    queryKey: ["additionalCategories", "v1"],
+    queryKey: ["additionalCategories", "v2"],
     queryFn: async () => {
       console.log("Starting additional categories query...");
       
@@ -23,11 +23,11 @@ export const useAdditionalCategories = () => {
         throw new Error(athletesError.message);
       }
 
-      // Get both parent category IDs
+      // Get all three parent category IDs including Competitions
       const { data: parentCategories, error: parentError } = await supabase
         .from("categories")
         .select("id, name")
-        .in("name", ["GOAT", "Current GOAT"])
+        .in("name", ["GOAT", "Current GOAT", "Competitions"])
         .is("parent_id", null);
 
       if (parentError || !parentCategories || parentCategories.length === 0) {
