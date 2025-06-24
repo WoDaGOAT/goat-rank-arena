@@ -97,7 +97,9 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
 
         {/* Ranking preview */}
         <div className="bg-white/10 rounded-lg p-4 ml-5">
-          <h4 className="font-semibold text-blue-300 mb-3">{rankingTitle}</h4>
+          {ranking_title && ranking_title.trim() && (
+            <h4 className="font-semibold text-blue-300 mb-3">{rankingTitle}</h4>
+          )}
           
           {/* Show top 3 athletes */}
           <div className="space-y-2">
