@@ -40,35 +40,38 @@ interface NewRankingFeedItemProps {
 const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const { user, category, ranking_title, top_athletes } = data;
   
-  const userName = user?.full_name || 'Anonymous';
-  const userAvatar = user?.avatar_url;
+  // Don't render if we don't have valid user data
+  if (!user?.full_name || user.full_name.trim() === '' || !category?.name) {
+    return null;
+  }
+  
+  const userName = user.full_name;
+  const userAvatar = user.avatar_url;
   const sanitizedUserName = sanitize(userName);
-  const categoryName = category?.name || 'Unknown Category';
+  const categoryName = category.name;
   const rankingTitle = sanitize(ranking_title) || 'Untitled Ranking';
 
   return (
     <Card className="bg-white/5 text-white border-gray-700">
       <CardContent className="p-4">
         <div className="flex items-start gap-4 mb-3">
-          {/* Make avatar clickable */}
-          {user?.id ? (
+          {user.id ? (
             <Link to={`/users/${user.id}`}>
               <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
-                <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName || 'User'}/>
-                <AvatarFallback>{sanitizedUserName?.charAt(0) || 'A'}</AvatarFallback>
+                <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName}/>
+                <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
             </Link>
           ) : (
             <Avatar>
-              <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName || 'User'}/>
-              <AvatarFallback>{sanitizedUserName?.charAt(0) || 'A'}</AvatarFallback>
+              <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName}/>
+              <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           )}
           <div className="flex-1">
             <p className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-yellow-400" />
-              {/* Make user name clickable */}
-              {user?.id ? (
+              {user.id ? (
                 <Link to={`/users/${user.id}`} className="font-bold hover:underline hover:text-blue-300 transition-colors">
                   {sanitizedUserName}
                 </Link>
@@ -76,13 +79,9 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
                 <span className="font-bold">{sanitizedUserName}</span>
               )}
               {' '} created a new ranking in {' '}
-              {category?.id ? (
-                <Link to={`/category/${category.id}`} className="text-blue-300 hover:underline">
-                  {sanitize(categoryName)}
-                </Link>
-              ) : (
-                <span className="text-blue-300">{sanitize(categoryName)}</span>
-              )}
+              <Link to={`/category/${category.id}`} className="text-blue-300 hover:underline">
+                {sanitize(categoryName)}
+              </Link>
             </p>
             <p className="text-xs text-gray-400">
               {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}

@@ -35,10 +35,15 @@ interface QuizCompletedFeedItemProps {
 const QuizCompletedFeedItem = ({ data, createdAt }: QuizCompletedFeedItemProps) => {
   const { user, quiz, score, total_questions } = data;
   
-  const userName = user?.full_name || 'Anonymous';
-  const userAvatar = user?.avatar_url;
+  // Don't render if we don't have valid user data
+  if (!user?.full_name || user.full_name.trim() === '' || !quiz?.title) {
+    return null;
+  }
+  
+  const userName = user.full_name;
+  const userAvatar = user.avatar_url;
   const sanitizedUserName = sanitize(userName);
-  const quizTitle = quiz?.title || 'Unknown Quiz';
+  const quizTitle = quiz.title;
   const accuracy = Math.round((score / total_questions) * 100);
   
   const getScoreColor = () => {
@@ -60,25 +65,23 @@ const QuizCompletedFeedItem = ({ data, createdAt }: QuizCompletedFeedItemProps) 
     <Card className="bg-white/5 text-white border-gray-700">
       <CardContent className="p-4">
         <div className="flex items-start gap-4 mb-3">
-          {/* Make avatar clickable */}
-          {user?.id ? (
+          {user.id ? (
             <Link to={`/users/${user.id}`}>
               <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
-                <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName || 'User'}/>
-                <AvatarFallback>{sanitizedUserName?.charAt(0) || 'A'}</AvatarFallback>
+                <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName}/>
+                <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
             </Link>
           ) : (
             <Avatar>
-              <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName || 'User'}/>
-              <AvatarFallback>{sanitizedUserName?.charAt(0) || 'A'}</AvatarFallback>
+              <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName}/>
+              <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           )}
           <div className="flex-1">
             <p className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-blue-300" />
-              {/* Make user name clickable */}
-              {user?.id ? (
+              {user.id ? (
                 <Link to={`/users/${user.id}`} className="font-bold hover:underline hover:text-blue-300 transition-colors">
                   {sanitizedUserName}
                 </Link>

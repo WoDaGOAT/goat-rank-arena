@@ -34,12 +34,17 @@ interface BadgeEarnedFeedItemProps {
 const BadgeEarnedFeedItem = ({ data, createdAt }: BadgeEarnedFeedItemProps) => {
   const { user, badge } = data;
   
-  const userName = user?.full_name || 'Anonymous';
-  const userAvatar = user?.avatar_url;
+  // Don't render if we don't have valid user data
+  if (!user?.full_name || user.full_name.trim() === '' || !badge?.name) {
+    return null;
+  }
+  
+  const userName = user.full_name;
+  const userAvatar = user.avatar_url;
   const sanitizedUserName = sanitize(userName);
-  const badgeName = badge?.name || 'Unknown Badge';
-  const badgeDescription = badge?.description || 'Badge earned';
-  const badgeRarity = badge?.rarity || 'common';
+  const badgeName = badge.name;
+  const badgeDescription = badge.description;
+  const badgeRarity = badge.rarity || 'common';
   
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
@@ -62,31 +67,29 @@ const BadgeEarnedFeedItem = ({ data, createdAt }: BadgeEarnedFeedItemProps) => {
     }
   };
 
-  const BadgeIcon = getBadgeIcon(badge?.id || '');
+  const BadgeIcon = getBadgeIcon(badge.id);
 
   return (
     <Card className="bg-white/5 text-white border-gray-700">
       <CardContent className="p-4">
         <div className="flex items-start gap-4 mb-3">
-          {/* Make avatar clickable */}
-          {user?.id ? (
+          {user.id ? (
             <Link to={`/users/${user.id}`}>
               <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
-                <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName || 'User'}/>
-                <AvatarFallback>{sanitizedUserName?.charAt(0) || 'A'}</AvatarFallback>
+                <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName}/>
+                <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
             </Link>
           ) : (
             <Avatar>
-              <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName || 'User'}/>
-              <AvatarFallback>{sanitizedUserName?.charAt(0) || 'A'}</AvatarFallback>
+              <AvatarImage src={userAvatar || undefined} alt={sanitizedUserName}/>
+              <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           )}
           <div className="flex-1">
             <p className="flex items-center gap-2">
               <Award className="w-4 h-4 text-purple-400" />
-              {/* Make user name clickable */}
-              {user?.id ? (
+              {user.id ? (
                 <Link to={`/users/${user.id}`} className="font-bold hover:underline hover:text-blue-300 transition-colors">
                   {sanitizedUserName}
                 </Link>

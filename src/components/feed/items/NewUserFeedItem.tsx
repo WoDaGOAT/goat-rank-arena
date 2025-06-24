@@ -26,6 +26,11 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
   const { user } = useAuthState();
   const { data: friendshipStatus } = useFriendshipStatus(user?.id, data.user_id);
   
+  // Don't render if we don't have a valid user name
+  if (!data.user_name || data.user_name.trim() === '') {
+    return null;
+  }
+  
   const sanitizedUserName = sanitize(data.user_name);
 
   const handleSendFriendRequest = async () => {
@@ -78,8 +83,8 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
         <div className="flex items-start gap-4 mb-3">
           <Link to={`/users/${data.user_id}`}>
             <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
-              <AvatarImage src={data.avatar_url || undefined} alt={sanitizedUserName || 'User'} />
-              <AvatarFallback>{sanitizedUserName?.charAt(0) || 'U'}</AvatarFallback>
+              <AvatarImage src={data.avatar_url || undefined} alt={sanitizedUserName} />
+              <AvatarFallback>{sanitizedUserName.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </Link>
           <div className="flex-1">
