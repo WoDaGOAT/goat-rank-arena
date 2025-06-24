@@ -13,7 +13,7 @@ const CreateRankingButton = ({ categoryId }: { categoryId: string }) => (
   <Button 
     asChild 
     variant="cta" 
-    className="absolute top-4 right-4 z-10 rounded-full shadow-2xl hover:scale-105 transition-transform w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12"
+    className="fixed bottom-6 right-6 z-50 rounded-full shadow-2xl hover:scale-105 transition-transform w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12"
   >
     <Link to={`/category/${categoryId}/rank`} title="Create Your Ranking">
       <Plus className="h-6 w-6 sm:h-7 sm:w-7 md:h-6 md:w-6 md:mr-2 shrink-0" />
