@@ -83,7 +83,6 @@ export type Database = {
         Row: {
           country_of_origin: string | null
           created_at: string
-          date_of_birth: string | null
           date_of_death: string | null
           id: string
           is_active: boolean
@@ -92,11 +91,11 @@ export type Database = {
           positions: string[] | null
           profile_picture_url: string | null
           updated_at: string
+          year_of_birth: number | null
         }
         Insert: {
           country_of_origin?: string | null
           created_at?: string
-          date_of_birth?: string | null
           date_of_death?: string | null
           id: string
           is_active?: boolean
@@ -105,11 +104,11 @@ export type Database = {
           positions?: string[] | null
           profile_picture_url?: string | null
           updated_at?: string
+          year_of_birth?: number | null
         }
         Update: {
           country_of_origin?: string | null
           created_at?: string
-          date_of_birth?: string | null
           date_of_death?: string | null
           id?: string
           is_active?: boolean
@@ -118,6 +117,7 @@ export type Database = {
           positions?: string[] | null
           profile_picture_url?: string | null
           updated_at?: string
+          year_of_birth?: number | null
         }
         Relationships: []
       }

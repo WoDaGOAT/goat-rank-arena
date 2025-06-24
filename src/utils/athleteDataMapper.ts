@@ -14,15 +14,15 @@ export const mapDatabaseAthleteToUIAthlete = (
     id: dbAthlete.id,
     rank,
     name: dbAthlete.name,
-    imageUrl: dbAthlete.profile_picture_url || "/placeholder.svg", // Use the actual profile picture URL
+    imageUrl: dbAthlete.profile_picture_url || "/placeholder.svg",
     points,
     movement: "neutral" as const,
     dateOfBirth: dbAthlete.year_of_birth ? dbAthlete.year_of_birth.toString() : "",
     dateOfDeath: dbAthlete.date_of_death || undefined,
     isActive: dbAthlete.is_active,
     countryOfOrigin: dbAthlete.country_of_origin || "",
-    clubs: [], // Will be populated from athlete_clubs table if needed
-    competitions: [], // Will be populated from athlete_competitions table if needed
+    clubs: [],
+    competitions: [],
     positions: dbAthlete.positions || [],
     nationality: dbAthlete.nationality || "",
   };
