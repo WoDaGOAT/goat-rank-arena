@@ -19,7 +19,7 @@ const CreateRankingButton = ({ categoryId, isSticky }: { categoryId: string; isS
       w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center 
       md:w-auto md:px-6 md:py-3 md:h-12
       ${isSticky 
-        ? 'absolute left-4 top-4' 
+        ? 'absolute left-4 -bottom-20' 
         : 'fixed bottom-6 left-6'
       }
     `}
@@ -68,11 +68,11 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
     <div className="lg:col-span-2 space-y-6">
       {goatFootballer ? (
         <div className="relative" ref={leaderboardRef}>
-          <CreateRankingButton categoryId={goatFootballer.id} isSticky={isSticky} />
           <GlobalLeaderboard
             athletes={goatFootballer.leaderboard}
             categoryName={goatFootballer.name}
           />
+          <CreateRankingButton categoryId={goatFootballer.id} isSticky={isSticky} />
         </div>
       ) : (
         <div className="text-center text-muted-foreground">
