@@ -33,7 +33,7 @@ const athleteSchema = z.object({
   name: z.string().min(1, "Name is required"),
   country_of_origin: z.string().optional(),
   nationality: z.string().optional(),
-  year_of_birth: z.number().min(1800).max(new Date().getFullYear()).optional().or(z.literal("")),
+  year_of_birth: z.number().min(1800).max(new Date().getFullYear()).optional(),
   date_of_death: z.string().optional(),
   is_active: z.boolean(),
   profile_picture_url: z.string().optional(),
@@ -60,7 +60,7 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
       name: "",
       country_of_origin: "",
       nationality: "",
-      year_of_birth: "" as any,
+      year_of_birth: undefined,
       date_of_death: "",
       is_active: true,
       profile_picture_url: "",
@@ -73,7 +73,7 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
         name: athlete.name || "",
         country_of_origin: athlete.country_of_origin || "",
         nationality: athlete.nationality || "",
-        year_of_birth: athlete.year_of_birth || ("" as any),
+        year_of_birth: athlete.year_of_birth || undefined,
         date_of_death: athlete.date_of_death || "",
         is_active: athlete.is_active,
         profile_picture_url: athlete.profile_picture_url || "",
@@ -101,7 +101,7 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
         name: data.name,
         country_of_origin: data.country_of_origin || null,
         nationality: data.nationality || null,
-        year_of_birth: data.year_of_birth && data.year_of_birth !== "" ? Number(data.year_of_birth) : null,
+        year_of_birth: data.year_of_birth || null,
         date_of_death: data.date_of_death || null,
         is_active: data.is_active,
         positions: positions.length > 0 ? positions : null,
@@ -195,8 +195,8 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
                         placeholder="YYYY" 
                         min="1800" 
                         max={new Date().getFullYear()}
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -217,7 +217,7 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
                       Only fill if the athlete is deceased
                     </FormDescription>
                     <FormMessage />
-                  </FormItem>
+                  </FormMessage>
                 )}
               />
 
