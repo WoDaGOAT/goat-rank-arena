@@ -81,9 +81,9 @@ const NotificationsList = ({ variant = 'page', maxHeight = '400px' }: Notificati
       )}
 
       <ScrollArea 
-        className="flex-1" 
+        className={`flex-1 ${variant === 'dropdown' ? 'h-full' : ''}`}
         style={{ 
-          maxHeight: variant === 'dropdown' ? maxHeight : 'calc(100vh - 200px)',
+          height: variant === 'dropdown' ? maxHeight : 'calc(100vh - 200px)',
           minHeight: variant === 'dropdown' ? '200px' : '400px'
         }}
       >

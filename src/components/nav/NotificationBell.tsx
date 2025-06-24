@@ -27,7 +27,7 @@ const NotificationBell = () => {
                     )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96 bg-gray-900 border-gray-700 text-white p-0" align="end">
+            <PopoverContent className="w-96 bg-gray-900 border-gray-700 text-white p-0 z-50" align="end">
                 <div className="flex items-center justify-between p-3 font-semibold border-b border-gray-700">
                     <span>Notifications</span>
                     <Link 
@@ -37,7 +37,9 @@ const NotificationBell = () => {
                         View All
                     </Link>
                 </div>
-                <NotificationsList variant="dropdown" maxHeight="400px" />
+                <div className="h-96 overflow-hidden">
+                    <NotificationsList variant="dropdown" maxHeight="384px" />
+                </div>
             </PopoverContent>
         </Popover>
     );
