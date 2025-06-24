@@ -1,11 +1,11 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { sanitize } from "@/lib/sanitize";
-import { Trophy } from "lucide-react";
+import { Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import RankedAthleteRow from "./RankedAthleteRow";
+import { useState } from "react";
 
 export interface ProfileInfo {
   id?: string;
@@ -47,6 +47,8 @@ interface NewRankingFeedItemProps {
 const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   console.log('NewRankingFeedItem received data:', data); // Debug log
   
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   // Handle both data formats (user vs author)
   const userProfile = data.user || data.author;
   
@@ -85,6 +87,9 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const userAvatar = userProfile.avatar_url;
   const sanitizedUserName = sanitize(userName);
   const categoryName = category.name;
+
+  const athletesToShow = isExpanded ? athletesArray : athletesArray?.slice(0, 3);
+  const hasMoreAthletes = athletesArray && athletesArray.length > 3;
 
   return (
     <Card className="bg-white/5 text-white border-gray-700">
@@ -130,17 +135,31 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
             <h4 className="font-semibold text-blue-300 mb-3">{sanitize(data.ranking_title)}</h4>
           )}
           
-          {/* Show top 3 athletes */}
+          {/* Show athletes */}
           <div className="space-y-2">
-            {athletesArray?.slice(0, 3).map((athlete) => (
+            {athletesToShow?.map((athlete) => (
               <RankedAthleteRow key={athlete.id} athlete={athlete} />
             ))}
           </div>
           
-          {athletesArray && athletesArray.length > 3 && (
-            <p className="text-xs text-gray-400 mt-2 text-center">
-              +{athletesArray.length - 3} more athletes
-            </p>
+          {/* Expand/Collapse button */}
+          {hasMoreAthletes && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="w-full text-xs text-blue-300 hover:text-blue-200 mt-3 py-2 rounded-md hover:bg-white/5 transition-colors flex items-center justify-center gap-1"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="w-3 h-3" />
+                  Show less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-3 h-3" />
+                  +{athletesArray.length - 3} more athletes
+                </>
+              )}
+            </button>
           )}
           
           {(!athletesArray || athletesArray.length === 0) && (
