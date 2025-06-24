@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
-import CategoriesGrid from "./CategoriesGrid";
+import AdditionalCategoriesGrid from "./AdditionalCategoriesGrid";
 import { useAdditionalCategories } from "@/hooks/useAdditionalCategories";
 
 const LoadMoreCategories = () => {
@@ -47,7 +47,7 @@ const LoadMoreCategories = () => {
 
       {showMore && additionalCategories && additionalCategories.length > 0 && (
         <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
-          <CategoriesGrid categories={additionalCategories} />
+          <AdditionalCategoriesGrid categories={additionalCategories} />
         </div>
       )}
 
