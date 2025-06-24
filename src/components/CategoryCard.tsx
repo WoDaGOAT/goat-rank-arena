@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Category } from "@/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Flag, Octagon } from "lucide-react";
 import PodiumDisplay from "./PodiumDisplay";
 
@@ -33,7 +33,6 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
             <Flag className="w-4 h-4 mr-2" />
             <span className="text-sm">{category.userRankingCount.toLocaleString()} rankings submitted</span>
           </div>
-          <CardDescription className="text-primary-foreground/80 h-12">{category.description}</CardDescription>
         </CardHeader>
       </Card>
     </Link>
