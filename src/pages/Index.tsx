@@ -1,3 +1,4 @@
+
 import CategoryCard from "@/components/CategoryCard";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { useQuery } from "@tanstack/react-query";
@@ -7,21 +8,34 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
-import { useAthletes } from "@/hooks/useAthletes";
 import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
 
 const Index = () => {
-  const { data: athletes = [] } = useAthletes();
-
   const { data: categoriesData, isLoading, isError } = useQuery<{
     goatFootballer: Category | null;
     otherCategories: Category[];
   }>({
-    queryKey: ["homepageCategories"],
+    queryKey: ["homepageCategories", "v3"], // Updated cache key for fresh data
     queryFn: async () => {
-      // First, get the ID of the 'GOAT' parent category
+      console.log("Starting homepage categories query...");
+      
+      // First, fetch all athletes data directly
+      const { data: athletesData, error: athletesError } = await supabase
+        .from("athletes")
+        .select("*")
+        .order("name");
+
+      if (athletesError) {
+        console.error("Error fetching athletes:", athletesError);
+        toast.error("Failed to load athlete data.");
+        throw new Error(athletesError.message);
+      }
+
+      console.log("Athletes fetched:", athletesData?.length || 0);
+
+      // Then, get the ID of the 'GOAT' parent category
       const { data: parentCategory, error: parentError } = await supabase
         .from("categories")
         .select("id")
@@ -45,7 +59,7 @@ const Index = () => {
       ];
 
       // Fetch all featured categories
-      const { data, error } = await supabase
+      const { data: categoriesRaw, error: categoriesError } = await supabase
         .from("categories")
         .select("*")
         .eq("parent_id", parentCategory.id)
@@ -53,15 +67,15 @@ const Index = () => {
         .order("name")
         .limit(9);
 
-      if (error) {
+      if (categoriesError) {
         toast.error("Failed to load categories.");
-        console.error("Error fetching categories:", error);
-        throw new Error(error.message);
+        console.error("Error fetching categories:", categoriesError);
+        throw new Error(categoriesError.message);
       }
 
-      // Process categories and separate GOAT Footballer
+      // Process categories and calculate leaderboards
       const categoriesWithLeaderboards = await Promise.all(
-        data.map(async (c) => {
+        categoriesRaw.map(async (c) => {
           // Get the actual count of user rankings for this category
           const { count: rankingCount, error: countError } = await supabase
             .from("user_rankings")
@@ -86,7 +100,9 @@ const Index = () => {
 
           let leaderboard: Athlete[] = [];
 
-          if (!rankingsError && athleteRankings && athleteRankings.length > 0) {
+          if (!rankingsError && athleteRankings && athleteRankings.length > 0 && athletesData) {
+            console.log(`Processing leaderboard for ${c.name}, found ${athleteRankings.length} rankings`);
+            
             // Calculate athlete scores from all rankings
             const athleteScores: Record<string, { totalScore: number; appearances: number }> = {};
             
@@ -111,10 +127,12 @@ const Index = () => {
               }
             });
 
+            console.log(`Found ${Object.keys(athleteScores).length} athletes with scores for ${c.name}`);
+
             // Convert to leaderboard format and sort by total score
             const athleteObjects = Object.entries(athleteScores)
               .map(([athleteId, { totalScore }]) => {
-                const athleteData = athletes.find(athlete => athlete.id === athleteId);
+                const athleteData = athletesData.find(athlete => athlete.id === athleteId);
                 
                 if (!athleteData) {
                   console.warn(`Athlete data not found for ID: ${athleteId}`);
@@ -134,6 +152,10 @@ const Index = () => {
                 ...athlete,
                 rank: index + 1
               }));
+
+            console.log(`Final leaderboard for ${c.name}:`, leaderboard.length, "athletes");
+          } else {
+            console.log(`No rankings found for ${c.name}`);
           }
 
           return {
@@ -151,12 +173,15 @@ const Index = () => {
       const goatFootballer = categoriesWithLeaderboards.find(c => c.name === "GOAT Footballer") || null;
       const otherCategories = categoriesWithLeaderboards.filter(c => c.name !== "GOAT Footballer");
 
+      console.log("GOAT Footballer leaderboard:", goatFootballer?.leaderboard?.length || 0, "athletes");
+
       return {
         goatFootballer,
         otherCategories
       };
     },
     retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const CreateRankingButton = ({ categoryId }: { categoryId: string }) => (
@@ -197,9 +222,10 @@ const Index = () => {
           )}
           
           {isError && (
-            <p className="text-center text-red-400 text-lg">
-              Could not load categories. Please try again later.
-            </p>
+            <div className="text-center text-red-400 text-lg space-y-2">
+              <p>Could not load categories. Please try again later.</p>
+              <p className="text-sm text-red-300">Check the console for more details.</p>
+            </div>
           )}
           
           {!isLoading && !isError && categoriesData && (
