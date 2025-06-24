@@ -57,7 +57,7 @@ const CustomDropdownMenu = () => {
     // Map to menu structure with icons
     const menuMapping: Record<string, string> = {
       'GOAT': '🐐',
-      'Greatest of This Season': '🏆',
+      'Current GOAT': '🏆',
       'Competitions': '🌍'
     };
 
@@ -74,7 +74,7 @@ const CustomDropdownMenu = () => {
         }))
       }))
       .sort((a, b) => {
-        const order = ['GOAT', 'Greatest of This Season', 'Competitions'];
+        const order = ['GOAT', 'Current GOAT', 'Competitions'];
         return order.indexOf(a.name) - order.indexOf(b.name);
       });
   }, [allCategories]);
