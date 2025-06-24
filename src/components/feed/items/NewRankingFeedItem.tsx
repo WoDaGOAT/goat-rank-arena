@@ -126,7 +126,7 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
 
         {/* Ranking preview */}
         <div className="bg-white/10 rounded-lg p-4 ml-5">
-          {data.ranking_title && data.ranking_title.trim() && (
+          {data.ranking_title && data.ranking_title.trim() && data.ranking_title !== "My Ranking" && (
             <h4 className="font-semibold text-blue-300 mb-3">{sanitize(data.ranking_title)}</h4>
           )}
           
