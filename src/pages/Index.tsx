@@ -10,10 +10,7 @@ const Index = () => {
   return (
     <>
       <HomepageHeader />
-      <div
-        className="flex flex-col flex-grow"
-        style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
-      >
+      <div className="flex flex-col flex-grow bg-gray-900/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-12 flex-grow">
           {isLoading && (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
