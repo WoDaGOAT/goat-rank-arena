@@ -1,7 +1,9 @@
+
 import { Skeleton } from "@/components/ui/skeleton";
 import HomepageHeader from "@/components/home/HomepageHeader";
 import FeaturedLeaderboard from "@/components/home/FeaturedLeaderboard";
 import CategoriesGrid from "@/components/home/CategoriesGrid";
+import LoadMoreCategories from "@/components/home/LoadMoreCategories";
 import { useHomepageCategories } from "@/hooks/useHomepageCategories";
 
 const Index = () => {
@@ -40,13 +42,18 @@ const Index = () => {
           )}
           
           {!isLoading && !isError && categoriesData && (
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              {/* Left side - Featured GOAT Footballer Leaderboard */}
-              <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                {/* Left side - Featured GOAT Footballer Leaderboard */}
+                <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
 
-              {/* Right side - Other Category Cards */}
-              <CategoriesGrid categories={categoriesData.otherCategories} />
-            </div>
+                {/* Right side - Other Category Cards */}
+                <CategoriesGrid categories={categoriesData.otherCategories} />
+              </div>
+
+              {/* Load More Categories Section */}
+              <LoadMoreCategories />
+            </>
           )}
         </div>
       </div>
