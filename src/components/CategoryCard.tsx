@@ -29,14 +29,12 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
             )}
           </div>
           <CardTitle className="text-2xl font-semibold text-primary">{category.name}</CardTitle>
+          <div className="flex items-center text-muted-foreground mt-2 mb-3">
+            <Flag className="w-4 h-4 mr-2" />
+            <span className="text-sm">{category.userRankingCount.toLocaleString()} rankings submitted</span>
+          </div>
           <CardDescription className="text-primary-foreground/80 h-12">{category.description}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center text-muted-foreground">
-            <Flag className="w-4 h-4 mr-2" />
-            <span>{category.userRankingCount.toLocaleString()} rankings submitted</span>
-          </div>
-        </CardContent>
       </Card>
     </Link>
   );
