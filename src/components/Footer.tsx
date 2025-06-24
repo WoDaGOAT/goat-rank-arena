@@ -3,7 +3,7 @@ import { Facebook, Instagram } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="py-8 text-center text-muted-foreground border-t border-gray-700/50 mt-12 bg-gray-900/95 backdrop-blur-sm">
+    <footer className="py-8 text-center text-muted-foreground border-t border-gray-700/50 mt-12">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-6">
           {/* Social media icons - centered and more prominent */}
