@@ -851,6 +851,10 @@ export type Database = {
           positions_count: number
         }[]
       }
+      get_friendship_pair_key: {
+        Args: { requester_id: string; receiver_id: string }
+        Returns: string
+      }
       get_quiz_leaderboard: {
         Args:
           | Record<PropertyKey, never>
