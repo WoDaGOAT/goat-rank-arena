@@ -24,8 +24,7 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
       <CardHeader className="border-b border-white/30 bg-white/5 relative overflow-hidden p-3 sm:p-4 md:p-6">
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5"></div>
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex-1 hidden sm:block"></div>
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1">
               {sanitize(categoryName)}
             </h1>
@@ -33,7 +32,7 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
               🎮 Live Rankings • Top 10 Champions
             </p>
           </div>
-          <div className="flex-1 flex justify-center sm:justify-end">
+          <div className="flex justify-center sm:justify-end">
             <Button
               variant="outline"
               size="sm"
