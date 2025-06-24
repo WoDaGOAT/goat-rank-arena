@@ -22,8 +22,8 @@ const buttonVariants = cva(
         cta:
           // Normal (enabled) style
           "bg-gradient-to-r from-fuchsia-500 to-cyan-500 font-poppins text-white rounded-lg px-6 py-2 font-semibold text-lg shadow transition-opacity hover:opacity-90 " +
-          // Disabled state override (use Figma spec)
-          "disabled:bg-white disabled:text-[#A2A2A2] disabled:shadow-none disabled:rounded-[12px] disabled:border-0 disabled:h-[36px] disabled:min-w-[58px] disabled:font-semibold disabled:opacity-100",
+          // Disabled state override (use Figma spec) - darker text for better contrast
+          "disabled:bg-white disabled:text-[#666666] disabled:shadow-none disabled:rounded-[12px] disabled:border-0 disabled:h-[36px] disabled:min-w-[58px] disabled:font-semibold disabled:opacity-100",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -60,4 +60,3 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button"
 
 export { Button, buttonVariants }
-

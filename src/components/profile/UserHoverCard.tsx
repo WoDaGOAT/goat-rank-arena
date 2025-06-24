@@ -107,7 +107,7 @@ const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
           </Avatar>
           <div className="space-y-1 flex-1">
             <Link to={`/users/${user.id}`} className="hover:underline">
-              <h4 className="text-sm font-semibold">{user.full_name || 'Anonymous User'}</h4>
+              <h4 className="text-sm font-semibold text-gray-800">{user.full_name || 'Anonymous User'}</h4>
             </Link>
             <p className="text-sm text-muted-foreground">
                 View profile for more details.
@@ -123,7 +123,7 @@ const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
                     {friendshipStatus === 'pending' && !isRequestReceived && <Badge variant="secondary">Request Sent</Badge>}
                     {friendshipStatus === 'blocked' && <Badge variant="destructive">Blocked</Badge>}
                     {!friendshipStatus && (
-                        <Button size="sm" onClick={handleAddFriend} disabled={isPending}>
+                        <Button size="sm" onClick={handleAddFriend} disabled={isPending} className="bg-blue-500 text-white hover:bg-blue-600">
                             <UserPlus className="mr-2 h-4 w-4" />
                             {isPending ? "Sending..." : "Add Friend"}
                         </Button>
@@ -131,7 +131,7 @@ const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
                   </>
                 )}
                 {!currentUser && (
-                   <Button size="sm" onClick={handleAddFriend}>
+                   <Button size="sm" onClick={handleAddFriend} className="bg-blue-500 text-white hover:bg-blue-600">
                         <UserPlus className="mr-2 h-4 w-4" />
                         Add Friend
                     </Button>

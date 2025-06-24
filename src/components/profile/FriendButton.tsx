@@ -91,7 +91,7 @@ const FriendButton = ({ userId }: FriendButtonProps) => {
       variant={buttonConfig.variant}
       disabled={buttonConfig.disabled}
       onClick={buttonConfig.onClick}
-      className="w-full sm:w-auto bg-white text-gray-900 hover:bg-gray-100 border border-gray-300 font-medium"
+      className="w-full sm:w-auto bg-white text-gray-800 hover:bg-gray-100 border border-gray-300 font-medium"
     >
       <IconComponent className="w-4 h-4 mr-2" />
       {buttonConfig.text}

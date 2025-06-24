@@ -22,7 +22,7 @@ const AuthButtons = () => {
             <SignupDialog>
                 <button
                     className={cn(
-                        "flex items-center justify-center rounded-[6px] sm:rounded-[8px] lg:rounded-[10px] border border-white bg-[#388BFF] font-bold transition-colors shadow hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300",
+                        "flex items-center justify-center rounded-[6px] sm:rounded-[8px] lg:rounded-[10px] border border-white bg-[#388BFF] font-bold transition-colors shadow hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300 text-white",
                         "text-xs sm:text-sm lg:text-base whitespace-nowrap leading-none",
                         "tracking-wide",
                         // Mobile first sizing - very compact
