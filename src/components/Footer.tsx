@@ -9,46 +9,46 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-6">
           {/* Social media icons - centered and more prominent */}
-          <div className="flex gap-6">
+          <div className="flex gap-8">
             <a 
               href="https://www.instagram.com/wodagoatofficial/" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
-              <Instagram className="h-8 w-8" />
+              <Instagram className="h-10 w-10" />
             </a>
             <a 
               href="https://www.youtube.com/@WODAGOAT" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
-              <Youtube className="h-8 w-8" />
+              <Youtube className="h-10 w-10" />
             </a>
             <a 
               href="https://www.tiktok.com/@wodagoatofficial" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
-              <TikTokIcon className="h-8 w-8" />
+              <TikTokIcon className="h-10 w-10" />
             </a>
             <a 
               href="https://www.facebook.com/profile.php?id=61570524337540" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
-              <Facebook className="h-8 w-8" />
+              <Facebook className="h-10 w-10" />
             </a>
             <a 
               href="https://x.com/_WODAGOAT" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+              className="hover:text-primary transition-colors p-3 rounded-full hover:bg-primary/10 hover:scale-110 transform duration-200"
             >
-              <X className="h-8 w-8" />
+              <X className="h-10 w-10" />
             </a>
           </div>
           
