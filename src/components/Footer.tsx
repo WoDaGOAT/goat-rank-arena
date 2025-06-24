@@ -1,5 +1,7 @@
+
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram } from 'lucide-react';
+import { Facebook, Instagram, Youtube, X } from 'lucide-react';
+import TikTokIcon from './icons/TikTokIcon';
 
 const Footer = () => {
   return (
@@ -9,7 +11,31 @@ const Footer = () => {
           {/* Social media icons - centered and more prominent */}
           <div className="flex gap-6">
             <a 
-              href="https://facebook.com" 
+              href="https://www.instagram.com/wodagoatofficial/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+            >
+              <Instagram className="h-8 w-8" />
+            </a>
+            <a 
+              href="https://www.youtube.com/@WODAGOAT" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+            >
+              <Youtube className="h-8 w-8" />
+            </a>
+            <a 
+              href="https://www.tiktok.com/@wodagoatofficial" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+            >
+              <TikTokIcon className="h-8 w-8" />
+            </a>
+            <a 
+              href="https://www.facebook.com/profile.php?id=61570524337540" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
@@ -17,12 +43,12 @@ const Footer = () => {
               <Facebook className="h-8 w-8" />
             </a>
             <a 
-              href="https://instagram.com" 
+              href="https://x.com/_WODAGOAT" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
             >
-              <Instagram className="h-8 w-8" />
+              <X className="h-8 w-8" />
             </a>
           </div>
           
