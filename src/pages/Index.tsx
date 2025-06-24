@@ -1,3 +1,4 @@
+
 import CategoryCard from "@/components/CategoryCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -52,9 +53,19 @@ const Index = () => {
         throw new Error(error.message);
       }
 
-      // For each category, fetch top 3 athletes from user rankings
+      // For each category, fetch top 3 athletes from user rankings and get actual ranking count
       const categoriesWithLeaderboards = await Promise.all(
         data.map(async (c) => {
+          // Get the actual count of user rankings for this category
+          const { count: rankingCount, error: countError } = await supabase
+            .from("user_rankings")
+            .select("*", { count: "exact", head: true })
+            .eq("category_id", c.id);
+
+          if (countError) {
+            console.error("Error fetching ranking count for category:", c.name, countError);
+          }
+
           // Fetch athlete scores for this category by joining user_rankings with ranking_athletes
           const { data: athleteRankings, error: rankingsError } = await supabase
             .from("user_rankings")
@@ -124,7 +135,7 @@ const Index = () => {
             name: c.name,
             description: c.description || "No description provided.",
             imageUrl: c.image_url || undefined,
-            userRankingCount: Math.floor(Math.random() * 5000) + 1000,
+            userRankingCount: rankingCount || 0,
             leaderboard: leaderboard
           };
         })
