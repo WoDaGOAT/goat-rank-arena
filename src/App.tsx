@@ -58,6 +58,7 @@ const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage").catch((
 const NotFound = lazy(() => import("./pages/NotFound").catch(() => ({ default: () => <div>Page not found</div> })));
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,6 +108,7 @@ function App() {
                       <Route path="/users/:userId" element={<PublicProfilePage />} />
                       <Route path="/feed" element={<FeedPage />} />
                       <Route path="/quiz" element={<QuizPage />} />
+                      <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/gdpr" element={<GdprPage />} />
                       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

@@ -1,10 +1,11 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Rss, FileQuestion, Trophy, Lightbulb, Award } from "lucide-react";
+import { Rss, FileQuestion, Trophy, Lightbulb, Award, Bell } from "lucide-react";
 import { useUserBadges } from "@/hooks/useUserBadges";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 
 interface MobileMenuNavigationProps {
   onLinkClick: () => void;
@@ -14,6 +15,7 @@ const MobileMenuNavigation = ({ onLinkClick }: MobileMenuNavigationProps) => {
   const { user } = useAuth();
   const { userBadges, loading: badgesLoading } = useUserBadges();
   const { stats, loading: statsLoading } = useUserStats();
+  const { data: unreadCount = 0 } = useUnreadNotificationCount();
 
   // Enhanced badge notification logic (same as navbar)
   const getBadgeNotification = () => {
@@ -97,6 +99,27 @@ const MobileMenuNavigation = ({ onLinkClick }: MobileMenuNavigationProps) => {
             </div>
           )}
         </Link>
+
+        {user && (
+          <Link
+            to="/notifications"
+            onClick={onLinkClick}
+            className="flex items-center gap-4 p-4 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600 relative"
+          >
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600">
+              <Bell className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <span className="text-lg font-semibold text-white block">Notifications</span>
+              <span className="text-sm text-slate-300">Stay updated with activities</span>
+            </div>
+            {unreadCount > 0 && (
+              <div className="absolute top-2 right-2 bg-red-500 rounded-full p-2 animate-pulse">
+                <span className="text-xs text-white font-bold">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              </div>
+            )}
+          </Link>
+        )}
 
         <Link
           to="/"
