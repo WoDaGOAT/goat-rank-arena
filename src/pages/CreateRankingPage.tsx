@@ -85,7 +85,7 @@ const CreateRankingPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+    <div className="min-h-screen flex flex-col mb-0" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
       <main className="container mx-auto flex-grow">
         <RankingEditor category={category} />
       </main>
