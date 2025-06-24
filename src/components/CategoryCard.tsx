@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Category } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Octagon } from "lucide-react";
+import { Flag, Octagon } from "lucide-react";
 import PodiumDisplay from "./PodiumDisplay";
 
 interface CategoryCardProps {
@@ -33,7 +33,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
         </CardHeader>
         <CardContent>
           <div className="flex items-center text-muted-foreground">
-            <Users className="w-4 h-4 mr-2" />
+            <Flag className="w-4 h-4 mr-2" />
             <span>{category.userRankingCount.toLocaleString()} rankings submitted</span>
           </div>
         </CardContent>
