@@ -33,6 +33,28 @@ export const useFriendActions = () => {
     },
   });
 
+  const cancelFriendRequest = useMutation({
+    mutationFn: async (receiverId: string) => {
+      if (!user) throw new Error('You must be logged in to cancel friend requests.');
+      
+      const { error } = await supabase
+        .from('friendships')
+        .delete()
+        .eq('requester_id', user.id)
+        .eq('receiver_id', receiverId)
+        .eq('status', 'pending');
+
+      if (error) throw new Error('Failed to cancel friend request.');
+    },
+    onSuccess: (_, receiverId) => {
+      toast.success('Friend request cancelled!');
+      queryClient.invalidateQueries({ queryKey: ['friendship-status', user?.id, receiverId] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
   const acceptFriendRequest = useMutation({
     mutationFn: async (friendshipId: string) => {
       const { error } = await supabase
@@ -73,6 +95,7 @@ export const useFriendActions = () => {
 
   return {
     sendFriendRequest,
+    cancelFriendRequest,
     acceptFriendRequest,
     removeFriend,
   };

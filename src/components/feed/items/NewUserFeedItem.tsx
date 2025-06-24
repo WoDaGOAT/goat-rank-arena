@@ -8,8 +8,7 @@ import { sanitize } from "@/lib/sanitize";
 import { UserPlus } from "lucide-react";
 import { useFriendshipStatus } from "@/hooks/useFriendshipStatus";
 import { useAuthState } from "@/hooks/useAuthState";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
+import { useFriendActions } from "@/hooks/useFriendActions";
 
 export interface NewUserFeedData {
   user_id: string;
@@ -25,6 +24,7 @@ interface NewUserFeedItemProps {
 const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
   const { user } = useAuthState();
   const { data: friendshipStatus } = useFriendshipStatus(user?.id, data.user_id);
+  const { sendFriendRequest, cancelFriendRequest } = useFriendActions();
   
   // Don't render if we don't have a valid user name
   if (!data.user_name || data.user_name.trim() === '') {
@@ -33,28 +33,12 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
   
   const sanitizedUserName = sanitize(data.user_name);
 
-  const handleSendFriendRequest = async () => {
-    if (!user) {
-      toast.error("Please log in to send friend requests");
-      return;
-    }
+  const handleSendFriendRequest = () => {
+    sendFriendRequest.mutate(data.user_id);
+  };
 
-    try {
-      const { error } = await supabase
-        .from('friendships')
-        .insert({
-          requester_id: user.id,
-          receiver_id: data.user_id,
-          status: 'pending'
-        });
-
-      if (error) throw error;
-      
-      toast.success("Friend request sent!");
-    } catch (error) {
-      console.error('Error sending friend request:', error);
-      toast.error("Failed to send friend request");
-    }
+  const handleCancelFriendRequest = () => {
+    cancelFriendRequest.mutate(data.user_id);
   };
 
   const getFriendshipButtonText = () => {
@@ -62,7 +46,7 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
     
     switch (friendshipStatus.status) {
       case 'pending':
-        return friendshipStatus.requester_id === user?.id ? "Request Sent" : "Accept Request";
+        return friendshipStatus.requester_id === user?.id ? "Cancel Request" : "Accept Request";
       case 'accepted':
         return "Friends";
       case 'declined':
@@ -73,8 +57,31 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
     }
   };
 
-  const canSendFriendRequest = () => {
-    return !friendshipStatus && user?.id !== data.user_id;
+  const getButtonAction = () => {
+    if (!friendshipStatus) return handleSendFriendRequest;
+    
+    if (friendshipStatus.status === 'pending' && friendshipStatus.requester_id === user?.id) {
+      return handleCancelFriendRequest;
+    }
+    
+    return handleSendFriendRequest;
+  };
+
+  const canPerformAction = () => {
+    if (!user || user.id === data.user_id) return false;
+    if (!friendshipStatus) return true;
+    
+    // Can cancel if user sent a pending request
+    if (friendshipStatus.status === 'pending' && friendshipStatus.requester_id === user.id) {
+      return true;
+    }
+    
+    // Can accept if user received a pending request
+    if (friendshipStatus.status === 'pending' && friendshipStatus.requester_id !== user.id) {
+      return true;
+    }
+    
+    return false;
   };
 
   return (
@@ -101,13 +108,13 @@ const NewUserFeedItem = ({ data, createdAt }: NewUserFeedItemProps) => {
           </div>
           {user && user.id !== data.user_id && (
             <Button
-              onClick={handleSendFriendRequest}
-              disabled={!canSendFriendRequest()}
+              onClick={getButtonAction()}
+              disabled={!canPerformAction() || sendFriendRequest.isPending || cancelFriendRequest.isPending}
               variant={friendshipStatus?.status === 'accepted' ? "secondary" : "default"}
               size="sm"
               className="text-xs"
             >
-              {getFriendshipButtonText()}
+              {sendFriendRequest.isPending || cancelFriendRequest.isPending ? "Loading..." : getFriendshipButtonText()}
             </Button>
           )}
         </div>

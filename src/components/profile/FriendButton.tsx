@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useFriendshipStatus } from "@/hooks/useFriendshipStatus";
 import { useFriendActions } from "@/hooks/useFriendActions";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserPlus, Clock, Check, UserMinus } from "lucide-react";
+import { UserPlus, Clock, Check, UserMinus, X } from "lucide-react";
 
 interface FriendButtonProps {
   userId: string;
@@ -12,16 +12,16 @@ interface FriendButtonProps {
 const FriendButton = ({ userId }: FriendButtonProps) => {
   const { user } = useAuth();
   const { data: friendshipStatus } = useFriendshipStatus(user?.id, userId);
-  const { sendFriendRequest, acceptFriendRequest, removeFriend } = useFriendActions();
+  const { sendFriendRequest, cancelFriendRequest, acceptFriendRequest, removeFriend } = useFriendActions();
 
   if (!user || user.id === userId) {
     return null;
   }
 
   const getButtonContent = () => {
-    if (sendFriendRequest.isPending) {
+    if (sendFriendRequest.isPending || cancelFriendRequest.isPending) {
       return {
-        text: "Sending...",
+        text: "Loading...",
         icon: Clock,
         variant: "secondary" as const,
         disabled: true
@@ -42,10 +42,11 @@ const FriendButton = ({ userId }: FriendButtonProps) => {
       case 'pending':
         if (friendshipStatus.requester_id === user.id) {
           return {
-            text: "Request Sent",
-            icon: Clock,
+            text: "Cancel Request",
+            icon: X,
             variant: "secondary" as const,
-            disabled: true
+            disabled: false,
+            onClick: () => cancelFriendRequest.mutate(userId)
           };
         } else {
           return {
