@@ -26,9 +26,9 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex-1 hidden sm:block"></div>
           <div className="text-center">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1">
               {sanitize(categoryName)}
-            </h2>
+            </h1>
             <p className="text-xs sm:text-sm text-gray-300 font-medium">
               🎮 Live Rankings • Top 10 Champions
             </p>
