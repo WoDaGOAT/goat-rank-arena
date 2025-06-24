@@ -10,7 +10,7 @@ export const useHomepageCategories = () => {
     goatFootballer: Category | null;
     otherCategories: Category[];
   }>({
-    queryKey: ["homepageCategories", "v3"],
+    queryKey: ["homepageCategories", "v4"],
     queryFn: async () => {
       console.log("Starting homepage categories query...");
       
@@ -28,23 +28,22 @@ export const useHomepageCategories = () => {
 
       console.log("Athletes fetched:", athletesData?.length || 0);
 
-      // Then, get the ID of the 'GOAT' parent category
-      const { data: parentCategory, error: parentError } = await supabase
+      // Get both parent category IDs
+      const { data: parentCategories, error: parentError } = await supabase
         .from("categories")
-        .select("id")
-        .eq("name", "GOAT")
-        .is("parent_id", null)
-        .single();
+        .select("id, name")
+        .in("name", ["GOAT", "Current GOAT"])
+        .is("parent_id", null);
 
-      if (parentError || !parentCategory) {
+      if (parentError || !parentCategories || parentCategories.length === 0) {
         toast.error("Failed to load featured categories.");
-        console.error("Error fetching parent category for homepage:", parentError);
-        throw new Error(parentError?.message || "Parent category not found");
+        console.error("Error fetching parent categories for homepage:", parentError);
+        throw new Error(parentError?.message || "Parent categories not found");
       }
 
       const featuredCategories = [
         "GOAT Footballer",
-        "GOAT Goalkeeper",
+        "GOAT Goalkeeper", 
         "GOAT Defender",
         "GOAT Midfielder",
         "GOAT Attacker",
@@ -52,11 +51,14 @@ export const useHomepageCategories = () => {
         "Current GOAT Footballer",
       ];
 
-      // Fetch all featured categories
+      // Get parent IDs
+      const parentIds = parentCategories.map(p => p.id);
+
+      // Fetch all featured categories from both parent categories
       const { data: categoriesRaw, error: categoriesError } = await supabase
         .from("categories")
         .select("*")
-        .eq("parent_id", parentCategory.id)
+        .in("parent_id", parentIds)
         .in("name", featuredCategories)
         .order("name")
         .limit(10);
@@ -168,6 +170,7 @@ export const useHomepageCategories = () => {
       const otherCategories = categoriesWithLeaderboards.filter(c => c.name !== "GOAT Footballer");
 
       console.log("GOAT Footballer leaderboard:", goatFootballer?.leaderboard?.length || 0, "athletes");
+      console.log("Other categories found:", otherCategories.length);
 
       return {
         goatFootballer,
