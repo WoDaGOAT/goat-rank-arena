@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,9 +17,15 @@ export const useNotifications = () => {
 
       console.log('Fetching notifications for user:', user.id);
       
+      // Query notifications with a filter for friend requests
       const { data, error } = await supabase
         .from('notifications')
-        .select('*')
+        .select(`
+          *,
+          friendships:data->friendship_id (
+            status
+          )
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -30,9 +35,41 @@ export const useNotifications = () => {
         throw error;
       }
 
-      console.log(`Notifications fetched: ${data?.length || 0}`);
+      // Filter out friend request notifications where the friendship is no longer pending
+      const filteredNotifications = (data || []).filter((notification: any) => {
+        // If it's a friend request notification, check if the friendship is still pending
+        if (notification.type === 'new_friend_request' && notification.data?.friendship_id) {
+          // Query the friendship status directly
+          return true; // We'll filter this in a second query
+        }
+        return true;
+      });
+
+      // For friend request notifications, we need to check the actual friendship status
+      const notificationsWithStatus = await Promise.all(
+        filteredNotifications.map(async (notification: any) => {
+          if (notification.type === 'new_friend_request' && notification.data?.friendship_id) {
+            const { data: friendship } = await supabase
+              .from('friendships')
+              .select('status')
+              .eq('id', notification.data.friendship_id)
+              .maybeSingle();
+            
+            // Only keep the notification if the friendship is still pending
+            if (friendship?.status !== 'pending') {
+              return null;
+            }
+          }
+          return notification;
+        })
+      );
+
+      // Filter out null values (declined/accepted friend requests)
+      const finalNotifications = notificationsWithStatus.filter(Boolean);
+
+      console.log(`Notifications fetched and filtered: ${finalNotifications?.length || 0}`);
       
-      return (data || []) as Notification[];
+      return finalNotifications as Notification[];
     },
     enabled: !!user?.id,
     staleTime: 1 * 60 * 1000,
@@ -47,9 +84,10 @@ export const useNotifications = () => {
         return 0;
       }
 
-      const { count, error } = await supabase
+      // Get all notifications first
+      const { data: allNotifications, error } = await supabase
         .from('notifications')
-        .select('*', { count: 'exact', head: true })
+        .select('*')
         .eq('user_id', user.id)
         .eq('is_read', false);
 
@@ -58,7 +96,28 @@ export const useNotifications = () => {
         throw error;
       }
 
-      return count || 0;
+      // Filter out friend request notifications that are no longer pending
+      let unreadCount = 0;
+      
+      for (const notification of allNotifications || []) {
+        if (notification.type === 'new_friend_request' && notification.data?.friendship_id) {
+          const { data: friendship } = await supabase
+            .from('friendships')
+            .select('status')
+            .eq('id', notification.data.friendship_id)
+            .maybeSingle();
+          
+          // Only count if the friendship is still pending
+          if (friendship?.status === 'pending') {
+            unreadCount++;
+          }
+        } else {
+          // Count all other notification types
+          unreadCount++;
+        }
+      }
+
+      return unreadCount;
     },
     enabled: !!user?.id,
     staleTime: 30 * 1000,
