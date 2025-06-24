@@ -1,4 +1,3 @@
-
 import CategoryCard from "@/components/CategoryCard";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { useQuery } from "@tanstack/react-query";
@@ -249,9 +248,6 @@ const Index = () => {
 
               {/* Right side - Other Category Cards */}
               <div className="lg:col-span-3">
-                <h3 className="text-xl font-semibold text-primary mb-6 text-center lg:text-left">
-                  More GOAT Categories
-                </h3>
                 {categoriesData.otherCategories.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {categoriesData.otherCategories.map((category) => (
