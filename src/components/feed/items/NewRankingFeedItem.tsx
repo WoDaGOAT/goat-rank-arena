@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from 'date-fns';
@@ -52,7 +51,6 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const userAvatar = user.avatar_url;
   const sanitizedUserName = sanitize(userName);
   const categoryName = category.name;
-  const rankingTitle = sanitize(ranking_title) || 'Untitled Ranking';
 
   // Ensure top_athletes is an array
   const athletesArray = Array.isArray(top_athletes) ? top_athletes : [];
@@ -98,7 +96,7 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
         {/* Ranking preview */}
         <div className="bg-white/10 rounded-lg p-4 ml-5">
           {ranking_title && ranking_title.trim() && (
-            <h4 className="font-semibold text-blue-300 mb-3">{rankingTitle}</h4>
+            <h4 className="font-semibold text-blue-300 mb-3">{sanitize(ranking_title)}</h4>
           )}
           
           {/* Show top 3 athletes */}
