@@ -18,6 +18,21 @@ const Index = () => {
         style={{ background: "linear-gradient(135deg, rgba(25, 7, 73, 0.6) 0%, rgba(7, 2, 21, 0.6) 100%)" }}
       >
         <div className="container mx-auto px-4 py-12 flex-grow">
+          {/* Temporary Sentry Test Button */}
+          <div className="mb-8 p-4 bg-red-100 border border-red-300 rounded-lg">
+            <h3 className="text-red-800 font-semibold mb-2">⚠️ Sentry Integration Test</h3>
+            <p className="text-red-700 text-sm mb-3">
+              This is a temporary test button to verify Sentry error tracking is working correctly.
+              Click to trigger an intentional error and check your Sentry dashboard.
+            </p>
+            <button 
+              onClick={() => {throw new Error("This is your first error!");}}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium"
+            >
+              🧨 Break the world (Test Sentry)
+            </button>
+          </div>
+
           {isLoading && (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               {/* Featured leaderboard skeleton */}
