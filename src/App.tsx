@@ -1,5 +1,6 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -10,9 +11,32 @@ import CommentManagementPage from "./pages/admin/CommentManagementPage";
 import AthleteManagementPage from "@/pages/admin/AthleteManagementPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { analytics } from "./lib/analytics";
 
 console.log('App.tsx: Starting to load');
 console.log('App.tsx: Supabase configured?', isSupabaseConfigured);
+
+// Analytics page tracking component
+const AnalyticsTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Track page views on route changes
+    analytics.trackPageView(location.pathname + location.search, document.title);
+    
+    // Track landing page visits specifically
+    if (location.pathname === '/') {
+      const urlParams = new URLSearchParams(location.search);
+      const source = urlParams.get('utm_source');
+      const medium = urlParams.get('utm_medium');
+      const campaign = urlParams.get('utm_campaign');
+      
+      analytics.trackLandingPageVisit(source || undefined, medium || undefined, campaign || undefined);
+    }
+  }, [location]);
+
+  return null;
+};
 
 // Enhanced loading fallback component with timeout
 const LoadingFallback = () => {
@@ -95,6 +119,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Router>
             <AuthProvider>
+              <AnalyticsTracker />
               <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
                 <Navbar />
                 <main className="flex-1">
