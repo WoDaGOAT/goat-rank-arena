@@ -18,6 +18,8 @@ class Analytics extends AnalyticsCore {
 
   constructor() {
     super();
+    
+    // Initialize all analytics modules
     this.acquisition = new AcquisitionAnalytics();
     this.ranking = new RankingAnalytics();
     this.quiz = new QuizAnalytics();
@@ -26,41 +28,117 @@ class Analytics extends AnalyticsCore {
   }
 
   // Acquisition & Onboarding Events
-  trackLandingPageVisit = this.acquisition.trackLandingPageVisit.bind(this.acquisition);
-  trackSignUp = this.acquisition.trackSignUp.bind(this.acquisition);
-  trackCompletedOnboarding = this.acquisition.trackCompletedOnboarding.bind(this.acquisition);
-  trackSelectedSportCategoryFirstTime = this.acquisition.trackSelectedSportCategoryFirstTime.bind(this.acquisition);
+  trackLandingPageVisit = (source?: string, medium?: string, campaign?: string) => {
+    return this.acquisition.trackLandingPageVisit(source, medium, campaign);
+  };
+
+  trackSignUp = (method: 'email' | 'google' | 'facebook') => {
+    return this.acquisition.trackSignUp(method);
+  };
+
+  trackCompletedOnboarding = () => {
+    return this.acquisition.trackCompletedOnboarding();
+  };
+
+  trackSelectedSportCategoryFirstTime = (categoryName: string, categoryId: string) => {
+    return this.acquisition.trackSelectedSportCategoryFirstTime(categoryName, categoryId);
+  };
 
   // Ranking Flow Events
-  trackStartedRanking = this.ranking.trackStartedRanking.bind(this.ranking);
-  trackSelectedAthlete = this.ranking.trackSelectedAthlete.bind(this.ranking);
-  trackReorderedRanking = this.ranking.trackReorderedRanking.bind(this.ranking);
-  trackSubmittedRanking = this.ranking.trackSubmittedRanking.bind(this.ranking);
-  trackEditedRanking = this.ranking.trackEditedRanking.bind(this.ranking);
-  trackSharedRankingLink = this.ranking.trackSharedRankingLink.bind(this.ranking);
-  trackViewedRankingLeaderboard = this.ranking.trackViewedRankingLeaderboard.bind(this.ranking);
+  trackStartedRanking = (categoryName: string, categoryId: string) => {
+    return this.ranking.trackStartedRanking(categoryName, categoryId);
+  };
+
+  trackSelectedAthlete = (athleteName: string, athleteId: string, position: number, categoryId: string) => {
+    return this.ranking.trackSelectedAthlete(athleteName, athleteId, position, categoryId);
+  };
+
+  trackReorderedRanking = (categoryId: string, totalAthletes: number) => {
+    return this.ranking.trackReorderedRanking(categoryId, totalAthletes);
+  };
+
+  trackSubmittedRanking = (categoryId: string, categoryName: string, athleteCount: number, timeTaken?: number) => {
+    return this.ranking.trackSubmittedRanking(categoryId, categoryName, athleteCount, timeTaken);
+  };
+
+  trackEditedRanking = (rankingId: string, categoryId: string) => {
+    return this.ranking.trackEditedRanking(rankingId, categoryId);
+  };
+
+  trackSharedRankingLink = (rankingId: string, categoryId: string, shareMethod?: string) => {
+    return this.ranking.trackSharedRankingLink(rankingId, categoryId, shareMethod);
+  };
+
+  trackViewedRankingLeaderboard = (categoryId: string, categoryName: string) => {
+    return this.ranking.trackViewedRankingLeaderboard(categoryId, categoryName);
+  };
 
   // Quiz Events
-  trackViewedQuiz = this.quiz.trackViewedQuiz.bind(this.quiz);
-  trackStartedQuiz = this.quiz.trackStartedQuiz.bind(this.quiz);
-  trackSubmittedQuizAnswers = this.quiz.trackSubmittedQuizAnswers.bind(this.quiz);
-  trackQuizScore = this.quiz.trackQuizScore.bind(this.quiz);
-  trackViewedDailyLeaderboard = this.quiz.trackViewedDailyLeaderboard.bind(this.quiz);
+  trackViewedQuiz = (quizId?: string, quizTitle?: string) => {
+    return this.quiz.trackViewedQuiz(quizId, quizTitle);
+  };
+
+  trackStartedQuiz = (quizId?: string, quizTitle?: string) => {
+    return this.quiz.trackStartedQuiz(quizId, quizTitle);
+  };
+
+  trackSubmittedQuizAnswers = (quizId: string, quizTitle: string, score: number, totalQuestions: number, timeTaken?: number) => {
+    return this.quiz.trackSubmittedQuizAnswers(quizId, quizTitle, score, totalQuestions, timeTaken);
+  };
+
+  trackQuizScore = (score: number, totalQuestions: number, quizId: string) => {
+    return this.quiz.trackQuizScore(score, totalQuestions, quizId);
+  };
+
+  trackViewedDailyLeaderboard = () => {
+    return this.quiz.trackViewedDailyLeaderboard();
+  };
 
   // Social Engagement Events
-  trackViewedComments = this.social.trackViewedComments.bind(this.social);
-  trackAddedComment = this.social.trackAddedComment.bind(this.social);
-  trackRepliedComment = this.social.trackRepliedComment.bind(this.social);
-  trackLikedComment = this.social.trackLikedComment.bind(this.social);
-  trackFollowedUser = this.social.trackFollowedUser.bind(this.social);
+  trackViewedComments = (contentType: 'ranking' | 'category', contentId: string) => {
+    return this.social.trackViewedComments(contentType, contentId);
+  };
+
+  trackAddedComment = (contentType: 'ranking' | 'category', contentId: string, commentLength: number) => {
+    return this.social.trackAddedComment(contentType, contentId, commentLength);
+  };
+
+  trackRepliedComment = (parentCommentId: string, replyLength: number) => {
+    return this.social.trackRepliedComment(parentCommentId, replyLength);
+  };
+
+  trackLikedComment = (commentId: string) => {
+    return this.social.trackLikedComment(commentId);
+  };
+
+  trackFollowedUser = (followedUserId: string) => {
+    return this.social.trackFollowedUser(followedUserId);
+  };
 
   // Engagement & Retention Events
-  trackReturnedDayX = this.engagement.trackReturnedDayX.bind(this.engagement);
-  trackInvitedFriend = this.engagement.trackInvitedFriend.bind(this.engagement);
-  trackClickedNotification = this.engagement.trackClickedNotification.bind(this.engagement);
-  trackSearchAthletes = this.engagement.trackSearchAthletes.bind(this.engagement);
-  trackProfileView = this.engagement.trackProfileView.bind(this.engagement);
-  trackTimeOnPage = this.engagement.trackTimeOnPage.bind(this.engagement);
+  trackReturnedDayX = (daysSinceLastVisit: number) => {
+    return this.engagement.trackReturnedDayX(daysSinceLastVisit);
+  };
+
+  trackInvitedFriend = (inviteMethod: string) => {
+    return this.engagement.trackInvitedFriend(inviteMethod);
+  };
+
+  trackClickedNotification = (notificationType: string, notificationId?: string) => {
+    return this.engagement.trackClickedNotification(notificationType, notificationId);
+  };
+
+  trackSearchAthletes = (searchTerm: string, resultsCount: number, categoryId: string) => {
+    return this.engagement.trackSearchAthletes(searchTerm, resultsCount, categoryId);
+  };
+
+  trackProfileView = (viewedUserId: string, isOwnProfile: boolean) => {
+    return this.engagement.trackProfileView(viewedUserId, isOwnProfile);
+  };
+
+  trackTimeOnPage = (pageName: string, timeInSeconds: number) => {
+    return this.engagement.trackTimeOnPage(pageName, timeInSeconds);
+  };
 }
 
 // Export singleton instance
