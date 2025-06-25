@@ -23,7 +23,7 @@ export const fetchHomepageCategories = async (): Promise<HomepageCategoriesData>
     
     console.log("✅ Supabase connectivity confirmed");
 
-    // Simplified approach: Get categories first without complex leaderboards
+    // Simplified approach for preview: Get categories without complex leaderboards
     const featuredCategories = [
       "GOAT Footballer",
       "GOAT Goalkeeper", 
@@ -41,7 +41,7 @@ export const fetchHomepageCategories = async (): Promise<HomepageCategoriesData>
       .select("id, name")
       .in("name", ["GOAT", "Current GOAT"])
       .is("parent_id", null)
-      .limit(3); // Limit for performance
+      .limit(3);
 
     if (parentError || !parentCategories || parentCategories.length === 0) {
       console.error("❌ Parent categories error:", parentError);
@@ -64,7 +64,7 @@ export const fetchHomepageCategories = async (): Promise<HomepageCategoriesData>
       .in("parent_id", parentIds)
       .in("name", featuredCategories)
       .order("name")
-      .limit(isPreview ? 5 : 10); // Reduced limit for preview
+      .limit(isPreview ? 5 : 10);
 
     if (categoriesError) {
       console.error("❌ Categories error:", categoriesError);
@@ -85,7 +85,7 @@ export const fetchHomepageCategories = async (): Promise<HomepageCategoriesData>
       throw new Error("No categories found");
     }
 
-    // Process categories with leaderboards
+    // Process categories with simplified leaderboards for preview
     const categoriesWithLeaderboards = await processLeaderboards(categoriesRaw, isPreview);
 
     // Separate GOAT Footballer from others
@@ -122,58 +122,30 @@ const processLeaderboards = async (categoriesRaw: any[], isPreview: boolean): Pr
       let leaderboard: Athlete[] = [];
       let userRankingCount = 0;
 
+      // For preview environment, skip complex queries and use empty leaderboards
       if (!isPreview) {
-        // Only do complex queries in production
         try {
-          // Get ranking count
+          // Get ranking count for production only
           const { count, error: countError } = await supabase
             .from("user_rankings")
             .select("*", { count: "exact", head: true })
             .eq("category_id", c.id);
 
-          userRankingCount = count || 0;
-
-          // Simple leaderboard query - get top athletes directly
-          const { data: athleteRankings, error: rankingsError } = await supabase
-            .from("ranking_athletes")
-            .select(`
-              athlete_id,
-              points,
-              athletes(name, country_of_origin, profile_picture_url)
-            `)
-            .eq("ranking_id", "sample-ranking-id")
-            .order("points", { ascending: false })
-            .limit(c.name === "GOAT Footballer" ? 10 : 3);
-
-          if (!rankingsError && athleteRankings) {
-            const maxItems = c.name === "GOAT Footballer" ? 10 : 3;
-            leaderboard = athleteRankings
-              .slice(0, maxItems)
-              .map((ranking: any, index) => ({
-                id: ranking.athlete_id,
-                name: ranking.athletes?.name || "Unknown",
-                imageUrl: ranking.athletes?.profile_picture_url || "",
-                rank: index + 1,
-                points: ranking.points || 0,
-                movement: "neutral" as const,
-                dateOfBirth: "",
-                dateOfDeath: undefined,
-                isActive: true,
-                countryOfOrigin: ranking.athletes?.country_of_origin || "",
-                country: ranking.athletes?.country_of_origin || "",
-                clubs: [],
-                competitions: [],
-                positions: [],
-                nationality: ""
-              }));
+          if (!countError) {
+            userRankingCount = count || 0;
           }
+
+          // For production, try to get actual leaderboard data
+          // Note: We need to fix the leaderboard query to use proper data structure
+          // For now, we'll use empty leaderboards until proper aggregation is implemented
+          
         } catch (error) {
           console.warn(`⚠️ Leaderboard error for ${c.name}:`, error);
           // Continue with empty leaderboard
         }
       }
 
-      console.log(`✅ Processed ${c.name}: ${leaderboard.length} athletes`);
+      console.log(`✅ Processed ${c.name}: ${leaderboard.length} athletes, ${userRankingCount} rankings`);
 
       return {
         id: c.id,
