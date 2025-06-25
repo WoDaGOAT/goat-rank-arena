@@ -48,6 +48,13 @@ const FeaturedLeaderboard = ({ goatFootballer, isStatic = false }: FeaturedLeade
   const [isSticky, setIsSticky] = useState(false);
   const leaderboardRef = useRef<HTMLDivElement>(null);
 
+  console.log("⚽ FeaturedLeaderboard render:", {
+    hasGoatFootballer: !!goatFootballer,
+    hasLeaderboard: !!goatFootballer?.leaderboard,
+    leaderboardLength: goatFootballer?.leaderboard?.length || 0,
+    isStatic
+  });
+
   useEffect(() => {
     const handleScroll = () => {
       if (!leaderboardRef.current) return;
@@ -89,8 +96,9 @@ const FeaturedLeaderboard = ({ goatFootballer, isStatic = false }: FeaturedLeade
           />
         </div>
       ) : (
-        <div className="text-center text-muted-foreground">
-          <p>GOAT Footballer category not found.</p>
+        <div className="text-center text-muted-foreground p-8 bg-white/10 rounded-lg">
+          <p className="text-lg font-medium mb-2">GOAT Footballer category not found.</p>
+          <p className="text-sm">Please check your connection and try again.</p>
         </div>
       )}
     </div>

@@ -14,7 +14,9 @@ const Index = () => {
   console.log("🏠 Index page render:", { 
     isLoading, 
     isError, 
-    hasData: !!homepageData 
+    hasData: !!homepageData,
+    goatFootballerExists: !!homepageData?.goatFootballer,
+    otherCategoriesCount: homepageData?.otherCategories?.length || 0
   });
 
   return (
@@ -39,7 +41,10 @@ const Index = () => {
                 <div className="text-red-600">Unable to load categories. Please try again later.</div>
               </div>
             ) : (
-              <CategoriesGrid categories={homepageData?.otherCategories || []} isStatic={true} />
+              <CategoriesGrid 
+                categories={homepageData?.otherCategories || []} 
+                isStatic={true} 
+              />
             )}
           </section>
 
@@ -48,10 +53,20 @@ const Index = () => {
             <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
               Featured Leaderboard
             </h2>
-            <FeaturedLeaderboard 
-              goatFootballer={homepageData?.goatFootballer || null} 
-              isStatic={true}
-            />
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="text-gray-600">Loading leaderboard...</div>
+              </div>
+            ) : isError ? (
+              <div className="text-center py-8">
+                <div className="text-red-600">Unable to load leaderboard. Please try again later.</div>
+              </div>
+            ) : (
+              <FeaturedLeaderboard 
+                goatFootballer={homepageData?.goatFootballer || null} 
+                isStatic={true}
+              />
+            )}
           </section>
 
           {/* Feed Preview */}

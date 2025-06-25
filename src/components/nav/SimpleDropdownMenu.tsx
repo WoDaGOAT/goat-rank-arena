@@ -30,9 +30,29 @@ const SimpleDropdownMenu = () => {
     categories: categories?.map(c => ({ name: c.name, childrenCount: c.children?.length || 0 }))
   });
 
-  // Build menu items from categories
+  // Build menu items from categories with improved fallback handling
   const menuItems: MenuCategory[] = React.useMemo(() => {
-    if (!categories) return [];
+    if (!categories || categories.length === 0) {
+      console.log("📋 Using fallback menu structure");
+      // Return a basic fallback menu structure
+      return [
+        {
+          id: 'fallback-goat',
+          name: 'GOAT',
+          children: [
+            { id: 'fallback-goat-footballer', name: 'GOAT Footballer', description: 'Greatest footballer of all time' },
+            { id: 'fallback-goat-goalkeeper', name: 'GOAT Goalkeeper', description: 'Greatest goalkeeper of all time' }
+          ]
+        },
+        {
+          id: 'fallback-current',
+          name: 'Current GOAT',
+          children: [
+            { id: 'fallback-current-footballer', name: 'Current GOAT Footballer', description: 'Best active footballer' }
+          ]
+        }
+      ];
+    }
     
     // Filter for main categories and build menu structure
     const items = categories
@@ -97,51 +117,9 @@ const SimpleDropdownMenu = () => {
     );
   }
 
-  // Show error state
+  // Show error state but still render fallback menu
   if (isError) {
-    return (
-      <div className="w-full flex justify-center">
-        <div className="block lg:hidden">
-          <button
-            onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-white/10 rounded-lg transition-colors"
-          >
-            <Menu className="h-5 w-5" />
-            <span className="text-sm font-medium">Retry</span>
-          </button>
-        </div>
-        <nav className="hidden lg:flex items-center justify-center gap-2 xl:gap-6">
-          <button
-            onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-red-400 hover:bg-white/10 rounded-lg transition-colors"
-          >
-            Menu unavailable - Click to retry
-          </button>
-        </nav>
-      </div>
-    );
-  }
-
-  // Show empty state if no menu items
-  if (!menuItems || menuItems.length === 0) {
-    return (
-      <div className="w-full flex justify-center">
-        <div className="block lg:hidden">
-          <button
-            disabled
-            className="flex items-center gap-2 px-4 py-2 text-gray-400 rounded-lg"
-          >
-            <Menu className="h-5 w-5" />
-            <span className="text-sm font-medium">No Categories</span>
-          </button>
-        </div>
-        <nav className="hidden lg:flex items-center justify-center gap-2 xl:gap-6">
-          <div className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-gray-400">
-            No categories available
-          </div>
-        </nav>
-      </div>
-    );
+    console.log("📋 Error state, using fallback menu");
   }
 
   return (
