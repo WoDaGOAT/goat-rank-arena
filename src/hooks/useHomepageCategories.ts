@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Category, Athlete } from "@/types";
 import { toast } from "sonner";
-import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 
 // Define the return type interface
 interface HomepageCategoriesData {
