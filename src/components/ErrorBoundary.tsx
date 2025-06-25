@@ -2,6 +2,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { shouldSuppressError, logError, isDevelopmentEnvironment } from '@/lib/networkUtils';
+import * as Sentry from "@sentry/react";
 
 interface Props {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface State {
   hasError: boolean;
   error?: Error;
   errorCount: number;
+  eventId?: string;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -27,10 +29,21 @@ class ErrorBoundary extends Component<Props, State> {
     }
     
     logError(error, 'ErrorBoundary');
+    
+    // Capture error in Sentry with additional context
+    const eventId = Sentry.captureException(error, {
+      tags: {
+        component: 'ErrorBoundary',
+        source: 'getDerivedStateFromError'
+      },
+      level: 'error'
+    });
+    
     return { 
       hasError: true, 
       error,
-      errorCount: 0
+      errorCount: 0,
+      eventId
     };
   }
 
@@ -48,6 +61,16 @@ class ErrorBoundary extends Component<Props, State> {
     
     logError(error, 'ErrorBoundary - Component error');
     console.error('ErrorBoundary details:', error, errorInfo);
+    
+    // Send additional context to Sentry
+    Sentry.withScope((scope) => {
+      scope.setTag('component', 'ErrorBoundary');
+      scope.setContext('errorInfo', errorInfo);
+      scope.setLevel('error');
+      
+      const eventId = Sentry.captureException(error);
+      this.setState({ eventId });
+    });
     
     // Track error count to prevent infinite error loops
     this.setState(prevState => ({
@@ -76,6 +99,18 @@ class ErrorBoundary extends Component<Props, State> {
     }
     
     logError(error, 'Global error handler');
+    
+    // Capture in Sentry with global error context
+    Sentry.captureException(error, {
+      tags: {
+        source: 'globalErrorHandler'
+      },
+      extra: {
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno
+      }
+    });
   };
 
   private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
@@ -88,13 +123,21 @@ class ErrorBoundary extends Component<Props, State> {
     }
     
     logError(error, 'Unhandled rejection');
+    
+    // Capture in Sentry with promise rejection context
+    Sentry.captureException(error, {
+      tags: {
+        source: 'unhandledRejection'
+      }
+    });
   };
 
   private handleRetry = () => {
     this.setState({ 
       hasError: false, 
       error: undefined,
-      errorCount: 0
+      errorCount: 0,
+      eventId: undefined
     });
   };
 
@@ -108,6 +151,12 @@ class ErrorBoundary extends Component<Props, State> {
               <AlertTitle>Critical Error</AlertTitle>
               <AlertDescription>
                 Multiple errors detected. Please refresh the page.
+                {this.state.eventId && (
+                  <>
+                    <br />
+                    <span className="text-xs text-gray-400">Error ID: {this.state.eventId}</span>
+                  </>
+                )}
                 {isDevelopmentEnvironment() && (
                   <>
                     <br />
@@ -133,6 +182,12 @@ class ErrorBoundary extends Component<Props, State> {
               >
                 Try Again
               </button>
+              {this.state.eventId && (
+                <>
+                  <br />
+                  <span className="text-xs text-gray-400 mt-2 block">Error ID: {this.state.eventId}</span>
+                </>
+              )}
               {isDevelopmentEnvironment() && (
                 <>
                   <br />
@@ -149,4 +204,22 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-export default ErrorBoundary;
+export default Sentry.withErrorBoundary(ErrorBoundary, {
+  fallback: ({ error, resetError }) => (
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+      <Alert variant="destructive" className="max-w-md">
+        <AlertTitle>Unexpected Error</AlertTitle>
+        <AlertDescription>
+          An unexpected error occurred. Please try refreshing the page.
+          <br />
+          <button 
+            onClick={resetError}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Reset
+          </button>
+        </AlertDescription>
+      </Alert>
+    </div>
+  )
+});
