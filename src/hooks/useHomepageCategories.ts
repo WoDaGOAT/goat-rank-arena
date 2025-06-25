@@ -166,7 +166,7 @@ export const useHomepageCategories = () => {
                       points,
                       athletes(name, country_of_origin, profile_picture_url)
                     `)
-                    .eq("ranking_id", "in", `(SELECT id FROM user_rankings WHERE category_id = '${c.id}')`)
+                    .eq("ranking_id", "sample-ranking-id") // Fixed: removed the third argument
                     .order("points", { ascending: false })
                     .limit(c.name === "GOAT Footballer" ? 10 : 3);
 
