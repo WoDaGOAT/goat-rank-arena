@@ -52,53 +52,57 @@ export const withSentrySupabase = <T>(
 };
 
 // Enhanced Supabase client with automatic error tracking
-// Note: This is a simplified version focused on core operations
 export const sentrySupabase = {
   from: (table: string) => ({
     select: (columns?: string) => 
       withSentrySupabase(
         async () => {
           const query = supabase.from(table as any);
-          return columns ? query.select(columns) : query.select();
+          const result = columns ? query.select(columns) : query.select();
+          return await result;
         },
         { operation: 'select', table, method: 'select' }
       ),
     
     insert: (data: any) => 
       withSentrySupabase(
-        () => supabase.from(table as any).insert(data),
+        async () => await supabase.from(table as any).insert(data),
         { operation: 'insert', table, method: 'insert' }
       ),
     
-    update: (data: any) => 
-      withSentrySupabase(
-        () => supabase.from(table as any).update(data),
-        { operation: 'update', table, method: 'update' }
-      ),
+    update: (data: any) => ({
+      eq: (column: string, value: any) =>
+        withSentrySupabase(
+          async () => await supabase.from(table as any).update(data).eq(column, value),
+          { operation: 'update', table, method: 'update' }
+        )
+    }),
     
-    delete: () => 
-      withSentrySupabase(
-        () => supabase.from(table as any).delete(),
-        { operation: 'delete', table, method: 'delete' }
-      ),
+    delete: () => ({
+      eq: (column: string, value: any) =>
+        withSentrySupabase(
+          async () => await supabase.from(table as any).delete().eq(column, value),
+          { operation: 'delete', table, method: 'delete' }
+        )
+    }),
   }),
   
   auth: {
     signUp: (credentials: any) =>
       withSentrySupabase(
-        () => supabase.auth.signUp(credentials),
+        async () => await supabase.auth.signUp(credentials),
         { operation: 'auth.signUp', method: 'signUp' }
       ),
     
     signInWithPassword: (credentials: any) =>
       withSentrySupabase(
-        () => supabase.auth.signInWithPassword(credentials),
+        async () => await supabase.auth.signInWithPassword(credentials),
         { operation: 'auth.signIn', method: 'signInWithPassword' }
       ),
     
     signOut: () =>
       withSentrySupabase(
-        () => supabase.auth.signOut(),
+        async () => await supabase.auth.signOut(),
         { operation: 'auth.signOut', method: 'signOut' }
       )
   }

@@ -33,11 +33,11 @@ export const setSentryContext = (key: string, context: Record<string, any>) => {
   Sentry.setContext(key, context);
 };
 
-export const captureUserFeedback = (eventId: string, name?: string, email?: string, comments?: string) => {
-  Sentry.captureUserFeedback({
-    event_id: eventId,
+export const captureFeedback = (eventId: string, name?: string, email?: string, comments?: string) => {
+  Sentry.captureFeedback({
+    message: comments || 'No additional feedback provided',
     name: name || 'Anonymous',
     email: email || 'unknown@example.com',
-    comments: comments || 'No additional feedback provided'
+    associatedEventId: eventId
   });
 };
