@@ -39,7 +39,7 @@ const Index = () => {
                 <div className="text-red-600">Unable to load categories. Please try again later.</div>
               </div>
             ) : (
-              <CategoriesGrid categories={homepageData?.categories || []} />
+              <CategoriesGrid categories={homepageData?.otherCategories || []} isStatic={true} />
             )}
           </section>
 
@@ -49,8 +49,8 @@ const Index = () => {
               Featured Leaderboard
             </h2>
             <FeaturedLeaderboard 
-              category={homepageData?.goatFootballer} 
-              isLoading={isLoading}
+              goatFootballer={homepageData?.goatFootballer || null} 
+              isStatic={true}
             />
           </section>
 

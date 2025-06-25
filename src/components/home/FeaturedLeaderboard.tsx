@@ -78,7 +78,7 @@ const FeaturedLeaderboard = ({ goatFootballer, isStatic = false }: FeaturedLeade
       {goatFootballer ? (
         <div className="relative" ref={leaderboardRef}>
           <GlobalLeaderboard
-            athletes={goatFootballer.leaderboard}
+            athletes={goatFootballer.leaderboard || []}
             categoryName={goatFootballer.name}
           />
           <CreateRankingButton 
