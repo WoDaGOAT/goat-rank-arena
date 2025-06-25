@@ -172,8 +172,9 @@ export const useHomepageCategories = () => {
                     .limit(c.name === "GOAT Footballer" ? 10 : 3);
 
                   if (!rankingsError && athleteRankings) {
+                    const maxItems = c.name === "GOAT Footballer" ? 10 : 3;
                     leaderboard = athleteRankings
-                      .slice(0, c.name === "GOAT Footballer" ? 10 : 3)
+                      .slice(0, maxItems)
                       .map((ranking: any, index) => ({
                         id: ranking.athlete_id,
                         name: ranking.athletes?.name || "Unknown",
