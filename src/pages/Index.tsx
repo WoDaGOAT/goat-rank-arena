@@ -8,16 +8,28 @@ import LoadMoreCategories from "@/components/home/LoadMoreCategories";
 import FeedPreview from "@/components/home/FeedPreview";
 import { useHomepageCategories } from "@/hooks/useHomepageCategories";
 import { analytics } from "@/lib/analytics";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Index = () => {
   const { data: categoriesData, isLoading, isError, error, refetch } = useHomepageCategories();
+  const [showProgressiveContent, setShowProgressiveContent] = useState(false);
 
   // Track homepage visit
   useEffect(() => {
     console.log("🏠 Homepage component mounted");
     analytics.trackPageView('/', 'WoDaGOAT - Greatest Athletes of All Time');
   }, []);
+
+  // Progressive loading: show additional content after a delay
+  useEffect(() => {
+    if (!isLoading && categoriesData) {
+      const timer = setTimeout(() => {
+        setShowProgressiveContent(true);
+      }, 100); // Small delay to ensure smooth rendering
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, categoriesData]);
 
   // Log data state for debugging
   useEffect(() => {
@@ -117,60 +129,45 @@ const Index = () => {
           
           {!isLoading && !isError && categoriesData && (
             <>
-              {/* Check if we have any data */}
-              {!categoriesData.goatFootballer && categoriesData.otherCategories.length === 0 ? (
-                <div className="text-center space-y-6 max-w-2xl mx-auto">
-                  <div className="space-y-2">
-                    <h2 className="text-2xl font-bold text-white">No Categories Available</h2>
-                    <p className="text-gray-300">
-                      The category data is currently unavailable. This might indicate a setup issue.
-                    </p>
+              {/* Main content loads immediately */}
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                {/* Left side - Featured GOAT Footballer Leaderboard */}
+                {categoriesData.goatFootballer ? (
+                  <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
+                ) : (
+                  <div className="lg:col-span-2">
+                    <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 text-center">
+                      <h3 className="text-xl font-bold text-white mb-2">GOAT Footballer</h3>
+                      <p className="text-gray-300">Coming soon...</p>
+                    </div>
                   </div>
-                  <Button
-                    onClick={handleRetry}
-                    variant="default"
-                    size="lg"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh Data
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                  {/* Left side - Featured GOAT Footballer Leaderboard */}
-                  {categoriesData.goatFootballer ? (
-                    <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
-                  ) : (
-                    <div className="lg:col-span-2">
+                )}
+
+                {/* Right side - Other Category Cards */}
+                {categoriesData.otherCategories.length > 0 ? (
+                  <CategoriesGrid categories={categoriesData.otherCategories} />
+                ) : (
+                  <div className="lg:col-span-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 text-center">
-                        <h3 className="text-xl font-bold text-white mb-2">GOAT Footballer</h3>
-                        <p className="text-gray-300">Coming soon...</p>
+                        <h3 className="text-lg font-bold text-white mb-2">Categories</h3>
+                        <p className="text-gray-300">Loading categories...</p>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
+              </div>
 
-                  {/* Right side - Other Category Cards */}
-                  {categoriesData.otherCategories.length > 0 ? (
-                    <CategoriesGrid categories={categoriesData.otherCategories} />
-                  ) : (
-                    <div className="lg:col-span-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 text-center">
-                          <h3 className="text-lg font-bold text-white mb-2">Categories</h3>
-                          <p className="text-gray-300">Loading categories...</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+              {/* Progressive content - loads after main content is rendered */}
+              {showProgressiveContent && (
+                <>
+                  {/* Load More Categories Section */}
+                  <LoadMoreCategories />
+
+                  {/* Feed Preview Section */}
+                  <FeedPreview />
+                </>
               )}
-
-              {/* Load More Categories Section */}
-              <LoadMoreCategories />
-
-              {/* Feed Preview Section */}
-              <FeedPreview />
             </>
           )}
         </div>
