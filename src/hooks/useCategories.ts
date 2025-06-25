@@ -12,13 +12,30 @@ interface Category {
 
 export const useCategories = () => {
   return useQuery<Category[]>({
-    queryKey: ['categories', 'v3'], // Updated cache key to force fresh fetch
+    queryKey: ['categories', 'v4'], // Incremented cache key
     queryFn: async () => {
-      const { data, error } = await supabase.from('categories').select('*');
-      if (error) throw new Error(error.message);
+      console.log("📋 Fetching categories from database...");
+      
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error("📋 Error fetching categories:", error);
+        throw new Error(`Failed to fetch categories: ${error.message}`);
+      }
+      
+      console.log("📋 Categories fetched successfully:", {
+        count: data?.length || 0,
+        categories: data?.map(c => ({ id: c.id, name: c.name, parent_id: c.parent_id })) || []
+      });
+      
       return data || [];
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes (renamed from cacheTime)
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 };
