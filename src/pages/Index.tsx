@@ -1,3 +1,4 @@
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle } from "lucide-react";
@@ -6,17 +7,17 @@ import FeaturedLeaderboard from "@/components/home/FeaturedLeaderboard";
 import CategoriesGrid from "@/components/home/CategoriesGrid";
 import LoadMoreCategories from "@/components/home/LoadMoreCategories";
 import FeedPreview from "@/components/home/FeedPreview";
-import { useHomepageCategories } from "@/hooks/useHomepageCategories";
+import { useSimplifiedHomepageCategories } from "@/hooks/useSimplifiedHomepageCategories";
 import { analytics } from "@/lib/analytics";
 import { useEffect, useState } from "react";
 
 const Index = () => {
-  const { data: categoriesData, isLoading, isError, error, refetch } = useHomepageCategories();
+  const { data: categoriesData, isLoading, isError, error, refetch } = useSimplifiedHomepageCategories();
   const [showProgressiveContent, setShowProgressiveContent] = useState(false);
 
   // Track homepage visit
   useEffect(() => {
-    console.log("🏠 Homepage component mounted");
+    console.log("🏠 Homepage component mounted with simplified static data");
     analytics.trackPageView('/', 'WoDaGOAT - Greatest Athletes of All Time');
   }, []);
 
@@ -25,7 +26,7 @@ const Index = () => {
     if (!isLoading && categoriesData) {
       const timer = setTimeout(() => {
         setShowProgressiveContent(true);
-      }, 100); // Small delay to ensure smooth rendering
+      }, 100);
       
       return () => clearTimeout(timer);
     }
@@ -33,7 +34,7 @@ const Index = () => {
 
   // Log data state for debugging
   useEffect(() => {
-    console.log("📊 Homepage data state:", {
+    console.log("📊 Homepage data state (simplified):", {
       isLoading,
       isError,
       hasData: !!categoriesData,
@@ -44,7 +45,7 @@ const Index = () => {
   }, [categoriesData, isLoading, isError, error]);
 
   const handleRetry = () => {
-    console.log("🔄 User initiated retry");
+    console.log("🔄 User initiated retry (static data)");
     refetch();
   };
 
@@ -63,11 +64,9 @@ const Index = () => {
                 <p className="text-gray-300">Fetching the greatest athletes of all time</p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Featured leaderboard skeleton */}
                 <div className="lg:col-span-2">
                   <Skeleton className="h-[600px] w-full rounded-lg bg-white/5" />
                 </div>
-                {/* Other categories skeleton */}
                 <div className="lg:col-span-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {Array.from({ length: 4 }).map((_, i) => (
@@ -129,11 +128,14 @@ const Index = () => {
           
           {!isLoading && !isError && categoriesData && (
             <>
-              {/* Main content loads immediately */}
+              {/* Main content loads immediately with static data */}
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 {/* Left side - Featured GOAT Footballer Leaderboard */}
                 {categoriesData.goatFootballer ? (
-                  <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
+                  <FeaturedLeaderboard 
+                    goatFootballer={categoriesData.goatFootballer} 
+                    isStatic={true}
+                  />
                 ) : (
                   <div className="lg:col-span-2">
                     <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 text-center">
@@ -145,7 +147,10 @@ const Index = () => {
 
                 {/* Right side - Other Category Cards */}
                 {categoriesData.otherCategories.length > 0 ? (
-                  <CategoriesGrid categories={categoriesData.otherCategories} />
+                  <CategoriesGrid 
+                    categories={categoriesData.otherCategories} 
+                    isStatic={true}
+                  />
                 ) : (
                   <div className="lg:col-span-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -161,10 +166,7 @@ const Index = () => {
               {/* Progressive content - loads after main content is rendered */}
               {showProgressiveContent && (
                 <>
-                  {/* Load More Categories Section */}
                   <LoadMoreCategories />
-
-                  {/* Feed Preview Section */}
                   <FeedPreview />
                 </>
               )}
