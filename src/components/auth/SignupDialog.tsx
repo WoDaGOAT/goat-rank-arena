@@ -16,16 +16,22 @@ import { toast } from "sonner";
 import SocialLogins from "./SocialLogins";
 
 interface SignupDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const SignupDialog = ({ children }: SignupDialogProps) => {
+const SignupDialog = ({ children, open: controlledOpen, onOpenChange: setControlledOpen }: SignupDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+
+  const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const onOpenChange = isControlled ? setControlledOpen : setInternalOpen;
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,14 +60,15 @@ const SignupDialog = ({ children }: SignupDialogProps) => {
       toast.error(error.message);
     } else {
       toast.success("Check your email for the confirmation link!");
-      setOpen(false);
+      if (onOpenChange) {
+        onOpenChange(false);
+      }
     }
   };
 
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-700">
         <DialogHeader>
           <DialogTitle>Sign Up</DialogTitle>
