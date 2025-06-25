@@ -13,16 +13,9 @@ const GdprPage = () => {
               <h2 className="text-2xl font-semibold text-gray-100">Your Rights Under GDPR</h2>
               <p>The General Data Protection Regulation (GDPR) gives you certain rights over your personal data. At wodagoat, we are committed to upholding these rights.</p>
               <p>You have the right to access, rectify, or erase your personal data, as well as the right to restrict or object to its processing. You can also request data portability.</p>
-              
               <h2 className="text-2xl font-semibold text-gray-100 mt-6">Data Collection and Use</h2>
               <p>We collect personal data to provide and improve our service. This includes information you provide upon registration, such as your name and email address, and data generated through your use of our platform, like quiz results and rankings.</p>
               <p>We do not sell your personal data to third parties. We may share data with trusted partners for purposes like analytics and service hosting, under strict data protection agreements.</p>
-              
-              <h2 className="text-2xl font-semibold text-gray-100 mt-6">Analytics and Tracking</h2>
-              <p>We use Google Analytics to understand how users interact with our platform and to improve our services. This includes tracking page views, user interactions, and engagement metrics. Google Analytics may collect information such as your IP address, browser type, and usage patterns.</p>
-              <p>You can opt out of Google Analytics tracking by installing the <a href="https://tools.google.com/dlpage/gaoptout" className="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a>.</p>
-              <p>For more information about how Google processes your data, please review <a href="https://policies.google.com/privacy" className="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">Google's Privacy Policy</a>.</p>
-              
               <h2 className="text-2xl font-semibold text-gray-100 mt-6">Contact Us</h2>
               <p>If you have any questions about our GDPR compliance or wish to exercise your rights, please contact us at <a href="mailto:privacy@wodagoat.com" className="text-cyan-400 hover:underline">privacy@wodagoat.com</a>.</p>
             </div>

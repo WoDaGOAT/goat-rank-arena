@@ -1,86 +1,66 @@
-
-import React from 'react';
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { Skeleton } from "@/components/ui/skeleton";
 import HomepageHeader from "@/components/home/HomepageHeader";
-import CategoriesGrid from "@/components/home/CategoriesGrid";
 import FeaturedLeaderboard from "@/components/home/FeaturedLeaderboard";
+import CategoriesGrid from "@/components/home/CategoriesGrid";
+import LoadMoreCategories from "@/components/home/LoadMoreCategories";
 import FeedPreview from "@/components/home/FeedPreview";
-import { useSimplifiedHomepageCategories } from "@/hooks/useSimplifiedHomepageCategories";
+import { useHomepageCategories } from "@/hooks/useHomepageCategories";
 
 const Index = () => {
-  const { data: homepageData, isLoading, isError } = useSimplifiedHomepageCategories();
-
-  console.log("🏠 Index page render:", { 
-    isLoading, 
-    isError, 
-    hasData: !!homepageData,
-    goatFootballerExists: !!homepageData?.goatFootballer,
-    otherCategoriesCount: homepageData?.otherCategories?.length || 0
-  });
+  const { data: categoriesData, isLoading, isError } = useHomepageCategories();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
-      <Navbar />
-      
-      <main className="flex-1">
-        <HomepageHeader />
-        
-        <div className="container mx-auto px-4 py-8 space-y-12">
-          {/* Categories Grid */}
-          <section>
-            <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-              Choose Your GOAT Category
-            </h2>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="text-gray-600">Loading categories...</div>
+    <>
+      <HomepageHeader />
+      <div
+        className="flex flex-col flex-grow"
+        style={{ background: "linear-gradient(135deg, rgba(25, 7, 73, 0.6) 0%, rgba(7, 2, 21, 0.6) 100%)" }}
+      >
+        <div className="container mx-auto px-4 py-12 flex-grow">
+          {isLoading && (
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              {/* Featured leaderboard skeleton */}
+              <div className="lg:col-span-2">
+                <Skeleton className="h-[600px] w-full rounded-lg bg-white/5" />
               </div>
-            ) : isError ? (
-              <div className="text-center py-8">
-                <div className="text-red-600">Unable to load categories. Please try again later.</div>
+              {/* Other categories skeleton */}
+              <div className="lg:col-span-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-[420px] w-full rounded-lg bg-white/5" />
+                  ))}
+                </div>
               </div>
-            ) : (
-              <CategoriesGrid 
-                categories={homepageData?.otherCategories || []} 
-                isStatic={true} 
-              />
-            )}
-          </section>
+            </div>
+          )}
+          
+          {isError && (
+            <div className="text-center text-red-400 text-lg space-y-2">
+              <p>Could not load categories. Please try again later.</p>
+              <p className="text-sm text-red-300">Check the console for more details.</p>
+            </div>
+          )}
+          
+          {!isLoading && !isError && categoriesData && (
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                {/* Left side - Featured GOAT Footballer Leaderboard */}
+                <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
 
-          {/* Featured Leaderboard */}
-          <section>
-            <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-              Featured Leaderboard
-            </h2>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="text-gray-600">Loading leaderboard...</div>
+                {/* Right side - Other Category Cards */}
+                <CategoriesGrid categories={categoriesData.otherCategories} />
               </div>
-            ) : isError ? (
-              <div className="text-center py-8">
-                <div className="text-red-600">Unable to load leaderboard. Please try again later.</div>
-              </div>
-            ) : (
-              <FeaturedLeaderboard 
-                goatFootballer={homepageData?.goatFootballer || null} 
-                isStatic={true}
-              />
-            )}
-          </section>
 
-          {/* Feed Preview */}
-          <section>
-            <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-              Latest Activity
-            </h2>
-            <FeedPreview />
-          </section>
+              {/* Load More Categories Section */}
+              <LoadMoreCategories />
+
+              {/* Feed Preview Section */}
+              <FeedPreview />
+            </>
+          )}
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

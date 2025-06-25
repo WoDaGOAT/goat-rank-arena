@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ import { useAthleteSearch } from "@/hooks/useAthleteSearch";
 import { useSaveRanking } from "@/hooks/useSaveRanking";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAthleteSelectionPersistence } from "@/hooks/useAthleteSelectionPersistence";
-import { analytics } from "@/lib/analytics";
 import { toast } from "sonner";
 
 interface RankingEditorProps {
@@ -23,7 +21,6 @@ interface RankingEditorProps {
 const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   const [rankingTitle, setRankingTitle] = useState("");
   const [rankingDescription, setRankingDescription] = useState("");
-  const [hasTrackedStart, setHasTrackedStart] = useState(false);
   const { user, openLoginDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
   const { loadSelection, saveSelection, clearSelection } = useAthleteSelectionPersistence();
@@ -40,14 +37,6 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     handleDragOver,
     handleDragEnd,
   } = useRankingManager(savedSelection || undefined);
-
-  // Track ranking started event (only once per session)
-  useEffect(() => {
-    if (!hasTrackedStart) {
-      analytics.trackStartedRanking(category.name!, category.id!);
-      setHasTrackedStart(true);
-    }
-  }, [category.name, category.id, hasTrackedStart]);
 
   // Show restoration message and clear saved data if we restored a selection
   useEffect(() => {
@@ -83,20 +72,8 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
 
   const handleAddAthlete = (athlete: Athlete) => {
     if (addAthlete(athlete)) {
-      // Track athlete selection
-      analytics.trackSelectedAthlete(
-        athlete.name,
-        athlete.id,
-        selectedAthletes.length + 1, // Position will be current length + 1
-        category.id!
-      );
       resetSearch();
     }
-  };
-
-  const handleReorderAthletes = () => {
-    // Track reordering event (debounced to avoid too many events)
-    analytics.trackReorderedRanking(category.id!, selectedAthletes.length);
   };
 
   const handleSave = () => {
@@ -162,10 +139,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
             <RankingList
               selectedAthletes={selectedAthletes}
               handleDragStart={handleDragStart}
-              handleDragOver={(e, index) => {
-                handleDragOver(e, index);
-                handleReorderAthletes();
-              }}
+              handleDragOver={handleDragOver}
               handleDragEnd={handleDragEnd}
               updateAthletePoints={updateAthletePoints}
               removeAthlete={removeAthlete}

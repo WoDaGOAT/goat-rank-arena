@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { SelectedAthlete } from "./useRankingManager";
-import { analytics } from "@/lib/analytics";
 
 interface SaveRankingParams {
   rankingTitle: string;
@@ -79,19 +78,6 @@ export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
         // Not a critical error, just log it. The ranking is saved.
         console.error('Failed to create feed item:', rpcError);
       }
-
-      // Track successful ranking submission
-      const { data: categoryData } = await supabase
-        .from('categories')
-        .select('name')
-        .eq('id', categoryId)
-        .single();
-
-      analytics.trackSubmittedRanking(
-        categoryId,
-        categoryData?.name || 'Unknown Category',
-        selectedAthletes.length
-      );
 
       return rankingId;
     },
