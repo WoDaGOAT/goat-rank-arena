@@ -1,28 +1,38 @@
 
 import { Category } from "@/types";
 import { HomepageCategoriesData } from "./fallbackData";
+import { allAthletes } from "@/data/mockAthletes";
 
 // Static category data for immediate homepage loading
 const createStaticCategory = (
   id: string, 
   name: string, 
   description: string, 
+  leaderboard: any[] = [],
   imageUrl?: string
 ): Category => ({
   id,
   name,
   description,
   userRankingCount: 0, // Will be updated progressively if needed
-  leaderboard: [], // Empty for static display
+  leaderboard,
   imageUrl
 });
 
 // Featured categories with their actual database IDs for navigation
 export const getStaticHomepageData = (): HomepageCategoriesData => {
+  // Use top 10 footballers from mock data for the GOAT Footballer leaderboard preview
+  const topFootballers = allAthletes.slice(0, 10).map(athlete => ({
+    ...athlete,
+    points: athlete.points || 0,
+    movement: athlete.movement || "neutral"
+  }));
+
   const goatFootballer = createStaticCategory(
     'goat-footballer-static', // Temporary static ID
     'GOAT Footballer',
     'Vote for the greatest footballer of all time. Compare legends across eras and decide who truly deserves the title.',
+    topFootballers, // Add the leaderboard data
     undefined
   );
 
