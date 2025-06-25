@@ -12,7 +12,7 @@ console.log('main.tsx: Starting application initialization');
 Sentry.init({
   dsn: "https://25839b27189d7e884d917cf967d45a2b@o4509554939527168.ingest.de.sentry.io/4509558829219920",
   environment: import.meta.env.MODE,
-  enabled: import.meta.env.PROD, // Only send errors in production
+  enabled: true, // Temporarily enabled for testing - will be reverted to import.meta.env.PROD
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration({
@@ -30,10 +30,18 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
   
   beforeSend(event, hint) {
+    console.log('Sentry beforeSend called with event:', event);
+    
     // Don't send external resource errors or development errors
     const error = hint.originalException;
     if (error && typeof error === 'object') {
       const errorMessage = error.toString();
+      
+      // Allow our test error through
+      if (errorMessage.includes('This is your first error!')) {
+        console.log('Sentry: Allowing test error through');
+        return event;
+      }
       
       // Filter out external resource errors using existing logic
       if (errorMessage.includes('ERR_BLOCKED_BY_CLIENT') ||
@@ -45,13 +53,17 @@ Sentry.init({
           errorMessage.includes('lovableproject.com') ||
           errorMessage.includes('WebSocket connection') ||
           errorMessage.includes('NetworkError')) {
+        console.log('Sentry: Filtering out external error:', errorMessage);
         return null; // Don't send to Sentry
       }
     }
     
+    console.log('Sentry: Sending event to Sentry');
     return event;
   }
 });
+
+console.log('Sentry initialized with DSN:', Sentry.getCurrentHub().getClient()?.getDsn()?.toString());
 
 // Initialize development console to suppress external errors
 DevelopmentConsole.init();
