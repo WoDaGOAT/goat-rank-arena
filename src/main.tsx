@@ -63,7 +63,7 @@ Sentry.init({
   }
 });
 
-console.log('Sentry initialized with DSN:', Sentry.getCurrentHub().getClient()?.getDsn()?.toString());
+console.log('Sentry initialized successfully');
 
 // Initialize development console to suppress external errors
 DevelopmentConsole.init();
