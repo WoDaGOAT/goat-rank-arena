@@ -5,10 +5,10 @@ import { Link } from "react-router-dom";
 import { Rss, FileQuestion, Bell } from "lucide-react";
 import SimpleDropdownMenu from "./nav/SimpleDropdownMenu";
 import SimpleAuthButtons from "./nav/SimpleAuthButtons";
-import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
-  const { user, loading } = useSimpleAuth();
+  const { user, loading } = useAuth();
 
   console.log('📱 Navbar render:', { user: !!user, loading });
 

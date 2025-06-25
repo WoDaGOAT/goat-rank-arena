@@ -1,83 +1,74 @@
 
-import React, { useState } from "react";
-import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
 import LoginDialog from "@/components/auth/LoginDialog";
 import SignupDialog from "@/components/auth/SignupDialog";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
+import UserMenu from "./UserMenu";
 
 const SimpleAuthButtons = () => {
-  const { user, loading, signOut } = useSimpleAuth();
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [signupOpen, setSignupOpen] = useState(false);
+    const { user, loading } = useAuth();
 
-  console.log('🔐 SimpleAuthButtons render:', { user: !!user, loading });
+    if (loading) {
+        return <div className="h-8 w-20 sm:h-9 sm:w-24 lg:h-10 lg:w-28 animate-pulse rounded-md bg-white/10" />;
+    }
 
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="h-8 w-20 animate-pulse rounded-md bg-white/10" />
-      </div>
-    );
-  }
-
-  if (user) {
-    const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-    const avatarUrl = user.user_metadata?.avatar_url;
+    if (user) {
+        return <UserMenu />;
+    }
 
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={avatarUrl} alt={`${displayName} Avatar`} />
-              <AvatarFallback>{displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuItem className="cursor-pointer">
-            <User className="mr-2 h-4 w-4" />
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={signOut} className="cursor-pointer">
-            Log out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        <div className="flex items-center gap-1 xs:gap-2 sm:gap-3">
+            {/* SIGN UP Button */}
+            <SignupDialog>
+                <button
+                    className={cn(
+                        "flex items-center justify-center rounded-[6px] sm:rounded-[8px] lg:rounded-[10px] border border-white bg-[#388BFF] font-bold transition-colors shadow hover:bg-[#236dda] focus:outline-none focus:ring-2 focus:ring-blue-300 text-white",
+                        "text-xs sm:text-sm lg:text-base whitespace-nowrap leading-none",
+                        "tracking-wide",
+                        // Mobile first sizing - very compact
+                        "px-2 py-1.5 min-w-[50px] min-h-[32px]",
+                        // Small mobile
+                        "xs:px-2.5 xs:py-1.5 xs:min-w-[55px] xs:min-h-[34px]",
+                        // Large mobile
+                        "sm:px-3 sm:py-2 sm:min-w-[70px] sm:min-h-[36px]",
+                        // Tablet and up
+                        "lg:px-6 lg:py-2.5 lg:min-w-[80px] lg:min-h-[40px]"
+                    )}
+                    style={{ letterSpacing: "0.5px" }}
+                >
+                    <span className="block font-semibold">
+                        <span className="hidden xs:inline">SIGN UP</span>
+                        <span className="inline xs:hidden">SIGN</span>
+                    </span>
+                </button>
+            </SignupDialog>
+            
+            {/* LOG IN Button */}
+            <LoginDialog>
+                <button
+                    className={cn(
+                        "flex items-center justify-center rounded-[6px] sm:rounded-[8px] lg:rounded-[10px] border border-[#388BFF] bg-transparent text-white font-bold transition-colors shadow hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-300",
+                        "text-xs sm:text-sm lg:text-base whitespace-nowrap leading-none",
+                        "tracking-wide",
+                        // Mobile first sizing - very compact
+                        "px-2 py-1.5 min-w-[50px] min-h-[32px]",
+                        // Small mobile
+                        "xs:px-2.5 xs:py-1.5 xs:min-w-[55px] xs:min-h-[34px]",
+                        // Large mobile
+                        "sm:px-3 sm:py-2 sm:min-w-[70px] sm:min-h-[36px]",
+                        // Tablet and up
+                        "lg:px-6 lg:py-2.5 lg:min-w-[80px] lg:min-h-[40px]"
+                    )}
+                    style={{ letterSpacing: "0.5px" }}
+                >
+                    <span className="block font-semibold">
+                        <span className="hidden xs:inline">LOG IN</span>
+                        <span className="inline xs:hidden">LOG</span>
+                    </span>
+                </button>
+            </LoginDialog>
+        </div>
     );
-  }
-
-  return (
-    <>
-      <div className="flex items-center gap-2">
-        <Button
-          onClick={() => setSignupOpen(true)}
-          className="bg-[#388BFF] hover:bg-[#236dda] text-white px-4 py-2 text-sm font-semibold"
-        >
-          SIGN UP
-        </Button>
-        
-        <Button
-          onClick={() => setLoginOpen(true)}
-          variant="outline"
-          className="border-[#388BFF] text-white hover:bg-white/10 px-4 py-2 text-sm font-semibold"
-        >
-          LOG IN
-        </Button>
-      </div>
-
-      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
-      <SignupDialog open={signupOpen} onOpenChange={setSignupOpen} />
-    </>
-  );
 };
 
 export default SimpleAuthButtons;
