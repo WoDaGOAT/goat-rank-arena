@@ -26,29 +26,28 @@ const SimpleDropdownMenu = () => {
   console.log("📋 SimpleDropdownMenu render:", { 
     categoriesCount: categories?.length, 
     isLoading, 
-    isError 
+    isError,
+    categories: categories?.map(c => ({ name: c.name, childrenCount: c.children?.length || 0 }))
   });
 
   // Build menu items from categories
   const menuItems: MenuCategory[] = React.useMemo(() => {
     if (!categories) return [];
     
-    // Simple flat structure for now
+    // Filter for main categories and build menu structure
     const items = categories
-      .filter(cat => ['GOAT', 'Current GOAT'].includes(cat.name))
+      .filter(cat => ['GOAT', 'Current GOAT', 'Competitions'].includes(cat.name))
       .map(category => ({
         id: category.id,
         name: category.name,
-        children: [
-          {
-            id: `${category.id}-main`,
-            name: category.name.replace('GOAT', 'Footballer'),
-            description: category.description || 'Vote for the greatest'
-          }
-        ]
+        children: (category.children || []).map(child => ({
+          id: child.id,
+          name: child.name,
+          description: child.description || undefined
+        }))
       }));
 
-    console.log("📋 Menu items built:", items.length);
+    console.log("📋 Menu items built:", items.map(i => ({ name: i.name, childrenCount: i.children.length })));
     return items;
   }, [categories]);
 
@@ -76,7 +75,75 @@ const SimpleDropdownMenu = () => {
     setOpenDropdown(openDropdown === itemId ? null : itemId);
   };
 
-  // Always render something, even if loading or error
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="w-full flex justify-center">
+        <div className="block lg:hidden">
+          <button
+            disabled
+            className="flex items-center gap-2 px-4 py-2 text-gray-400 rounded-lg"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="text-sm font-medium">Loading...</span>
+          </button>
+        </div>
+        <nav className="hidden lg:flex items-center justify-center gap-2 xl:gap-6">
+          <div className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-gray-400">
+            Loading categories...
+          </div>
+        </nav>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <div className="w-full flex justify-center">
+        <div className="block lg:hidden">
+          <button
+            onClick={() => window.location.reload()}
+            className="flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="text-sm font-medium">Retry</span>
+          </button>
+        </div>
+        <nav className="hidden lg:flex items-center justify-center gap-2 xl:gap-6">
+          <button
+            onClick={() => window.location.reload()}
+            className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-red-400 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            Menu unavailable - Click to retry
+          </button>
+        </nav>
+      </div>
+    );
+  }
+
+  // Show empty state if no menu items
+  if (!menuItems || menuItems.length === 0) {
+    return (
+      <div className="w-full flex justify-center">
+        <div className="block lg:hidden">
+          <button
+            disabled
+            className="flex items-center gap-2 px-4 py-2 text-gray-400 rounded-lg"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="text-sm font-medium">No Categories</span>
+          </button>
+        </div>
+        <nav className="hidden lg:flex items-center justify-center gap-2 xl:gap-6">
+          <div className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-gray-400">
+            No categories available
+          </div>
+        </nav>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="w-full flex justify-center">
@@ -85,76 +152,59 @@ const SimpleDropdownMenu = () => {
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-            disabled={isLoading}
           >
             <Menu className="h-5 w-5" />
-            <span className="text-sm font-medium">
-              {isLoading ? "Loading..." : "Categories"}
-            </span>
+            <span className="text-sm font-medium">Categories</span>
           </button>
         </div>
 
         {/* Desktop navigation */}
         <nav className="hidden lg:flex items-center justify-center gap-2 xl:gap-6">
-          {isLoading ? (
-            <div className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-gray-400">
-              Loading categories...
-            </div>
-          ) : isError ? (
-            <div className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-red-400">
-              Menu unavailable
-            </div>
-          ) : menuItems.length === 0 ? (
-            <div className="flex items-center gap-2 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-gray-400">
-              No categories
-            </div>
-          ) : (
-            menuItems.map((item) => {
-              const isOpen = openDropdown === item.id;
-              
-              return (
-                <div 
-                  key={item.id} 
-                  className="relative"
-                  ref={el => dropdownRefs.current[item.id] = el}
+          {menuItems.map((item) => {
+            const isOpen = openDropdown === item.id;
+            
+            return (
+              <div 
+                key={item.id} 
+                className="relative"
+                ref={el => dropdownRefs.current[item.id] = el}
+              >
+                <button
+                  onClick={() => handleDropdownToggle(item.id)}
+                  className="flex items-center gap-1 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-white hover:bg-white/10 rounded-lg transition-colors"
                 >
-                  <button
-                    onClick={() => handleDropdownToggle(item.id)}
-                    className="flex items-center gap-1 px-3 xl:px-6 py-2 xl:py-3 text-sm xl:text-lg font-semibold text-white hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    <span>{item.name}</span>
-                    <ChevronDown 
-                      className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-                    />
-                  </button>
-                  
-                  {isOpen && (
-                    <div className="absolute top-full left-0 mt-1 w-64 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50">
-                      <div className="p-2">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.id}
-                            to={`/categories?search=${encodeURIComponent(child.name)}`}
-                            onClick={() => setOpenDropdown(null)}
-                            className="block p-3 rounded-md hover:bg-gray-700 transition-colors"
-                          >
-                            <div className="font-medium text-white">{child.name}</div>
-                            {child.description && (
-                              <div className="text-sm text-gray-300 mt-1">{child.description}</div>
-                            )}
-                          </Link>
-                        ))}
-                      </div>
+                  <span>{item.name}</span>
+                  <ChevronDown 
+                    className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {isOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-64 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50">
+                    <div className="p-2">
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.id}
+                          to={`/category/${child.id}`}
+                          onClick={() => setOpenDropdown(null)}
+                          className="block p-3 rounded-md hover:bg-gray-700 transition-colors"
+                        >
+                          <div className="font-medium text-white">{child.name}</div>
+                          {child.description && (
+                            <div className="text-sm text-gray-300 mt-1">{child.description}</div>
+                          )}
+                        </Link>
+                      ))}
                     </div>
-                  )}
-                </div>
-              );
-            })
-          )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
       </div>
 
-      {/* Simple mobile menu placeholder */}
+      {/* Simple mobile menu */}
       {mobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-black/95 z-50 lg:hidden"
@@ -174,7 +224,7 @@ const SimpleDropdownMenu = () => {
                   {item.children.map((child) => (
                     <Link
                       key={child.id}
-                      to={`/categories?search=${encodeURIComponent(child.name)}`}
+                      to={`/category/${child.id}`}
                       onClick={() => setMobileMenuOpen(false)}
                       className="block p-2 text-gray-300 hover:text-white"
                     >

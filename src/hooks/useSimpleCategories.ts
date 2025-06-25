@@ -7,18 +7,19 @@ interface SimpleCategory {
   name: string;
   description: string | null;
   parent_id: string | null;
+  children?: SimpleCategory[];
 }
 
 // Static fallback categories for when database fails
-const FALLBACK_CATEGORIES = [
+const FALLBACK_CATEGORIES: SimpleCategory[] = [
   {
     id: 'fallback-goat',
     name: 'GOAT',
     description: 'Greatest of All Time rankings',
     parent_id: null,
     children: [
-      { id: 'fallback-goat-footballer', name: 'GOAT Footballer', description: 'Greatest footballer of all time' },
-      { id: 'fallback-goat-goalkeeper', name: 'GOAT Goalkeeper', description: 'Greatest goalkeeper of all time' }
+      { id: 'fallback-goat-footballer', name: 'GOAT Footballer', description: 'Greatest footballer of all time', parent_id: 'fallback-goat' },
+      { id: 'fallback-goat-goalkeeper', name: 'GOAT Goalkeeper', description: 'Greatest goalkeeper of all time', parent_id: 'fallback-goat' }
     ]
   },
   {
@@ -27,7 +28,7 @@ const FALLBACK_CATEGORIES = [
     description: 'Current generation rankings',
     parent_id: null,
     children: [
-      { id: 'fallback-current-footballer', name: 'Current GOAT Footballer', description: 'Best active footballer' }
+      { id: 'fallback-current-footballer', name: 'Current GOAT Footballer', description: 'Best active footballer', parent_id: 'fallback-current' }
     ]
   }
 ];
@@ -54,8 +55,23 @@ export const useSimpleCategories = () => {
           return FALLBACK_CATEGORIES;
         }
         
-        console.log("📋 Categories fetched successfully:", data.length);
-        return data;
+        // Build proper hierarchical structure
+        const categoriesById = new Map(data.map(c => [c.id, { ...c, children: [] as SimpleCategory[] }]));
+        const rootCategories: SimpleCategory[] = [];
+        
+        data.forEach(category => {
+          if (category.parent_id) {
+            const parent = categoriesById.get(category.parent_id);
+            if (parent) {
+              parent.children!.push(categoriesById.get(category.id)!);
+            }
+          } else {
+            rootCategories.push(categoriesById.get(category.id)!);
+          }
+        });
+        
+        console.log("📋 Categories structured successfully:", rootCategories.length);
+        return rootCategories;
         
       } catch (error) {
         console.error("📋 Fetch error, using fallback categories:", error);
@@ -66,7 +82,6 @@ export const useSimpleCategories = () => {
     gcTime: 1000 * 60 * 10, // 10 minutes
     retry: 2,
     retryDelay: 1000,
-    // Always return fallback data even on error
     throwOnError: false,
   });
 };
