@@ -5,6 +5,12 @@ import { Category, Athlete } from "@/types";
 import { toast } from "sonner";
 import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 
+// Define the return type interface
+interface HomepageCategoriesData {
+  goatFootballer: Category | null;
+  otherCategories: Category[];
+}
+
 // Detect if we're in Lovable preview environment
 const isPreviewEnvironment = () => {
   return window.location.hostname.includes('lovableproject.com') || 
@@ -13,7 +19,7 @@ const isPreviewEnvironment = () => {
 };
 
 // Simple fallback data for preview environment
-const getFallbackData = () => {
+const getFallbackData = (): HomepageCategoriesData => {
   return {
     goatFootballer: {
       id: 'fallback-goat-footballer',
@@ -44,22 +50,19 @@ const getFallbackData = () => {
 export const useHomepageCategories = () => {
   const isPreview = isPreviewEnvironment();
   
-  return useQuery<{
-    goatFootballer: Category | null;
-    otherCategories: Category[];
-  }>({
-    queryKey: ["homepageCategories", "v6", isPreview ? "preview" : "production"],
-    queryFn: async () => {
+  return useQuery<HomepageCategoriesData>({
+    queryKey: ["homepageCategories", "v7", isPreview ? "preview" : "production"],
+    queryFn: async (): Promise<HomepageCategoriesData> => {
       console.log("🏠 Homepage categories query starting...", { isPreview });
       
       // Use timeout for preview environment
       const queryTimeout = isPreview ? 5000 : 30000; // 5s for preview, 30s for production
       
-      const timeoutPromise = new Promise((_, reject) => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('Query timeout')), queryTimeout);
       });
       
-      const queryPromise = async () => {
+      const queryPromise = async (): Promise<HomepageCategoriesData> => {
         try {
           // Test basic connectivity first
           console.log("🔍 Testing Supabase connectivity...");
@@ -138,7 +141,7 @@ export const useHomepageCategories = () => {
           }
 
           // Simplified leaderboard calculation - no complex nested queries for preview
-          const categoriesWithLeaderboards = await Promise.all(
+          const categoriesWithLeaderboards: Category[] = await Promise.all(
             categoriesRaw.map(async (c) => {
               console.log(`📊 Processing category: ${c.name}`);
               
@@ -174,10 +177,19 @@ export const useHomepageCategories = () => {
                       .map((ranking: any, index) => ({
                         id: ranking.athlete_id,
                         name: ranking.athletes?.name || "Unknown",
-                        country: ranking.athletes?.country_of_origin || "",
                         imageUrl: ranking.athletes?.profile_picture_url || "",
                         rank: index + 1,
-                        points: ranking.points || 0
+                        points: ranking.points || 0,
+                        movement: "neutral" as const,
+                        dateOfBirth: "",
+                        dateOfDeath: undefined,
+                        isActive: true,
+                        countryOfOrigin: ranking.athletes?.country_of_origin || "",
+                        country: ranking.athletes?.country_of_origin || "",
+                        clubs: [],
+                        competitions: [],
+                        positions: [],
+                        nationality: ""
                       }));
                   }
                 } catch (error) {
