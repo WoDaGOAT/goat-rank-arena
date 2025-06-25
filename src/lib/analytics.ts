@@ -31,7 +31,7 @@ class Analytics {
 
   constructor() {
     this.isDevelopment = import.meta.env.DEV;
-    this.isEnabled = import.meta.env.PROD && typeof window !== 'undefined' && window.gtag;
+    this.isEnabled = import.meta.env.PROD && typeof window !== 'undefined' && typeof window.gtag === 'function';
     
     if (this.isDevelopment) {
       console.log('Analytics initialized in development mode - events will be logged but not sent');

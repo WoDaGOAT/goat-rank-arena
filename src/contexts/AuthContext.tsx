@@ -1,27 +1,13 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { setSentryUser } from '@/lib/sentryUtils';
 import { analytics } from '@/lib/analytics';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signUp: (email: string, password: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithFacebook: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updateUser: (updates: any) => Promise<void>;
-  openLoginDialog: () => void;
-  closeLoginDialog: () => void;
-  isLoginDialogOpen: boolean;
-  savePreLoginUrl: (url: string) => void;
-  preLoginUrl: string | null;
-}
+import { useAuthState } from '@/hooks/useAuthState';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import type { AuthContextType, Profile } from '@/types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -35,11 +21,46 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [preLoginUrl, setPreLoginUrl] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Use the user roles hook
+  const {
+    isAdmin,
+    isModerator,
+    isModeratorOrAdmin,
+    fetchUserRoles,
+    updateRoleStates,
+    clearRoles,
+  } = useUserRoles();
+
+  // Fetch user profile and roles
+  const refetchUser = async () => {
+    if (!user) return;
+    
+    try {
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileData) {
+        setProfile(profileData);
+      }
+
+      // Fetch and update roles
+      const roles = await fetchUserRoles(user.id);
+      updateRoleStates(roles);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   useEffect(() => {
     const getSession = async () => {
@@ -51,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getSession()
   }, [])
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async ({ email, password }: { email: string; password: string }) => {
     setLoading(true);
     try {
       const { data: { user }, error } = await supabase.auth.signUp({
@@ -61,15 +82,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       setUser(user);
       analytics.trackSignUp('email');
+      return { data: { user }, error: null };
     } catch (error: any) {
       console.error("Error signing up:", error.message);
-      throw error;
+      return { data: null, error };
     } finally {
       setLoading(false);
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async ({ email, password }: { email: string; password: string }) => {
     setLoading(true);
     try {
       const { data: { user, session }, error } = await supabase.auth.signInWithPassword({
@@ -79,9 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       setUser(user);
       setSession(session);
+      return { data: { user, session }, error: null };
     } catch (error: any) {
       console.error("Error signing in:", error.message);
-      throw error;
+      return { data: null, error };
     } finally {
       setLoading(false);
     }
@@ -94,6 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       setUser(null);
       setSession(null);
+      setProfile(null);
+      clearRoles();
     } catch (error: any) {
       console.error("Error signing out:", error.message);
       throw error;
@@ -102,67 +127,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      console.error("Error signing in with Google:", error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signInWithFacebook = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      console.error("Error signing in with Facebook:", error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetPassword = async (email: string) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      console.error("Error resetting password:", error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateUser = async (updates: any) => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user!.id);
-      if (error) throw error;
-      setUser({ ...user, ...data });
-    } catch (error: any) {
-      console.error("Error updating user:", error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Alias for signOut for backward compatibility
+  const logout = signOut;
 
   const openLoginDialog = () => {
     setIsLoginDialogOpen(true);
@@ -176,6 +142,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPreLoginUrl(url);
   };
 
+  const getAndClearPreLoginUrl = (): string | null => {
+    const url = preLoginUrl;
+    setPreLoginUrl(null);
+    return url;
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, 'Session:', !!session);
@@ -183,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('User signed in:', session.user.id);
         setUser(session.user);
+        setSession(session);
         setSentryUser(session.user);
         
         // Track user sign in and set analytics user ID
@@ -201,7 +174,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           analytics.trackSignUp(signUpMethod);
         }
         
-        // Fetch and set user properties for analytics
+        // Fetch user profile and roles
+        setTimeout(() => {
+          refetchUser();
+        }, 0);
+        
+        // Set user properties for analytics
         try {
           const { data: profile } = await supabase
             .from('profiles')
@@ -227,6 +205,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out');
         setUser(null);
+        setSession(null);
+        setProfile(null);
+        clearRoles();
         setSentryUser(null);
         analytics.setUserId('');
         analytics.setUserProperties({ user_type: 'anonymous' });
@@ -236,29 +217,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, preLoginUrl]);
+  }, [navigate, preLoginUrl, fetchUserRoles, updateRoleStates, clearRoles]);
 
   const value: AuthContextType = {
     user,
+    profile,
     session,
     loading,
+    isAdmin,
+    isModerator,
+    isModeratorOrAdmin,
     signUp,
     signIn,
     signOut,
-    signInWithGoogle,
-    signInWithFacebook,
-    resetPassword,
-    updateUser,
+    logout,
     openLoginDialog,
-    closeLoginDialog,
-    isLoginDialogOpen,
     savePreLoginUrl,
-    preLoginUrl,
+    getAndClearPreLoginUrl,
+    refetchUser,
   };
 
   return (
     <AuthContext.Provider value={value}>
       {children}
+      {/* Login dialog would go here if needed */}
     </AuthContext.Provider>
   );
 };
