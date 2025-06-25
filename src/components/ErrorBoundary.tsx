@@ -62,10 +62,14 @@ class ErrorBoundary extends Component<Props, State> {
     logError(error, 'ErrorBoundary - Component error');
     console.error('ErrorBoundary details:', error, errorInfo);
     
-    // Send additional context to Sentry
+    // Send additional context to Sentry with proper error info conversion
     Sentry.withScope((scope) => {
       scope.setTag('component', 'ErrorBoundary');
-      scope.setContext('errorInfo', errorInfo);
+      // Convert ErrorInfo to a plain object for Sentry context
+      scope.setContext('errorInfo', {
+        componentStack: errorInfo.componentStack,
+        errorBoundary: errorInfo.errorBoundary
+      });
       scope.setLevel('error');
       
       const eventId = Sentry.captureException(error);

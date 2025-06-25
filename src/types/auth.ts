@@ -8,10 +8,13 @@ export type AppRole = Database['public']['Enums']['app_role'];
 export interface AuthContextType {
   user: User | null;
   profile: Profile | null;
+  session: any; // Kept for backward compatibility
   loading: boolean;
   isAdmin: boolean;
   isModerator: boolean;
   isModeratorOrAdmin: boolean;
+  signUp: (credentials: { email: string; password: string }) => Promise<any>;
+  signIn: (credentials: { email: string; password: string }) => Promise<any>;
   signOut: () => Promise<void>;
   logout: () => Promise<void>;
   openLoginDialog: () => void;

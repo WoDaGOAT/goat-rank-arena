@@ -52,29 +52,33 @@ export const withSentrySupabase = <T>(
 };
 
 // Enhanced Supabase client with automatic error tracking
+// Note: This is a simplified version focused on core operations
 export const sentrySupabase = {
   from: (table: string) => ({
     select: (columns?: string) => 
       withSentrySupabase(
-        () => supabase.from(table).select(columns),
+        async () => {
+          const query = supabase.from(table as any);
+          return columns ? query.select(columns) : query.select();
+        },
         { operation: 'select', table, method: 'select' }
       ),
     
     insert: (data: any) => 
       withSentrySupabase(
-        () => supabase.from(table).insert(data),
+        () => supabase.from(table as any).insert(data),
         { operation: 'insert', table, method: 'insert' }
       ),
     
     update: (data: any) => 
       withSentrySupabase(
-        () => supabase.from(table).update(data),
+        () => supabase.from(table as any).update(data),
         { operation: 'update', table, method: 'update' }
       ),
     
     delete: () => 
       withSentrySupabase(
-        () => supabase.from(table).delete(),
+        () => supabase.from(table as any).delete(),
         { operation: 'delete', table, method: 'delete' }
       ),
   }),
