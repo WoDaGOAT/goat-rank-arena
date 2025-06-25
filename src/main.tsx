@@ -12,7 +12,7 @@ console.log('main.tsx: Starting application initialization');
 Sentry.init({
   dsn: "https://25839b27189d7e884d917cf967d45a2b@o4509554939527168.ingest.de.sentry.io/4509558829219920",
   environment: import.meta.env.MODE,
-  enabled: true, // Temporarily enabled for testing - will be reverted to import.meta.env.PROD
+  enabled: import.meta.env.PROD, // Only enabled in production
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration({
