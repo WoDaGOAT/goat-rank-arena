@@ -1,4 +1,3 @@
-
 export type AthleteMovement = "up" | "down" | "neutral";
 
 export interface Club {
@@ -29,6 +28,8 @@ export interface Athlete {
   competitions: Competition[];
   positions: string[]; // e.g., ["Forward", "Right Winger"]
   nationality: string;
+  careerStartYear?: number;
+  careerEndYear?: number;
 }
 
 export interface Category {
