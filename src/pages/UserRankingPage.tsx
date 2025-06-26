@@ -1,8 +1,9 @@
+
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, BarChart3 } from "lucide-react";
+import { ChevronLeft, BarChart3, Share } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -14,10 +15,14 @@ import { format } from "date-fns";
 import RankedAthleteRow from "@/components/feed/items/RankedAthleteRow";
 import UserHoverCard from "@/components/profile/UserHoverCard";
 import Footer from "@/components/Footer";
+import { ShareDialog } from "@/components/category/ShareDialog";
+import RankingSEO from "@/components/seo/RankingSEO";
+import { useState } from "react";
 
 const UserRankingPage = () => {
   const { rankingId } = useParams<{ rankingId: string }>();
   const { data: ranking, isLoading, error } = useUserRanking(rankingId);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -55,16 +60,40 @@ const UserRankingPage = () => {
     );
   }
 
+  const shareUrl = window.location.href;
+  const shareTitle = `${ranking.title} - WoDaGOAT Ranking`;
+  const shareDescription = ranking.description || `Check out this ${ranking.categories?.name || 'sports'} GOAT ranking on WoDaGOAT!`;
+  const topAthletes = ranking.athletes.slice(0, 5).map(athlete => athlete.name);
+  const categoryHashtags = ranking.categories?.name ? [`#${ranking.categories.name.replace(/\s+/g, '')}`] : [];
+
   return (
     <>
+      <RankingSEO
+        title={ranking.title}
+        description={shareDescription}
+        categoryName={ranking.categories?.name || undefined}
+        creatorName={ranking.profiles?.full_name || undefined}
+        topAthletes={topAthletes}
+        url={shareUrl}
+      />
+      
       <Navbar />
       <div className="min-h-screen text-white flex flex-col" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
         <main className="container mx-auto px-4 py-8 flex-grow">
-           <div className="mb-6">
+           <div className="mb-6 flex justify-between items-center">
             <Button asChild variant="outline" className="border-white/10 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white">
               <Link to={`/feed`}>
                 <ChevronLeft /> Back to Feed
               </Link>
+            </Button>
+            
+            <Button 
+              onClick={() => setShareDialogOpen(true)}
+              variant="outline" 
+              className="border-blue-500/20 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 hover:text-blue-200"
+            >
+              <Share className="mr-2 h-4 w-4" />
+              Share Ranking
             </Button>
           </div>
 
@@ -148,6 +177,19 @@ const UserRankingPage = () => {
         </main>
         <Footer />
       </div>
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        url={shareUrl}
+        text={shareDescription}
+        title={shareTitle}
+        description={shareDescription}
+        hashtags={categoryHashtags}
+        isRanking={true}
+        topAthletes={topAthletes}
+        categoryName={ranking.categories?.name || undefined}
+      />
     </>
   );
 };

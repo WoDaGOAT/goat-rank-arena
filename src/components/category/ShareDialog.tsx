@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -7,19 +8,22 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Copy, Facebook, Twitter, Mail, Share } from "lucide-react";
+import { Copy, Facebook, Mail, Share } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-// For brevity, I'm using Twitter icon for Telegram and Share icon for WhatsApp, as specific icons weren't available in the prompt's list
-import { FaWhatsapp as Whatsapp, FaTelegram as Telegram } from "react-icons/fa";
-
+import { FaWhatsapp as Whatsapp, FaTelegram as Telegram, FaXTwitter as TwitterX } from "react-icons/fa6";
 
 interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   url: string;
   text: string;
+  title?: string;
+  description?: string;
+  hashtags?: string[];
+  isRanking?: boolean;
+  topAthletes?: string[];
+  categoryName?: string;
 }
 
 const SocialButton = ({ children, onClick, 'aria-label': ariaLabel, className }: { children: React.ReactNode, onClick: () => void, 'aria-label': string, className?: string }) => (
@@ -34,27 +38,95 @@ const SocialButton = ({ children, onClick, 'aria-label': ariaLabel, className }:
     </Button>
 )
 
-export const ShareDialog = ({ open, onOpenChange, url, text }: ShareDialogProps) => {
+export const ShareDialog = ({ 
+  open, 
+  onOpenChange, 
+  url, 
+  text, 
+  title,
+  description,
+  hashtags = [],
+  isRanking = false,
+  topAthletes = [],
+  categoryName 
+}: ShareDialogProps) => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(url);
     toast.success("Link copied to clipboard!");
   };
 
+  const generateShareContent = (platform: string) => {
+    let shareText = text;
+    
+    if (isRanking) {
+      const topThree = topAthletes.slice(0, 3);
+      const athleteList = topThree.length > 0 ? `\n\nTop 3: ${topThree.join(', ')}` : '';
+      const categoryText = categoryName ? ` in ${categoryName}` : '';
+      
+      switch (platform) {
+        case 'twitter':
+          const twitterHashtags = ['#WoDaGOAT', '#GOAT', '#SportsDebate', ...(hashtags || [])].join(' ');
+          shareText = `🏆 Check out my ${categoryName || 'sports'} GOAT ranking${athleteList}\n\n${twitterHashtags}`;
+          break;
+        case 'facebook':
+          shareText = `🏆 I just created my ${categoryName || 'sports'} GOAT ranking on WoDaGOAT!${athleteList}\n\nWhat do you think? Join the debate and create your own ranking!`;
+          break;
+        case 'whatsapp':
+          shareText = `🏆 Hey! Check out my ${categoryName || 'sports'} GOAT ranking${athleteList}\n\nThought you might find this interesting! 🔥`;
+          break;
+        case 'telegram':
+          shareText = `🏆 My ${categoryName || 'sports'} GOAT ranking${athleteList}\n\nJoin the sports debate on WoDaGOAT! 🔥`;
+          break;
+        case 'email':
+          shareText = `Check out my ${categoryName || 'sports'} GOAT ranking on WoDaGOAT${athleteList}\n\nI'd love to hear your thoughts on this ranking!`;
+          break;
+      }
+    }
+    
+    return shareText;
+  };
+
   const shareOptions = [
-    { name: 'WhatsApp', icon: <Whatsapp className="h-6 w-6" />, href: `whatsapp://send?text=${encodeURIComponent(`${text}\n${url}`)}` },
-    { name: 'Facebook', icon: <Facebook className="h-6 w-6" />, href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-    { name: 'Telegram', icon: <Telegram className="h-6 w-6" />, href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}` },
-    { name: 'Email', icon: <Mail className="h-6 w-6" />, href: `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(url)}` },
+    { 
+      name: 'Twitter/X', 
+      icon: <TwitterX className="h-6 w-6" />, 
+      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(generateShareContent('twitter'))}&url=${encodeURIComponent(url)}`
+    },
+    { 
+      name: 'WhatsApp', 
+      icon: <Whatsapp className="h-6 w-6" />, 
+      href: `whatsapp://send?text=${encodeURIComponent(`${generateShareContent('whatsapp')}\n${url}`)}`
+    },
+    { 
+      name: 'Facebook', 
+      icon: <Facebook className="h-6 w-6" />, 
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(generateShareContent('facebook'))}`
+    },
+    { 
+      name: 'Telegram', 
+      icon: <Telegram className="h-6 w-6" />, 
+      href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(generateShareContent('telegram'))}`
+    },
+    { 
+      name: 'Email', 
+      icon: <Mail className="h-6 w-6" />, 
+      href: `mailto:?subject=${encodeURIComponent(title || 'Check out this ranking!')}&body=${encodeURIComponent(`${generateShareContent('email')}\n\n${url}`)}`
+    },
   ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
-          <DialogTitle>Share this leaderboard</DialogTitle>
+          <DialogTitle>
+            {isRanking ? 'Share your ranking' : 'Share this leaderboard'}
+          </DialogTitle>
           <DialogDescription>
-            Anyone with this link will be able to view this page.
+            {isRanking 
+              ? 'Show off your GOAT picks and get others to join the debate!'
+              : 'Anyone with this link will be able to view this page.'
+            }
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center space-x-2">
