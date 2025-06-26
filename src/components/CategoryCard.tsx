@@ -34,7 +34,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
               <span className="line-clamp-2 break-words">{category.name}</span>
             </CardTitle>
             
-            <div className="flex items-center text-muted-foreground mt-auto">
+            <div className="flex items-center text-muted-foreground">
               <Flag className="w-4 h-4 mr-2 flex-shrink-0" />
               <span className="text-sm">{category.userRankingCount.toLocaleString()} rankings submitted</span>
             </div>
