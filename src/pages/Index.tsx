@@ -1,3 +1,4 @@
+
 import { Skeleton } from "@/components/ui/skeleton";
 import HomepageHeader from "@/components/home/HomepageHeader";
 import FeaturedLeaderboard from "@/components/home/FeaturedLeaderboard";
@@ -18,18 +19,16 @@ const Index = () => {
       >
         <div className="container mx-auto px-4 py-12 flex-grow">
           {isLoading && (
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              {/* Featured leaderboard skeleton */}
-              <div className="lg:col-span-2">
-                <Skeleton className="h-[600px] w-full rounded-lg bg-white/5" />
+            <div className="space-y-8">
+              {/* Centered leaderboard skeleton */}
+              <div className="flex justify-center">
+                <Skeleton className="h-[600px] w-full max-w-4xl rounded-lg bg-white/5" />
               </div>
-              {/* Other categories skeleton */}
-              <div className="lg:col-span-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-[420px] w-full rounded-lg bg-white/5" />
-                  ))}
-                </div>
+              {/* Categories grid skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[420px] w-full rounded-lg bg-white/5" />
+                ))}
               </div>
             </div>
           )}
@@ -43,11 +42,15 @@ const Index = () => {
           
           {!isLoading && !isError && categoriesData && (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Left side - Featured GOAT Footballer Leaderboard */}
-                <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
+              {/* Centered Featured GOAT Footballer Leaderboard */}
+              <div className="flex justify-center mb-12">
+                <div className="w-full max-w-4xl">
+                  <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
+                </div>
+              </div>
 
-                {/* Right side - Other Category Cards */}
+              {/* Full Width Category Cards Section */}
+              <div className="mb-12">
                 <CategoriesGrid categories={categoriesData.otherCategories} />
               </div>
 

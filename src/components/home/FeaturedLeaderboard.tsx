@@ -65,7 +65,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
   }, []);
 
   return (
-    <div className="lg:col-span-2 space-y-6">
+    <div className="w-full">
       {goatFootballer ? (
         <div className="relative" ref={leaderboardRef}>
           <GlobalLeaderboard
