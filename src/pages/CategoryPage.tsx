@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
@@ -48,22 +47,33 @@ const CategoryPage = () => {
   });
 
   // Fetch submitted rankings count for this category
-  const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount } = useQuery({
+  const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount, error: rankingsCountError } = useQuery({
     queryKey: ['categoryRankingsCount', categoryId],
     queryFn: async () => {
+      console.log('Fetching rankings count for categoryId:', categoryId);
+      
       const { count, error } = await supabase
         .from('user_rankings')
         .select('*', { count: 'exact', head: true })
         .eq('category_id', categoryId || "");
       
+      console.log('Rankings count query result:', { count, error });
+      
       if (error) {
+        console.error('Error fetching rankings count:', error);
         throw error;
       }
       
       return count || 0;
     },
     enabled: !!categoryId,
+    staleTime: 1000 * 60, // 1 minute
+    retry: 3,
   });
+
+  // Debug log the submitted rankings count
+  console.log('Submitted rankings count from query:', submittedRankingsCount);
+  console.log('Rankings count error:', rankingsCountError);
 
   // Fetch real athletes from the database
   const { data: dbAthletes, isLoading: isLoadingAthletes } = useAthletes();
