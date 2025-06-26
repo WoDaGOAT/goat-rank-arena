@@ -1,4 +1,4 @@
-
+import React from "react";
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
