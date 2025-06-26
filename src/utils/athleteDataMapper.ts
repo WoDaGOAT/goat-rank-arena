@@ -25,6 +25,8 @@ export const mapDatabaseAthleteToUIAthlete = (
     competitions: [],
     positions: dbAthlete.positions || [],
     nationality: dbAthlete.nationality || "",
+    careerStartYear: dbAthlete.career_start_year || undefined,
+    careerEndYear: dbAthlete.career_end_year || undefined,
   };
 };
 

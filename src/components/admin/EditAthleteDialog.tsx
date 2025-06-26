@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +39,16 @@ const athleteSchema = z.object({
   date_of_death: z.string().optional(),
   is_active: z.boolean(),
   profile_picture_url: z.string().optional(),
+  career_start_year: z.number().min(1800).max(new Date().getFullYear()).optional(),
+  career_end_year: z.number().min(1800).max(new Date().getFullYear()).optional(),
+}).refine((data) => {
+  if (data.career_start_year && data.career_end_year) {
+    return data.career_end_year >= data.career_start_year;
+  }
+  return true;
+}, {
+  message: "Career end year must be greater than or equal to career start year",
+  path: ["career_end_year"],
 });
 
 type AthleteFormData = z.infer<typeof athleteSchema>;
@@ -65,6 +76,8 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
       date_of_death: "",
       is_active: true,
       profile_picture_url: "",
+      career_start_year: undefined,
+      career_end_year: undefined,
     },
   });
 
@@ -78,6 +91,8 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
         date_of_death: athlete.date_of_death || "",
         is_active: athlete.is_active,
         profile_picture_url: athlete.profile_picture_url || "",
+        career_start_year: athlete.career_start_year || undefined,
+        career_end_year: athlete.career_end_year || undefined,
       });
       setPositions(athlete.positions || []);
     }
@@ -107,6 +122,8 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
         is_active: data.is_active,
         positions: positions.length > 0 ? positions : null,
         profile_picture_url: data.profile_picture_url || null,
+        career_start_year: data.career_start_year || null,
+        career_end_year: data.career_end_year || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -200,6 +217,54 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
                         onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="career_start_year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Career Start Year</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="YYYY" 
+                        min="1800" 
+                        max={new Date().getFullYear()}
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Year the professional career started
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="career_end_year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Career End Year</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="YYYY" 
+                        min="1800" 
+                        max={new Date().getFullYear()}
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Year the professional career ended (leave empty if active)
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

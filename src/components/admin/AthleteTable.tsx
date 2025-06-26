@@ -64,7 +64,9 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
            !athlete.year_of_birth || 
            !athlete.positions || 
            athlete.positions.length === 0 || 
-           !athlete.profile_picture_url;
+           !athlete.profile_picture_url ||
+           !athlete.career_start_year ||
+           (!athlete.is_active && !athlete.career_end_year);
   };
 
   const handleEdit = (athlete: any) => {
@@ -153,14 +155,15 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                 <TableHead>Nationality</TableHead>
                 <TableHead>Positions</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Year of Birth</TableHead>
+                <TableHead>Birth Year</TableHead>
+                <TableHead>Career Span</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {athletes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     No athletes found matching your criteria.
                   </TableCell>
                 </TableRow>
@@ -208,6 +211,17 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                     </TableCell>
                     <TableCell>
                       {athlete.year_of_birth || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {athlete.career_start_year || athlete.career_end_year ? (
+                          <span>
+                            {athlete.career_start_year || "?"} - {athlete.career_end_year || (athlete.is_active ? "Present" : "?")}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">N/A</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

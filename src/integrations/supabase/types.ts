@@ -81,6 +81,8 @@ export type Database = {
       }
       athletes: {
         Row: {
+          career_end_year: number | null
+          career_start_year: number | null
           country_of_origin: string | null
           created_at: string
           date_of_death: string | null
@@ -94,6 +96,8 @@ export type Database = {
           year_of_birth: number | null
         }
         Insert: {
+          career_end_year?: number | null
+          career_start_year?: number | null
           country_of_origin?: string | null
           created_at?: string
           date_of_death?: string | null
@@ -107,6 +111,8 @@ export type Database = {
           year_of_birth?: number | null
         }
         Update: {
+          career_end_year?: number | null
+          career_start_year?: number | null
           country_of_origin?: string | null
           created_at?: string
           date_of_death?: string | null
@@ -921,6 +927,8 @@ export type Database = {
           is_active: boolean
           positions: string[]
           profile_picture_url: string
+          career_start_year: number
+          career_end_year: number
           created_at: string
           updated_at: string
           total_count: number

@@ -12,6 +12,8 @@ export interface DatabaseAthlete {
   country_of_origin: string | null;
   nationality: string | null;
   positions: string[] | null;
+  career_start_year: number | null;
+  career_end_year: number | null;
   created_at: string;
   updated_at: string;
 }

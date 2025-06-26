@@ -14,6 +14,8 @@ interface AthleteData {
   is_active: boolean;
   positions?: string[];
   profile_picture_url?: string;
+  career_start_year?: number;
+  career_end_year?: number;
 }
 
 export const useAthleteManagement = () => {
@@ -33,6 +35,8 @@ export const useAthleteManagement = () => {
           is_active: athleteData.is_active,
           positions: athleteData.positions || null,
           profile_picture_url: athleteData.profile_picture_url || null,
+          career_start_year: athleteData.career_start_year || null,
+          career_end_year: athleteData.career_end_year || null,
         }])
         .select()
         .single();
@@ -64,6 +68,8 @@ export const useAthleteManagement = () => {
           is_active: athleteData.is_active,
           positions: athleteData.positions || null,
           profile_picture_url: athleteData.profile_picture_url || null,
+          career_start_year: athleteData.career_start_year || null,
+          career_end_year: athleteData.career_end_year || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)
