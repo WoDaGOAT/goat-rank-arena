@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Button } from "@/components/ui/button";
@@ -74,7 +73,7 @@ const UserRankingPage = () => {
       
       <div className="min-h-screen text-white flex flex-col" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
         <main className="container mx-auto px-4 py-8 flex-grow">
-           <div className="mb-6 flex justify-between items-center">
+           <div className="mb-6 flex justify-start items-center gap-4">
             <Button asChild variant="outline" className="border-white/10 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white">
               <Link to={`/feed`}>
                 <ChevronLeft /> Back to Feed
