@@ -10,9 +10,9 @@ export const useHomepageCategories = () => {
     goatFootballer: Category | null;
     otherCategories: Category[];
   }>({
-    queryKey: ["homepageCategories", "v4"],
+    queryKey: ["homepageCategories", "v5"],
     queryFn: async () => {
-      console.log("Starting homepage categories query...");
+      console.log("Starting homepage categories query with dynamic selection...");
       
       // First, fetch all athletes data directly
       const { data: athletesData, error: athletesError } = await supabase
@@ -28,40 +28,33 @@ export const useHomepageCategories = () => {
 
       console.log("Athletes fetched:", athletesData?.length || 0);
 
-      // Get both parent category IDs
+      // Get parent category IDs
       const { data: parentCategories, error: parentError } = await supabase
         .from("categories")
         .select("id, name")
-        .in("name", ["GOAT", "Current GOAT"])
+        .in("name", ["GOAT", "Current GOAT", "Competitions"])
         .is("parent_id", null);
 
       if (parentError || !parentCategories || parentCategories.length === 0) {
-        toast.error("Failed to load featured categories.");
+        toast.error("Failed to load parent categories.");
         console.error("Error fetching parent categories for homepage:", parentError);
         throw new Error(parentError?.message || "Parent categories not found");
       }
 
-      const featuredCategories = [
-        "GOAT Footballer",
-        "GOAT Goalkeeper", 
-        "GOAT Defender",
-        "GOAT Midfielder",
-        "GOAT Attacker",
-        "GOAT Free-Kick Taker",
-        "Current GOAT Footballer",
-      ];
-
-      // Get parent IDs
       const parentIds = parentCategories.map(p => p.id);
 
-      // Fetch all featured categories from both parent categories
-      const { data: categoriesRaw, error: categoriesError } = await supabase
+      // Fetch all categories from parent categories with their ranking counts
+      const { data: categoriesWithCounts, error: categoriesError } = await supabase
         .from("categories")
-        .select("*")
+        .select(`
+          id,
+          name,
+          description,
+          image_url,
+          parent_id
+        `)
         .in("parent_id", parentIds)
-        .in("name", featuredCategories)
-        .order("name")
-        .limit(10);
+        .order("name");
 
       if (categoriesError) {
         toast.error("Failed to load categories.");
@@ -69,18 +62,61 @@ export const useHomepageCategories = () => {
         throw new Error(categoriesError.message);
       }
 
+      // Get ranking counts for all categories
+      const categoryIds = categoriesWithCounts.map(c => c.id);
+      const { data: rankingCounts, error: countError } = await supabase
+        .from("user_rankings")
+        .select("category_id")
+        .in("category_id", categoryIds);
+
+      if (countError) {
+        console.error("Error fetching ranking counts:", countError);
+      }
+
+      // Count rankings per category
+      const rankingCountMap: Record<string, number> = {};
+      if (rankingCounts) {
+        rankingCounts.forEach(ranking => {
+          const categoryId = ranking.category_id;
+          rankingCountMap[categoryId] = (rankingCountMap[categoryId] || 0) + 1;
+        });
+      }
+
+      console.log("Ranking counts by category:", rankingCountMap);
+
+      // Priority categories for tiebreaking
+      const priorityCategories = ["GOAT Attacker", "GOAT Skills", "Current GOAT"];
+
+      // Sort categories by ranking count and priority
+      const sortedCategories = categoriesWithCounts.sort((a, b) => {
+        const aCount = rankingCountMap[a.id] || 0;
+        const bCount = rankingCountMap[b.id] || 0;
+
+        // Primary sort: ranking count (descending)
+        if (aCount !== bCount) {
+          return bCount - aCount;
+        }
+
+        // Secondary sort: priority categories for tiebreakers
+        const aPriority = priorityCategories.indexOf(a.name);
+        const bPriority = priorityCategories.indexOf(b.name);
+
+        if (aPriority !== -1 && bPriority !== -1) {
+          return aPriority - bPriority; // Both are priority, use order in array
+        }
+        if (aPriority !== -1) return -1; // a is priority, b is not
+        if (bPriority !== -1) return 1;  // b is priority, a is not
+
+        // Tertiary sort: alphabetical by name
+        return a.name.localeCompare(b.name);
+      });
+
+      console.log("Sorted categories:", sortedCategories.map(c => ({ name: c.name, count: rankingCountMap[c.id] || 0 })));
+
       // Process categories and calculate leaderboards
       const categoriesWithLeaderboards = await Promise.all(
-        categoriesRaw.map(async (c) => {
-          // Get the actual count of user rankings for this category
-          const { count: rankingCount, error: countError } = await supabase
-            .from("user_rankings")
-            .select("*", { count: "exact", head: true })
-            .eq("category_id", c.id);
-
-          if (countError) {
-            console.error("Error fetching ranking count for category:", c.name, countError);
-          }
+        sortedCategories.map(async (c) => {
+          const rankingCount = rankingCountMap[c.id] || 0;
 
           // Fetch athlete scores for this category
           const { data: athleteRankings, error: rankingsError } = await supabase
@@ -159,7 +195,7 @@ export const useHomepageCategories = () => {
             name: c.name,
             description: c.description || "No description provided.",
             imageUrl: c.image_url || undefined,
-            userRankingCount: rankingCount || 0,
+            userRankingCount: rankingCount,
             leaderboard: leaderboard
           };
         })
@@ -167,10 +203,12 @@ export const useHomepageCategories = () => {
 
       // Separate GOAT Footballer from other categories
       const goatFootballer = categoriesWithLeaderboards.find(c => c.name === "GOAT Footballer") || null;
-      const otherCategories = categoriesWithLeaderboards.filter(c => c.name !== "GOAT Footballer");
+      const otherCategories = categoriesWithLeaderboards
+        .filter(c => c.name !== "GOAT Footballer")
+        .slice(0, 8); // Take top 8 categories for homepage display
 
       console.log("GOAT Footballer leaderboard:", goatFootballer?.leaderboard?.length || 0, "athletes");
-      console.log("Other categories found:", otherCategories.length);
+      console.log("Other categories selected:", otherCategories.map(c => ({ name: c.name, count: c.userRankingCount })));
 
       return {
         goatFootballer,
