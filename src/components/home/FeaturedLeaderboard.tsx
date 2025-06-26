@@ -10,7 +10,11 @@ interface FeaturedLeaderboardProps {
   goatFootballer: Category | null;
 }
 
-const CreateRankingButton = ({ categoryId, isSticky }: { categoryId: string; isSticky: boolean }) => (
+const CreateRankingButton = ({ categoryId, isSticky, hasInsufficientData }: { 
+  categoryId: string; 
+  isSticky: boolean;
+  hasInsufficientData: boolean;
+}) => (
   <Button 
     asChild 
     variant="cta" 
@@ -18,7 +22,7 @@ const CreateRankingButton = ({ categoryId, isSticky }: { categoryId: string; isS
       z-50 rounded-full shadow-2xl hover:scale-105 transition-all duration-300 
       w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center 
       md:w-auto md:px-6 md:py-3 md:h-12
-      ${isSticky 
+      ${isSticky && !hasInsufficientData
         ? 'absolute left-4 -bottom-20' 
         : 'fixed bottom-6 left-6'
       }
@@ -35,9 +39,12 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
   const [isSticky, setIsSticky] = useState(false);
   const leaderboardRef = useRef<HTMLDivElement>(null);
 
+  // Check if we have insufficient data
+  const hasInsufficientData = goatFootballer ? goatFootballer.userRankingCount < 3 : false;
+
   useEffect(() => {
     const handleScroll = () => {
-      if (!leaderboardRef.current) return;
+      if (!leaderboardRef.current || hasInsufficientData) return;
 
       const leaderboardRect = leaderboardRef.current.getBoundingClientRect();
       const leaderboardBottom = leaderboardRect.bottom;
@@ -62,7 +69,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
       window.removeEventListener('scroll', throttledHandleScroll);
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [hasInsufficientData]);
 
   return (
     <div className="w-full">
@@ -75,7 +82,14 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
             compact={true}
             categoryId={goatFootballer.id}
           />
-          <CreateRankingButton categoryId={goatFootballer.id} isSticky={isSticky} />
+          {/* Only show floating button when there's sufficient data */}
+          {!hasInsufficientData && (
+            <CreateRankingButton 
+              categoryId={goatFootballer.id} 
+              isSticky={isSticky}
+              hasInsufficientData={hasInsufficientData}
+            />
+          )}
         </div>
       ) : (
         <div className="text-center text-muted-foreground">

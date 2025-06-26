@@ -78,73 +78,79 @@ export const useAdditionalCategories = () => {
             console.error("Error fetching ranking count for category:", c.name, countError);
           }
 
-          // Fetch athlete scores for this category
-          const { data: athleteRankings, error: rankingsError } = await supabase
-            .from("user_rankings")
-            .select(`
-              ranking_athletes(
-                athlete_id,
-                position,
-                points
-              )
-            `)
-            .eq("category_id", c.id);
-
+          const actualRankingCount = rankingCount || 0;
           let leaderboard: Athlete[] = [];
 
-          if (!rankingsError && athleteRankings && athleteRankings.length > 0 && athletesData) {
-            console.log(`Processing leaderboard for ${c.name}, found ${athleteRankings.length} rankings`);
-            
-            // Calculate athlete scores from all rankings
-            const athleteScores: Record<string, { totalScore: number; appearances: number }> = {};
-            
-            athleteRankings.forEach((ranking) => {
-              if (ranking.ranking_athletes && Array.isArray(ranking.ranking_athletes)) {
-                ranking.ranking_athletes.forEach((athleteRanking: any) => {
-                  const athleteId = athleteRanking.athlete_id;
-                  const points = athleteRanking.points;
-                  
-                  if (athleteId && points) {
-                    if (!athleteScores[athleteId]) {
-                      athleteScores[athleteId] = {
-                        totalScore: 0,
-                        appearances: 0
-                      };
-                    }
+          // Only calculate leaderboard if we have sufficient rankings (3 or more)
+          if (actualRankingCount >= 3 && athletesData) {
+            // Fetch athlete scores for this category
+            const { data: athleteRankings, error: rankingsError } = await supabase
+              .from("user_rankings")
+              .select(`
+                ranking_athletes(
+                  athlete_id,
+                  position,
+                  points
+                )
+              `)
+              .eq("category_id", c.id);
+
+            if (!rankingsError && athleteRankings && athleteRankings.length > 0) {
+              console.log(`Processing leaderboard for ${c.name}, found ${athleteRankings.length} rankings`);
+              
+              // Calculate athlete scores from all rankings
+              const athleteScores: Record<string, { totalScore: number; appearances: number }> = {};
+              
+              athleteRankings.forEach((ranking) => {
+                if (ranking.ranking_athletes && Array.isArray(ranking.ranking_athletes)) {
+                  ranking.ranking_athletes.forEach((athleteRanking: any) => {
+                    const athleteId = athleteRanking.athlete_id;
+                    const points = athleteRanking.points;
                     
-                    athleteScores[athleteId].totalScore += points;
-                    athleteScores[athleteId].appearances += 1;
-                  }
-                });
-              }
-            });
-
-            // Convert to leaderboard format and sort by total score
-            const athleteObjects = Object.entries(athleteScores)
-              .map(([athleteId, { totalScore }]) => {
-                const athleteData = athletesData.find(athlete => athlete.id === athleteId);
-                
-                if (!athleteData) {
-                  console.warn(`Athlete data not found for ID: ${athleteId}`);
-                  return null;
+                    if (athleteId && points) {
+                      if (!athleteScores[athleteId]) {
+                        athleteScores[athleteId] = {
+                          totalScore: 0,
+                          appearances: 0
+                        };
+                      }
+                      
+                      athleteScores[athleteId].totalScore += points;
+                      athleteScores[athleteId].appearances += 1;
+                    }
+                  });
                 }
+              });
 
-                const athlete = mapDatabaseAthleteToUIAthlete(athleteData, 0, totalScore);
-                return athlete;
-              })
-              .filter((athlete): athlete is Athlete => athlete !== null);
+              // Convert to leaderboard format and sort by total score
+              const athleteObjects = Object.entries(athleteScores)
+                .map(([athleteId, { totalScore }]) => {
+                  const athleteData = athletesData.find(athlete => athlete.id === athleteId);
+                  
+                  if (!athleteData) {
+                    console.warn(`Athlete data not found for ID: ${athleteId}`);
+                    return null;
+                  }
 
-            leaderboard = athleteObjects
-              .sort((a, b) => b.points - a.points)
-              .slice(0, 3) // Top 3 for additional categories
-              .map((athlete, index) => ({
-                ...athlete,
-                rank: index + 1
-              }));
+                  const athlete = mapDatabaseAthleteToUIAthlete(athleteData, 0, totalScore);
+                  return athlete;
+                })
+                .filter((athlete): athlete is Athlete => athlete !== null);
 
-            console.log(`Final leaderboard for ${c.name}:`, leaderboard.length, "athletes");
+              leaderboard = athleteObjects
+                .sort((a, b) => b.points - a.points)
+                .slice(0, 3) // Top 3 for additional categories
+                .map((athlete, index) => ({
+                  ...athlete,
+                  rank: index + 1
+                }));
+
+              console.log(`Final leaderboard for ${c.name}:`, leaderboard.length, "athletes");
+            } else {
+              console.log(`No rankings found for ${c.name}`);
+            }
           } else {
-            console.log(`No rankings found for ${c.name}`);
+            console.log(`Insufficient rankings for ${c.name} (${actualRankingCount} rankings)`);
           }
 
           return {
@@ -152,7 +158,7 @@ export const useAdditionalCategories = () => {
             name: c.name,
             description: c.description || "No description provided.",
             imageUrl: c.image_url || undefined,
-            userRankingCount: rankingCount || 0,
+            userRankingCount: actualRankingCount,
             leaderboard: leaderboard
           };
         })

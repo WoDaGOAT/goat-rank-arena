@@ -3,7 +3,7 @@ import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, ExternalLink } from "lucide-react";
+import { Share2, ExternalLink, Plus } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
 import { ShareDialog } from "./category/ShareDialog";
 import { useState } from "react";
@@ -32,6 +32,9 @@ const GlobalLeaderboard = ({
 
   // Show fewer athletes in compact mode
   const displayAthletes = compact ? athletes.slice(0, 5) : athletes.slice(0, 10);
+  
+  // Check if we have insufficient data for a meaningful leaderboard
+  const hasInsufficientData = submittedRankingsCount < 3;
 
   return (
     <Card className="shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20 w-full">
@@ -73,29 +76,56 @@ const GlobalLeaderboard = ({
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {/* Header row - hidden on mobile */}
-        <div className={`hidden md:grid md:grid-cols-[50px_72px_1fr_110px_90px] gap-4 items-center px-4 bg-white/5 border-b border-white/20 text-xs font-bold text-gray-300 uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}>
-          <div className="text-center">#</div>
-          <div></div>
-          <div>Player</div>
-          <div className="text-center">Trend</div>
-          <div className="text-center">Score</div>
-        </div>
-        
-        {/* Leaderboard rows */}
-        <div className="divide-y divide-white/20">
-          {displayAthletes.map((athlete, index) => (
-            <LeaderboardRow 
-              key={athlete.id} 
-              athlete={athlete} 
-              position={index + 1}
-              compact={compact}
-            />
-          ))}
-        </div>
+        {hasInsufficientData ? (
+          // Show message when insufficient data
+          <div className="flex flex-col items-center justify-center py-8 px-6 text-center">
+            <div className="mb-4">
+              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <Plus className="h-8 w-8 text-white/60" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Not Enough Rankings Yet
+              </h3>
+              <p className="text-sm text-gray-300 mb-4 max-w-md">
+                We need at least 3 rankings to show a meaningful leaderboard. Be one of the first to rank the greatest {sanitize(categoryName.toLowerCase())}!
+              </p>
+            </div>
+            {categoryId && (
+              <Button asChild variant="cta" className="rounded-full">
+                <Link to={`/category/${categoryId}/rank`}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your Ranking
+                </Link>
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Header row - hidden on mobile */}
+            <div className={`hidden md:grid md:grid-cols-[50px_72px_1fr_110px_90px] gap-4 items-center px-4 bg-white/5 border-b border-white/20 text-xs font-bold text-gray-300 uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}>
+              <div className="text-center">#</div>
+              <div></div>
+              <div>Player</div>
+              <div className="text-center">Trend</div>
+              <div className="text-center">Score</div>
+            </div>
+            
+            {/* Leaderboard rows */}
+            <div className="divide-y divide-white/20">
+              {displayAthletes.map((athlete, index) => (
+                <LeaderboardRow 
+                  key={athlete.id} 
+                  athlete={athlete} 
+                  position={index + 1}
+                  compact={compact}
+                />
+              ))}
+            </div>
+          </>
+        )}
         
         {/* Social Actions at the bottom */}
-        {socialActions && (
+        {socialActions && !hasInsufficientData && (
           <div className={`border-t border-white/20 bg-white/5 ${compact ? 'p-3' : 'p-3 sm:p-4'}`}>
             {socialActions}
           </div>
