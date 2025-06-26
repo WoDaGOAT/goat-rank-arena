@@ -62,24 +62,24 @@ export const ShareDialog = ({
     if (isRanking) {
       const topThree = topAthletes.slice(0, 3);
       const athleteList = topThree.length > 0 ? `\n\nTop 3: ${topThree.join(', ')}` : '';
-      const categoryText = categoryName ? ` in ${categoryName}` : '';
+      const categoryText = categoryName ? ` ${categoryName}` : '';
       
       switch (platform) {
         case 'twitter':
           const twitterHashtags = ['#WoDaGOAT', '#GOAT', '#SportsDebate', ...(hashtags || [])].join(' ');
-          shareText = `🏆 Check out my ${categoryName || 'sports'} GOAT ranking${athleteList}\n\n${twitterHashtags}`;
+          shareText = `🏆 Check out my TOP 10${categoryText} ranking!${athleteList}\n\n${twitterHashtags}`;
           break;
         case 'facebook':
-          shareText = `🏆 I just created my ${categoryName || 'sports'} GOAT ranking on WoDaGOAT!${athleteList}\n\nWhat do you think? Join the debate and create your own ranking!`;
+          shareText = `🏆 I just created my TOP 10${categoryText} GOAT ranking on WoDaGOAT!${athleteList}\n\nWhat do you think? Join the debate and create your own ranking!`;
           break;
         case 'whatsapp':
-          shareText = `🏆 Hey! Check out my ${categoryName || 'sports'} GOAT ranking${athleteList}\n\nThought you might find this interesting! 🔥`;
+          shareText = `🏆 Hey! Check out my TOP 10${categoryText} GOAT ranking${athleteList}\n\nThought you might find this interesting! 🔥`;
           break;
         case 'telegram':
-          shareText = `🏆 My ${categoryName || 'sports'} GOAT ranking${athleteList}\n\nJoin the sports debate on WoDaGOAT! 🔥`;
+          shareText = `🏆 My TOP 10${categoryText} GOAT ranking${athleteList}\n\nJoin the sports debate on WoDaGOAT! 🔥`;
           break;
         case 'email':
-          shareText = `Check out my ${categoryName || 'sports'} GOAT ranking on WoDaGOAT${athleteList}\n\nI'd love to hear your thoughts on this ranking!`;
+          shareText = `Check out my TOP 10${categoryText} GOAT ranking on WoDaGOAT${athleteList}\n\nI'd love to hear your thoughts on this ranking!`;
           break;
       }
     }
@@ -120,7 +120,7 @@ export const ShareDialog = ({
       <DialogContent className="sm:max-w-md bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
           <DialogTitle>
-            {isRanking ? 'Share your ranking' : 'Share this leaderboard'}
+            {isRanking ? 'Share your TOP 10 ranking' : 'Share this leaderboard'}
           </DialogTitle>
           <DialogDescription>
             {isRanking 
