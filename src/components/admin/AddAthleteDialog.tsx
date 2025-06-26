@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,6 +28,8 @@ import { X, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FOOTBALL_POSITIONS } from "@/constants/positions";
 
 const athleteSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -49,7 +50,7 @@ interface AddAthleteDialogProps {
 
 const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
   const [positions, setPositions] = useState<string[]>([]);
-  const [newPosition, setNewPosition] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
 
@@ -67,9 +68,9 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
   });
 
   const addPosition = () => {
-    if (newPosition.trim() && !positions.includes(newPosition.trim())) {
-      setPositions([...positions, newPosition.trim()]);
-      setNewPosition("");
+    if (selectedPosition && !positions.includes(selectedPosition)) {
+      setPositions([...positions, selectedPosition]);
+      setSelectedPosition("");
     }
   };
 
@@ -250,13 +251,24 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
             <div className="space-y-3">
               <FormLabel>Positions</FormLabel>
               <div className="flex gap-2">
-                <Input
-                  placeholder="Add position"
-                  value={newPosition}
-                  onChange={(e) => setNewPosition(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addPosition())}
-                />
-                <Button type="button" onClick={addPosition} size="sm">
+                <Select value={selectedPosition} onValueChange={setSelectedPosition}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select a position" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-300 shadow-lg z-50">
+                    {FOOTBALL_POSITIONS.map((position) => (
+                      <SelectItem key={position} value={position} className="hover:bg-gray-100">
+                        {position}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  type="button" 
+                  onClick={addPosition} 
+                  size="sm"
+                  disabled={!selectedPosition || positions.includes(selectedPosition)}
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
