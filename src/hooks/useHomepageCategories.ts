@@ -205,7 +205,7 @@ export const useHomepageCategories = () => {
       const goatFootballer = categoriesWithLeaderboards.find(c => c.name === "GOAT Footballer") || null;
       const otherCategories = categoriesWithLeaderboards
         .filter(c => c.name !== "GOAT Footballer")
-        .slice(0, 8); // Take top 8 categories for homepage display
+        .slice(0, 5); // Limit to 5 categories for single line display
 
       console.log("GOAT Footballer leaderboard:", goatFootballer?.leaderboard?.length || 0, "athletes");
       console.log("Other categories selected:", otherCategories.map(c => ({ name: c.name, count: c.userRankingCount })));

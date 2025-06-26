@@ -10,10 +10,14 @@ const CategoriesGrid = ({ categories }: CategoriesGridProps) => {
   return (
     <div className="w-full">
       {categories.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
-          ))}
+        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="flex gap-6 min-w-max">
+            {categories.map((category) => (
+              <div key={category.id} className="w-72 flex-shrink-0">
+                <CategoryCard category={category} />
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <p className="text-center text-muted-foreground">
