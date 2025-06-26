@@ -13,7 +13,7 @@ const CategoriesGrid = ({ categories }: CategoriesGridProps) => {
         <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
           <div className="flex gap-6 min-w-max">
             {categories.map((category) => (
-              <div key={category.id} className="w-72 h-[350px] flex-shrink-0">
+              <div key={category.id} className="w-72 h-[380px] flex-shrink-0">
                 <CategoryCard category={category} />
               </div>
             ))}
