@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import footballPlayers from '@/data/footballPlayers';
@@ -61,19 +62,58 @@ export const useUserRanking = (rankingId?: string) => {
           throw athletesError;
       }
       
-      // 3. Hydrate athlete data
+      // 3. Get all unique athlete IDs from the ranking
+      const athleteIds = (athletesData || []).map(athlete => athlete.athlete_id);
+      
+      // 4. Fetch athlete data from database
+      const { data: dbAthletes, error: dbAthletesError } = await supabase
+        .from('athletes')
+        .select('id, name, profile_picture_url')
+        .in('id', athleteIds);
+      
+      if (dbAthletesError) {
+        console.error("Error fetching database athletes:", dbAthletesError);
+      }
+      
+      // 5. Hydrate athlete data with database first, then fallback to footballPlayers
       const hydratedAthletes: RankedAthlete[] = (athletesData || []).map(athlete => {
-        const fullAthlete = footballPlayers.find(p => String(p.id) === athlete.athlete_id);
+        // First try to find athlete in database
+        const dbAthlete = dbAthletes?.find(db => db.id === athlete.athlete_id);
+        
+        if (dbAthlete) {
+          return {
+            id: athlete.athlete_id,
+            name: dbAthlete.name,
+            imageUrl: dbAthlete.profile_picture_url || "/placeholder.svg",
+            position: athlete.position,
+            points: athlete.points
+          };
+        }
+        
+        // Fallback to footballPlayers array for backward compatibility
+        const footballPlayer = footballPlayers.find(p => String(p.id) === athlete.athlete_id);
+        
+        if (footballPlayer) {
+          return {
+            id: athlete.athlete_id,
+            name: footballPlayer.name,
+            imageUrl: footballPlayer.imageUrl,
+            position: athlete.position,
+            points: athlete.points
+          };
+        }
+        
+        // Last resort - return with unknown athlete info
         return {
           id: athlete.athlete_id,
-          name: fullAthlete?.name || 'Unknown Athlete',
-          imageUrl: fullAthlete?.imageUrl,
+          name: 'Unknown Athlete',
+          imageUrl: "/placeholder.svg",
           position: athlete.position,
           points: athlete.points
         };
       });
       
-      // 4. Combine all data into a single object
+      // 6. Combine all data into a single object
       const finalRanking = {
           ...rankingData,
           profiles: profileData,
