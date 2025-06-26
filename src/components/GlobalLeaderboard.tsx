@@ -11,10 +11,11 @@ import { useState } from "react";
 interface GlobalLeaderboardProps {
   athletes: Athlete[];
   categoryName: string;
+  submittedRankingsCount?: number;
   socialActions?: React.ReactNode;
 }
 
-const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLeaderboardProps) => {
+const GlobalLeaderboard = ({ athletes, categoryName, submittedRankingsCount = 0, socialActions }: GlobalLeaderboardProps) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const currentUrl = window.location.href;
   const shareText = `Check out the ${sanitize(categoryName)} leaderboard on WoDaGOAT!`;
@@ -29,7 +30,7 @@ const GlobalLeaderboard = ({ athletes, categoryName, socialActions }: GlobalLead
               {sanitize(categoryName)}
             </h1>
             <p className="text-xs sm:text-sm text-gray-300 font-medium">
-              🎮 Live Rankings • Top 10 Champions
+              ✅ {submittedRankingsCount.toLocaleString()} Submitted Rankings
             </p>
           </div>
           <div className="flex justify-center sm:justify-end">

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
@@ -46,6 +47,24 @@ const CategoryPage = () => {
     enabled: !!categoryId,
   });
 
+  // Fetch submitted rankings count for this category
+  const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount } = useQuery({
+    queryKey: ['categoryRankingsCount', categoryId],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('user_rankings')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', categoryId || "");
+      
+      if (error) {
+        throw error;
+      }
+      
+      return count || 0;
+    },
+    enabled: !!categoryId,
+  });
+
   // Fetch real athletes from the database
   const { data: dbAthletes, isLoading: isLoadingAthletes } = useAthletes();
 
@@ -58,7 +77,7 @@ const CategoryPage = () => {
     imageUrl: athlete.imageUrl // This will now use the real profile_picture_url from the database
   })).sort((a, b) => b.points - a.points) : [];
 
-  const isLoading = isLoadingCategory || isLoadingAthletes;
+  const isLoading = isLoadingCategory || isLoadingAthletes || isLoadingRankingsCount;
 
   if (isLoading) {
      return (
@@ -149,6 +168,7 @@ const CategoryPage = () => {
               <GlobalLeaderboard 
                 athletes={leaderboardAthletes} 
                 categoryName="Global Leaderboard" 
+                submittedRankingsCount={submittedRankingsCount || 0}
                 socialActions={socialActions}
               />
             </div>
