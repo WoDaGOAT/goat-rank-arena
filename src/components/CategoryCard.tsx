@@ -16,11 +16,11 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
   return (
     <Link to={`/category/${category.id}`} className="block h-full">
       <Card className="w-full h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col bg-white/5 border-white/10 text-white cursor-pointer hover:bg-white/10 hover:scale-105">
-        <CardHeader className="flex flex-col flex-grow p-6">
-          <div className="relative w-full h-60 mb-4 rounded-t-md overflow-hidden bg-zinc-100/5 dark:bg-zinc-800/5 flex items-center justify-center flex-shrink-0">
+        <CardHeader className="flex flex-col flex-grow p-4">
+          <div className="relative w-full h-44 mb-3 rounded-t-md overflow-hidden bg-zinc-100/5 dark:bg-zinc-800/5 flex items-center justify-center flex-shrink-0">
             {showOctagon ? (
               <div className="flex items-center justify-center w-full h-full">
-                <Octagon className="w-20 h-20 text-primary" strokeWidth={1.5} />
+                <Octagon className="w-16 h-16 text-primary" strokeWidth={1.5} />
               </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -30,7 +30,7 @@ const CategoryCard = ({ category }: CategoryCardProps) => {
           </div>
           
           <div className="flex flex-col flex-grow">
-            <CardTitle className="text-xl font-semibold text-primary leading-tight min-h-[3.5rem] flex items-start mb-3">
+            <CardTitle className="text-lg font-semibold text-primary leading-tight min-h-[3rem] flex items-start mb-2">
               <span className="line-clamp-2 break-words">{category.name}</span>
             </CardTitle>
             
