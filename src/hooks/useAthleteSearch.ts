@@ -3,14 +3,35 @@ import { useState, useMemo } from "react";
 import { useAthletes, DatabaseAthlete } from "./useAthletes";
 import { mapDatabaseAthleteToUIAthlete } from "@/utils/athleteDataMapper";
 import { Athlete } from "@/types";
+import { getCategoryPositionMapping, athleteMatchesCategory } from "@/utils/categoryPositionMapping";
 
-export const useAthleteSearch = (excludedAthletes: Athlete[] = []) => {
+interface UseAthleteSearchParams {
+  excludedAthletes?: Athlete[];
+  categoryId?: string;
+  categoryName?: string;
+}
+
+export const useAthleteSearch = ({ 
+  excludedAthletes = [], 
+  categoryId, 
+  categoryName 
+}: UseAthleteSearchParams = {}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState<string>("");
   const { data: athletes = [], isLoading } = useAthletes();
 
   const filteredAthletes = useMemo(() => {
     let filtered = athletes.map(athlete => mapDatabaseAthleteToUIAthlete(athlete));
+
+    // Apply category-based position filtering if category name is provided
+    if (categoryName) {
+      const positionMapping = getCategoryPositionMapping(categoryName);
+      if (positionMapping) {
+        filtered = filtered.filter(athlete => 
+          athleteMatchesCategory(athlete.positions, positionMapping, athlete.isActive)
+        );
+      }
+    }
 
     // Exclude already selected athletes
     if (excludedAthletes.length > 0) {
@@ -41,7 +62,7 @@ export const useAthleteSearch = (excludedAthletes: Athlete[] = []) => {
     }
 
     return filtered;
-  }, [athletes, searchTerm, selectedLetter, excludedAthletes]);
+  }, [athletes, searchTerm, selectedLetter, excludedAthletes, categoryName]);
 
   const resetSearch = () => {
     setSearchTerm("");

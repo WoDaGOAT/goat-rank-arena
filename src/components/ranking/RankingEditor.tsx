@@ -66,7 +66,11 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     setSelectedLetter,
     filteredAthletes,
     resetSearch
-  } = useAthleteSearch(selectedAthletes);
+  } = useAthleteSearch({ 
+    excludedAthletes: selectedAthletes,
+    categoryId: category.id,
+    categoryName: category.name
+  });
 
   const { onSave, isSaving } = useSaveRanking({ categoryId: category.id! });
 
@@ -132,6 +136,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
               setSelectedLetter={setSelectedLetter}
               addAthlete={handleAddAthlete}
               numSelectedAthletes={selectedAthletes.length}
+              categoryName={category.name}
             />
           </div>
 
