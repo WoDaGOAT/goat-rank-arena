@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import UserHoverCard from "@/components/profile/UserHoverCard";
 import Footer from "@/components/Footer";
 import { ShareDialog } from "@/components/category/ShareDialog";
 import RankingSEO from "@/components/seo/RankingSEO";
+import SocialPreviewDebug from "@/components/seo/SocialPreviewDebug";
 import { useState } from "react";
 
 const UserRankingPage = () => {
@@ -59,6 +61,21 @@ const UserRankingPage = () => {
   const shareDescription = ranking.description || `Check out this ${ranking.categories?.name || 'sports'} GOAT ranking on WoDaGOAT!`;
   const topAthletes = ranking.athletes.slice(0, 5).map(athlete => athlete.name);
   const categoryHashtags = ranking.categories?.name ? [`#${ranking.categories.name.replace(/\s+/g, '')}`] : [];
+
+  // Generate OG image URL for debugging
+  const debugOGImageUrl = (() => {
+    const pageTitle = ranking.categories?.name && ranking.profiles?.full_name 
+      ? `TOP 10 ranking of ${ranking.categories.name} by ${ranking.profiles.full_name}`
+      : `${ranking.title} - WoDaGOAT`;
+    
+    const baseTitle = encodeURIComponent(pageTitle);
+    const subtitle = topAthletes.length > 0 
+      ? encodeURIComponent(`Top picks: ${topAthletes.slice(0, 3).join(', ')}`)
+      : encodeURIComponent(`Created by ${ranking.profiles?.full_name || 'WoDaGOAT User'}`);
+    
+    const cacheBust = new Date().getTime();
+    return `https://og.png/api/og?title=${baseTitle}&subtitle=${subtitle}&theme=dark&width=1200&height=630&cache=${cacheBust}`;
+  })();
 
   return (
     <>
@@ -182,6 +199,15 @@ const UserRankingPage = () => {
         isRanking={true}
         topAthletes={topAthletes}
         categoryName={ranking.categories?.name || undefined}
+      />
+
+      <SocialPreviewDebug
+        url={shareUrl}
+        title={ranking.categories?.name && ranking.profiles?.full_name 
+          ? `TOP 10 ranking of ${ranking.categories.name} by ${ranking.profiles.full_name}`
+          : `${ranking.title} - WoDaGOAT`}
+        description={shareDescription}
+        imageUrl={debugOGImageUrl}
       />
     </>
   );

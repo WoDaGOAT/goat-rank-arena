@@ -39,80 +39,132 @@ const RankingSEO = ({
 
   // Generate dynamic OG image URL for the ranking
   const generateOGImageUrl = () => {
-    const baseUrl = 'https://og-image.vercel.app';
-    const encodedTitle = encodeURIComponent(pageTitle);
-    const encodedTopAthletes = topAthletes.length > 0 
+    // Create a more robust OG image with fallback options
+    const baseTitle = encodeURIComponent(pageTitle);
+    const subtitle = topAthletes.length > 0 
       ? encodeURIComponent(`Top picks: ${topAthletes.slice(0, 3).join(', ')}`)
-      : '';
+      : encodeURIComponent(`Created by ${creatorName || 'WoDaGOAT User'}`);
     
-    return `${baseUrl}/${encodedTitle}.png?theme=dark&md=1&fontSize=75px&images=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fvercel-triangle-white.svg${encodedTopAthletes ? `&subtitle=${encodedTopAthletes}` : ''}`;
+    // Add cache busting parameter
+    const cacheBust = new Date().getTime();
+    
+    // Use og.png service for better reliability
+    const ogImageUrl = `https://og.png/api/og?title=${baseTitle}&subtitle=${subtitle}&theme=dark&width=1200&height=630&cache=${cacheBust}`;
+    
+    return ogImageUrl;
   };
 
   const ogImageUrl = generateOGImageUrl();
 
+  // Debug logging (will show in console)
+  console.log('RankingSEO Debug Info:', {
+    pageTitle,
+    pageDescription,
+    ogImageUrl,
+    categoryName,
+    creatorName,
+    topAthletes: topAthletes.slice(0, 3),
+    currentUrl: url
+  });
+
   return (
-    <Helmet>
-      <title>{pageTitle}</title>
-      <meta name="description" content={pageDescription} />
-      <meta name="keywords" content={keywords} />
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={keywords} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={url} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:site_name" content="WoDaGOAT" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={url} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={ogImageUrl} />
+        <meta name="twitter:image:alt" content={`${pageTitle} - WoDaGOAT ranking preview`} />
+        
+        {/* Additional meta tags for better compatibility */}
+        <meta name="author" content={creatorName || 'WoDaGOAT Community'} />
+        <meta name="robots" content="index, follow" />
+        <meta property="article:author" content={creatorName || 'WoDaGOAT User'} />
+        <meta property="article:section" content="Sports" />
+        <meta property="article:tag" content={categoryName || 'GOAT Rankings'} />
+        <link rel="canonical" href={url} />
+        
+        {/* Cache control for better social media refresh */}
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
+        
+        {/* Enhanced structured data for rankings */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": pageTitle,
+            "description": pageDescription,
+            "image": ogImageUrl,
+            "author": {
+              "@type": "Person",
+              "name": creatorName || "WoDaGOAT User"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "WoDaGOAT",
+              "logo": {
+                "@type": "ImageObject",
+                "url": ogImageUrl
+              }
+            },
+            "url": url,
+            "keywords": keywords,
+            "genre": "Sports",
+            "about": {
+              "@type": "Thing",
+              "name": categoryName || "Sports",
+              "description": `GOAT ranking for ${categoryName || 'sports'}`
+            },
+            "mentions": topAthletes.slice(0, 5).map(athlete => ({
+              "@type": "Person",
+              "name": athlete
+            })),
+            "datePublished": new Date().toISOString(),
+            "dateModified": new Date().toISOString()
+          })}
+        </script>
+      </Helmet>
       
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content="article" />
-      <meta property="og:url" content={url} />
-      <meta property="og:title" content={pageTitle} />
-      <meta property="og:description" content={pageDescription} />
-      <meta property="og:image" content={ogImageUrl} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:site_name" content="WoDaGOAT" />
-      
-      {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url} />
-      <meta property="twitter:title" content={pageTitle} />
-      <meta property="twitter:description" content={pageDescription} />
-      <meta property="twitter:image" content={ogImageUrl} />
-      
-      {/* Additional meta tags */}
-      <meta name="author" content={creatorName || 'WoDaGOAT Community'} />
-      <meta name="robots" content="index, follow" />
-      <link rel="canonical" href={url} />
-      
-      {/* Enhanced structured data for rankings */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Article",
-          "headline": pageTitle,
-          "description": pageDescription,
-          "author": {
-            "@type": "Person",
-            "name": creatorName || "WoDaGOAT User"
-          },
-          "publisher": {
-            "@type": "Organization",
-            "name": "WoDaGOAT",
-            "logo": {
-              "@type": "ImageObject",
-              "url": ogImageUrl
-            }
-          },
-          "url": url,
-          "image": ogImageUrl,
-          "keywords": keywords,
-          "genre": "Sports",
-          "about": {
-            "@type": "Thing",
-            "name": categoryName || "Sports",
-            "description": `GOAT ranking for ${categoryName || 'sports'}`
-          },
-          "mentions": topAthletes.slice(0, 5).map(athlete => ({
-            "@type": "Person",
-            "name": athlete
-          }))
-        })}
-      </script>
-    </Helmet>
+      {/* Debug section - only visible in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          position: 'fixed', 
+          bottom: '10px', 
+          left: '10px', 
+          background: 'rgba(0,0,0,0.8)', 
+          color: 'white', 
+          padding: '10px', 
+          fontSize: '12px',
+          zIndex: 9999,
+          maxWidth: '300px'
+        }}>
+          <strong>SEO Debug:</strong><br/>
+          Title: {pageTitle}<br/>
+          OG Image: <a href={ogImageUrl} target="_blank" rel="noopener noreferrer" style={{color: 'yellow'}}>
+            Test Image
+          </a>
+        </div>
+      )}
+    </>
   );
 };
 
