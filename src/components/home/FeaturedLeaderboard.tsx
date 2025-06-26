@@ -71,6 +71,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
           <GlobalLeaderboard
             athletes={goatFootballer.leaderboard}
             categoryName={goatFootballer.name}
+            submittedRankingsCount={goatFootballer.userRankingCount}
           />
           <CreateRankingButton categoryId={goatFootballer.id} isSticky={isSticky} />
         </div>
