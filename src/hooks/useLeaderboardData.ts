@@ -85,16 +85,16 @@ export const useLeaderboardData = (categoryId: string) => {
           .slice(0, 10)
           .map((athlete, index) => {
             // Generate some trend movement based on position and score patterns
-            let movement: "up" | "down" | "same" = "same";
+            let movement: "up" | "down" | "neutral" = "neutral";
             
             // Simple trend logic: higher scores in top positions tend to be "up"
-            // lower positions with decent scores might be "down", middle stays "same"
+            // lower positions with decent scores might be "down", middle stays "neutral"
             if (index < 3 && athlete.points > 200) {
-              movement = Math.random() > 0.6 ? "up" : "same";
+              movement = Math.random() > 0.6 ? "up" : "neutral";
             } else if (index > 6) {
-              movement = Math.random() > 0.5 ? "down" : "same";
+              movement = Math.random() > 0.5 ? "down" : "neutral";
             } else {
-              movement = Math.random() > 0.7 ? (Math.random() > 0.5 ? "up" : "down") : "same";
+              movement = Math.random() > 0.7 ? (Math.random() > 0.5 ? "up" : "down") : "neutral";
             }
 
             return {
