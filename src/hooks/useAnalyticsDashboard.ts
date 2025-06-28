@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { addDays, format } from 'date-fns';
@@ -29,6 +28,29 @@ export interface UserActivityMetrics {
   mau: number;
   dau_mau_ratio: number;
   churn_rate: number;
+}
+
+export interface BounceRateData {
+  page_url: string;
+  total_sessions: number;
+  bounced_sessions: number;
+  bounce_rate: number;
+}
+
+export interface RegistrationFlowData {
+  step_name: string;
+  started_count: number;
+  completed_count: number;
+  conversion_rate: number;
+  avg_time_seconds: number;
+}
+
+export interface RankingFlowData {
+  step_name: string;
+  started_count: number;
+  completed_count: number;
+  conversion_rate: number;
+  avg_completion_time_seconds: number;
 }
 
 export const useAnalyticsDashboard = (startDate: Date, endDate: Date) => {
@@ -242,6 +264,51 @@ export const useAnalyticsDashboard = (startDate: Date, endDate: Date) => {
     },
   });
 
+  // New queries for bounce rates
+  const { data: bounceRates } = useQuery({
+    queryKey: ['bounce-rates', format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
+    queryFn: async (): Promise<BounceRateData[]> => {
+      const { data, error } = await supabase.rpc('get_bounce_rates', {
+        start_date: format(startDate, 'yyyy-MM-dd'),
+        end_date: format(endDate, 'yyyy-MM-dd'),
+      });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!startDate && !!endDate,
+  });
+
+  // Registration flow analytics
+  const { data: registrationFlow } = useQuery({
+    queryKey: ['registration-flow', format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
+    queryFn: async (): Promise<RegistrationFlowData[]> => {
+      const { data, error } = await supabase.rpc('get_registration_flow_analytics', {
+        start_date: format(startDate, 'yyyy-MM-dd'),
+        end_date: format(endDate, 'yyyy-MM-dd'),
+      });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!startDate && !!endDate,
+  });
+
+  // Ranking creation flow analytics
+  const { data: rankingFlow } = useQuery({
+    queryKey: ['ranking-flow', format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
+    queryFn: async (): Promise<RankingFlowData[]> => {
+      const { data, error } = await supabase.rpc('get_ranking_flow_analytics', {
+        start_date: format(startDate, 'yyyy-MM-dd'),
+        end_date: format(endDate, 'yyyy-MM-dd'),
+      });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!startDate && !!endDate,
+  });
+
   return {
     analyticsData,
     conversionData,
@@ -251,6 +318,9 @@ export const useAnalyticsDashboard = (startDate: Date, endDate: Date) => {
     sessionAnalytics,
     draftRankings,
     topCategories,
+    bounceRates,
+    registrationFlow,
+    rankingFlow,
     isLoading: analyticsLoading || conversionLoading,
     error: analyticsError || conversionError,
   };

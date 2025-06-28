@@ -14,6 +14,8 @@ import AnalyticsChart from '@/components/admin/analytics/AnalyticsChart';
 import ConversionFunnelChart from '@/components/admin/analytics/ConversionFunnelChart';
 import MetricCard from '@/components/admin/analytics/MetricCard';
 import TrafficSourceBreakdown from '@/components/admin/analytics/TrafficSourceBreakdown';
+import BounceRateCard from '@/components/admin/analytics/BounceRateCard';
+import FlowAnalyticsCard from '@/components/admin/analytics/FlowAnalyticsCard';
 
 const AnalyticsDashboardPage = () => {
   const { isAdmin, loading } = useAuth();
@@ -31,6 +33,9 @@ const AnalyticsDashboardPage = () => {
     sessionAnalytics,
     draftRankings,
     topCategories,
+    bounceRates,
+    registrationFlow,
+    rankingFlow,
     isLoading,
     error,
   } = useAnalyticsDashboard(dateRange.from, dateRange.to);
@@ -231,6 +236,23 @@ const AnalyticsDashboardPage = () => {
               icon={Eye}
               trend="+5%"
               trendDirection="up"
+            />
+          </div>
+
+          {/* Bounce Rates */}
+          <div className="mb-8">
+            <BounceRateCard data={bounceRates || []} />
+          </div>
+
+          {/* Flow Analytics */}
+          <div className="grid gap-6 md:grid-cols-2 mb-8">
+            <FlowAnalyticsCard 
+              title="Registration Flow Analytics"
+              data={registrationFlow || []}
+            />
+            <FlowAnalyticsCard 
+              title="Ranking Creation Flow Analytics"
+              data={rankingFlow || []}
             />
           </div>
 

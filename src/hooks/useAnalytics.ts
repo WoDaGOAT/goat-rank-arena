@@ -69,7 +69,14 @@ export const useAnalytics = () => {
   // Track analytics event
   const trackEvent = useCallback(async (
     eventType: string, 
-    properties: Record<string, any> = {}
+    properties: Record<string, any> = {},
+    additionalData?: {
+      pageUrl?: string;
+      previousPageUrl?: string;
+      interactionType?: string;
+      formStep?: string;
+      timeSpentSeconds?: number;
+    }
   ) => {
     const sessionId = getSessionId();
     const trafficSource = getTrafficSource();
@@ -89,6 +96,11 @@ export const useAnalytics = () => {
         utm_term: trafficSource.term,
         ip_address: null, // Will be handled server-side if needed
         user_agent: navigator.userAgent,
+        page_url: additionalData?.pageUrl || window.location.pathname,
+        previous_page_url: additionalData?.previousPageUrl || null,
+        interaction_type: additionalData?.interactionType || null,
+        form_step: additionalData?.formStep || null,
+        time_spent_seconds: additionalData?.timeSpentSeconds || null,
       });
 
       // Update or create user session
@@ -113,7 +125,13 @@ export const useAnalytics = () => {
 
   // Track page view
   const trackPageView = useCallback((page: string, additionalData?: Record<string, any>) => {
-    trackEvent('page_view', { page, ...additionalData });
+    trackEvent('page_view', { page, ...additionalData }, {
+      pageUrl: page,
+      previousPageUrl: sessionStorage.getItem('previous_page_url') || undefined,
+    });
+    
+    // Store current page as previous for next page view
+    sessionStorage.setItem('previous_page_url', page);
   }, [trackEvent]);
 
   // Track signup
@@ -136,6 +154,22 @@ export const useAnalytics = () => {
     trackEvent('quiz_completed', { quizId, score });
   }, [trackEvent]);
 
+  // Track form step interactions
+  const trackFormStep = useCallback((stepName: string, action: 'start' | 'complete', timeSpent?: number) => {
+    trackEvent(`form_step_${action}`, { step: stepName }, {
+      formStep: stepName,
+      timeSpentSeconds: timeSpent,
+    });
+  }, [trackEvent]);
+
+  // Track ranking flow interactions
+  const trackRankingFlow = useCallback((stepName: string, action: 'start' | 'complete', timeSpent?: number) => {
+    trackEvent(`ranking_${action}`, { step: stepName }, {
+      interactionType: 'ranking_flow',
+      timeSpentSeconds: timeSpent,
+    });
+  }, [trackEvent]);
+
   // Auto-track page views on route changes
   useEffect(() => {
     trackPageView(window.location.pathname + window.location.search);
@@ -148,5 +182,7 @@ export const useAnalytics = () => {
     trackRankingCreated,
     trackCommentPosted,
     trackQuizCompleted,
+    trackFormStep,
+    trackRankingFlow,
   };
 };

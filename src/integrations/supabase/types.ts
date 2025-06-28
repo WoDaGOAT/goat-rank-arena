@@ -13,11 +13,16 @@ export type Database = {
         Row: {
           created_at: string
           event_type: string
+          form_step: string | null
           id: string
+          interaction_type: string | null
           ip_address: string | null
+          page_url: string | null
+          previous_page_url: string | null
           properties: Json | null
           referrer: string | null
           session_id: string | null
+          time_spent_seconds: number | null
           traffic_source: string | null
           user_agent: string | null
           user_id: string | null
@@ -30,11 +35,16 @@ export type Database = {
         Insert: {
           created_at?: string
           event_type: string
+          form_step?: string | null
           id?: string
+          interaction_type?: string | null
           ip_address?: string | null
+          page_url?: string | null
+          previous_page_url?: string | null
           properties?: Json | null
           referrer?: string | null
           session_id?: string | null
+          time_spent_seconds?: number | null
           traffic_source?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -47,11 +57,16 @@ export type Database = {
         Update: {
           created_at?: string
           event_type?: string
+          form_step?: string | null
           id?: string
+          interaction_type?: string | null
           ip_address?: string | null
+          page_url?: string | null
+          previous_page_url?: string | null
           properties?: Json | null
           referrer?: string | null
           session_id?: string | null
+          time_spent_seconds?: number | null
           traffic_source?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -1011,6 +1026,15 @@ export type Database = {
           positions_count: number
         }[]
       }
+      get_bounce_rates: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          page_url: string
+          total_sessions: number
+          bounced_sessions: number
+          bounce_rate: number
+        }[]
+      }
       get_conversion_funnel: {
         Args: { start_date?: string; end_date?: string }
         Returns: {
@@ -1037,6 +1061,26 @@ export type Database = {
           highest_badge_id: string
           highest_badge_name: string
           highest_badge_rarity: string
+        }[]
+      }
+      get_ranking_flow_analytics: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          step_name: string
+          started_count: number
+          completed_count: number
+          conversion_rate: number
+          avg_completion_time_seconds: number
+        }[]
+      }
+      get_registration_flow_analytics: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          step_name: string
+          started_count: number
+          completed_count: number
+          conversion_rate: number
+          avg_time_seconds: number
         }[]
       }
       get_todays_quiz: {
