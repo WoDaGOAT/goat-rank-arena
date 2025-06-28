@@ -229,6 +229,13 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
+          },
         ]
       }
       category_comments: {
@@ -263,6 +270,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_comments_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
           },
           {
             foreignKeyName: "category_comments_parent_comment_id_fkey"
@@ -307,6 +321,13 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "category_likes_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
+          },
         ]
       }
       category_reactions: {
@@ -338,6 +359,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_reactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
           },
         ]
       }
@@ -821,6 +849,13 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_rankings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
+          },
         ]
       }
       user_roles: {
@@ -903,7 +938,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      homepage_leaderboards: {
+        Row: {
+          category_description: string | null
+          category_id: string | null
+          category_image_url: string | null
+          category_name: string | null
+          leaderboard: Json | null
+          ranking_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_role_to_user: {
@@ -1035,6 +1080,18 @@ export type Database = {
           bounce_rate: number
         }[]
       }
+      get_category_leaderboard: {
+        Args: { p_category_id: string; p_limit?: number }
+        Returns: {
+          athlete_id: string
+          athlete_name: string
+          profile_picture_url: string
+          country_of_origin: string
+          total_points: number
+          rank: number
+          movement: string
+        }[]
+      }
       get_conversion_funnel: {
         Args: { start_date?: string; end_date?: string }
         Returns: {
@@ -1052,6 +1109,19 @@ export type Database = {
         Args:
           | Record<PropertyKey, never>
           | { p_limit?: number; p_offset?: number }
+        Returns: {
+          user_id: string
+          full_name: string
+          avatar_url: string
+          total_score: number
+          quizzes_completed: number
+          highest_badge_id: string
+          highest_badge_name: string
+          highest_badge_rarity: string
+        }[]
+      }
+      get_quiz_leaderboard_optimized: {
+        Args: { p_limit?: number; p_offset?: number }
         Returns: {
           user_id: string
           full_name: string
@@ -1108,6 +1178,10 @@ export type Database = {
       is_moderator_or_admin: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      refresh_homepage_leaderboards: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       remove_role_from_user: {
         Args: {

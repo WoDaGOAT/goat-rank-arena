@@ -29,14 +29,17 @@ const CategoryPage = () => {
   const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(categoryId);
   
   // Fetch category data from Supabase
-  const { data: dbCategory, isLoading: isLoadingCategory } = useQuery<DbCategory | null>({
+  const { data: dbCategory, isLoading: isLoadingCategory, error: categoryError } = useQuery<DbCategory | null>({
     queryKey: ['category', categoryId],
     queryFn: async () => {
+      if (!categoryId) return null;
+      
       const { data, error } = await supabase
         .from('categories')
         .select('*')
-        .eq('id', categoryId || "")
+        .eq('id', categoryId)
         .single();
+        
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
@@ -49,26 +52,34 @@ const CategoryPage = () => {
   const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount } = useQuery({
     queryKey: ['categoryRankingsCount', categoryId],
     queryFn: async () => {
+      if (!categoryId) return 0;
+      
       const { count, error } = await supabase
         .from('user_rankings')
         .select('*', { count: 'exact', head: true })
-        .eq('category_id', categoryId || "");
+        .eq('category_id', categoryId);
       
       if (error) {
-        throw error;
+        console.error('Error fetching rankings count:', error);
+        return 0;
       }
       
       return count || 0;
     },
     enabled: !!categoryId,
-    staleTime: 1000 * 60, // 1 minute
-    retry: 3,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    retry: 2,
   });
 
-  // Fetch real leaderboard data using the shared hook
-  const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard } = useLeaderboardData(categoryId || "");
+  // Fetch optimized leaderboard data
+  const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard, error: leaderboardError } = useLeaderboardData(categoryId || "");
 
   const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount;
+
+  // Handle errors
+  if (categoryError || leaderboardError) {
+    console.error('Category page error:', { categoryError, leaderboardError });
+  }
 
   if (isLoading) {
     return (
