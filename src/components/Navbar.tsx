@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import AuthButtons from "./nav/AuthButtons";
@@ -120,7 +119,7 @@ const Navbar = () => {
               {isAdmin && (
                 <>
                   <Link
-                    to="/admin/quizzes/new"
+                    to="/admin/create-quiz"
                     className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2"
                   >
                     <Wrench className="h-4 w-4 xl:h-5 xl:w-5 text-white" />
