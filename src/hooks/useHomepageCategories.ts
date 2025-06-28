@@ -10,7 +10,7 @@ export const useHomepageCategories = () => {
     goatFootballer: Category | null;
     otherCategories: Category[];
   }>({
-    queryKey: ["homepageCategories", "v5"],
+    queryKey: ["homepageCategories", "v6"],
     queryFn: async () => {
       console.log("Starting homepage categories query with dynamic selection...");
       
@@ -176,7 +176,8 @@ export const useHomepageCategories = () => {
               })
               .filter((athlete): athlete is Athlete => athlete !== null);
 
-            const maxAthletes = c.name === "GOAT Footballer" ? 10 : 3; // Top 10 for featured, top 3 for others
+            // Show full top 10 for GOAT Footballer, top 3 for others
+            const maxAthletes = c.name === "GOAT Footballer" ? 10 : 3;
             leaderboard = athleteObjects
               .sort((a, b) => b.points - a.points)
               .slice(0, maxAthletes)
