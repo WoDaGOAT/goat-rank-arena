@@ -179,7 +179,7 @@ export const useUserRanking = (rankingId?: string) => {
           // Convert athlete.athlete_id to string for comparison
           const athleteIdStr = String(athlete.athlete_id);
           
-          // Try direct string match first (convert both to strings)
+          // Try direct string match first (convert both to strings for comparison)
           footballPlayer = footballPlayers.find(p => String(p.id) === athleteIdStr);
           
           // If not found and athlete_id looks like a number, try numeric match
