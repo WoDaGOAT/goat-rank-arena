@@ -53,7 +53,7 @@ const Index = () => {
           
           {!isLoading && !isError && categoriesData && (
             <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-8 items-start">
-              {/* Left Column - Leaderboard (60%) */}
+              {/* Left Column - Leaderboard with Comments (60%) */}
               <div className="w-full">
                 <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
               </div>
