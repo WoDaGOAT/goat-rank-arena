@@ -109,9 +109,9 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-gray-800 border-gray-700">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-bold">
+          <DialogTitle className="text-center text-xl font-bold text-white">
             {mode === 'login' ? 'Welcome back to WoDaGOAT!' : 'Join WoDaGOAT!'}
           </DialogTitle>
         </DialogHeader>
@@ -121,10 +121,10 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
           
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-gray-600" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-gray-800 px-2 text-gray-400">
                 Or continue with email
               </span>
             </div>
@@ -132,7 +132,7 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-200">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -141,11 +141,12 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-gray-200">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -155,12 +156,13 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
                 required
                 disabled={isLoading}
                 minLength={6}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500"
               />
             </div>
 
             {mode === 'signup' && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-gray-200">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -170,6 +172,7 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
                   required
                   disabled={isLoading}
                   minLength={6}
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500"
                 />
               </div>
             )}
@@ -190,7 +193,7 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
             <button
               type="button"
               onClick={toggleMode}
-              className="text-sm text-muted-foreground hover:text-primary underline"
+              className="text-sm text-gray-400 hover:text-cyan-400 underline"
               disabled={isLoading}
             >
               {mode === 'login' 
