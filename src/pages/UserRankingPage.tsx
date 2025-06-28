@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Button } from "@/components/ui/button";
@@ -20,13 +19,39 @@ import SocialPreviewDebug from "@/components/seo/SocialPreviewDebug";
 import { useState } from "react";
 
 const UserRankingPage = () => {
-  const { rankingId } = useParams<{ rankingId: string }>();
-  const { data: ranking, isLoading, error } = useUserRanking(rankingId);
+  const params = useParams<{ rankingId: string }>();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  
+  // Enhanced parameter extraction with validation
+  console.log('UserRankingPage - Raw params from useParams():', params);
+  console.log('UserRankingPage - params.rankingId:', params.rankingId);
+  console.log('UserRankingPage - typeof params.rankingId:', typeof params.rankingId);
+  
+  // Extract and validate the ranking ID
+  let rankingId: string | undefined;
+  
+  if (params.rankingId && typeof params.rankingId === 'string') {
+    rankingId = params.rankingId;
+  } else if (params.rankingId && typeof params.rankingId === 'object') {
+    // Handle the malformed object case
+    console.warn('UserRankingPage - Malformed rankingId object:', params.rankingId);
+    const rankingIdObj = params.rankingId as any;
+    if (rankingIdObj.value && typeof rankingIdObj.value === 'string' && rankingIdObj.value !== 'undefined') {
+      rankingId = rankingIdObj.value;
+    }
+  }
+  
+  // Validate that we have a proper UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const isValidUUID = rankingId && uuidRegex.test(rankingId);
+  
+  console.log('UserRankingPage - Final extracted rankingId:', rankingId);
+  console.log('UserRankingPage - Is valid UUID:', isValidUUID);
+  
+  // Only proceed with the query if we have a valid ranking ID
+  const { data: ranking, isLoading, error } = useUserRanking(isValidUUID ? rankingId : undefined);
 
-  console.log('UserRankingPage - rankingId:', rankingId);
-  console.log('UserRankingPage - ranking data:', ranking);
-  console.log('UserRankingPage - error:', error);
+  console.log('UserRankingPage - Query results:', { ranking, isLoading, error });
 
   if (isLoading) {
     return (
@@ -39,16 +64,30 @@ const UserRankingPage = () => {
     );
   }
 
-  if (error || !ranking) {
-    console.error('UserRankingPage - Error or no ranking found:', { error, ranking, rankingId });
+  if (!isValidUUID || error || !ranking) {
+    console.error('UserRankingPage - Error state:', { 
+      isValidUUID, 
+      error, 
+      ranking, 
+      originalRankingId: params.rankingId,
+      extractedRankingId: rankingId 
+    });
+    
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <main className="container mx-auto px-4 py-8 text-center text-white flex-grow flex flex-col items-center justify-center">
           <div>
             <h1 className="text-3xl font-bold text-yellow-400 mb-4">Ranking Not Available</h1>
             <p className="text-gray-300">We couldn't find the details for this specific ranking.</p>
-            <p className="text-gray-400 mt-2">This might be because the ranking was deleted or the link is incorrect.</p>
-            <p className="text-sm text-gray-500 mt-1">Attempted to load ID: {rankingId}</p>
+            {!isValidUUID && (
+              <p className="text-gray-400 mt-2">The ranking ID in the URL appears to be invalid.</p>
+            )}
+            {isValidUUID && (
+              <p className="text-gray-400 mt-2">This might be because the ranking was deleted or there was an error loading it.</p>
+            )}
+            <p className="text-sm text-gray-500 mt-1">
+              Attempted to load ID: {rankingId || 'Invalid ID'}
+            </p>
             {error && (
               <p className="text-xs text-red-400 mt-2">Error: {error.toString()}</p>
             )}
