@@ -1,4 +1,3 @@
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,18 +34,18 @@ const NavMenu = () => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    const result = await signOut();
-    if (result?.error) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: result.error.message,
-      });
-    } else {
+    try {
+      await signOut();
       toast({
         title: "Signed out successfully!",
       });
       navigate("/");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "Failed to sign out",
+      });
     }
   };
 
