@@ -17,7 +17,7 @@ const Index = () => {
       {/* Marketing Banner */}
       <div className="py-8 sm:py-12">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-yellow-400 mb-3">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">
             Your Voice, Your Vote, Your GOAT
           </h1>
           <p className="text-lg sm:text-xl text-yellow-300 max-w-2xl mx-auto">
