@@ -1,4 +1,5 @@
 
+import { memo } from 'react';
 import { NewUserFeedData } from './items/NewUserFeedItem';
 import NewUserFeedItem from './items/NewUserFeedItem';
 import { NewCommentFeedData } from './items/NewCommentFeedItem';
@@ -12,7 +13,7 @@ import QuizCompletedFeedItem from './items/QuizCompletedFeedItem';
 import { BadgeEarnedFeedData } from './items/BadgeEarnedFeedItem';
 import BadgeEarnedFeedItem from './items/BadgeEarnedFeedItem';
 import { RankingReactionFeedData } from './items/RankingReactionFeedItem';
-import RankingReactionFeedItem from './items/RankingReactionFeedItem';
+import OptimizedRankingReactionFeedItem from './items/OptimizedRankingReactionFeedItem';
 
 type FeedItemData = NewUserFeedData | NewCommentFeedData | AcceptedFriendshipFeedData | NewRankingFeedData | QuizCompletedFeedData | BadgeEarnedFeedData | RankingReactionFeedData;
 
@@ -37,7 +38,7 @@ interface FeedItemRendererProps {
   };
 }
 
-const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
+const FeedItemRenderer = memo(({ item }: FeedItemRendererProps) => {
   console.log('FeedItemRenderer received item:', item);
   
   // Type guard to ensure we only render valid feed item types
@@ -68,7 +69,7 @@ const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
         return <BadgeEarnedFeedItem data={typedItem.data as BadgeEarnedFeedData} createdAt={typedItem.created_at} />;
       case 'ranking_reaction':
         console.log('Rendering ranking_reaction item with data:', typedItem.data);
-        return <RankingReactionFeedItem data={typedItem.data as RankingReactionFeedData} createdAt={typedItem.created_at} />;
+        return <OptimizedRankingReactionFeedItem data={typedItem.data as RankingReactionFeedData} createdAt={typedItem.created_at} />;
       default:
         return null;
     }
@@ -76,6 +77,8 @@ const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
     console.error('Error rendering feed item:', error, typedItem);
     return null;
   }
-};
+});
+
+FeedItemRenderer.displayName = 'FeedItemRenderer';
 
 export default FeedItemRenderer;

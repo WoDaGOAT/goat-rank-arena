@@ -15,14 +15,14 @@ interface UseFeedOptions {
 }
 
 export const useFeed = (options: UseFeedOptions = {}) => {
-  const { limit = 20, offset = 0 } = options;
+  const { limit = 15, offset = 0 } = options; // Reduced default limit for better performance
 
   return useQuery({
     queryKey: ['feed', limit, offset],
     queryFn: async (): Promise<FeedItem[]> => {
       console.log(`Fetching feed with limit: ${limit}, offset: ${offset}`);
       
-      // Use the new index for optimized pagination
+      // Use optimized query with the new indexes
       const { data, error } = await supabase
         .from('feed_items')
         .select('*')
@@ -35,27 +35,27 @@ export const useFeed = (options: UseFeedOptions = {}) => {
       }
 
       console.log(`Feed items fetched: ${data?.length || 0}`);
-      console.log('Feed data preview:', data?.slice(0, 3));
       return data || [];
     },
-    staleTime: 10 * 1000, // 10 seconds - reduced to see new rankings faster
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true, // Enable refetch on focus to see new data
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds to catch new rankings
+    staleTime: 2 * 60 * 1000, // 2 minutes - increased for better caching
+    gcTime: 10 * 60 * 1000, // 10 minutes - increased cache time
+    refetchOnWindowFocus: false, // Disable automatic refetch on focus
+    refetchInterval: false, // Disable automatic refetch interval
+    refetchOnMount: true, // Only refetch on mount
   });
 };
 
-// Hook for infinite scroll feed
+// Optimized hook for infinite scroll feed (if needed later)
 export const useInfiniteFeed = () => {
   return useQuery({
     queryKey: ['feed-infinite'],
     queryFn: async (): Promise<FeedItem[]> => {
-      // Start with first 50 items for infinite scroll
+      // Fetch only 20 items for infinite scroll to reduce load
       const { data, error } = await supabase
         .from('feed_items')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(20);
 
       if (error) {
         console.error('Error fetching infinite feed:', error);
@@ -64,9 +64,9 @@ export const useInfiniteFeed = () => {
 
       return data || [];
     },
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: true,
-    refetchInterval: 60 * 1000, // Refetch every minute
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
   });
 };

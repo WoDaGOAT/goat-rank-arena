@@ -977,6 +977,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      cleanup_old_feed_items: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       create_new_ranking_feed_item: {
         Args:
           | { p_ranking_id: string; p_athletes: Json }

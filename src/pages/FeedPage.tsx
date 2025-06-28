@@ -1,10 +1,10 @@
 
-import FeedList from "@/components/feed/FeedList";
+import OptimizedFeedList from "@/components/feed/OptimizedFeedList";
 
 const FeedPage = () => {
   return (
     <div
-      className="flex flex-col flex-grow"
+      className="flex flex-col flex-grow min-h-screen"
       style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
     >
       <header className="bg-transparent text-primary-foreground py-6 px-4 text-center shadow-md">
@@ -20,7 +20,7 @@ const FeedPage = () => {
 
       <div className="container mx-auto px-4 py-6 flex-grow">
         <div className="max-w-3xl mx-auto">
-          <FeedList />
+          <OptimizedFeedList />
         </div>
       </div>
     </div>
