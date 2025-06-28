@@ -5,18 +5,25 @@ import { Button } from '@/components/ui/button';
 import { useNotifications } from '@/hooks/useNotifications';
 import NotificationsList from '../notifications/NotificationsList';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 const NotificationBell = () => {
     const { unreadCount, markAllAsRead } = useNotifications();
+    const [isOpen, setIsOpen] = useState(false);
     
     const handleOpenChange = (open: boolean) => {
+        setIsOpen(open);
         if (open && unreadCount > 0) {
             markAllAsRead();
         }
     };
 
+    const handleViewAllClick = () => {
+        setIsOpen(false); // Close the dropdown when "View All" is clicked
+    };
+
     return (
-        <Popover onOpenChange={handleOpenChange}>
+        <Popover open={isOpen} onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative text-white hover:text-white hover:bg-white/10">
                     <Bell className="h-5 w-5" />
@@ -32,6 +39,7 @@ const NotificationBell = () => {
                     <span>Notifications</span>
                     <Link 
                         to="/notifications" 
+                        onClick={handleViewAllClick}
                         className="text-blue-400 hover:text-blue-300 text-sm font-normal"
                     >
                         View All
