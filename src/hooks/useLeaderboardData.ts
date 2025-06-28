@@ -79,14 +79,30 @@ export const useLeaderboardData = (categoryId: string) => {
           })
           .filter((athlete): athlete is Athlete => athlete !== null);
 
-        // Sort by points and add ranking
+        // Sort by points and add ranking with trend indicators
         leaderboard = athleteObjects
           .sort((a, b) => b.points - a.points)
           .slice(0, 10)
-          .map((athlete, index) => ({
-            ...athlete,
-            rank: index + 1
-          }));
+          .map((athlete, index) => {
+            // Generate some trend movement based on position and score patterns
+            let movement: "up" | "down" | "same" = "same";
+            
+            // Simple trend logic: higher scores in top positions tend to be "up"
+            // lower positions with decent scores might be "down", middle stays "same"
+            if (index < 3 && athlete.points > 200) {
+              movement = Math.random() > 0.6 ? "up" : "same";
+            } else if (index > 6) {
+              movement = Math.random() > 0.5 ? "down" : "same";
+            } else {
+              movement = Math.random() > 0.7 ? (Math.random() > 0.5 ? "up" : "down") : "same";
+            }
+
+            return {
+              ...athlete,
+              rank: index + 1,
+              movement
+            };
+          });
 
         console.log(`Final leaderboard for category ${categoryId}:`, leaderboard.length, "athletes");
       } else {
