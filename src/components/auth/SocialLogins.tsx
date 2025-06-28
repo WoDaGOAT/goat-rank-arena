@@ -32,11 +32,11 @@ const SocialLogins = () => {
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full bg-gray-800 border-gray-600 hover:bg-gray-700" onClick={() => handleOAuthLogin('google')}>
+                <Button variant="outline" className="w-full bg-gray-700 border-gray-600 hover:bg-gray-600 text-white" onClick={() => handleOAuthLogin('google')}>
                     <GoogleIcon className="mr-2 h-5 w-5" />
                     Google
                 </Button>
-                <Button variant="outline" className="w-full bg-gray-800 border-gray-600 hover:bg-gray-700" onClick={() => handleOAuthLogin('facebook')}>
+                <Button variant="outline" className="w-full bg-gray-700 border-gray-600 hover:bg-gray-600 text-white" onClick={() => handleOAuthLogin('facebook')}>
                     <Facebook className="mr-2 h-5 w-5 text-[#1877F2]" />
                     Facebook
                 </Button>
