@@ -1,3 +1,4 @@
+
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -134,6 +135,9 @@ function App() {
                       <Route path="/admin/comments" element={<CommentManagementPage />} />
                       <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
                       <Route path="/admin/analytics" element={<AnalyticsDashboardPage />} />
+                      
+                      {/* Redirect old quiz creation URL to new one */}
+                      <Route path="/admin/quizzes/new" element={<Navigate to="/admin/create-quiz" replace />} />
                       
                       <Route path="*" element={<NotFound />} />
                     </Routes>
