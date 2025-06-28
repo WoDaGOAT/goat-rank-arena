@@ -102,7 +102,7 @@ function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                       <Route path="/" element={<Index />} />
-                      <Route path="/category/:id" element={<CategoryPage />} />
+                      <Route path="/category/:categoryId" element={<CategoryPage />} />
                       <Route path="/create-ranking/:categoryId" element={<CreateRankingPage />} />
                       <Route path="/ranking/:id" element={<UserRankingPage />} />
                       <Route path="/profile" element={<UserProfilePage />} />
