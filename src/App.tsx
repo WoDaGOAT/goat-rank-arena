@@ -59,6 +59,7 @@ const NotFound = lazy(() => import("./pages/NotFound").catch(() => ({ default: (
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const AnalyticsDashboardPage = lazy(() => import("./pages/admin/AnalyticsDashboardPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,22 +102,25 @@ function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                       <Route path="/" element={<Index />} />
-                      <Route path="/category/:categoryId" element={<CategoryPage />} />
-                      <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
-                      <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                      <Route path="/category/:id" element={<CategoryPage />} />
+                      <Route path="/create-ranking/:categoryId" element={<CreateRankingPage />} />
+                      <Route path="/ranking/:id" element={<UserRankingPage />} />
                       <Route path="/profile" element={<UserProfilePage />} />
                       <Route path="/users/:userId" element={<PublicProfilePage />} />
-                      <Route path="/feed" element={<FeedPage />} />
                       <Route path="/quiz" element={<QuizPage />} />
+                      <Route path="/feed" element={<FeedPage />} />
                       <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/contact" element={<ContactPage />} />
-                      <Route path="/gdpr" element={<GdprPage />} />
                       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/gdpr" element={<GdprPage />} />
+                      
+                      {/* Admin Routes */}
                       <Route path="/admin/users" element={<UserManagementPage />} />
-                      <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
-                      <Route path="/admin/create-quiz" element={<Navigate to="/admin/quizzes/new" replace />} />
-                      <Route path="/admin/comments" element={<CommentManagementPage />} />
                       <Route path="/admin/athletes" element={<AthleteManagementPage />} />
+                      <Route path="/admin/comments" element={<CommentManagementPage />} />
+                      <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
+                      <Route path="/admin/analytics" element={<AnalyticsDashboardPage />} />
+                      
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>

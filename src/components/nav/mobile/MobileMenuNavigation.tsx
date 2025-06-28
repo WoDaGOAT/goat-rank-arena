@@ -1,118 +1,140 @@
-
-import React from "react";
-import { Link } from "react-router-dom";
-import { Rss, FileQuestion, Trophy, Lightbulb, Award } from "lucide-react";
-import { useUserBadges } from "@/hooks/useUserBadges";
-import { useUserStats } from "@/hooks/useUserStats";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  BarChart3,
+  FileQuestion,
+  Home,
+  ListChecks,
+  MessageCircle,
+  Settings,
+  Trophy,
+  Users,
+} from "lucide-react";
 
-interface MobileMenuNavigationProps {
-  onLinkClick: () => void;
-}
+const MobileMenuNavigation = () => {
+  const [open, setOpen] = useState(false);
+  const { user, isAdmin, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-const MobileMenuNavigation = ({ onLinkClick }: MobileMenuNavigationProps) => {
-  const { user } = useAuth();
-  const { userBadges, loading: badgesLoading } = useUserBadges();
-  const { stats, loading: statsLoading } = useUserStats();
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
 
-  // Enhanced badge notification logic (same as navbar)
-  const getBadgeNotification = () => {
-    if (!user || badgesLoading || statsLoading) return null;
-
-    // Check for first quiz notification (for new users)
-    const hasFirstQuizBadge = userBadges.some(badge => badge.badge_id === 'first_quiz');
-    if (!hasFirstQuizBadge) {
-      return {
-        icon: Lightbulb,
-        color: "text-yellow-900",
-        bgColor: "bg-yellow-500",
-        message: "Take your first quiz!"
-      };
-    }
-
-    // Check for perfect score achievement
-    const hasPerfectScoreBadge = userBadges.some(badge => badge.badge_id === 'perfect_score');
-    if (stats && stats.total_quizzes >= 1 && !hasPerfectScoreBadge && stats.accuracy_percentage < 100) {
-      return {
-        icon: Trophy,
-        color: "text-blue-900",
-        bgColor: "bg-blue-500",
-        message: "Try for a perfect score!"
-      };
-    }
-
-    // Check for streak opportunities
-    const hasStreakBadge = userBadges.some(badge => badge.badge_id === 'streak_3' || badge.badge_id === 'streak_10');
-    if (stats && stats.current_streak === 0 && stats.total_quizzes >= 1 && !hasStreakBadge) {
-      return {
-        icon: Award,
-        color: "text-purple-900",
-        bgColor: "bg-purple-500",
-        message: "Start a quiz streak!"
-      };
-    }
-
-    return null;
+  const onItemClick = () => {
+    setOpen(false);
   };
 
-  const badgeNotification = getBadgeNotification();
-
   return (
-    <div className="space-y-6 mb-8">
-      <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Navigate</h3>
-      
-      <div className="space-y-3">
-        <Link
-          to="/feed"
-          onClick={onLinkClick}
-          className="flex items-center gap-4 p-4 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600"
-        >
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600">
-            <Rss className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <span className="text-lg font-semibold text-white block">Feed</span>
-            <span className="text-sm text-slate-300">Latest rankings & discussions</span>
-          </div>
-        </Link>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="sm">
+          <Menu className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="bg-background text-foreground">
+        <SheetHeader className="space-y-2.5">
+          <SheetTitle>Menu</SheetTitle>
+          <SheetDescription>
+            Explore the app and manage your account.
+          </SheetDescription>
+        </SheetHeader>
 
-        <Link
-          to="/quiz"
-          onClick={onLinkClick}
-          className="flex items-center gap-4 p-4 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600 relative"
-        >
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-fuchsia-600 to-cyan-600">
-            <FileQuestion className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <span className="text-lg font-bold bg-gradient-to-r from-fuchsia-300 to-cyan-300 bg-clip-text text-transparent block">Quiz</span>
-            <span className="text-sm text-slate-300">Test your sports knowledge</span>
-          </div>
-          {badgeNotification && (
-            <div 
-              className={`absolute top-2 right-2 ${badgeNotification.bgColor} rounded-full p-2 animate-pulse`}
-              title={badgeNotification.message}
-            >
-              <badgeNotification.icon className={`h-4 w-4 ${badgeNotification.color}`} />
+        <div className="py-4">
+          {user ? (
+            <div className="flex items-center justify-between px-4">
+              <Link
+                to="/profile"
+                className="flex items-center gap-3 group overflow-hidden"
+              >
+                <Avatar className="h-10 w-10 border-2 border-white/20">
+                  <AvatarImage src={user.avatar_url || undefined} alt={user.full_name || 'User'} />
+                  <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+                <div className="truncate">
+                  <p className="font-semibold text-white group-hover:underline truncate">{user.full_name || 'Anonymous User'}</p>
+                  <p className="text-sm text-gray-400 truncate">{user.email}</p>
+                </div>
+              </Link>
+              <Button variant="secondary" size="sm" onClick={() => signOut(() => navigate('/'))}>
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 px-4">
+              <Button variant="secondary" onClick={() => navigate('/login')}>
+                Login
+              </Button>
+              <Button onClick={() => navigate('/signup')}>Sign Up</Button>
             </div>
           )}
-        </Link>
+        </div>
 
-        <Link
-          to="/"
-          onClick={onLinkClick}
-          className="flex items-center gap-4 p-4 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600"
-        >
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-amber-600">
-            <Trophy className="h-6 w-6 text-white" />
+        <div className="grid gap-4 py-4">
+          <Link to="/" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+            <Home className="h-5 w-5" />
+            <span>Home</span>
+          </Link>
+          <Link to="/feed" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+            <ListChecks className="h-5 w-5" />
+            <span>Feed</span>
+          </Link>
+        </div>
+
+        {isAdmin && (
+          <div className="border-t border-white/20 pt-4">
+            <h3 className="text-yellow-300 text-sm font-semibold mb-3 px-4">Admin</h3>
+            <Link to="/admin/users" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+              <Users className="h-5 w-5" />
+              <span>Users</span>
+            </Link>
+            <Link to="/admin/athletes" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+              <Trophy className="h-5 w-5" />
+              <span>Athletes</span>
+            </Link>
+            <Link to="/admin/comments" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+              <MessageCircle className="h-5 w-5" />
+              <span>Comments</span>
+            </Link>
+            <Link to="/admin/create-quiz" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+              <FileQuestion className="h-5 w-5" />
+              <span>Create Quiz</span>
+            </Link>
+            <Link to="/admin/analytics" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+              <BarChart3 className="h-5 w-5" />
+              <span>Analytics</span>
+            </Link>
           </div>
-          <div>
-            <span className="text-lg font-semibold text-white block">Daily Ranking</span>
-            <span className="text-sm text-slate-300">Today's featured GOAT debate</span>
-          </div>
-        </Link>
-      </div>
-    </div>
+        )}
+
+        <div className="border-t border-white/20 mt-4 pt-4">
+          <Link to="/contact" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+            <MessageCircle className="h-5 w-5" />
+            <span>Contact</span>
+          </Link>
+          <Link to="/privacy-policy" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+            <Settings className="h-5 w-5" />
+            <span>Privacy Policy</span>
+          </Link>
+          <Link to="/gdpr" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+            <Settings className="h-5 w-5" />
+            <span>GDPR</span>
+          </Link>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

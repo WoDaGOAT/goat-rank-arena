@@ -1,139 +1,106 @@
-
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/contexts/AuthContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
-import { Send } from "lucide-react";
-import { CommentWithUser } from "@/types";
-import { sanitize } from "@/lib/sanitize";
-import { FunctionsHttpError } from "@supabase/supabase-js";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface CommentFormProps {
   categoryId: string;
+  parentCommentId?: number;
   onSuccess?: () => void;
+  placeholder?: string;
 }
 
-const CommentForm = ({ categoryId, onSuccess }: CommentFormProps) => {
+interface SubmitCommentParams {
+  comment: string;
+  categoryId: string;
+  parentCommentId?: number;
+}
+
+const CommentForm = ({ categoryId, parentCommentId, onSuccess, placeholder = "Share your thoughts..." }: CommentFormProps) => {
   const [comment, setComment] = useState("");
-  const { user, openLoginDialog } = useAuth();
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const { trackCommentPosted } = useAnalytics();
 
-  const { mutate: addComment, isPending } = useMutation({
-    mutationFn: async (commentText: string): Promise<CommentWithUser> => {
+  const submitComment = useMutation({
+    mutationFn: async ({ comment, categoryId, parentCommentId }: SubmitCommentParams) => {
       if (!user) {
-        openLoginDialog();
-        throw new Error("User not authenticated");
+        throw new Error("You must be logged in to post a comment.");
       }
-      
-      console.log("🔍 Starting comment submission...");
-      console.log("📝 Comment text:", commentText);
-      console.log("🏷️ Category ID:", categoryId);
-      console.log("👤 User ID:", user.id);
-      
-      try {
-        const { data, error } = await supabase.functions.invoke("post-comment", {
-          body: {
-            categoryId: categoryId,
-            commentText: commentText,
-          },
-        });
 
-        console.log("📤 Function invoked, response:", { data, error });
+      const { data, error } = await supabase
+        .from('comments')
+        .insert({
+          comment,
+          category_id: categoryId,
+          user_id: user.id,
+          parent_comment_id: parentCommentId,
+        })
+        .select()
+        .single();
 
-        if (error) {
-          console.error("❌ Edge Function error:", error);
-          
-          // Handle different types of errors
-          if (error instanceof FunctionsHttpError) {
-            console.error("❌ HTTP Error details:", error.context);
-            try {
-              const errorJson = await error.context.json();
-              console.error("❌ Error JSON:", errorJson);
-              throw new Error(errorJson.error || "Failed to post comment.");
-            } catch (parseError) {
-              console.error("❌ Error parsing response:", parseError);
-              throw new Error("Failed to post comment - server error.");
-            }
-          }
-          
-          // Handle network or deployment errors
-          if (error.message?.includes("Failed to fetch") || error.message?.includes("NetworkError")) {
-            throw new Error("Network error - please check your connection and try again.");
-          }
-          
-          if (error.message?.includes("Function not found") || error.message?.includes("404")) {
-            throw new Error("Comment function not available - please contact support.");
-          }
-          
-          throw error;
-        }
-
-        if (!data) {
-          console.error("❌ No data returned from function");
-          throw new Error("Comment could not be created - no response.");
-        }
-
-        console.log("✅ Comment created successfully:", data);
-        return data as CommentWithUser;
-        
-      } catch (networkError) {
-        console.error("❌ Network/Function error:", networkError);
-        
-        // Provide user-friendly error messages
-        if (networkError.message?.includes("failed to send a request")) {
-          throw new Error("Unable to reach comment service. Please check if the app is properly deployed and try again.");
-        }
-        
-        throw networkError;
+      if (error) {
+        throw new Error(error.message);
       }
+
+      // Track comment posting
+      trackCommentPosted(categoryId);
+
+      return data;
     },
-    onSuccess: () => {
-      console.log("✅ Comment submission successful, clearing form");
-      setComment("");
-      queryClient.invalidateQueries({ queryKey: ["categoryComments", categoryId] });
-      queryClient.invalidateQueries({ queryKey: ["categoryCommentCount", categoryId] });
+    onSuccess: (data) => {
       toast.success("Comment posted!");
-      onSuccess?.();
-    },
-    onError: (error) => {
-      console.error("❌ Comment submission failed:", error);
-      
-      if (error.message !== "User not authenticated") {
-        // Show specific error message to user
-        toast.error(error.message || "Failed to post comment. Please try again.");
+      setComment("");
+      if (onSuccess) {
+        onSuccess();
       }
+    },
+    onError: (error: any) => {
+      toast.error("Failed to post comment.", {
+        description: error.message,
+      });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("📝 Form submitted with comment:", comment.trim());
-    
-    if (comment.trim()) {
-      addComment(sanitize(comment.trim()));
-    } else {
-      console.warn("⚠️ Empty comment attempted");
-      toast.error("Please enter a comment before posting.");
+    if (isLoading) return;
+
+    if (!comment.trim()) {
+      toast.error("Comment cannot be empty.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await submitComment.mutateAsync({ comment, categoryId, parentCommentId });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <Textarea
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        placeholder={user ? "Write a comment..." : "Log in to post a comment"}
-        className="bg-white/5 border-white/20 text-white placeholder:text-gray-400"
-        rows={3}
-        disabled={isPending || !user}
-      />
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isPending || !comment.trim()} className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Send className="w-4 h-4 mr-2" />
-          {isPending ? "Posting..." : "Post Comment"}
+    <form onSubmit={handleSubmit} className="flex items-start gap-4">
+      <Avatar className="h-10 w-10">
+        <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt={user?.user_metadata?.full_name as string || 'User'} />
+        <AvatarFallback>{user?.user_metadata?.full_name?.charAt(0) || 'U'}</AvatarFallback>
+      </Avatar>
+      <div className="w-full space-y-2">
+        <Textarea
+          placeholder={placeholder}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={2}
+          className="resize-none"
+        />
+        <Button type="submit" isLoading={isLoading} disabled={isLoading} size="sm">
+          Post Comment
         </Button>
       </div>
     </form>

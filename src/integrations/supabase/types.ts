@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          traffic_source: string | null
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          traffic_source?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          traffic_source?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: []
+      }
       athlete_clubs: {
         Row: {
           athlete_id: string | null
@@ -271,6 +325,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      daily_analytics: {
+        Row: {
+          breakdown: Json | null
+          created_at: string
+          date: string
+          id: string
+          metric_type: string
+          metric_value: number
+        }
+        Insert: {
+          breakdown?: Json | null
+          created_at?: string
+          date: string
+          id?: string
+          metric_type: string
+          metric_value?: number
+        }
+        Update: {
+          breakdown?: Json | null
+          created_at?: string
+          date?: string
+          id?: string
+          metric_type?: string
+          metric_value?: number
+        }
+        Relationships: []
       }
       feed_items: {
         Row: {
@@ -745,6 +826,66 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          converted_to_signup: boolean | null
+          created_at: string
+          first_page_view: string
+          id: string
+          ip_address: string | null
+          page_views: number | null
+          referrer: string | null
+          session_id: string
+          signup_completed_at: string | null
+          time_on_site: number | null
+          traffic_source: string | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          converted_to_signup?: boolean | null
+          created_at?: string
+          first_page_view?: string
+          id?: string
+          ip_address?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_id: string
+          signup_completed_at?: string | null
+          time_on_site?: number | null
+          traffic_source?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          converted_to_signup?: boolean | null
+          created_at?: string
+          first_page_view?: string
+          id?: string
+          ip_address?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_id?: string
+          signup_completed_at?: string | null
+          time_on_site?: number | null
+          traffic_source?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -755,6 +896,10 @@ export type Database = {
           p_user_id: string
           p_role: Database["public"]["Enums"]["app_role"]
         }
+        Returns: undefined
+      }
+      aggregate_daily_analytics: {
+        Args: { target_date?: string }
         Returns: undefined
       }
       bulk_insert_athletes: {
@@ -847,6 +992,15 @@ export type Database = {
           roles: Database["public"]["Enums"]["app_role"][]
         }[]
       }
+      get_analytics_dashboard: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          metric_type: string
+          date_data: Json
+          total_value: number
+          breakdown_data: Json
+        }[]
+      }
       get_athlete_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -855,6 +1009,15 @@ export type Database = {
           inactive_athletes: number
           countries_count: number
           positions_count: number
+        }[]
+      }
+      get_conversion_funnel: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          traffic_source: string
+          total_sessions: number
+          signups: number
+          conversion_rate: number
         }[]
       }
       get_friendship_pair_key: {
