@@ -1,25 +1,14 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import footballPlayers from '@/data/footballPlayers';
-import { RankedAthlete } from '@/components/feed/items/NewRankingFeedItem';
-
-export interface UserRankingDetails {
-    id: string;
-    created_at: string;
-    title: string;
-    description: string | null;
-    user_id: string;
-    category_id: string;
-    profiles: {
-        full_name: string | null;
-        avatar_url: string | null;
-    } | null;
-    categories: {
-        name: string | null;
-    } | null;
-    athletes: RankedAthlete[];
-}
+import { UserRankingDetails } from '@/types/userRanking';
+import {
+  fetchRankingData,
+  fetchProfileData,
+  fetchCategoryData,
+  fetchRankingAthletes,
+  fetchDatabaseAthletes
+} from '@/services/userRankingService';
+import { hydrateAthleteData } from '@/utils/athleteDataProcessor';
 
 export const useUserRanking = (rankingId?: string) => {
   return useQuery({
@@ -34,92 +23,21 @@ export const useUserRanking = (rankingId?: string) => {
 
       try {
         // 1. Fetch the core ranking data
-        console.log('useUserRanking: Step 1 - Fetching core ranking data');
-        const { data: rankingData, error: rankingError } = await supabase
-          .from('user_rankings')
-          .select('*')
-          .eq('id', rankingId)
-          .maybeSingle();
+        const rankingData = await fetchRankingData(rankingId);
+        if (!rankingData) return null;
 
-        if (rankingError) {
-          console.error("useUserRanking: Error fetching ranking:", rankingError);
-          throw new Error(`Failed to fetch ranking: ${rankingError.message}`);
-        }
-        
-        if (!rankingData) {
-          console.warn(`useUserRanking: No ranking found for ID ${rankingId}`);
-          return null;
-        }
-
-        console.log('useUserRanking: Step 1 SUCCESS - Found ranking data:', rankingData);
-
-        // 2. Fetch related data in separate queries with individual error handling
-        console.log('useUserRanking: Step 2 - Fetching related data');
-        
-        let profileData = null;
-        let categoryData = null;
-        let athletesData = null;
-
-        try {
-          console.log('useUserRanking: Step 2a - Fetching profile data for user:', rankingData.user_id);
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('id', rankingData.user_id)
-            .maybeSingle();
-          
-          if (profileError) {
-            console.error(`useUserRanking: Profile error for user ${rankingData.user_id}:`, profileError);
-          } else {
-            profileData = profile;
-            console.log('useUserRanking: Step 2a SUCCESS - Profile data:', profileData);
-          }
-        } catch (error) {
-          console.error('useUserRanking: Profile fetch failed:', error);
-        }
-
-        try {
-          console.log('useUserRanking: Step 2b - Fetching category data for category:', rankingData.category_id);
-          const { data: category, error: categoryError } = await supabase
-            .from('categories')
-            .select('name')
-            .eq('id', rankingData.category_id)
-            .maybeSingle();
-          
-          if (categoryError) {
-            console.error(`useUserRanking: Category error for category ${rankingData.category_id}:`, categoryError);
-          } else {
-            categoryData = category;
-            console.log('useUserRanking: Step 2b SUCCESS - Category data:', categoryData);
-          }
-        } catch (error) {
-          console.error('useUserRanking: Category fetch failed:', error);
-        }
-
-        try {
-          console.log('useUserRanking: Step 2c - Fetching athletes data for ranking:', rankingId);
-          const { data: athletes, error: athletesError } = await supabase
-            .from('ranking_athletes')
-            .select('athlete_id, position, points')
-            .eq('ranking_id', rankingId)
-            .order('position', { ascending: true });
-          
-          if (athletesError) {
-            console.error("useUserRanking: Athletes error:", athletesError);
-            throw new Error(`Failed to fetch ranking athletes: ${athletesError.message}`);
-          } else {
-            athletesData = athletes;
-            console.log('useUserRanking: Step 2c SUCCESS - Athletes data:', athletesData);
-          }
-        } catch (error) {
-          console.error('useUserRanking: Athletes fetch failed:', error);
-          throw error; // Re-throw athletes error as it's critical
-        }
+        // 2. Fetch related data in parallel for better performance
+        console.log('useUserRanking: Fetching related data');
+        const [profileData, categoryData, athletesData] = await Promise.all([
+          fetchProfileData(rankingData.user_id),
+          fetchCategoryData(rankingData.category_id),
+          fetchRankingAthletes(rankingId)
+        ]);
         
         // 3. Get all unique athlete IDs from the ranking
-        console.log('useUserRanking: Step 3 - Processing athlete IDs');
-        const athleteIds = (athletesData || []).map(athlete => athlete.athlete_id);
-        console.log('useUserRanking: Step 3 - Athlete IDs to fetch:', athleteIds);
+        console.log('useUserRanking: Processing athlete IDs');
+        const athleteIds = athletesData.map(athlete => athlete.athlete_id);
+        console.log('useUserRanking: Athlete IDs to fetch:', athleteIds);
         
         if (athleteIds.length === 0) {
           console.warn('useUserRanking: No athletes found for this ranking');
@@ -134,100 +52,24 @@ export const useUserRanking = (rankingId?: string) => {
           return finalRanking as UserRankingDetails;
         }
         
-        // 4. Enhanced athlete data fetching - handle both string and UUID formats
-        console.log('useUserRanking: Step 4 - Enhanced athlete data fetching');
-        let dbAthletes = null;
+        // 4. Fetch athlete data from database
+        console.log('useUserRanking: Fetching athlete data from database');
+        const dbAthletes = await fetchDatabaseAthletes(athleteIds);
         
-        // Try to fetch from database using the IDs directly (handles both strings and UUIDs)
-        try {
-          const { data: athletes, error: dbAthletesError } = await supabase
-            .from('athletes')
-            .select('id, name, profile_picture_url')
-            .in('id', athleteIds);
-          
-          if (dbAthletesError) {
-            console.error("useUserRanking: Database athletes error:", dbAthletesError);
-          } else {
-            dbAthletes = athletes;
-            console.log('useUserRanking: Step 4 SUCCESS - Database athletes found:', dbAthletes?.length || 0);
-          }
-        } catch (error) {
-          console.error('useUserRanking: Database athletes fetch failed:', error);
-        }
-        
-        // 5. Enhanced athlete data hydration with better fallback logic and fixed type comparisons
-        console.log('useUserRanking: Step 5 - Enhanced athlete data hydration');
-        const hydratedAthletes: RankedAthlete[] = (athletesData || []).map(athlete => {
-          console.log('useUserRanking: Processing athlete:', athlete.athlete_id, 'type:', typeof athlete.athlete_id);
-          
-          // First try to find athlete in database (exact match)
-          const dbAthlete = dbAthletes?.find(db => db.id === athlete.athlete_id);
-          
-          if (dbAthlete) {
-            console.log('useUserRanking: Found athlete in database:', dbAthlete.name);
-            return {
-              id: athlete.athlete_id,
-              name: dbAthlete.name,
-              imageUrl: dbAthlete.profile_picture_url || "/placeholder.svg",
-              position: athlete.position,
-              points: athlete.points
-            };
-          }
-          
-          // Enhanced fallback to footballPlayers - try both string and converted formats
-          let footballPlayer = null;
-          
-          // Convert athlete.athlete_id to string for comparison
-          const athleteIdStr = String(athlete.athlete_id);
-          
-          // Try direct string match first (convert both to strings for comparison)
-          footballPlayer = footballPlayers.find(p => String(p.id) === athleteIdStr);
-          
-          // If not found and athlete_id looks like a number, try numeric match
-          if (!footballPlayer && !isNaN(Number(athleteIdStr))) {
-            const athleteIdNum = Number(athleteIdStr);
-            footballPlayer = footballPlayers.find(p => Number(p.id) === athleteIdNum);
-          }
-          
-          if (footballPlayer) {
-            console.log('useUserRanking: Found athlete in footballPlayers:', footballPlayer.name);
-            return {
-              id: athlete.athlete_id,
-              name: footballPlayer.name,
-              imageUrl: footballPlayer.imageUrl,
-              position: athlete.position,
-              points: athlete.points
-            };
-          }
-          
-          // Last resort - return with unknown athlete info but keep the structure
-          console.warn('useUserRanking: Unknown athlete - ID:', athlete.athlete_id, 'Type:', typeof athlete.athlete_id);
-          return {
-            id: athlete.athlete_id,
-            name: `Unknown Athlete (${athlete.athlete_id})`,
-            imageUrl: "/placeholder.svg",
-            position: athlete.position,
-            points: athlete.points
-          };
-        });
-        
-        console.log('useUserRanking: Step 5 SUCCESS - Hydrated athletes:', hydratedAthletes.length, 'athletes');
-        console.log('useUserRanking: Athletes breakdown:', {
-          total: hydratedAthletes.length,
-          fromDatabase: hydratedAthletes.filter(a => !a.name.startsWith('Unknown')).length,
-          unknown: hydratedAthletes.filter(a => a.name.startsWith('Unknown')).length
-        });
+        // 5. Hydrate athlete data with fallback logic
+        console.log('useUserRanking: Hydrating athlete data');
+        const hydratedAthletes = hydrateAthleteData(athletesData, dbAthletes);
         
         // 6. Combine all data into a single object
-        console.log('useUserRanking: Step 6 - Combining final data');
+        console.log('useUserRanking: Combining final data');
         const finalRanking = {
-            ...rankingData,
-            profiles: profileData,
-            categories: categoryData,
-            athletes: hydratedAthletes,
-        }
+          ...rankingData,
+          profiles: profileData,
+          categories: categoryData,
+          athletes: hydratedAthletes,
+        };
 
-        console.log('useUserRanking: Step 6 SUCCESS - Final ranking with all data:', {
+        console.log('useUserRanking: SUCCESS - Final ranking with all data:', {
           id: finalRanking.id,
           title: finalRanking.title,
           athleteCount: finalRanking.athletes.length,

@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Trophy, ChevronDown, ChevronUp, Share } from "lucide-react";
 import RankedAthleteRow from "./RankedAthleteRow";
 import { ShareDialog } from "@/components/category/ShareDialog";
 import { useState } from "react";
+import { RankedAthlete } from "@/types/userRanking";
 
 export interface ProfileInfo {
   id?: string;
@@ -19,13 +19,6 @@ export interface ProfileInfo {
 export interface CategoryInfo {
   id: string;
   name: string;
-}
-
-export interface RankedAthlete {
-  id: string;
-  name: string;
-  position: number;
-  imageUrl?: string;
 }
 
 // Updated interface to match actual database structure
