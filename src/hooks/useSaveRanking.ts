@@ -1,4 +1,3 @@
-
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,7 +26,7 @@ interface SelectedAthleteInput {
 }
 
 export const useSaveRanking = (options?: { categoryId?: string }) => {
-  const { user } = useAuth();
+  const { user, openAuthDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
   const { trackRankingCreated } = useAnalytics();
 
@@ -35,6 +34,15 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
     mutationFn: async ({ title, description, categoryId, selectedAthletes }: SaveRankingParams) => {
       console.log('Saving ranking with data:', { title, description, categoryId, selectedAthletes });
       
+      // Check if user is logged in first
+      if (!user) {
+        // Save current URL for redirect after login/signup
+        savePreLoginUrl(window.location.pathname);
+        // Open auth dialog with signup as default for new users
+        openAuthDialog('signup');
+        throw new Error("Authentication required");
+      }
+
       // Validate the input
       const validatedData = saveRankingSchema.parse({ title, description, categoryId, selectedAthletes });
 
@@ -87,7 +95,9 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
     },
     onError: (error: any) => {
       console.error("Failed to save ranking:", error);
-      toast.error("Failed to save ranking.", { description: error.message });
+      if (error.message !== "Authentication required") {
+        toast.error("Failed to save ranking.", { description: error.message });
+      }
     }
   });
 

@@ -13,13 +13,17 @@ export interface AuthContextType {
   isAdmin: boolean;
   isModerator: boolean;
   isModeratorOrAdmin: boolean;
-  signUp: (credentials: { email: string; password: string }) => Promise<any>;
+  signUp: (credentials: { email: string; password: string; options?: any }) => Promise<any>;
   signIn: (credentials: { email: string; password: string }) => Promise<any>;
   signOut: () => Promise<void>;
   logout: () => Promise<void>;
   openLoginDialog: () => void;
   closeLoginDialog: () => void;
   loginDialogOpen: boolean;
+  openAuthDialog: (mode?: 'login' | 'signup') => void;
+  closeAuthDialog: () => void;
+  authDialogOpen: boolean;
+  authDialogMode: 'login' | 'signup';
   savePreLoginUrl: (url: string) => void;
   getAndClearPreLoginUrl: () => string | null;
   refetchUser: () => Promise<void>;
