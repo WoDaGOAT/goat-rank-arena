@@ -21,27 +21,40 @@ export const useAthleteSearch = ({
   const { data: athletes = [], isLoading } = useAthletes();
 
   const filteredAthletes = useMemo(() => {
+    console.log('Filtering athletes for category:', categoryName);
+    console.log('Total athletes loaded:', athletes.length);
+    
     let filtered = athletes.map(athlete => mapDatabaseAthleteToUIAthlete(athlete));
+    console.log('Athletes after mapping:', filtered.length);
 
     // Apply category-based position filtering if category name is provided
     if (categoryName) {
       const positionMapping = getCategoryPositionMapping(categoryName);
+      console.log('Position mapping result:', positionMapping);
+      
       if (positionMapping) {
+        const beforeFilter = filtered.length;
         filtered = filtered.filter(athlete => 
           athleteMatchesCategory(athlete.positions, positionMapping, athlete.isActive)
         );
+        console.log(`Category filtering: ${beforeFilter} -> ${filtered.length} athletes`);
+      } else {
+        console.log('No position filtering applied for category:', categoryName);
       }
     }
 
     // Exclude already selected athletes
     if (excludedAthletes.length > 0) {
       const excludedIds = excludedAthletes.map(a => a.id);
+      const beforeExclude = filtered.length;
       filtered = filtered.filter(athlete => !excludedIds.includes(athlete.id));
+      console.log(`After excluding selected: ${beforeExclude} -> ${filtered.length} athletes`);
     }
 
     // Filter by search term
     if (searchTerm.trim()) {
       const lowercaseSearch = searchTerm.toLowerCase();
+      const beforeSearch = filtered.length;
       filtered = filtered.filter((athlete: Athlete) => {
         const nameMatch = athlete.name.toLowerCase().includes(lowercaseSearch);
         const countryMatch = athlete.countryOfOrigin?.toLowerCase().includes(lowercaseSearch);
@@ -52,13 +65,25 @@ export const useAthleteSearch = ({
         
         return nameMatch || countryMatch || nationalityMatch || positionMatch;
       });
+      console.log(`After search filtering: ${beforeSearch} -> ${filtered.length} athletes`);
     }
 
     // Filter by selected letter
     if (selectedLetter) {
+      const beforeLetter = filtered.length;
       filtered = filtered.filter(athlete => 
         athlete.name.charAt(0).toLowerCase() === selectedLetter.toLowerCase()
       );
+      console.log(`After letter filtering: ${beforeLetter} -> ${filtered.length} athletes`);
+    }
+
+    // Log a few example athletes for debugging
+    if (filtered.length > 0) {
+      console.log('Sample filtered athletes:', filtered.slice(0, 3).map(a => ({ 
+        name: a.name, 
+        positions: a.positions, 
+        isActive: a.isActive 
+      })));
     }
 
     return filtered;
