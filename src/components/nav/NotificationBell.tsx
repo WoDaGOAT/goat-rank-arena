@@ -4,16 +4,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { useNotifications } from '@/hooks/useNotifications';
 import NotificationsList from '../notifications/NotificationsList';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const NotificationBell = () => {
     const { unreadCount, markAllAsRead } = useNotifications();
-    const location = useLocation();
-    
-    // Hide the notification bell when on the notifications page
-    if (location.pathname === '/notifications') {
-        return null;
-    }
     
     const handleOpenChange = (open: boolean) => {
         if (open && unreadCount > 0) {
