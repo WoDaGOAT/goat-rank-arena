@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ShieldAlert, Calendar, TrendingUp, Users, MousePointer, MessageCircle, FileQuestion, Trophy, FileText } from 'lucide-react';
+import { ShieldAlert, Calendar, TrendingUp, Users, MousePointer, MessageCircle, FileQuestion, Trophy, FileText, Activity, Clock, Eye, UserX } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,8 @@ const AnalyticsDashboardPage = () => {
     conversionData,
     totalUsers,
     activeUsersToday,
+    userActivityMetrics,
+    sessionAnalytics,
     draftRankings,
     topCategories,
     isLoading,
@@ -161,6 +163,72 @@ const AnalyticsDashboardPage = () => {
               title="Draft Rankings"
               value={draftRankings || 0}
               icon={FileText}
+              trend="+5%"
+              trendDirection="up"
+            />
+          </div>
+
+          {/* User Activity Metrics */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-8">
+            <MetricCard
+              title="Daily Active Users"
+              value={userActivityMetrics?.dau || 0}
+              icon={Activity}
+              trend="+7%"
+              trendDirection="up"
+            />
+            <MetricCard
+              title="Weekly Active Users"
+              value={userActivityMetrics?.wau || 0}
+              icon={Users}
+              trend="+12%"
+              trendDirection="up"
+            />
+            <MetricCard
+              title="Monthly Active Users"
+              value={userActivityMetrics?.mau || 0}
+              icon={Users}
+              trend="+18%"
+              trendDirection="up"
+            />
+            <MetricCard
+              title="DAU/MAU Ratio"
+              value={userActivityMetrics?.dau_mau_ratio || 0}
+              icon={TrendingUp}
+              format="percentage"
+              trend="+2%"
+              trendDirection="up"
+            />
+            <MetricCard
+              title="Churn Rate"
+              value={userActivityMetrics?.churn_rate || 0}
+              icon={UserX}
+              format="percentage"
+              trend="-3%"
+              trendDirection="down"
+            />
+          </div>
+
+          {/* Session Analytics */}
+          <div className="grid gap-4 md:grid-cols-3 mb-8">
+            <MetricCard
+              title="Total Sessions"
+              value={sessionAnalytics?.total_sessions || 0}
+              icon={Activity}
+              trend="+15%"
+              trendDirection="up"
+            />
+            <MetricCard
+              title="Avg Session Length"
+              value={sessionAnalytics?.avg_session_length || 0}
+              icon={Clock}
+              trend="+8%"
+              trendDirection="up"
+            />
+            <MetricCard
+              title="Pages per Session"
+              value={sessionAnalytics?.avg_pages_per_session || 0}
+              icon={Eye}
               trend="+5%"
               trendDirection="up"
             />
