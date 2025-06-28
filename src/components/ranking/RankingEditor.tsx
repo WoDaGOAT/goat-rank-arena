@@ -90,14 +90,27 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
       return;
     }
 
+    console.log('Preparing to save ranking with athletes:', selectedAthletes);
+    
+    // Validate that we have exactly 10 athletes with valid points
+    const validAthletes = selectedAthletes.filter(athlete => 
+      athlete.userPoints > 0 && athlete.userPoints <= 100 && !athlete.error
+    );
+    
+    if (validAthletes.length !== 10) {
+      toast.error("Please select exactly 10 athletes with valid points (1-100)");
+      return;
+    }
+
     onSave({
       rankingTitle: rankingTitle.trim() || "My Ranking", // Use default title if empty
       rankingDescription,
-      selectedAthletes,
+      selectedAthletes: validAthletes,
     });
   };
 
   const hasErrors = selectedAthletes.some(a => !!a.error);
+  const hasInvalidPoints = selectedAthletes.some(a => a.userPoints <= 0 || a.userPoints > 100);
 
   return (
     <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8 py-4 md:py-8">
@@ -155,15 +168,15 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
 
         <RankingActions
           categoryId={category.id!}
-          disabled={selectedAthletes.length !== 10 || hasErrors}
+          disabled={selectedAthletes.length !== 10 || hasErrors || hasInvalidPoints}
           saveLabel={isSaving ? "Saving..." : `Save Ranking (${selectedAthletes.length}/10)`}
           onSave={handleSave}
           isSaving={isSaving}
           selectedAthleteCount={selectedAthletes.length}
         />
-        {hasErrors && (
+        {(hasErrors || hasInvalidPoints) && (
           <p className="text-center sm:text-right text-red-400 mt-2 text-sm">
-            Please fix the validation errors before saving.
+            Please fix the validation errors and ensure all points are between 1-100 before saving.
           </p>
         )}
       </div>
