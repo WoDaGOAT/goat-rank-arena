@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import footballPlayers from '@/data/footballPlayers';
@@ -185,7 +186,7 @@ export const useUserRanking = (rankingId?: string) => {
           // If not found and athlete_id looks like a number, try numeric match
           if (!footballPlayer && !isNaN(Number(athleteIdStr))) {
             const athleteIdNum = Number(athleteIdStr);
-            footballPlayer = footballPlayers.find(p => p.id === athleteIdNum);
+            footballPlayer = footballPlayers.find(p => Number(p.id) === athleteIdNum);
           }
           
           if (footballPlayer) {
