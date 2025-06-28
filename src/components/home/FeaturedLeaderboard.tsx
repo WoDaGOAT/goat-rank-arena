@@ -1,6 +1,7 @@
 
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import CommentSection from "@/components/category/CommentSection";
+import { SocialActions } from "@/components/category/SocialActions";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -22,6 +23,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
               submittedRankingsCount={goatFootballer.userRankingCount}
               compact={false}
               categoryId={goatFootballer.id}
+              socialActions={<SocialActions categoryId={goatFootballer.id} />}
             />
           </div>
           
