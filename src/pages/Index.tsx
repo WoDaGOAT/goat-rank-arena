@@ -15,7 +15,7 @@ const Index = () => {
       <HomepageHeader />
       
       {/* Marketing Banner */}
-      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 py-8 sm:py-12">
+      <div className="bg-gradient-to-r from-purple-600/40 via-blue-600/40 to-indigo-700/40 py-8 sm:py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">
             Your Voice, Your Vote, Your GOAT
