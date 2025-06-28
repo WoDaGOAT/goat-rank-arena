@@ -109,7 +109,7 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-gray-800 border-gray-700">
+      <DialogContent className="sm:max-w-md bg-gray-900 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold text-white">
             {mode === 'login' ? 'Welcome back to WoDaGOAT!' : 'Join WoDaGOAT!'}
@@ -124,7 +124,7 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
               <span className="w-full border-t border-gray-600" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-gray-800 px-2 text-gray-400">
+              <span className="bg-gray-900 px-2 text-gray-400">
                 Or continue with email
               </span>
             </div>
