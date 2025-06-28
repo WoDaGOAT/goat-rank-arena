@@ -19,7 +19,7 @@ const FloatingActionButton = ({
 }: FloatingActionButtonProps) => {
   const buttonText = hasExistingRanking ? "View My Ranking" : "Create Ranking";
   const buttonIcon = hasExistingRanking ? Eye : Plus;
-  const buttonLink = hasExistingRanking ? `/ranking/${userRankingId}` : `/category/${categoryId}/rank`;
+  const buttonLink = hasExistingRanking ? `/ranking/${userRankingId}` : `/create-ranking/${categoryId}`;
   const buttonTitle = hasExistingRanking ? "View Your Ranking" : "Create Your Ranking";
 
   return (
