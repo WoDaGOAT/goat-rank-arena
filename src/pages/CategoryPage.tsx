@@ -97,7 +97,7 @@ const CategoryPage = () => {
   }
 
   // Determine button state based on user authentication and existing ranking
-  const hasExistingRanking = user && userRanking;
+  const hasExistingRanking = Boolean(user && userRanking);
 
   return (
     <>
