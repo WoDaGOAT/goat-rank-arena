@@ -95,7 +95,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Router>
             <AuthProvider>
-              <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+              <div className="min-h-screen bg-gray-900">
                 <Navbar />
                 <main className="flex-1">
                   <Suspense fallback={<LoadingFallback />}>
