@@ -17,6 +17,15 @@ const COLORS = [
 ];
 
 const TrafficSourceBreakdown = ({ data }: TrafficSourceBreakdownProps) => {
+  // Handle empty or null data
+  if (!data || Object.keys(data).length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <p className="text-muted-foreground">No traffic source data available</p>
+      </div>
+    );
+  }
+
   const chartData = Object.entries(data).map(([source, value], index) => ({
     name: source,
     value,
@@ -24,6 +33,14 @@ const TrafficSourceBreakdown = ({ data }: TrafficSourceBreakdownProps) => {
   }));
 
   const total = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  if (total === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <p className="text-muted-foreground">No traffic data for selected period</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-64">

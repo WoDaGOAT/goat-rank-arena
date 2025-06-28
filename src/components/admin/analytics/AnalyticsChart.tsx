@@ -9,6 +9,15 @@ interface AnalyticsChartProps {
 }
 
 const AnalyticsChart = ({ data, title, color }: AnalyticsChartProps) => {
+  // Handle empty or null data
+  if (!data || Object.keys(data).length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <p className="text-muted-foreground">No {title.toLowerCase()} data available</p>
+      </div>
+    );
+  }
+
   // Convert data object to array format for recharts
   const chartData = Object.entries(data).map(([date, value]) => ({
     date,

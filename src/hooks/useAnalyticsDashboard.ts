@@ -77,6 +77,22 @@ export const useAnalyticsDashboard = (startDate: Date, endDate: Date) => {
     },
   });
 
+  // New query for draft rankings
+  const { data: draftRankings } = useQuery({
+    queryKey: ['draft-rankings', format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('user_rankings')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', format(startDate, 'yyyy-MM-dd'))
+        .lte('created_at', format(endDate, 'yyyy-MM-dd'))
+        .is('description', null); // Assuming drafts have no description or we can add a status field
+      
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
   const { data: topCategories } = useQuery({
     queryKey: ['top-categories', format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
     queryFn: async () => {
@@ -112,6 +128,7 @@ export const useAnalyticsDashboard = (startDate: Date, endDate: Date) => {
     conversionData,
     totalUsers,
     activeUsersToday,
+    draftRankings,
     topCategories,
     isLoading: analyticsLoading || conversionLoading,
     error: analyticsError || conversionError,

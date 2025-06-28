@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ShieldAlert, Calendar, TrendingUp, Users, MousePointer, MessageCircle, FileQuestion, Trophy } from 'lucide-react';
+import { ShieldAlert, Calendar, TrendingUp, Users, MousePointer, MessageCircle, FileQuestion, Trophy, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ const AnalyticsDashboardPage = () => {
     conversionData,
     totalUsers,
     activeUsersToday,
+    draftRankings,
     topCategories,
     isLoading,
     error,
@@ -127,7 +128,7 @@ const AnalyticsDashboardPage = () => {
           )}
 
           {/* Key Metrics */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-8">
             <MetricCard
               title="Total Users"
               value={totalUsers || 0}
@@ -154,6 +155,13 @@ const AnalyticsDashboardPage = () => {
               value={getMetricData('signups')?.total_value || 0}
               icon={Users}
               trend="+23%"
+              trendDirection="up"
+            />
+            <MetricCard
+              title="Draft Rankings"
+              value={draftRankings || 0}
+              icon={FileText}
+              trend="+5%"
               trendDirection="up"
             />
           </div>
