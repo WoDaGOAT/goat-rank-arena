@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   AlertDialog,
@@ -15,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { Icons } from "../Icons";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAnalytics } from '@/hooks/useAnalytics';
 
@@ -122,7 +123,7 @@ const SignupDialog = ({ children }: SignupDialogProps) => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button type="submit" disabled={isLoading}>
               {isLoading && (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               Create Account
             </Button>

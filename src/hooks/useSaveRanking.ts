@@ -1,8 +1,9 @@
+
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { useRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useAnalytics } from './useAnalytics';
 
@@ -19,9 +20,9 @@ const saveRankingSchema = z.object({
 
 type SaveRankingParams = z.infer<typeof saveRankingSchema>;
 
-export const useSaveRanking = () => {
+export const useSaveRanking = (options?: { categoryId?: string }) => {
   const { user } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const { trackRankingCreated } = useAnalytics();
 
   const saveRanking = useMutation({
@@ -74,12 +75,24 @@ export const useSaveRanking = () => {
     },
     onSuccess: (rankingId) => {
       toast.success("Ranking saved successfully!");
-      router(`/ranking/${rankingId}`);
+      navigate(`/ranking/${rankingId}`);
     },
     onError: (error: any) => {
       toast.error("Failed to save ranking.", { description: error.message });
     }
   });
 
-  return { saveRanking };
+  return { 
+    onSave: (params: Omit<SaveRankingParams, 'categoryId'> & { rankingTitle: string, rankingDescription?: string, selectedAthletes: any[] }) => {
+      const { rankingTitle, rankingDescription, selectedAthletes } = params;
+      return saveRanking.mutate({
+        title: rankingTitle,
+        description: rankingDescription,
+        categoryId: options?.categoryId || '',
+        selectedAthletes
+      });
+    },
+    isSaving: saveRanking.isPending,
+    saveRanking
+  };
 };

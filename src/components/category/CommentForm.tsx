@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -99,7 +100,7 @@ const CommentForm = ({ categoryId, parentCommentId, onSuccess, placeholder = "Sh
           rows={2}
           className="resize-none"
         />
-        <Button type="submit" isLoading={isLoading} disabled={isLoading} size="sm">
+        <Button type="submit" disabled={isLoading} size="sm">
           Post Comment
         </Button>
       </div>

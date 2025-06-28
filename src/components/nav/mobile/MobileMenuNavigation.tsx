@@ -1,3 +1,4 @@
+
 import {
   Sheet,
   SheetContent,
@@ -37,6 +38,11 @@ const MobileMenuNavigation = () => {
     setOpen(false);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -60,15 +66,15 @@ const MobileMenuNavigation = () => {
                 className="flex items-center gap-3 group overflow-hidden"
               >
                 <Avatar className="h-10 w-10 border-2 border-white/20">
-                  <AvatarImage src={user.avatar_url || undefined} alt={user.full_name || 'User'} />
-                  <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                  <AvatarImage src={user.user_metadata?.avatar_url || undefined} alt={user.user_metadata?.full_name || 'User'} />
+                  <AvatarFallback>{user.user_metadata?.full_name?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
                 <div className="truncate">
-                  <p className="font-semibold text-white group-hover:underline truncate">{user.full_name || 'Anonymous User'}</p>
+                  <p className="font-semibold text-white group-hover:underline truncate">{user.user_metadata?.full_name || 'Anonymous User'}</p>
                   <p className="text-sm text-gray-400 truncate">{user.email}</p>
                 </div>
               </Link>
-              <Button variant="secondary" size="sm" onClick={() => signOut(() => navigate('/'))}>
+              <Button variant="secondary" size="sm" onClick={handleSignOut}>
                 Sign Out
               </Button>
             </div>
