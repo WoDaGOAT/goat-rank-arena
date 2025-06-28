@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import footballPlayers from '@/data/footballPlayers';
@@ -25,7 +24,12 @@ export const useUserRanking = (rankingId?: string) => {
   return useQuery({
     queryKey: ['userRankingDetails', rankingId],
     queryFn: async (): Promise<UserRankingDetails | null> => {
-      if (!rankingId) return null;
+      if (!rankingId) {
+        console.warn('useUserRanking: No ranking ID provided');
+        return null;
+      }
+
+      console.log('useUserRanking: Fetching ranking for ID:', rankingId);
 
       // 1. Fetch the core ranking data
       const { data: rankingData, error: rankingError } = await supabase
@@ -35,14 +39,16 @@ export const useUserRanking = (rankingId?: string) => {
         .maybeSingle();
 
       if (rankingError) {
-        console.error("Error fetching ranking:", rankingError);
-        throw rankingError;
+        console.error("useUserRanking: Error fetching ranking:", rankingError);
+        throw new Error(`Failed to fetch ranking: ${rankingError.message}`);
       }
       
       if (!rankingData) {
-        console.warn(`No ranking found for ID ${rankingId}`);
+        console.warn(`useUserRanking: No ranking found for ID ${rankingId}`);
         return null;
       }
+
+      console.log('useUserRanking: Found ranking data:', rankingData);
 
       // 2. Fetch related data in separate queries
       const [
@@ -55,10 +61,10 @@ export const useUserRanking = (rankingId?: string) => {
         supabase.from('ranking_athletes').select('athlete_id, position, points').eq('ranking_id', rankingId).order('position', { ascending: true })
       ]);
 
-      if (profileError) console.error(`Error fetching profile for user ${rankingData.user_id}:`, profileError);
-      if (categoryError) console.error(`Error fetching category ${rankingData.category_id}:`, categoryError);
+      if (profileError) console.error(`useUserRanking: Error fetching profile for user ${rankingData.user_id}:`, profileError);
+      if (categoryError) console.error(`useUserRanking: Error fetching category ${rankingData.category_id}:`, categoryError);
       if (athletesError) {
-          console.error("Error fetching ranking athletes:", athletesError);
+          console.error("useUserRanking: Error fetching ranking athletes:", athletesError);
           throw athletesError;
       }
       
@@ -72,7 +78,7 @@ export const useUserRanking = (rankingId?: string) => {
         .in('id', athleteIds);
       
       if (dbAthletesError) {
-        console.error("Error fetching database athletes:", dbAthletesError);
+        console.error("useUserRanking: Error fetching database athletes:", dbAthletesError);
       }
       
       // 5. Hydrate athlete data with database first, then fallback to footballPlayers
@@ -121,8 +127,13 @@ export const useUserRanking = (rankingId?: string) => {
           athletes: hydratedAthletes,
       }
 
+      console.log('useUserRanking: Final ranking with athletes:', finalRanking);
       return finalRanking as UserRankingDetails;
     },
     enabled: !!rankingId,
+    retry: (failureCount, error) => {
+      console.error(`useUserRanking: Query failed (attempt ${failureCount + 1}):`, error);
+      return failureCount < 2; // Retry up to 2 times
+    },
   });
 };
