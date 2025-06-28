@@ -1,17 +1,17 @@
+
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import GlobalLeaderboard from "@/components/GlobalLeaderboard";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Plus, TrendingUp, Eye } from "lucide-react";
+import { ChevronLeft, Plus, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SocialActions } from "@/components/category/SocialActions";
 import CommentSection from "@/components/category/CommentSection";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAthletes } from "@/hooks/useAthletes";
-import { mapDatabaseAthletesToUIAthletes } from "@/utils/athleteDataMapper";
 import { useUserRankingForCategory } from "@/hooks/useUserRankingForCategory";
+import { useLeaderboardData } from "@/hooks/useLeaderboardData";
 import { Helmet } from "react-helmet-async";
 
 type DbCategory = {
@@ -75,19 +75,10 @@ const CategoryPage = () => {
   console.log('Submitted rankings count from query:', submittedRankingsCount);
   console.log('Rankings count error:', rankingsCountError);
 
-  // Fetch real athletes from the database
-  const { data: dbAthletes, isLoading: isLoadingAthletes } = useAthletes();
+  // Fetch real leaderboard data using the shared hook
+  const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard } = useLeaderboardData(categoryId || "");
 
-  // Transform athletes into leaderboard format with mock ranking data
-  const leaderboardAthletes = dbAthletes ? mapDatabaseAthletesToUIAthletes(dbAthletes).map((athlete, index) => ({
-    ...athlete,
-    rank: index + 1,
-    points: Math.max(1000 - (index * 50) + Math.random() * 100, 100), // Mock points with some randomization
-    movement: index % 3 === 0 ? "up" as const : index % 3 === 1 ? "down" as const : "neutral" as const,
-    imageUrl: athlete.imageUrl // This will now use the real profile_picture_url from the database
-  })).sort((a, b) => b.points - a.points) : [];
-
-  const isLoading = isLoadingCategory || isLoadingAthletes || isLoadingRankingsCount;
+  const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount;
 
   if (isLoading) {
      return (
@@ -176,7 +167,7 @@ const CategoryPage = () => {
 
             <div className="mb-6 sm:mb-8">
               <GlobalLeaderboard 
-                athletes={leaderboardAthletes} 
+                athletes={leaderboardAthletes || []} 
                 categoryName="Global Leaderboard" 
                 submittedRankingsCount={submittedRankingsCount || 0}
                 socialActions={socialActions}
