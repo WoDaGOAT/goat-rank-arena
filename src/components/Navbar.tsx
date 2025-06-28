@@ -8,16 +8,14 @@ import NavMenu from "./nav/NavMenu";
 import NotificationBell from "./nav/NotificationBell";
 import MobileNav from "./nav/MobileNav";
 import { Link } from "react-router-dom";
-import { Rss, FileQuestion, Wrench, Users, MessageSquareWarning, Lightbulb, Trophy, Award, Bell } from "lucide-react";
+import { Rss, FileQuestion, Wrench, Users, MessageSquareWarning, Lightbulb, Trophy, Award } from "lucide-react";
 import { useUserBadges } from "@/hooks/useUserBadges";
 import { useUserStats } from "@/hooks/useUserStats";
-import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 
 const Navbar = () => {
   const { user, loading, isAdmin, isModeratorOrAdmin } = useAuth();
   const { userBadges, loading: badgesLoading } = useUserBadges();
   const { stats, loading: statsLoading } = useUserStats();
-  const { data: unreadNotificationsCount = 0 } = useUnreadNotificationCount();
 
   // Enhanced badge notification logic
   const getBadgeNotification = () => {
@@ -108,21 +106,6 @@ const Navbar = () => {
                   </div>
                 )}
               </Link>
-
-              {user && (
-                <Link
-                  to="/notifications"
-                  className="bg-transparent hover:bg-white/10 focus:bg-white/10 px-3 xl:px-4 py-2 rounded-md transition-colors focus:outline-none flex items-center gap-2 relative"
-                >
-                  <Bell className="h-4 w-4 xl:h-5 xl:w-5 text-white" />
-                  <span className="text-white">Notifications</span>
-                  {unreadNotificationsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                      {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
-                    </span>
-                  )}
-                </Link>
-              )}
               
               {isModeratorOrAdmin && (
                 <Link
