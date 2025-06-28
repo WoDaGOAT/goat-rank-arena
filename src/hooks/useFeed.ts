@@ -38,9 +38,10 @@ export const useFeed = (options: UseFeedOptions = {}) => {
       console.log('Feed data preview:', data?.slice(0, 3));
       return data || [];
     },
-    staleTime: 30 * 1000, // 30 seconds - reduced to see updates faster
-    gcTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: 10 * 1000, // 10 seconds - reduced to see new rankings faster
+    gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true, // Enable refetch on focus to see new data
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds to catch new rankings
   });
 };
 
@@ -63,8 +64,9 @@ export const useInfiniteFeed = () => {
 
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes for infinite scroll
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: true,
+    refetchInterval: 60 * 1000, // Refetch every minute
   });
 };

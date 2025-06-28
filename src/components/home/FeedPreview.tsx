@@ -5,21 +5,39 @@ import { useNavigate } from "react-router-dom";
 import { useFeed } from "@/hooks/useFeed";
 import FeedItemRenderer from "@/components/feed/FeedItemRenderer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshCw } from "lucide-react";
 
 const FeedPreview = () => {
   const navigate = useNavigate();
-  const { data: feedItems, isLoading } = useFeed({ limit: 6 });
+  const { data: feedItems, isLoading, refetch, isFetching } = useFeed({ limit: 6 });
+
+  const handleRefresh = () => {
+    refetch();
+  };
 
   return (
     <div className="mt-16">
       <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold text-white mb-4">
-            Recent Activity
-          </CardTitle>
-          <p className="text-white/80 text-base sm:text-lg max-w-2xl mx-auto">
-            See what's happening across the WoDaGOAT community - latest rankings, comments, achievements, and more.
-          </p>
+          <div className="flex justify-between items-center">
+            <div className="flex-1">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                Recent Activity
+              </CardTitle>
+              <p className="text-white/80 text-base sm:text-lg max-w-2xl mx-auto">
+                See what's happening across the WoDaGOAT community - latest rankings, comments, achievements, and more.
+              </p>
+            </div>
+            <Button
+              onClick={handleRefresh}
+              variant="ghost"
+              size="sm"
+              disabled={isFetching}
+              className="text-white/60 hover:text-white hover:bg-white/10"
+            >
+              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading && (
