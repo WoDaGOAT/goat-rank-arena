@@ -7,10 +7,13 @@ const FeedPage = () => {
       className="flex flex-col flex-grow"
       style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
     >
-      <header className="bg-transparent text-primary-foreground py-4 px-4 text-center shadow-md">
-        <div className="container mx-auto pt-4">
-          <p className="text-base sm:text-lg md:text-xl mb-4 max-w-3xl mx-auto text-primary-foreground/80 font-medium">
-            Latest GOAT moves. Fresh from the field.
+      <header className="bg-transparent text-primary-foreground py-6 px-4 text-center shadow-md">
+        <div className="container mx-auto pt-6">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 max-w-4xl mx-auto text-white font-poppins">
+            Latest GOAT moves.
+          </h1>
+          <p className="text-xl sm:text-2xl lg:text-3xl font-semibold max-w-4xl mx-auto text-blue-300 font-poppins">
+            Fresh from the field.
           </p>
         </div>
       </header>
