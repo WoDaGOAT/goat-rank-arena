@@ -21,24 +21,26 @@ export const useLeaderboardData = (categoryId: string) => {
         throw new Error(athletesError.message);
       }
 
-      // Fetch athlete scores for this category
+      // Fetch athlete scores for this category with timestamps for trend calculation
       const { data: athleteRankings, error: rankingsError } = await supabase
         .from("user_rankings")
         .select(`
+          created_at,
           ranking_athletes(
             athlete_id,
             position,
             points
           )
         `)
-        .eq("category_id", categoryId);
+        .eq("category_id", categoryId)
+        .order("created_at", { ascending: false });
 
       let leaderboard: Athlete[] = [];
 
       if (!rankingsError && athleteRankings && athleteRankings.length > 0 && athletesData) {
         console.log(`Processing leaderboard for category ${categoryId}, found ${athleteRankings.length} rankings`);
         
-        // Calculate athlete scores from all rankings
+        // Calculate athlete scores from all rankings for overall leaderboard
         const athleteScores: Record<string, { totalScore: number; appearances: number }> = {};
         
         athleteRankings.forEach((ranking) => {
@@ -62,6 +64,62 @@ export const useLeaderboardData = (categoryId: string) => {
           }
         });
 
+        // Calculate trend movements by comparing recent vs older rankings
+        const calculateTrendMovement = (athleteId: string): "up" | "down" | "neutral" => {
+          if (athleteRankings.length < 4) {
+            return "neutral"; // Not enough data for trend analysis
+          }
+
+          // Get recent rankings (last 25% of rankings) vs older rankings (previous 25%)
+          const totalRankings = athleteRankings.length;
+          const recentCount = Math.max(1, Math.floor(totalRankings * 0.25));
+          const olderStartIndex = Math.floor(totalRankings * 0.5);
+          const olderEndIndex = olderStartIndex + recentCount;
+
+          const recentRankings = athleteRankings.slice(0, recentCount);
+          const olderRankings = athleteRankings.slice(olderStartIndex, olderEndIndex);
+
+          // Calculate average position in recent vs older rankings
+          let recentPositions: number[] = [];
+          let olderPositions: number[] = [];
+
+          recentRankings.forEach((ranking) => {
+            if (ranking.ranking_athletes && Array.isArray(ranking.ranking_athletes)) {
+              const athleteRanking = ranking.ranking_athletes.find((ar: any) => ar.athlete_id === athleteId);
+              if (athleteRanking) {
+                recentPositions.push(athleteRanking.position);
+              }
+            }
+          });
+
+          olderRankings.forEach((ranking) => {
+            if (ranking.ranking_athletes && Array.isArray(ranking.ranking_athletes)) {
+              const athleteRanking = ranking.ranking_athletes.find((ar: any) => ar.athlete_id === athleteId);
+              if (athleteRanking) {
+                olderPositions.push(athleteRanking.position);
+              }
+            }
+          });
+
+          if (recentPositions.length === 0 || olderPositions.length === 0) {
+            return "neutral";
+          }
+
+          const recentAvgPosition = recentPositions.reduce((a, b) => a + b, 0) / recentPositions.length;
+          const olderAvgPosition = olderPositions.reduce((a, b) => a + b, 0) / olderPositions.length;
+
+          // Lower position number = better rank, so if recent < older, athlete moved up
+          const positionDifference = olderAvgPosition - recentAvgPosition;
+          
+          if (positionDifference > 1) {
+            return "up";
+          } else if (positionDifference < -1) {
+            return "down";
+          } else {
+            return "neutral";
+          }
+        };
+
         console.log(`Found ${Object.keys(athleteScores).length} athletes with scores for category ${categoryId}`);
 
         // Convert to leaderboard format and sort by total score
@@ -79,23 +137,12 @@ export const useLeaderboardData = (categoryId: string) => {
           })
           .filter((athlete): athlete is Athlete => athlete !== null);
 
-        // Sort by points and add ranking with trend indicators
+        // Sort by points and add ranking with real trend indicators
         leaderboard = athleteObjects
           .sort((a, b) => b.points - a.points)
           .slice(0, 10)
           .map((athlete, index) => {
-            // Generate some trend movement based on position and score patterns
-            let movement: "up" | "down" | "neutral" = "neutral";
-            
-            // Simple trend logic: higher scores in top positions tend to be "up"
-            // lower positions with decent scores might be "down", middle stays "neutral"
-            if (index < 3 && athlete.points > 200) {
-              movement = Math.random() > 0.6 ? "up" : "neutral";
-            } else if (index > 6) {
-              movement = Math.random() > 0.5 ? "down" : "neutral";
-            } else {
-              movement = Math.random() > 0.7 ? (Math.random() > 0.5 ? "up" : "down") : "neutral";
-            }
+            const movement = calculateTrendMovement(athlete.id);
 
             return {
               ...athlete,
