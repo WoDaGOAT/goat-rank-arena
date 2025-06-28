@@ -1,8 +1,8 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import RankedAthleteRow from "@/components/feed/items/RankedAthleteRow";
-import Footer from "@/components/Footer";
 import { ShareDialog } from "@/components/category/ShareDialog";
 import RankingSEO from "@/components/seo/RankingSEO";
 import SocialPreviewDebug from "@/components/seo/SocialPreviewDebug";
@@ -19,6 +19,11 @@ const UserRankingPage = () => {
   // Only proceed with the query if we have a valid ranking ID
   const { data: ranking, isLoading, error } = useUserRanking(isValidUUID ? rankingId : undefined);
 
+  // Scroll to top when component mounts or when ranking data loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [ranking]);
+
   console.log('UserRankingPage - Query results:', { ranking, isLoading, error });
 
   if (isLoading) {
@@ -27,7 +32,6 @@ const UserRankingPage = () => {
         <main className="container mx-auto px-4 py-8 text-center text-white flex-grow flex items-center justify-center">
           <p>Loading ranking...</p>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -122,7 +126,6 @@ const UserRankingPage = () => {
             </aside>
           </div>
         </main>
-        <Footer />
       </div>
 
       <ShareDialog
