@@ -41,7 +41,7 @@ const GlobalLeaderboard = ({
       <CardHeader className={`border-b border-white/30 bg-white/5 relative overflow-hidden ${compact ? 'p-3 sm:p-4' : 'p-3 sm:p-4 md:p-6'}`}>
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5"></div>
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="text-center sm:text-left flex-1">
+          <div className="text-center flex-1">
             <h1 className={`font-bold text-white mb-1 ${compact ? 'text-lg sm:text-xl' : 'text-lg sm:text-xl md:text-2xl'}`}>
               {sanitize(categoryName)}
             </h1>
