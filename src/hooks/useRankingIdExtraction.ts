@@ -2,24 +2,24 @@
 import { useParams } from "react-router-dom";
 
 export const useRankingIdExtraction = () => {
-  const params = useParams<{ rankingId: string }>();
+  const params = useParams<{ id: string }>();
   
   // Enhanced parameter extraction with validation
   console.log('useRankingIdExtraction - Raw params from useParams():', params);
-  console.log('useRankingIdExtraction - params.rankingId:', params.rankingId);
-  console.log('useRankingIdExtraction - typeof params.rankingId:', typeof params.rankingId);
+  console.log('useRankingIdExtraction - params.id:', params.id);
+  console.log('useRankingIdExtraction - typeof params.id:', typeof params.id);
   
   // Extract and validate the ranking ID
   let rankingId: string | undefined;
   
-  if (params.rankingId && typeof params.rankingId === 'string' && params.rankingId.trim() !== '') {
-    rankingId = params.rankingId.trim();
-  } else if (params.rankingId && typeof params.rankingId === 'object') {
+  if (params.id && typeof params.id === 'string' && params.id.trim() !== '') {
+    rankingId = params.id.trim();
+  } else if (params.id && typeof params.id === 'object') {
     // Handle the malformed object case
-    console.warn('useRankingIdExtraction - Malformed rankingId object:', params.rankingId);
-    const rankingIdObj = params.rankingId as any;
-    if (rankingIdObj.value && typeof rankingIdObj.value === 'string' && rankingIdObj.value !== 'undefined') {
-      rankingId = rankingIdObj.value.trim();
+    console.warn('useRankingIdExtraction - Malformed id object:', params.id);
+    const idObj = params.id as any;
+    if (idObj.value && typeof idObj.value === 'string' && idObj.value !== 'undefined') {
+      rankingId = idObj.value.trim();
     }
   }
   
