@@ -25,8 +25,8 @@ export const useUserRanking = (rankingId?: string) => {
   return useQuery({
     queryKey: ['userRankingDetails', rankingId],
     queryFn: async (): Promise<UserRankingDetails | null> => {
-      if (!rankingId) {
-        console.warn('useUserRanking: No ranking ID provided');
+      if (!rankingId || rankingId.trim() === '') {
+        console.warn('useUserRanking: No valid ranking ID provided');
         return null;
       }
 
@@ -216,7 +216,7 @@ export const useUserRanking = (rankingId?: string) => {
         throw error;
       }
     },
-    enabled: !!rankingId,
+    enabled: !!rankingId && rankingId.trim() !== '',
     retry: (failureCount, error) => {
       console.error(`useUserRanking: Query failed (attempt ${failureCount + 1}):`, error);
       return failureCount < 2; // Retry up to 2 times

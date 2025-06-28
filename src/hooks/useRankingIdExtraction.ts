@@ -12,14 +12,14 @@ export const useRankingIdExtraction = () => {
   // Extract and validate the ranking ID
   let rankingId: string | undefined;
   
-  if (params.rankingId && typeof params.rankingId === 'string') {
-    rankingId = params.rankingId;
+  if (params.rankingId && typeof params.rankingId === 'string' && params.rankingId.trim() !== '') {
+    rankingId = params.rankingId.trim();
   } else if (params.rankingId && typeof params.rankingId === 'object') {
     // Handle the malformed object case
     console.warn('useRankingIdExtraction - Malformed rankingId object:', params.rankingId);
     const rankingIdObj = params.rankingId as any;
     if (rankingIdObj.value && typeof rankingIdObj.value === 'string' && rankingIdObj.value !== 'undefined') {
-      rankingId = rankingIdObj.value;
+      rankingId = rankingIdObj.value.trim();
     }
   }
   
