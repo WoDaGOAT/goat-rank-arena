@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import footballPlayers from '@/data/footballPlayers';
@@ -134,9 +133,11 @@ export const useUserRanking = (rankingId?: string) => {
           return finalRanking as UserRankingDetails;
         }
         
-        // 4. Fetch athlete data from database
-        console.log('useUserRanking: Step 4 - Fetching athlete details from database');
+        // 4. Enhanced athlete data fetching - handle both string and UUID formats
+        console.log('useUserRanking: Step 4 - Enhanced athlete data fetching');
         let dbAthletes = null;
+        
+        // Try to fetch from database using the IDs directly (handles both strings and UUIDs)
         try {
           const { data: athletes, error: dbAthletesError } = await supabase
             .from('athletes')
@@ -147,18 +148,18 @@ export const useUserRanking = (rankingId?: string) => {
             console.error("useUserRanking: Database athletes error:", dbAthletesError);
           } else {
             dbAthletes = athletes;
-            console.log('useUserRanking: Step 4 SUCCESS - Database athletes:', dbAthletes);
+            console.log('useUserRanking: Step 4 SUCCESS - Database athletes found:', dbAthletes?.length || 0);
           }
         } catch (error) {
           console.error('useUserRanking: Database athletes fetch failed:', error);
         }
         
-        // 5. Hydrate athlete data with database first, then fallback to footballPlayers
-        console.log('useUserRanking: Step 5 - Hydrating athlete data');
+        // 5. Enhanced athlete data hydration with better fallback logic
+        console.log('useUserRanking: Step 5 - Enhanced athlete data hydration');
         const hydratedAthletes: RankedAthlete[] = (athletesData || []).map(athlete => {
-          console.log('useUserRanking: Processing athlete:', athlete.athlete_id);
+          console.log('useUserRanking: Processing athlete:', athlete.athlete_id, 'type:', typeof athlete.athlete_id);
           
-          // First try to find athlete in database
+          // First try to find athlete in database (exact match)
           const dbAthlete = dbAthletes?.find(db => db.id === athlete.athlete_id);
           
           if (dbAthlete) {
@@ -172,8 +173,21 @@ export const useUserRanking = (rankingId?: string) => {
             };
           }
           
-          // Fallback to footballPlayers array for backward compatibility
-          const footballPlayer = footballPlayers.find(p => String(p.id) === athlete.athlete_id);
+          // Enhanced fallback to footballPlayers - try both string and converted formats
+          let footballPlayer = null;
+          
+          // Try direct string match first
+          footballPlayer = footballPlayers.find(p => String(p.id) === String(athlete.athlete_id));
+          
+          // If not found and athlete_id looks like a number, try numeric match
+          if (!footballPlayer && !isNaN(Number(athlete.athlete_id))) {
+            footballPlayer = footballPlayers.find(p => p.id === Number(athlete.athlete_id));
+          }
+          
+          // If not found and athlete_id is a string that could be converted, try converting
+          if (!footballPlayer) {
+            footballPlayer = footballPlayers.find(p => p.id.toString() === athlete.athlete_id);
+          }
           
           if (footballPlayer) {
             console.log('useUserRanking: Found athlete in footballPlayers:', footballPlayer.name);
@@ -186,18 +200,23 @@ export const useUserRanking = (rankingId?: string) => {
             };
           }
           
-          // Last resort - return with unknown athlete info
-          console.warn('useUserRanking: Unknown athlete:', athlete.athlete_id);
+          // Last resort - return with unknown athlete info but keep the structure
+          console.warn('useUserRanking: Unknown athlete - ID:', athlete.athlete_id, 'Type:', typeof athlete.athlete_id);
           return {
             id: athlete.athlete_id,
-            name: 'Unknown Athlete',
+            name: `Unknown Athlete (${athlete.athlete_id})`,
             imageUrl: "/placeholder.svg",
             position: athlete.position,
             points: athlete.points
           };
         });
         
-        console.log('useUserRanking: Step 5 SUCCESS - Hydrated athletes:', hydratedAthletes);
+        console.log('useUserRanking: Step 5 SUCCESS - Hydrated athletes:', hydratedAthletes.length, 'athletes');
+        console.log('useUserRanking: Athletes breakdown:', {
+          total: hydratedAthletes.length,
+          fromDatabase: hydratedAthletes.filter(a => !a.name.startsWith('Unknown')).length,
+          unknown: hydratedAthletes.filter(a => a.name.startsWith('Unknown')).length
+        });
         
         // 6. Combine all data into a single object
         console.log('useUserRanking: Step 6 - Combining final data');
@@ -208,7 +227,13 @@ export const useUserRanking = (rankingId?: string) => {
             athletes: hydratedAthletes,
         }
 
-        console.log('useUserRanking: Step 6 SUCCESS - Final ranking with all data:', finalRanking);
+        console.log('useUserRanking: Step 6 SUCCESS - Final ranking with all data:', {
+          id: finalRanking.id,
+          title: finalRanking.title,
+          athleteCount: finalRanking.athletes.length,
+          hasProfile: !!finalRanking.profiles,
+          hasCategory: !!finalRanking.categories
+        });
         return finalRanking as UserRankingDetails;
         
       } catch (error) {
