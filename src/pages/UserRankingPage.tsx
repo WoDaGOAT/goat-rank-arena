@@ -10,6 +10,7 @@ import RankingNotFound from "@/components/ranking/RankingNotFound";
 import RankingHeader from "@/components/ranking/RankingHeader";
 import RankingMetadata from "@/components/ranking/RankingMetadata";
 import RankingPageActions from "@/components/ranking/RankingPageActions";
+import { SocialActions } from "@/components/category/SocialActions";
 import { useRankingIdExtraction } from "@/hooks/useRankingIdExtraction";
 
 const UserRankingPage = () => {
@@ -113,6 +114,11 @@ const UserRankingPage = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Social Actions for the ranking */}
+              <div className="mt-6">
+                <SocialActions rankingId={ranking.id} />
+              </div>
             </div>
 
             <aside className="space-y-8">

@@ -11,19 +11,21 @@ import { QuizCompletedFeedData } from './items/QuizCompletedFeedItem';
 import QuizCompletedFeedItem from './items/QuizCompletedFeedItem';
 import { BadgeEarnedFeedData } from './items/BadgeEarnedFeedItem';
 import BadgeEarnedFeedItem from './items/BadgeEarnedFeedItem';
+import { RankingReactionFeedData } from './items/RankingReactionFeedItem';
+import RankingReactionFeedItem from './items/RankingReactionFeedItem';
 
-type FeedItemData = NewUserFeedData | NewCommentFeedData | AcceptedFriendshipFeedData | NewRankingFeedData | QuizCompletedFeedData | BadgeEarnedFeedData;
+type FeedItemData = NewUserFeedData | NewCommentFeedData | AcceptedFriendshipFeedData | NewRankingFeedData | QuizCompletedFeedData | BadgeEarnedFeedData | RankingReactionFeedData;
 
 export interface FeedItemType {
   id: string;
   created_at: string;
-  type: 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' | 'quiz_completed' | 'badge_earned';
+  type: 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' | 'quiz_completed' | 'badge_earned' | 'ranking_reaction';
   data: FeedItemData;
 }
 
 // Type guard to ensure feed item has correct type
-function isValidFeedItemType(type: string): type is 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' | 'quiz_completed' | 'badge_earned' {
-  return ['new_user', 'new_comment', 'accepted_friendship', 'new_ranking', 'quiz_completed', 'badge_earned'].includes(type);
+function isValidFeedItemType(type: string): type is 'new_user' | 'new_comment' | 'accepted_friendship' | 'new_ranking' | 'quiz_completed' | 'badge_earned' | 'ranking_reaction' {
+  return ['new_user', 'new_comment', 'accepted_friendship', 'new_ranking', 'quiz_completed', 'badge_earned', 'ranking_reaction'].includes(type);
 }
 
 interface FeedItemRendererProps {
@@ -36,7 +38,7 @@ interface FeedItemRendererProps {
 }
 
 const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
-  console.log('FeedItemRenderer received item:', item); // Debug log
+  console.log('FeedItemRenderer received item:', item);
   
   // Type guard to ensure we only render valid feed item types
   if (!isValidFeedItemType(item.type)) {
@@ -58,12 +60,15 @@ const FeedItemRenderer = ({ item }: FeedItemRendererProps) => {
       case 'accepted_friendship':
         return <AcceptedFriendshipFeedItem data={typedItem.data as AcceptedFriendshipFeedData} createdAt={typedItem.created_at} />;
       case 'new_ranking':
-        console.log('Rendering new_ranking item with data:', typedItem.data); // Debug log
+        console.log('Rendering new_ranking item with data:', typedItem.data);
         return <NewRankingFeedItem data={typedItem.data as NewRankingFeedData} createdAt={typedItem.created_at} />;
       case 'quiz_completed':
         return <QuizCompletedFeedItem data={typedItem.data as QuizCompletedFeedData} createdAt={typedItem.created_at} />;
       case 'badge_earned':
         return <BadgeEarnedFeedItem data={typedItem.data as BadgeEarnedFeedData} createdAt={typedItem.created_at} />;
+      case 'ranking_reaction':
+        console.log('Rendering ranking_reaction item with data:', typedItem.data);
+        return <RankingReactionFeedItem data={typedItem.data as RankingReactionFeedData} createdAt={typedItem.created_at} />;
       default:
         return null;
     }

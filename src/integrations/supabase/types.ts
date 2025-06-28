@@ -1239,6 +1239,7 @@ export type Database = {
         | "new_ranking"
         | "quiz_completed"
         | "badge_earned"
+        | "ranking_reaction"
       friendship_status: "pending" | "accepted" | "declined" | "blocked"
       notification_type:
         | "new_comment_reply"
@@ -1373,6 +1374,7 @@ export const Constants = {
         "new_ranking",
         "quiz_completed",
         "badge_earned",
+        "ranking_reaction",
       ],
       friendship_status: ["pending", "accepted", "declined", "blocked"],
       notification_type: [
