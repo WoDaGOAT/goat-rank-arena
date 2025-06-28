@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AuthButtons from "./nav/AuthButtons";
 import UserMenu from "./nav/UserMenu";
 import Logo from "./nav/Logo";
-import NavMenu from "./nav/NavMenu";
+import CustomDropdownMenu from "./nav/CustomDropdownMenu";
 import NotificationBell from "./nav/NotificationBell";
 import MobileNav from "./nav/MobileNav";
 import { Link } from "react-router-dom";
@@ -161,7 +161,7 @@ const Navbar = () => {
 
         {/* Desktop Categories Row (hidden on mobile) */}
         <div className="hidden lg:flex items-center justify-center h-12 border-t border-gray-700/50">
-          <NavMenu />
+          <CustomDropdownMenu />
         </div>
       </div>
     </header>
