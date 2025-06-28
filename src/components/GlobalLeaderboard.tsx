@@ -92,7 +92,7 @@ const GlobalLeaderboard = ({
             </div>
             {categoryId && (
               <Button asChild variant="cta" className="rounded-full">
-                <Link to={`/category/${categoryId}/rank`}>
+                <Link to={`/create-ranking/${categoryId}`}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Your Ranking
                 </Link>

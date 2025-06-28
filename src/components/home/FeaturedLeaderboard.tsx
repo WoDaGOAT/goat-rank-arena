@@ -28,7 +28,7 @@ const CreateRankingButton = ({ categoryId, isSticky, hasInsufficientData }: {
       }
     `}
   >
-    <Link to={`/category/${categoryId}/rank`} title="Create Your Ranking">
+    <Link to={`/create-ranking/${categoryId}`} title="Create Your Ranking">
       <Plus className="h-6 w-6 sm:h-7 sm:w-7 md:h-6 md:w-6 md:mr-2 shrink-0" />
       <span className="hidden md:inline font-semibold">Create Ranking</span>
     </Link>
