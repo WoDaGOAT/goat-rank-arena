@@ -18,6 +18,8 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   logout: () => Promise<void>;
   openLoginDialog: () => void;
+  closeLoginDialog: () => void;
+  loginDialogOpen: boolean;
   savePreLoginUrl: (url: string) => void;
   getAndClearPreLoginUrl: () => string | null;
   refetchUser: () => Promise<void>;

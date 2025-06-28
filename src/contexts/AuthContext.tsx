@@ -35,6 +35,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user, profile]);
 
+  // Close login dialog when user successfully logs in
+  useEffect(() => {
+    if (user && loginDialogOpen) {
+      setLoginDialogOpen(false);
+    }
+  }, [user, loginDialogOpen]);
+
   const signUp = async (credentials: { email: string; password: string }) => {
     const { data, error } = await supabase.auth.signUp(credentials);
     if (error) throw error;
@@ -63,7 +70,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const openLoginDialog = () => {
+    console.log('Opening login dialog');
     setLoginDialogOpen(true);
+  };
+
+  const closeLoginDialog = () => {
+    console.log('Closing login dialog');
+    setLoginDialogOpen(false);
   };
 
   const savePreLoginUrl = (url: string) => {
@@ -89,6 +102,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     logout,
     openLoginDialog,
+    closeLoginDialog,
+    loginDialogOpen,
     savePreLoginUrl,
     getAndClearPreLoginUrl,
     refetchUser,

@@ -1,6 +1,7 @@
+
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
@@ -10,6 +11,7 @@ import CommentManagementPage from "./pages/admin/CommentManagementPage";
 import AthleteManagementPage from "@/pages/admin/AthleteManagementPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./components/ErrorBoundary";
+import LoginDialog from "./components/auth/LoginDialog";
 
 console.log('App.tsx: Starting to load');
 console.log('App.tsx: Supabase configured?', isSupabaseConfigured);
@@ -73,6 +75,18 @@ const queryClient = new QueryClient({
 
 console.log('App.tsx: QueryClient created');
 
+// Component to handle global login dialog
+const GlobalLoginDialog = () => {
+  const { loginDialogOpen, closeLoginDialog } = useAuth();
+  
+  return (
+    <LoginDialog 
+      open={loginDialogOpen} 
+      onOpenChange={closeLoginDialog}
+    />
+  );
+};
+
 function App() {
   console.log('App.tsx: App component rendering');
 
@@ -127,6 +141,7 @@ function App() {
                 </main>
                 <Footer />
               </div>
+              <GlobalLoginDialog />
               <SonnerToaster />
             </AuthProvider>
           </Router>
