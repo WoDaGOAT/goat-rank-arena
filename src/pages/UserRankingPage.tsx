@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -38,7 +37,7 @@ const UserRankingPage = () => {
       isValidUUID, 
       error, 
       ranking, 
-      originalRankingId: originalParams.rankingId,
+      originalId: originalParams.id,
       extractedRankingId: rankingId 
     });
     
@@ -47,7 +46,7 @@ const UserRankingPage = () => {
         isValidUUID={isValidUUID}
         error={error}
         rankingId={rankingId}
-        originalRankingId={originalParams.rankingId}
+        originalRankingId={originalParams.id}
       />
     );
   }
