@@ -154,7 +154,7 @@ export const useUserRanking = (rankingId?: string) => {
           console.error('useUserRanking: Database athletes fetch failed:', error);
         }
         
-        // 5. Enhanced athlete data hydration with better fallback logic
+        // 5. Enhanced athlete data hydration with better fallback logic and fixed type comparisons
         console.log('useUserRanking: Step 5 - Enhanced athlete data hydration');
         const hydratedAthletes: RankedAthlete[] = (athletesData || []).map(athlete => {
           console.log('useUserRanking: Processing athlete:', athlete.athlete_id, 'type:', typeof athlete.athlete_id);
@@ -176,17 +176,16 @@ export const useUserRanking = (rankingId?: string) => {
           // Enhanced fallback to footballPlayers - try both string and converted formats
           let footballPlayer = null;
           
-          // Try direct string match first
-          footballPlayer = footballPlayers.find(p => String(p.id) === String(athlete.athlete_id));
+          // Convert athlete.athlete_id to string for comparison
+          const athleteIdStr = String(athlete.athlete_id);
+          
+          // Try direct string match first (convert both to strings)
+          footballPlayer = footballPlayers.find(p => String(p.id) === athleteIdStr);
           
           // If not found and athlete_id looks like a number, try numeric match
-          if (!footballPlayer && !isNaN(Number(athlete.athlete_id))) {
-            footballPlayer = footballPlayers.find(p => p.id === Number(athlete.athlete_id));
-          }
-          
-          // If not found and athlete_id is a string that could be converted, try converting
-          if (!footballPlayer) {
-            footballPlayer = footballPlayers.find(p => p.id.toString() === athlete.athlete_id);
+          if (!footballPlayer && !isNaN(Number(athleteIdStr))) {
+            const athleteIdNum = Number(athleteIdStr);
+            footballPlayer = footballPlayers.find(p => p.id === athleteIdNum);
           }
           
           if (footballPlayer) {
