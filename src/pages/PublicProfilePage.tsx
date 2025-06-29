@@ -1,11 +1,10 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import Footer from '@/components/Footer';
 import QuizActivity from '@/components/profile/QuizActivity';
 import { UserQuizAttemptForProfile } from '@/types/quiz';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +18,11 @@ const PublicProfilePage = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user: currentUser } = useAuth();
   const { data: userBadges = [], isLoading: isBadgesLoading } = usePublicUserBadges(userId);
+
+  // Scroll to top when component mounts or userId changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [userId]);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['publicProfile', userId],
@@ -234,23 +238,17 @@ const PublicProfilePage = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}
-    >
-      <main className="container mx-auto px-4 py-12 flex-grow">
-        <Card className="max-w-4xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">
-              {isOwnProfile ? "My Profile" : "User Profile"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {renderContent()}
-          </CardContent>
-        </Card>
-      </main>
-      <Footer />
+    <div className="container mx-auto px-4 py-12">
+      <Card className="max-w-4xl mx-auto bg-white/5 text-white border-gray-700 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            {isOwnProfile ? "My Profile" : "User Profile"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {renderContent()}
+        </CardContent>
+      </Card>
     </div>
   );
 };
