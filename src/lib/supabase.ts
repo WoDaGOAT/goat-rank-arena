@@ -12,10 +12,9 @@ if (!isSupabaseConfigured) {
   console.error("Supabase client could not be initialized. Please check your Supabase integration.");
 } else {
   console.log("Supabase client initialized successfully");
-  console.log("Supabase URL:", integrationClient.supabaseUrl);
   
   // Test connection
-  integrationClient
+  supabase
     .from('categories')
     .select('count')
     .limit(1)
