@@ -62,14 +62,38 @@ const CreateRankingPage = lazy(() => {
   });
 });
 
+// CRITICAL FIX: Ensure UserRankingPage loads properly with better error handling
 const UserRankingPage = lazy(() => {
-  console.log('🔍 App.tsx: Loading UserRankingPage');
+  console.log('🔍 App.tsx: STARTING to load UserRankingPage component');
   return import("./pages/UserRankingPage").then(module => {
-    console.log('🔍 App.tsx: UserRankingPage loaded successfully');
+    console.log('🔍 App.tsx: UserRankingPage loaded SUCCESSFULLY - module:', module);
+    console.log('🔍 App.tsx: UserRankingPage default export exists:', !!module.default);
     return module;
   }).catch(error => {
-    console.error('🔍 App.tsx: Failed to load UserRankingPage:', error);
-    return { default: () => <div>Error loading UserRankingPage</div> };
+    console.error('🔍 App.tsx: CRITICAL ERROR loading UserRankingPage:', error);
+    console.error('🔍 App.tsx: Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    // Return a debug component instead of generic error
+    return { 
+      default: () => (
+        <div className="min-h-screen flex flex-col text-white" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+          <div className="container mx-auto px-4 py-8 text-center">
+            <h1 className="text-2xl font-bold text-red-400 mb-4">UserRankingPage Load Error</h1>
+            <p className="text-gray-300 mb-4">Failed to load the ranking page component.</p>
+            <p className="text-sm text-gray-400">Error: {error.message}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )
+    };
   });
 });
 
@@ -112,6 +136,13 @@ const GlobalAuthDialog = () => {
   );
 };
 
+// DEBUG COMPONENT: Add route debugging wrapper
+const DebugRouteWrapper = ({ children, routeName }: { children: React.ReactNode, routeName: string }) => {
+  console.log(`🔍 App.tsx: ROUTE RENDER - ${routeName} is being rendered at:`, window.location.pathname);
+  console.log(`🔍 App.tsx: ROUTE RENDER - Current URL params:`, new URLSearchParams(window.location.search).toString());
+  return <>{children}</>;
+};
+
 function App() {
   console.log('App.tsx: App component rendering');
 
@@ -146,12 +177,14 @@ function App() {
                       <Route 
                         path="/ranking/:id" 
                         element={
-                          <div>
-                            <div style={{ display: 'none' }}>
-                              🔍 Route matched: /ranking/:id
+                          <DebugRouteWrapper routeName="UserRankingPage">
+                            <div>
+                              <div style={{ display: 'none' }}>
+                                🔍 Route matched: /ranking/:id at {new Date().toISOString()}
+                              </div>
+                              <UserRankingPage />
                             </div>
-                            <UserRankingPage />
-                          </div>
+                          </DebugRouteWrapper>
                         } 
                       />
                       <Route path="/profile" element={<UserProfilePage />} />

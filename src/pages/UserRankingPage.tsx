@@ -14,7 +14,14 @@ import { SocialActions } from "@/components/category/SocialActions";
 import { useRankingIdExtraction } from "@/hooks/useRankingIdExtraction";
 
 const UserRankingPage = () => {
-  console.log('🔍 UserRankingPage: Component is rendering');
+  console.log('🔍 UserRankingPage: ========================== COMPONENT START ==========================');
+  console.log('🔍 UserRankingPage: Component is rendering at:', new Date().toISOString());
+  console.log('🔍 UserRankingPage: Current window.location:', {
+    href: window.location.href,
+    pathname: window.location.pathname,
+    search: window.location.search,
+    hash: window.location.hash
+  });
   
   const { rankingId, isValidUUID, originalParams } = useRankingIdExtraction();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -33,7 +40,9 @@ const UserRankingPage = () => {
     ranking: ranking ? {
       id: ranking.id,
       title: ranking.title,
-      athleteCount: ranking.athletes?.length
+      athleteCount: ranking.athletes?.length,
+      hasAthletes: !!ranking.athletes,
+      firstAthlete: ranking.athletes?.[0]?.name
     } : null,
     isLoading, 
     error: error?.message
@@ -41,7 +50,7 @@ const UserRankingPage = () => {
 
   // Immediate scroll to top on component mount
   useEffect(() => {
-    console.log('UserRankingPage: Immediate scroll to top on mount');
+    console.log('🔍 UserRankingPage: useEffect - Immediate scroll to top on mount');
     window.scrollTo(0, 0);
     
     // Prevent browser's automatic scroll restoration
@@ -53,7 +62,7 @@ const UserRankingPage = () => {
   // Additional scroll when ranking data loads (with delay for DOM rendering)
   useEffect(() => {
     if (ranking) {
-      console.log('UserRankingPage: Ranking data loaded, ensuring scroll to top');
+      console.log('🔍 UserRankingPage: useEffect - Ranking data loaded, ensuring scroll to top');
       // Small delay to ensure DOM is fully rendered
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -62,18 +71,22 @@ const UserRankingPage = () => {
   }, [ranking]);
 
   if (isLoading) {
-    console.log('🔍 UserRankingPage: Showing loading state');
+    console.log('🔍 UserRankingPage: SHOWING LOADING STATE');
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <main className="container mx-auto px-4 py-8 text-center text-white flex-grow flex items-center justify-center">
-          <p>Loading ranking...</p>
+          <div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p>Loading your ranking...</p>
+            <p className="text-sm text-gray-400 mt-2">Ranking ID: {rankingId}</p>
+          </div>
         </main>
       </div>
     );
   }
 
   if (!isValidUUID || error || !ranking) {
-    console.error('🔍 UserRankingPage: Error state detected:', { 
+    console.error('🔍 UserRankingPage: ERROR STATE DETECTED:', { 
       isValidUUID, 
       error: error?.message, 
       ranking: !!ranking, 
@@ -91,7 +104,8 @@ const UserRankingPage = () => {
     );
   }
 
-  console.log('🔍 UserRankingPage: Successfully rendering ranking page for:', ranking.title);
+  console.log('🔍 UserRankingPage: SUCCESS - Rendering ranking page for:', ranking.title);
+  console.log('🔍 UserRankingPage: SUCCESS - Athletes in ranking:', ranking.athletes.map(a => `${a.position}. ${a.name}`));
 
   const shareUrl = window.location.href;
   const shareTitle = `${ranking.title} - WoDaGOAT Ranking`;
@@ -195,5 +209,7 @@ const UserRankingPage = () => {
     </>
   );
 };
+
+console.log('🔍 UserRankingPage: Component definition complete');
 
 export default UserRankingPage;

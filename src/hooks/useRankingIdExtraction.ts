@@ -5,11 +5,13 @@ export const useRankingIdExtraction = () => {
   const params = useParams<{ id: string }>();
   
   // Enhanced parameter extraction with validation
+  console.log('🔍 useRankingIdExtraction - ===================== HOOK START =====================');
   console.log('🔍 useRankingIdExtraction - Raw params from useParams():', params);
   console.log('🔍 useRankingIdExtraction - params.id:', params.id);
   console.log('🔍 useRankingIdExtraction - typeof params.id:', typeof params.id);
   console.log('🔍 useRankingIdExtraction - Current URL:', window.location.href);
   console.log('🔍 useRankingIdExtraction - Current pathname:', window.location.pathname);
+  console.log('🔍 useRankingIdExtraction - URL match test:', window.location.pathname.match(/\/ranking\/([^\/]+)/));
   
   // Extract and validate the ranking ID
   let rankingId: string | undefined;
@@ -27,6 +29,12 @@ export const useRankingIdExtraction = () => {
     }
   } else {
     console.error('🔍 useRankingIdExtraction - No valid ID found in params');
+    // Try to extract from URL directly as fallback
+    const urlMatch = window.location.pathname.match(/\/ranking\/([^\/]+)/);
+    if (urlMatch && urlMatch[1]) {
+      rankingId = urlMatch[1];
+      console.log('🔍 useRankingIdExtraction - FALLBACK: Extracted from URL:', rankingId);
+    }
   }
   
   // Validate that we have a proper UUID format
@@ -38,8 +46,11 @@ export const useRankingIdExtraction = () => {
   console.log('🔍 useRankingIdExtraction - UUID validation result:', {
     rankingId,
     passesRegex: rankingId ? uuidRegex.test(rankingId) : false,
-    isValidUUID
+    isValidUUID,
+    regexPattern: uuidRegex.toString()
   });
+  
+  console.log('🔍 useRankingIdExtraction - ===================== HOOK END =====================');
   
   return {
     rankingId,
