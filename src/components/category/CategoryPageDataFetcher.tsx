@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -43,7 +42,7 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
   const { data: userRanking, isLoading: isLoadingUserRanking, error: userRankingError } = useUserRankingForCategory(categoryId);
   
   console.log('🔧 CategoryPageDataFetcher - User ranking result:', {
-    userRanking: userRanking ? { id: userRanking.id, title: userRanking.title } : null,
+    userRanking: userRanking ? { id: userRanking.id } : null,
     categoryId,
     hasRanking: Boolean(userRanking),
     isLoadingUserRanking
@@ -130,7 +129,7 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
     isLoading,
     dbCategory: !!dbCategory,
     categoryName: dbCategory?.name,
-    userRanking: userRanking ? { id: userRanking.id, title: userRanking.title } : null,
+    userRanking: userRanking ? { id: userRanking.id } : null,
     submittedRankingsCount,
     leaderboardAthletesCount: leaderboardAthletes?.length || 0,
     hasErrors: !!(categoryError || leaderboardError || userRankingError || rankingsCountError)
