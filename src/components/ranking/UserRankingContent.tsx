@@ -10,14 +10,18 @@ interface UserRankingContentProps {
 }
 
 const UserRankingContent = ({ ranking }: UserRankingContentProps) => {
+  const categoryName = ranking.categories?.name || "Athletes";
+  const headerTitle = categoryName;
+  const headerDescription = `See who made the cut in this ${categoryName} ranking.`;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2">
         <Card className="bg-white/5 border-white/10 text-white">
           <CardHeader>
-            <h2 className="text-2xl font-semibold leading-none tracking-tight">Ranked Athletes</h2>
+            <h2 className="text-2xl font-semibold leading-none tracking-tight">{headerTitle}</h2>
             <CardDescription className="text-gray-400">
-              See who made the cut in this ranking.
+              {headerDescription}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
