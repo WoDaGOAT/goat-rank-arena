@@ -19,11 +19,12 @@ const FloatingActionButton = ({
 }: FloatingActionButtonProps) => {
   const navigate = useNavigate();
   
-  console.log('🔍 FloatingActionButton - Props received:', {
+  console.log('🔍 FloatingActionButton - DETAILED PROPS:', {
     hasExistingRanking,
     userRankingId,
     categoryId,
-    isLoadingUserRanking
+    isLoadingUserRanking,
+    currentUrl: window.location.href
   });
 
   const buttonText = hasExistingRanking ? "View My Ranking" : "Create Ranking";
@@ -31,53 +32,32 @@ const FloatingActionButton = ({
   const buttonLink = hasExistingRanking ? `/ranking/${userRankingId}` : `/create-ranking/${categoryId}`;
   const buttonTitle = hasExistingRanking ? "View Your Ranking" : "Create Your Ranking";
 
-  console.log('🔍 FloatingActionButton - Generated link:', buttonLink);
-  console.log('🔍 FloatingActionButton - Current URL:', window.location.href);
-
   const handleClick = (e: React.MouseEvent) => {
-    console.log('🔍 FloatingActionButton - Button clicked!');
-    console.log('🔍 FloatingActionButton - Navigation details:', {
+    e.preventDefault();
+    console.log('🔍 FloatingActionButton - BUTTON CLICKED!', {
       hasExistingRanking,
       userRankingId,
-      targetUrl: buttonLink,
-      currentUrl: window.location.href
+      categoryId,
+      targetUrl: buttonLink
     });
     
     if (hasExistingRanking && userRankingId) {
-      e.preventDefault();
-      console.log('🔍 FloatingActionButton - Using programmatic navigation to ranking:', userRankingId);
-      
-      // Add error handling for navigation
-      try {
-        navigate(`/ranking/${userRankingId}`, { replace: true });
-        console.log('🔍 FloatingActionButton - Navigation initiated successfully');
-      } catch (error) {
-        console.error('🔍 FloatingActionButton - Navigation failed:', error);
-        // Fallback to window.location if navigate fails
-        window.location.href = `/ranking/${userRankingId}`;
-      }
-    } else if (!hasExistingRanking) {
-      e.preventDefault();
+      console.log('🔍 FloatingActionButton - Navigating to existing ranking:', userRankingId);
+      navigate(`/ranking/${userRankingId}`, { replace: true });
+    } else {
       console.log('🔍 FloatingActionButton - Navigating to create ranking for category:', categoryId);
-      
-      try {
-        navigate(`/create-ranking/${categoryId}`);
-        console.log('🔍 FloatingActionButton - Create ranking navigation initiated successfully');
-      } catch (error) {
-        console.error('🔍 FloatingActionButton - Create ranking navigation failed:', error);
-        // Fallback to window.location if navigate fails
-        window.location.href = `/create-ranking/${categoryId}`;
-      }
+      navigate(`/create-ranking/${categoryId}`);
     }
   };
 
   // Show loading state while checking for existing ranking
   if (isLoadingUserRanking) {
+    console.log('🔍 FloatingActionButton - SHOWING LOADING STATE');
     return (
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999]">
         <Button 
           variant="cta" 
-          className="rounded-full shadow-2xl w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12 opacity-50 cursor-not-allowed"
+          className="rounded-full shadow-2xl w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12 opacity-75"
           disabled
         >
           <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
@@ -86,11 +66,13 @@ const FloatingActionButton = ({
     );
   }
 
+  console.log('🔍 FloatingActionButton - RENDERING MAIN BUTTON');
+
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999]">
       <Button 
         variant="cta" 
-        className="rounded-full shadow-2xl hover:scale-105 transition-transform w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12"
+        className="rounded-full shadow-2xl hover:scale-105 transition-transform w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12 bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 font-semibold"
         onClick={handleClick}
         title={buttonTitle}
       >

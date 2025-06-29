@@ -14,12 +14,15 @@ const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { user } = useAuth();
   
-  console.log('CategoryPage - URL categoryId from params:', categoryId);
-  console.log('CategoryPage - Current user:', user?.id);
+  console.log('🚀 CategoryPage - RENDER START:', {
+    categoryId,
+    userId: user?.id,
+    currentUrl: window.location.href
+  });
   
   // Ensure we have a valid categoryId before proceeding
   if (!categoryId) {
-    console.error('CategoryPage - No categoryId found in URL params');
+    console.error('❌ CategoryPage - No categoryId found in URL params');
     return <CategoryNotFound />;
   }
 
@@ -36,7 +39,19 @@ const CategoryPage = () => {
       }) => {
         const { categoryError, leaderboardError, userRankingError, rankingsCountError } = errors;
 
+        console.log('🚀 CategoryPage - DATA FETCHER RESULT:', {
+          hasDbCategory: !!dbCategory,
+          categoryName: dbCategory?.name,
+          hasUserRanking: !!userRanking,
+          userRankingId: userRanking?.id,
+          submittedRankingsCount,
+          leaderboardAthletesCount: leaderboardAthletes?.length || 0,
+          isLoading,
+          hasErrors: !!(categoryError || leaderboardError || userRankingError || rankingsCountError)
+        });
+
         if (isLoading) {
+          console.log('🚀 CategoryPage - SHOWING LOADING STATE');
           return <CategoryPageLoading />;
         }
 
@@ -54,22 +69,29 @@ const CategoryPage = () => {
 
         if (errorComponent) {
           const errorResult = React.isValidElement(errorComponent) ? errorComponent : null;
-          if (errorResult) return errorResult;
+          if (errorResult) {
+            console.log('🚀 CategoryPage - SHOWING ERROR COMPONENT');
+            return errorResult;
+          }
         }
 
         if (!dbCategory) {
+          console.log('🚀 CategoryPage - NO CATEGORY FOUND');
           return <CategoryNotFound />;
         }
 
         // Determine button state based on user authentication and existing ranking
         const hasExistingRanking = Boolean(user && userRanking);
         
-        console.log('CategoryPage - FloatingActionButton props being passed:', {
+        console.log('🚀 CategoryPage - FLOATING ACTION BUTTON PROPS:', {
           hasExistingRanking,
           userRankingId: userRanking?.id,
           categoryId: categoryId,
-          isLoadingUserRanking: false
+          isLoadingUserRanking: false,
+          userAuthenticated: !!user
         });
+
+        console.log('🚀 CategoryPage - RENDERING MAIN CONTENT');
 
         return (
           <>

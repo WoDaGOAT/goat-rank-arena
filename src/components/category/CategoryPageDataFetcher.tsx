@@ -37,22 +37,23 @@ interface CategoryPageDataFetcherProps {
 const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetcherProps) => {
   const queryClient = useQueryClient();
   
-  console.log('CategoryPageDataFetcher - categoryId:', categoryId);
+  console.log('🔧 CategoryPageDataFetcher - START:', { categoryId });
   
   // Check if user has existing ranking for this category
   const { data: userRanking, isLoading: isLoadingUserRanking, error: userRankingError } = useUserRankingForCategory(categoryId);
   
-  console.log('CategoryPageDataFetcher - User ranking for this category:', {
-    userRanking,
+  console.log('🔧 CategoryPageDataFetcher - User ranking result:', {
+    userRanking: userRanking ? { id: userRanking.id, title: userRanking.title } : null,
     categoryId,
-    hasRanking: Boolean(userRanking)
+    hasRanking: Boolean(userRanking),
+    isLoadingUserRanking
   });
 
   // Fetch category data from Supabase
   const { data: dbCategory, isLoading: isLoadingCategory, error: categoryError, refetch: refetchCategory } = useQuery<DbCategory | null>({
     queryKey: ['category', categoryId],
     queryFn: async () => {
-      console.log('CategoryPageDataFetcher - Fetching category data for ID:', categoryId);
+      console.log('🔧 CategoryPageDataFetcher - Fetching category data for ID:', categoryId);
       
       try {
         const { data, error } = await supabase
@@ -62,20 +63,19 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
           .single();
           
         if (error && error.code !== 'PGRST116') {
-          console.error('CategoryPageDataFetcher - Error fetching category:', error);
+          console.error('🔧 CategoryPageDataFetcher - Error fetching category:', error);
           throw error;
         }
         
-        console.log('CategoryPageDataFetcher - Category data fetched:', data);
+        console.log('🔧 CategoryPageDataFetcher - Category data fetched:', data);
         return data;
       } catch (error) {
-        console.error('CategoryPageDataFetcher - Fatal category fetch error:', error);
+        console.error('🔧 CategoryPageDataFetcher - Fatal category fetch error:', error);
         throw error;
       }
     },
     enabled: !!categoryId,
     retry: (failureCount, error) => {
-      // Only retry network errors, not data-not-found errors
       const errorMessage = error?.message || '';
       if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
         return failureCount < 2;
@@ -84,23 +84,14 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
     },
   });
 
-  // Fetch submitted rankings count for this category with detailed debugging
+  // Fetch submitted rankings count for this category
   const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount, error: rankingsCountError } = useQuery({
     queryKey: ['categoryRankingsCount', categoryId],
     queryFn: async () => {
       if (!categoryId) return 0;
       
       try {
-        console.log('🔍 DEBUGGING: Fetching rankings count for category:', categoryId);
-        
-        // First, let's check what rankings exist for this category
-        const { data: allRankings, error: allRankingsError } = await supabase
-          .from('user_rankings')
-          .select('id, title, created_at, user_id')
-          .eq('category_id', categoryId);
-        
-        console.log('🔍 DEBUGGING: All rankings for this category:', allRankings);
-        console.log('🔍 DEBUGGING: All rankings error:', allRankingsError);
+        console.log('🔧 CategoryPageDataFetcher - Fetching rankings count for category:', categoryId);
         
         const { count, error } = await supabase
           .from('user_rankings')
@@ -108,15 +99,14 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
           .eq('category_id', categoryId);
         
         if (error) {
-          console.error('🔍 DEBUGGING: Error fetching rankings count:', error);
+          console.error('🔧 CategoryPageDataFetcher - Error fetching rankings count:', error);
           return 0;
         }
         
-        console.log('🔍 DEBUGGING: Rankings count result:', count);
-        console.log('CategoryPageDataFetcher - Rankings count:', count);
+        console.log('🔧 CategoryPageDataFetcher - Rankings count result:', count);
         return count || 0;
       } catch (error) {
-        console.error('🔍 DEBUGGING: Fatal rankings count error:', error);
+        console.error('🔧 CategoryPageDataFetcher - Fatal rankings count error:', error);
         return 0;
       }
     },
@@ -134,26 +124,20 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
   // Fetch optimized leaderboard data
   const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard, error: leaderboardError, refetch: refetchLeaderboard } = useLeaderboardData(categoryId || "");
 
-  const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount;
+  const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount || isLoadingUserRanking;
 
-  console.log('🔍 DEBUGGING: CategoryPageDataFetcher - Final data state:', {
+  console.log('🔧 CategoryPageDataFetcher - FINAL STATE:', {
     isLoading,
     dbCategory: !!dbCategory,
     categoryName: dbCategory?.name,
+    userRanking: userRanking ? { id: userRanking.id, title: userRanking.title } : null,
     submittedRankingsCount,
     leaderboardAthletesCount: leaderboardAthletes?.length || 0,
-    leaderboardAthletes: leaderboardAthletes?.slice(0, 3), // First 3 for debugging
-    hasErrors: !!(categoryError || leaderboardError || userRankingError || rankingsCountError),
-    errors: {
-      categoryError: !!categoryError,
-      leaderboardError: !!leaderboardError,
-      userRankingError: !!userRankingError,
-      rankingsCountError: !!rankingsCountError
-    }
+    hasErrors: !!(categoryError || leaderboardError || userRankingError || rankingsCountError)
   });
 
   const handleRetry = () => {
-    console.log('CategoryPageDataFetcher - Retrying all queries...');
+    console.log('🔧 CategoryPageDataFetcher - Retrying all queries...');
     refetchCategory();
     refetchLeaderboard();
     queryClient.invalidateQueries({ queryKey: ['categoryRankingsCount', categoryId] });
