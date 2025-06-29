@@ -13,20 +13,36 @@ const CreateRankingPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { user } = useAuth();
   
+  console.log('CreateRankingPage - URL categoryId from params:', categoryId);
+  console.log('CreateRankingPage - Current user:', user?.id);
+  
   const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(categoryId);
+  
+  console.log('CreateRankingPage - User ranking check result:', {
+    userRanking,
+    categoryId,
+    hasExistingRanking: Boolean(userRanking),
+    isLoading: isLoadingUserRanking
+  });
 
   const { data: category, isLoading: isLoadingCategory } = useQuery<Category | null>({
     queryKey: ['category', categoryId],
     queryFn: async () => {
+      console.log('CreateRankingPage - Fetching category data for:', categoryId);
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .eq('id', categoryId || "")
         .single();
       if (error && error.code !== 'PGRST116') {
+        console.error('CreateRankingPage - Category fetch error:', error);
         throw error;
       }
-      if (!data) return null;
+      if (!data) {
+        console.log('CreateRankingPage - No category found for ID:', categoryId);
+        return null;
+      }
+      console.log('CreateRankingPage - Category data loaded:', data);
       return {
         id: data.id,
         name: data.name,
@@ -49,6 +65,7 @@ const CreateRankingPage = () => {
   }
 
   if (userRanking) {
+    console.log('CreateRankingPage - User already has ranking, showing already submitted message');
     return (
      <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
        <main className="flex-grow flex items-center justify-center container mx-auto py-4 sm:py-6 md:py-8 text-center">
@@ -67,6 +84,7 @@ const CreateRankingPage = () => {
  }
 
   if (!category) {
+    console.log('CreateRankingPage - Category not found, showing not found message');
     return (
       <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <main className="flex-grow flex items-center justify-center container mx-auto py-4 sm:py-6 md:py-8 text-center">
@@ -83,6 +101,8 @@ const CreateRankingPage = () => {
       </div>
     );
   }
+
+  console.log('CreateRankingPage - Proceeding to RankingEditor with category:', category);
 
   return (
     <div className="min-h-screen flex flex-col mb-0" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>

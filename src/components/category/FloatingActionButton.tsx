@@ -17,10 +17,19 @@ const FloatingActionButton = ({
   categoryId, 
   isLoadingUserRanking 
 }: FloatingActionButtonProps) => {
+  console.log('FloatingActionButton - Props received:', {
+    hasExistingRanking,
+    userRankingId,
+    categoryId,
+    isLoadingUserRanking
+  });
+
   const buttonText = hasExistingRanking ? "View My Ranking" : "Create Ranking";
   const buttonIcon = hasExistingRanking ? Eye : Plus;
   const buttonLink = hasExistingRanking ? `/ranking/${userRankingId}` : `/create-ranking/${categoryId}`;
   const buttonTitle = hasExistingRanking ? "View Your Ranking" : "Create Your Ranking";
+
+  console.log('FloatingActionButton - Generated link:', buttonLink);
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -25,9 +24,18 @@ const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { user } = useAuth();
   
+  console.log('CategoryPage - URL categoryId from params:', categoryId);
+  console.log('CategoryPage - Current user:', user?.id);
+  
   // Check if user has existing ranking for this category
   const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(categoryId);
   
+  console.log('CategoryPage - User ranking for this category:', {
+    userRanking,
+    categoryId,
+    hasRanking: Boolean(userRanking)
+  });
+
   // Fetch category data from Supabase
   const { data: dbCategory, isLoading: isLoadingCategory, error: categoryError } = useQuery<DbCategory | null>({
     queryKey: ['category', categoryId],
@@ -109,6 +117,13 @@ const CategoryPage = () => {
 
   // Determine button state based on user authentication and existing ranking
   const hasExistingRanking = Boolean(user && userRanking);
+  
+  console.log('CategoryPage - FloatingActionButton props being passed:', {
+    hasExistingRanking,
+    userRankingId: userRanking?.id,
+    categoryId: categoryId!,
+    isLoadingUserRanking
+  });
 
   return (
     <>
