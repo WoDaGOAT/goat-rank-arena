@@ -14,11 +14,30 @@ import { SocialActions } from "@/components/category/SocialActions";
 import { useRankingIdExtraction } from "@/hooks/useRankingIdExtraction";
 
 const UserRankingPage = () => {
+  console.log('🔍 UserRankingPage: Component is rendering');
+  
   const { rankingId, isValidUUID, originalParams } = useRankingIdExtraction();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   
+  console.log('🔍 UserRankingPage: Extracted ranking data:', {
+    rankingId,
+    isValidUUID,
+    originalParams,
+    currentUrl: window.location.href
+  });
+  
   // Only proceed with the query if we have a valid ranking ID
   const { data: ranking, isLoading, error } = useUserRanking(isValidUUID ? rankingId : undefined);
+
+  console.log('🔍 UserRankingPage: Query results:', { 
+    ranking: ranking ? {
+      id: ranking.id,
+      title: ranking.title,
+      athleteCount: ranking.athletes?.length
+    } : null,
+    isLoading, 
+    error: error?.message
+  });
 
   // Immediate scroll to top on component mount
   useEffect(() => {
@@ -42,9 +61,8 @@ const UserRankingPage = () => {
     }
   }, [ranking]);
 
-  console.log('UserRankingPage - Query results:', { ranking, isLoading, error });
-
   if (isLoading) {
+    console.log('🔍 UserRankingPage: Showing loading state');
     return (
       <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <main className="container mx-auto px-4 py-8 text-center text-white flex-grow flex items-center justify-center">
@@ -55,10 +73,10 @@ const UserRankingPage = () => {
   }
 
   if (!isValidUUID || error || !ranking) {
-    console.error('UserRankingPage - Error state:', { 
+    console.error('🔍 UserRankingPage: Error state detected:', { 
       isValidUUID, 
-      error, 
-      ranking, 
+      error: error?.message, 
+      ranking: !!ranking, 
       originalId: originalParams.id,
       extractedRankingId: rankingId 
     });
@@ -72,6 +90,8 @@ const UserRankingPage = () => {
       />
     );
   }
+
+  console.log('🔍 UserRankingPage: Successfully rendering ranking page for:', ranking.title);
 
   const shareUrl = window.location.href;
   const shareTitle = `${ranking.title} - WoDaGOAT Ranking`;

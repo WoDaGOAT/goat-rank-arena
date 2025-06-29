@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -46,10 +45,35 @@ const Index = lazy(() => {
   });
 });
 
+// Improved lazy loading with better error handling and debugging
+const CategoryPage = lazy(() => {
+  console.log('🔍 App.tsx: Loading CategoryPage');
+  return import("./pages/CategoryPage").catch(error => {
+    console.error('🔍 App.tsx: Failed to load CategoryPage:', error);
+    return { default: () => <div>Error loading CategoryPage</div> };
+  });
+});
+
+const CreateRankingPage = lazy(() => {
+  console.log('🔍 App.tsx: Loading CreateRankingPage');
+  return import("./pages/CreateRankingPage").catch(error => {
+    console.error('🔍 App.tsx: Failed to load CreateRankingPage:', error);
+    return { default: () => <div>Error loading CreateRankingPage</div> };
+  });
+});
+
+const UserRankingPage = lazy(() => {
+  console.log('🔍 App.tsx: Loading UserRankingPage');
+  return import("./pages/UserRankingPage").then(module => {
+    console.log('🔍 App.tsx: UserRankingPage loaded successfully');
+    return module;
+  }).catch(error => {
+    console.error('🔍 App.tsx: Failed to load UserRankingPage:', error);
+    return { default: () => <div>Error loading UserRankingPage</div> };
+  });
+});
+
 // Keep other lazy imports simple for now
-const CategoryPage = lazy(() => import("./pages/CategoryPage").catch(() => ({ default: () => <div>Error loading page</div> })));
-const CreateRankingPage = lazy(() => import("./pages/CreateRankingPage").catch(() => ({ default: () => <div>Error loading page</div> })));
-const UserRankingPage = lazy(() => import("./pages/UserRankingPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const UserProfilePage = lazy(() => import("./pages/UserProfilePage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const PublicProfilePage = lazy(() => import("./pages/PublicProfilePage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const FeedPage = lazy(() => import("./pages/FeedPage").catch(() => ({ default: () => <div>Error loading page</div> })));
@@ -119,7 +143,17 @@ function App() {
                       <Route path="/" element={<Index />} />
                       <Route path="/category/:categoryId" element={<CategoryPage />} />
                       <Route path="/create-ranking/:categoryId" element={<CreateRankingPage />} />
-                      <Route path="/ranking/:id" element={<UserRankingPage />} />
+                      <Route 
+                        path="/ranking/:id" 
+                        element={
+                          <div>
+                            <div style={{ display: 'none' }}>
+                              🔍 Route matched: /ranking/:id
+                            </div>
+                            <UserRankingPage />
+                          </div>
+                        } 
+                      />
                       <Route path="/profile" element={<UserProfilePage />} />
                       <Route path="/users/:userId" element={<PublicProfilePage />} />
                       <Route path="/quiz" element={<QuizPage />} />
