@@ -33,7 +33,6 @@ const Index = lazy(() => {
   console.log('App.tsx: Loading Index page');
   return import("./pages/Index").catch(error => {
     console.error('App.tsx: Failed to load Index page:', error);
-    // Return a fallback component instead of throwing
     return {
       default: () => (
         <div className="container mx-auto px-4 py-8 text-center text-white">
@@ -116,7 +115,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false, // Prevent unnecessary refetches
+      refetchOnWindowFocus: false,
     },
   },
 });
@@ -136,10 +135,12 @@ const GlobalAuthDialog = () => {
   );
 };
 
-// DEBUG COMPONENT: Add route debugging wrapper
+// DEBUG COMPONENT: Add route debugging wrapper with better logging
 const DebugRouteWrapper = ({ children, routeName }: { children: React.ReactNode, routeName: string }) => {
   console.log(`🔍 App.tsx: ROUTE RENDER - ${routeName} is being rendered at:`, window.location.pathname);
   console.log(`🔍 App.tsx: ROUTE RENDER - Current URL params:`, new URLSearchParams(window.location.search).toString());
+  console.log(`🔍 App.tsx: ROUTE RENDER - Full URL:`, window.location.href);
+  console.log(`🔍 App.tsx: ROUTE RENDER - Route name: ${routeName}`);
   return <>{children}</>;
 };
 
@@ -203,7 +204,6 @@ function App() {
                       <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
                       <Route path="/admin/analytics" element={<AnalyticsDashboardPage />} />
                       
-                      {/* Redirect old quiz creation URL to new one */}
                       <Route path="/admin/quizzes/new" element={<Navigate to="/admin/create-quiz" replace />} />
                       
                       <Route path="*" element={<NotFound />} />

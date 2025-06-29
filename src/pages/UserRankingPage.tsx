@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useUserRanking } from "@/hooks/useUserRanking";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -12,8 +11,10 @@ import RankingMetadata from "@/components/ranking/RankingMetadata";
 import RankingPageActions from "@/components/ranking/RankingPageActions";
 import { SocialActions } from "@/components/category/SocialActions";
 import { useRankingIdExtraction } from "@/hooks/useRankingIdExtraction";
+import { useParams } from "react-router-dom";
 
 const UserRankingPage = () => {
+  const params = useParams();
   console.log('🔍 UserRankingPage: ========================== COMPONENT START ==========================');
   console.log('🔍 UserRankingPage: Component is rendering at:', new Date().toISOString());
   console.log('🔍 UserRankingPage: Current window.location:', {
@@ -22,6 +23,7 @@ const UserRankingPage = () => {
     search: window.location.search,
     hash: window.location.hash
   });
+  console.log('🔍 UserRankingPage: useParams result:', params);
   
   const { rankingId, isValidUUID, originalParams } = useRankingIdExtraction();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -48,10 +50,10 @@ const UserRankingPage = () => {
     error: error?.message
   });
 
-  // Immediate scroll to top on component mount
+  // Force scroll to top when component mounts
   useEffect(() => {
-    console.log('🔍 UserRankingPage: useEffect - Immediate scroll to top on mount');
-    window.scrollTo(0, 0);
+    console.log('🔍 UserRankingPage: useEffect - FORCING scroll to top on mount');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     
     // Prevent browser's automatic scroll restoration
     if ('scrollRestoration' in history) {
@@ -59,11 +61,10 @@ const UserRankingPage = () => {
     }
   }, []);
 
-  // Additional scroll when ranking data loads (with delay for DOM rendering)
+  // Additional scroll when ranking data loads
   useEffect(() => {
     if (ranking) {
       console.log('🔍 UserRankingPage: useEffect - Ranking data loaded, ensuring scroll to top');
-      // Small delay to ensure DOM is fully rendered
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 100);
@@ -166,7 +167,6 @@ const UserRankingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Social Actions for the ranking */}
               <div className="mt-6">
                 <SocialActions rankingId={ranking.id} />
               </div>
