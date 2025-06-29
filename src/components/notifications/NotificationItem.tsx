@@ -2,7 +2,7 @@
 import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { Check, X, MessageSquare, Trophy, Clock } from 'lucide-react';
+import { Check, X, MessageSquare, Trophy, Clock, Heart, Folder } from 'lucide-react';
 import { Notification } from '@/types/index';
 import { Link } from 'react-router-dom';
 import { useMarkNotificationAsRead } from '@/hooks/useNotifications';
@@ -41,6 +41,10 @@ const NotificationItem = ({
         return <MessageSquare className="h-4 w-4 text-blue-400" />;
       case 'badge_earned':
         return <Trophy className="h-4 w-4 text-yellow-400" />;
+      case 'ranking_reaction':
+        return <Heart className="h-4 w-4 text-red-400" />;
+      case 'new_category':
+        return <Folder className="h-4 w-4 text-purple-400" />;
       default:
         return <Clock className="h-4 w-4 text-gray-400" />;
     }
@@ -105,11 +109,25 @@ const NotificationItem = ({
           message: `You earned the "${data?.badge_name || 'Achievement'}" badge`,
           link: '/profile'
         };
+
+      case 'ranking_reaction':
+        return {
+          title: 'Ranking Reaction',
+          message: `${data?.user_name || 'Someone'} ${data?.reaction_type || 'reacted to'} your ranking "${data?.ranking_title || 'your ranking'}"`,
+          link: data?.ranking_id ? `/ranking/${data.ranking_id}` : undefined
+        };
+
+      case 'new_category':
+        return {
+          title: 'New Category Available',
+          message: `New category "${data?.category_name || 'category'}" is now available for ranking`,
+          link: data?.category_id ? `/category/${data.category_id}` : undefined
+        };
         
       default:
         return {
           title: 'Notification',
-          message: 'You have a new notification'
+          message: data?.message || 'You have a new notification'
         };
     }
   };
