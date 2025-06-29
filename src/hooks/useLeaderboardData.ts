@@ -7,10 +7,10 @@ export const useLeaderboardData = (categoryId: string) => {
   return useQuery({
     queryKey: ['leaderboardData', categoryId],
     queryFn: async () => {
-      console.log(`🔍 DEBUGGING: Fetching leaderboard data for category: ${categoryId}`);
+      console.log(`🔍 ENHANCED: Fetching leaderboard data for category: ${categoryId}`);
 
       try {
-        // Use the optimized database function
+        // Use the optimized database function with enhanced error handling
         const { data: leaderboardData, error } = await supabase
           .rpc('get_category_leaderboard', {
             p_category_id: categoryId,
@@ -18,25 +18,34 @@ export const useLeaderboardData = (categoryId: string) => {
           });
 
         if (error) {
-          console.error("🔍 DEBUGGING: Error fetching leaderboard:", error);
-          throw new Error(error.message);
+          console.error("🚨 ENHANCED: Error fetching leaderboard:", error);
+          // Don't throw immediately for certain types of errors
+          if (error.message?.includes('function get_category_leaderboard does not exist')) {
+            console.warn("⚠️ Database function missing, returning empty array");
+            return [];
+          }
+          throw new Error(`Leaderboard fetch failed: ${error.message}`);
         }
 
-        console.log('🔍 DEBUGGING: Raw leaderboard data from database:', leaderboardData);
+        console.log('✅ ENHANCED: Raw leaderboard data from database:', {
+          categoryId,
+          dataLength: leaderboardData?.length || 0,
+          data: leaderboardData
+        });
 
         if (!leaderboardData || leaderboardData.length === 0) {
-          console.log(`🔍 DEBUGGING: No leaderboard data found for category ${categoryId}`);
+          console.log(`📊 ENHANCED: No leaderboard data found for category ${categoryId} - this is normal for categories with few rankings`);
           return [];
         }
 
-        console.log(`🔍 DEBUGGING: Processing leaderboard for category ${categoryId}, found ${leaderboardData.length} athletes`);
+        console.log(`🔄 ENHANCED: Processing leaderboard for category ${categoryId}, found ${leaderboardData.length} athletes`);
 
-        // Map the database response to UI format with proper error handling
+        // Map the database response to UI format with enhanced error handling
         const leaderboard: Athlete[] = leaderboardData.map((athlete: any, index: number) => {
           try {
-            console.log(`🔍 DEBUGGING: Processing athlete ${index + 1}:`, athlete);
+            console.log(`👤 ENHANCED: Processing athlete ${index + 1}:`, athlete);
             
-            return {
+            const mappedAthlete = {
               id: athlete.athlete_id || `athlete-${index}`,
               name: athlete.athlete_name || 'Unknown Athlete',
               profile_picture_url: athlete.profile_picture_url || '/placeholder.svg',
@@ -45,8 +54,11 @@ export const useLeaderboardData = (categoryId: string) => {
               rank: Number(athlete.rank) || index + 1,
               movement: (athlete.movement as "up" | "down" | "neutral") || "neutral"
             };
+            
+            console.log(`✨ ENHANCED: Mapped athlete:`, mappedAthlete);
+            return mappedAthlete;
           } catch (mapError) {
-            console.error('🔍 DEBUGGING: Error mapping athlete data:', mapError, athlete);
+            console.error('🚨 ENHANCED: Error mapping athlete data:', mapError, athlete);
             return {
               id: `athlete-${index}`,
               name: 'Unknown Athlete',
@@ -59,20 +71,34 @@ export const useLeaderboardData = (categoryId: string) => {
           }
         });
 
-        console.log(`🔍 DEBUGGING: Final leaderboard for category ${categoryId}:`, leaderboard.length, "athletes");
-        console.log('🔍 DEBUGGING: Final leaderboard data:', leaderboard);
+        console.log(`🎯 ENHANCED: Final leaderboard for category ${categoryId}:`, {
+          athleteCount: leaderboard.length,
+          athletes: leaderboard
+        });
         
         return leaderboard;
       } catch (error) {
-        console.error('🔍 DEBUGGING: Fatal error in leaderboard fetch:', error);
+        console.error('🚨 ENHANCED: Fatal error in leaderboard fetch:', {
+          categoryId,
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined
+        });
+        
         // Return empty array instead of throwing to prevent UI crashes
+        // This allows the "Not Enough Rankings Yet" message to display properly
         return [];
       }
     },
     enabled: !!categoryId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: (failureCount, error) => {
-      console.log(`🔍 DEBUGGING: Leaderboard fetch retry ${failureCount}:`, error);
+      console.log(`🔄 ENHANCED: Leaderboard fetch retry ${failureCount} for category ${categoryId}:`, error);
+      
+      // Don't retry for certain errors
+      if (error?.message?.includes('function get_category_leaderboard does not exist')) {
+        return false;
+      }
+      
       return failureCount < 2;
     },
   });
