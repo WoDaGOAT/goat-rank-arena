@@ -1,144 +1,195 @@
 
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserRankingForCategory } from "@/hooks/useUserRankingForCategory";
-import { useLeaderboardData } from "@/hooks/useLeaderboardData";
 import { Helmet } from "react-helmet-async";
-import CategoryPageHeader from "@/components/category/CategoryPageHeader";
 import CategoryPageContent from "@/components/category/CategoryPageContent";
 import FloatingActionButton from "@/components/category/FloatingActionButton";
 import CategoryNotFound from "@/components/category/CategoryNotFound";
-
-type DbCategory = {
-  id: string;
-  name: string;
-  description: string | null;
-  image_url: string | null;
-  created_at: string;
-};
+import CategoryPageLoading from "@/components/category/CategoryPageLoading";
+import CategoryNetworkError from "@/components/category/CategoryNetworkError";
+import CategoryPageDataFetcher from "@/components/category/CategoryPageDataFetcher";
+import ComingSoonPage from "./ComingSoonPage";
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { user } = useAuth();
   
-  // Check if user has existing ranking for this category
-  const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(categoryId);
+  console.log('🚀 CategoryPage - RENDER START:', {
+    categoryId,
+    userId: user?.id,
+    currentUrl: window.location.href
+  });
   
-  // Fetch category data from Supabase
-  const { data: dbCategory, isLoading: isLoadingCategory, error: categoryError } = useQuery<DbCategory | null>({
-    queryKey: ['category', categoryId],
-    queryFn: async () => {
-      if (!categoryId) return null;
-      
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('id', categoryId)
-        .single();
-        
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-      return data;
-    },
-    enabled: !!categoryId,
-  });
-
-  // Fetch submitted rankings count for this category
-  const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount } = useQuery({
-    queryKey: ['categoryRankingsCount', categoryId],
-    queryFn: async () => {
-      if (!categoryId) return 0;
-      
-      const { count, error } = await supabase
-        .from('user_rankings')
-        .select('*', { count: 'exact', head: true })
-        .eq('category_id', categoryId);
-      
-      if (error) {
-        console.error('Error fetching rankings count:', error);
-        return 0;
-      }
-      
-      return count || 0;
-    },
-    enabled: !!categoryId,
-    staleTime: 1000 * 60 * 2, // 2 minutes
-    retry: 2,
-  });
-
-  // Fetch optimized leaderboard data
-  const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard, error: leaderboardError } = useLeaderboardData(categoryId || "");
-
-  const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount;
-
-  // Handle errors
-  if (categoryError || leaderboardError) {
-    console.error('Category page error:', { categoryError, leaderboardError });
-  }
-
-  if (isLoading) {
-    return (
-      <>
-        <Helmet>
-          <title>Loading Category... | Wodagoat</title>
-          <meta name="description" content="Loading category details, leaderboards, and community rankings." />
-        </Helmet>
-        <div className="flex flex-col flex-grow min-h-screen px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-          <div className="container mx-auto py-4 sm:py-6 md:py-8 flex-grow">
-            <Skeleton className="h-10 sm:h-12 w-32 sm:w-48 mb-6 sm:mb-8" />
-            <Skeleton className="h-8 sm:h-10 w-3/4 mb-2" />
-            <Skeleton className="h-4 sm:h-6 w-1/2 mb-6 sm:mb-8" />
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-              <div className="w-full lg:w-2/3 xl:w-3/5"><Skeleton className="h-80 sm:h-96 w-full" /></div>
-              <div className="w-full lg:w-1/3 xl:w-2/5 space-y-4 sm:space-y-6"><Skeleton className="h-40 sm:h-48 w-full" /></div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  if (!dbCategory) {
+  if (!categoryId) {
+    console.error('❌ CategoryPage - No categoryId found in URL params');
     return <CategoryNotFound />;
   }
 
-  // Determine button state based on user authentication and existing ranking
-  const hasExistingRanking = Boolean(user && userRanking);
+  // Helper function to check if an error is critical
+  const isCriticalError = (error: any) => {
+    if (!error) return false;
+    
+    const errorMessage = error?.message || '';
+    const criticalPatterns = [
+      'JWT expired',
+      'Unauthorized', 
+      'Authentication failed',
+      'Invalid category',
+      'Category not found',
+      'Database connection failed'
+    ];
+    
+    return criticalPatterns.some(pattern => 
+      errorMessage.toLowerCase().includes(pattern.toLowerCase())
+    );
+  };
+
+  // Helper function to check for persistent network errors
+  const isPersistentNetworkError = (error: any) => {
+    if (!error) return false;
+    
+    const errorMessage = error?.message || '';
+    return (errorMessage.includes('Failed to fetch') || 
+           errorMessage.includes('NetworkError') ||
+           error?.code === 'NETWORK_ERROR') &&
+           !errorMessage.includes('ad blocker') &&
+           !errorMessage.includes('extension');
+  };
+
+  // Helper function to check if category is a competition category
+  const isCompetitionCategory = (categoryName: string, parentCategoryName?: string) => {
+    const competitionKeywords = [
+      'premier league',
+      'laliga', 
+      'la liga',
+      'serie a',
+      'bundesliga',
+      'ligue 1',
+      'champions league',
+      'world cup',
+      'euro',
+      'copa america',
+      'competition',
+      'tournament',
+      'league',
+      'championship'
+    ];
+    
+    const nameToCheck = (categoryName || '').toLowerCase();
+    const parentToCheck = (parentCategoryName || '').toLowerCase();
+    
+    return competitionKeywords.some(keyword => 
+      nameToCheck.includes(keyword) || parentToCheck.includes(keyword)
+    ) || parentToCheck.includes('competition');
+  };
 
   return (
-    <>
-      <Helmet>
-        <title>{`${dbCategory.name} - GOAT Debate | Wodagoat`}</title>
-        <meta name="description" content={dbCategory.description || `Join the GOAT debate for ${dbCategory.name}. Create rankings, view leaderboards, and share your opinion with a global community of sports fans.`} />
-      </Helmet>
-      <div className="flex flex-col flex-grow min-h-screen px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <div className="container mx-auto py-4 sm:py-6 md:py-8 flex-grow">
-          <CategoryPageHeader 
-            categoryName={dbCategory.name}
-            categoryDescription={dbCategory.description}
-          />
+    <CategoryPageDataFetcher categoryId={categoryId}>
+      {({ 
+        dbCategory, 
+        userRanking, 
+        submittedRankingsCount, 
+        leaderboardAthletes, 
+        isLoading, 
+        errors,
+        refetch 
+      }) => {
+        const { categoryError, leaderboardError, userRankingError, rankingsCountError } = errors;
 
-          <CategoryPageContent
-            categoryId={categoryId!}
-            leaderboardAthletes={leaderboardAthletes || []}
-            submittedRankingsCount={submittedRankingsCount || 0}
-            categoryName={dbCategory.name}
-          />
+        console.log('🚀 CategoryPage - DATA FETCHER RESULT:', {
+          hasDbCategory: !!dbCategory,
+          categoryName: dbCategory?.name,
+          hasUserRanking: !!userRanking,
+          userRankingId: userRanking?.id,
+          submittedRankingsCount,
+          leaderboardAthletesCount: leaderboardAthletes?.length || 0,
+          isLoading,
+          errorSummary: {
+            categoryError: !!categoryError,
+            leaderboardError: !!leaderboardError,
+            userRankingError: !!userRankingError,
+            rankingsCountError: !!rankingsCountError
+          }
+        });
 
-          <FloatingActionButton
-            hasExistingRanking={hasExistingRanking}
-            userRankingId={userRanking?.id}
-            categoryId={categoryId!}
-            isLoadingUserRanking={isLoadingUserRanking}
-          />
-        </div>
-      </div>
-    </>
+        if (isLoading) {
+          console.log('🚀 CategoryPage - SHOWING LOADING STATE');
+          return <CategoryPageLoading />;
+        }
+
+        // Check for CRITICAL category errors that should block the page
+        if (categoryError && isCriticalError(categoryError)) {
+          console.log('🚨 CRITICAL: Category error detected:', categoryError);
+          return <CategoryNotFound />;
+        }
+
+        // Check for persistent network errors that affect category loading
+        if (categoryError && isPersistentNetworkError(categoryError)) {
+          console.log('🌐 PERSISTENT NETWORK ERROR:', categoryError);
+          return <CategoryNetworkError onRetry={refetch.refetchLeaderboard} />;
+        }
+
+        // Log other errors but don't block the UI - they're not critical
+        if (leaderboardError || userRankingError || rankingsCountError) {
+          console.log('⚠️ NON-CRITICAL ERRORS (not blocking UI):', {
+            leaderboardError: leaderboardError?.message,
+            userRankingError: userRankingError?.message,
+            rankingsCountError: rankingsCountError?.message
+          });
+        }
+
+        // If no category data, show not found
+        if (!dbCategory) {
+          console.log('🚀 CategoryPage - NO CATEGORY DATA');
+          return <CategoryNotFound />;
+        }
+
+        // Check if this is a competition category and show coming soon page
+        if (isCompetitionCategory(dbCategory.name)) {
+          console.log('🚀 CategoryPage - SHOWING COMING SOON for competition category:', dbCategory.name);
+          return <ComingSoonPage categoryName={dbCategory.name} />;
+        }
+
+        // We have valid category data - render the page
+        const hasExistingRanking = Boolean(user && userRanking);
+        
+        console.log('🚀 CategoryPage - RENDERING MAIN CONTENT:', {
+          categoryName: dbCategory.name,
+          hasExistingRanking,
+          userRankingId: userRanking?.id,
+          submittedRankingsCount,
+          leaderboardCount: leaderboardAthletes?.length || 0
+        });
+
+        return (
+          <>
+            <Helmet>
+              <title>{`${dbCategory.name} - GOAT Debate | Wodagoat`}</title>
+              <meta name="description" content={dbCategory.description || `Join the GOAT debate for ${dbCategory.name}. Create rankings, view leaderboards, and share your opinion with a global community of sports fans.`} />
+            </Helmet>
+            <div className="flex flex-col flex-grow min-h-screen px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
+              <div className="container mx-auto py-4 sm:py-6 md:py-8 flex-grow">
+                <CategoryPageContent
+                  categoryId={categoryId}
+                  leaderboardAthletes={leaderboardAthletes}
+                  submittedRankingsCount={submittedRankingsCount}
+                  categoryName={dbCategory.name}
+                  categoryDescription={dbCategory.description}
+                />
+
+                <FloatingActionButton
+                  hasExistingRanking={hasExistingRanking}
+                  userRankingId={userRanking?.id}
+                  categoryId={categoryId}
+                  isLoadingUserRanking={false}
+                />
+              </div>
+            </div>
+          </>
+        );
+      }}
+    </CategoryPageDataFetcher>
   );
 };
 

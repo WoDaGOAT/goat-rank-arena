@@ -1,3 +1,4 @@
+
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,7 +33,7 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
 
   const saveRanking = useMutation({
     mutationFn: async ({ title, description, categoryId, selectedAthletes }: SaveRankingParams) => {
-      console.log('Saving ranking with data:', { title, description, categoryId, selectedAthletes });
+      console.log('🔍 useSaveRanking - Saving ranking with data:', { title, description, categoryId, selectedAthletes });
       
       // Check if user is logged in first
       if (!user) {
@@ -87,14 +88,24 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
       
       trackRankingCreated(categoryId, category.data?.name || 'Unknown');
 
+      console.log('🔍 useSaveRanking - Ranking saved successfully with ID:', rankingData.id);
       return rankingData.id;
     },
     onSuccess: (rankingId) => {
+      console.log('🔍 useSaveRanking - Success callback, navigating to ranking:', rankingId);
       toast.success("Ranking saved successfully!");
-      navigate(`/ranking/${rankingId}`);
+      
+      // Use replace: true to ensure clean navigation
+      try {
+        navigate(`/ranking/${rankingId}`, { replace: true });
+        console.log('🔍 useSaveRanking - Navigation to ranking page initiated');
+      } catch (error) {
+        console.error('🔍 useSaveRanking - Navigation failed, using window.location fallback:', error);
+        window.location.href = `/ranking/${rankingId}`;
+      }
     },
     onError: (error: any) => {
-      console.error("Failed to save ranking:", error);
+      console.error("🔍 useSaveRanking - Failed to save ranking:", error);
       if (error.message !== "Authentication required") {
         toast.error("Failed to save ranking.", { description: error.message });
       }
@@ -105,7 +116,7 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
     onSave: (params: { rankingTitle: string, rankingDescription?: string, selectedAthletes: SelectedAthleteInput[] }) => {
       const { rankingTitle, rankingDescription, selectedAthletes } = params;
       
-      console.log('Raw selected athletes before transformation:', selectedAthletes);
+      console.log('🔍 useSaveRanking - Raw selected athletes before transformation:', selectedAthletes);
       
       // Transform the selectedAthletes data to match the expected schema
       const transformedAthletes = selectedAthletes.map((athlete, index) => ({
@@ -114,7 +125,7 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
         points: athlete.userPoints // Map userPoints to points
       }));
       
-      console.log('Transformed athletes:', transformedAthletes);
+      console.log('🔍 useSaveRanking - Transformed athletes:', transformedAthletes);
       
       return saveRanking.mutate({
         title: rankingTitle,

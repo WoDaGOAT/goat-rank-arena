@@ -1,47 +1,74 @@
 
 import { useState, useEffect } from "react";
 import { useUserRanking } from "@/hooks/useUserRanking";
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import RankedAthleteRow from "@/components/feed/items/RankedAthleteRow";
-import { ShareDialog } from "@/components/category/ShareDialog";
 import RankingSEO from "@/components/seo/RankingSEO";
 import SocialPreviewDebug from "@/components/seo/SocialPreviewDebug";
 import RankingNotFound from "@/components/ranking/RankingNotFound";
-import RankingHeader from "@/components/ranking/RankingHeader";
-import RankingMetadata from "@/components/ranking/RankingMetadata";
-import RankingPageActions from "@/components/ranking/RankingPageActions";
-import { SocialActions } from "@/components/category/SocialActions";
+import UserRankingPageHeader from "@/components/ranking/UserRankingPageHeader";
+import UserRankingContent from "@/components/ranking/UserRankingContent";
+import UserRankingPageLayout from "@/components/ranking/UserRankingPageLayout";
+import UserRankingLoadingState from "@/components/ranking/UserRankingLoadingState";
+import UserRankingShareDialog from "@/components/ranking/UserRankingShareDialog";
 import { useRankingIdExtraction } from "@/hooks/useRankingIdExtraction";
+import { useParams } from "react-router-dom";
 
 const UserRankingPage = () => {
+  const params = useParams();
+  console.log('🔍 UserRankingPage: ========================== COMPONENT START ==========================');
+  console.log('🔍 UserRankingPage: Component is rendering at:', new Date().toISOString());
+  console.log('🔍 UserRankingPage: Current window.location:', {
+    href: window.location.href,
+    pathname: window.location.pathname,
+    search: window.location.search,
+    hash: window.location.hash
+  });
+  console.log('🔍 UserRankingPage: useParams result:', params);
+  
   const { rankingId, isValidUUID, originalParams } = useRankingIdExtraction();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  
+  console.log('🔍 UserRankingPage: Extracted ranking data:', {
+    rankingId,
+    isValidUUID,
+    originalParams,
+    currentUrl: window.location.href
+  });
   
   // Only proceed with the query if we have a valid ranking ID
   const { data: ranking, isLoading, error } = useUserRanking(isValidUUID ? rankingId : undefined);
 
-  // Scroll to top when component mounts or when ranking data loads
+  console.log('🔍 UserRankingPage: Query results:', { 
+    ranking: ranking ? {
+      id: ranking.id,
+      title: ranking.title,
+      athleteCount: ranking.athletes?.length,
+      hasAthletes: !!ranking.athletes,
+      firstAthlete: ranking.athletes?.[0]?.name
+    } : null,
+    isLoading, 
+    error: error?.message
+  });
+
+  // Additional scroll when ranking data loads
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (ranking) {
+      console.log('🔍 UserRankingPage: useEffect - Ranking data loaded, ensuring scroll to top');
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
   }, [ranking]);
 
-  console.log('UserRankingPage - Query results:', { ranking, isLoading, error });
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
-        <main className="container mx-auto px-4 py-8 text-center text-white flex-grow flex items-center justify-center">
-          <p>Loading ranking...</p>
-        </main>
-      </div>
-    );
+    console.log('🔍 UserRankingPage: SHOWING LOADING STATE');
+    return <UserRankingLoadingState rankingId={rankingId} />;
   }
 
   if (!isValidUUID || error || !ranking) {
-    console.error('UserRankingPage - Error state:', { 
+    console.error('🔍 UserRankingPage: ERROR STATE DETECTED:', { 
       isValidUUID, 
-      error, 
-      ranking, 
+      error: error?.message, 
+      ranking: !!ranking, 
       originalId: originalParams.id,
       extractedRankingId: rankingId 
     });
@@ -55,6 +82,9 @@ const UserRankingPage = () => {
       />
     );
   }
+
+  console.log('🔍 UserRankingPage: SUCCESS - Rendering ranking page for:', ranking.title);
+  console.log('🔍 UserRankingPage: SUCCESS - Athletes in ranking:', ranking.athletes.map(a => `${a.position}. ${a.name}`));
 
   const shareUrl = window.location.href;
   const shareTitle = `${ranking.title} - WoDaGOAT Ranking`;
@@ -88,61 +118,22 @@ const UserRankingPage = () => {
         url={shareUrl}
       />
       
-      <div className="min-h-screen text-white flex flex-col" style={{ background: "linear-gradient(135deg, #190749 0%, #070215 100%)" }}>
-        <main className="container mx-auto px-4 py-8 flex-grow">
-          <RankingPageActions onShareClick={() => setShareDialogOpen(true)} />
-          <RankingHeader title={ranking.title} createdAt={ranking.created_at} />
+      <UserRankingPageLayout>
+        <UserRankingPageHeader
+          title={ranking.title}
+          createdAt={ranking.created_at}
+          onShareClick={() => setShareDialogOpen(true)}
+        />
+        <UserRankingContent ranking={ranking} />
+      </UserRankingPageLayout>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <Card className="bg-white/5 border-white/10 text-white">
-                <CardHeader>
-                  <h2 className="text-2xl font-semibold leading-none tracking-tight">Ranked Athletes</h2>
-                  <CardDescription className="text-gray-400">
-                    See who made the cut in this ranking.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="flex flex-col">
-                    {ranking.athletes.length > 0 ? (
-                      ranking.athletes.map((athlete) => (
-                        <RankedAthleteRow key={athlete.id} athlete={athlete} />
-                      ))
-                    ) : (
-                      <p className="p-6 text-gray-400">No athletes have been ranked yet.</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Social Actions for the ranking */}
-              <div className="mt-6">
-                <SocialActions rankingId={ranking.id} />
-              </div>
-            </div>
-
-            <aside className="space-y-8">
-              <RankingMetadata
-                description={ranking.description}
-                profiles={ranking.profiles}
-                userId={ranking.user_id}
-                categories={ranking.categories}
-                categoryId={ranking.category_id}
-              />
-            </aside>
-          </div>
-        </main>
-      </div>
-
-      <ShareDialog
+      <UserRankingShareDialog
         open={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
-        url={shareUrl}
-        text={shareDescription}
-        title={shareTitle}
-        description={shareDescription}
-        hashtags={categoryHashtags}
-        isRanking={true}
+        shareUrl={shareUrl}
+        shareTitle={shareTitle}
+        shareDescription={shareDescription}
+        categoryHashtags={categoryHashtags}
         topAthletes={topAthletes}
         categoryName={ranking.categories?.name || undefined}
       />
@@ -158,5 +149,7 @@ const UserRankingPage = () => {
     </>
   );
 };
+
+console.log('🔍 UserRankingPage: Component definition complete');
 
 export default UserRankingPage;
