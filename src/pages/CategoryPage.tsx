@@ -9,6 +9,7 @@ import CategoryNotFound from "@/components/category/CategoryNotFound";
 import CategoryPageLoading from "@/components/category/CategoryPageLoading";
 import CategoryNetworkError from "@/components/category/CategoryNetworkError";
 import CategoryPageDataFetcher from "@/components/category/CategoryPageDataFetcher";
+import ComingSoonPage from "./ComingSoonPage";
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -54,6 +55,33 @@ const CategoryPage = () => {
            error?.code === 'NETWORK_ERROR') &&
            !errorMessage.includes('ad blocker') &&
            !errorMessage.includes('extension');
+  };
+
+  // Helper function to check if category is a competition category
+  const isCompetitionCategory = (categoryName: string, parentCategoryName?: string) => {
+    const competitionKeywords = [
+      'premier league',
+      'laliga', 
+      'la liga',
+      'serie a',
+      'bundesliga',
+      'ligue 1',
+      'champions league',
+      'world cup',
+      'euro',
+      'copa america',
+      'competition',
+      'tournament',
+      'league',
+      'championship'
+    ];
+    
+    const nameToCheck = (categoryName || '').toLowerCase();
+    const parentToCheck = (parentCategoryName || '').toLowerCase();
+    
+    return competitionKeywords.some(keyword => 
+      nameToCheck.includes(keyword) || parentToCheck.includes(keyword)
+    ) || parentToCheck.includes('competition');
   };
 
   return (
@@ -115,6 +143,12 @@ const CategoryPage = () => {
         if (!dbCategory) {
           console.log('🚀 CategoryPage - NO CATEGORY DATA');
           return <CategoryNotFound />;
+        }
+
+        // Check if this is a competition category and show coming soon page
+        if (isCompetitionCategory(dbCategory.name)) {
+          console.log('🚀 CategoryPage - SHOWING COMING SOON for competition category:', dbCategory.name);
+          return <ComingSoonPage categoryName={dbCategory.name} />;
         }
 
         // We have valid category data - render the page

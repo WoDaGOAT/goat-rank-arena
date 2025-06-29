@@ -69,6 +69,15 @@ const UserRankingPage = lazy(() => {
   });
 });
 
+// Add ComingSoonPage to lazy components
+const ComingSoonPage = lazy(() => {
+  console.log('🔍 LazyComponents.tsx: Loading ComingSoonPage');
+  return import("../../pages/ComingSoonPage").catch(error => {
+    console.error('🔍 LazyComponents.tsx: Failed to load ComingSoonPage:', error);
+    return { default: () => <div>Error loading ComingSoonPage</div> };
+  });
+});
+
 // Keep other lazy imports simple for now
 const UserProfilePage = lazy(() => import("../../pages/UserProfilePage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const PublicProfilePage = lazy(() => import("../../pages/PublicProfilePage").catch(() => ({ default: () => <div>Error loading page</div> })));
@@ -105,7 +114,8 @@ export {
   NotificationsPage,
   AnalyticsDashboardPage,
   CommentManagementPage,
-  AthleteManagementPage
+  AthleteManagementPage,
+  ComingSoonPage
 };
 
 console.log('LazyComponents.tsx: All components exported');
