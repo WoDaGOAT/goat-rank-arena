@@ -12,20 +12,16 @@ export const useNotifications = () => {
     queryKey: ['notifications', user?.id],
     queryFn: async (): Promise<Notification[]> => {
       if (!user?.id) {
+        console.log('No user ID, returning empty notifications');
         return [];
       }
 
       console.log('Fetching notifications for user:', user.id);
       
-      // Query notifications with a filter for friend requests
-      const { data, error } = await supabase
+      // Get all notifications first
+      const { data: allNotifications, error } = await supabase
         .from('notifications')
-        .select(`
-          *,
-          friendships:data->friendship_id (
-            status
-          )
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -35,41 +31,58 @@ export const useNotifications = () => {
         throw error;
       }
 
-      // Filter out friend request notifications where the friendship is no longer pending
-      const filteredNotifications = (data || []).filter((notification: any) => {
-        // If it's a friend request notification, check if the friendship is still pending
-        if (notification.type === 'new_friend_request' && notification.data?.friendship_id) {
-          // Query the friendship status directly
-          return true; // We'll filter this in a second query
-        }
-        return true;
-      });
+      console.log('Raw notifications fetched:', allNotifications?.length || 0);
 
-      // For friend request notifications, we need to check the actual friendship status
-      const notificationsWithStatus = await Promise.all(
-        filteredNotifications.map(async (notification: any) => {
-          if (notification.type === 'new_friend_request' && notification.data?.friendship_id) {
-            const { data: friendship } = await supabase
+      if (!allNotifications || allNotifications.length === 0) {
+        console.log('No notifications found');
+        return [];
+      }
+
+      // Filter out friend request notifications that are no longer pending
+      const validNotifications = [];
+      
+      for (const notification of allNotifications) {
+        if (notification.type === 'new_friend_request') {
+          // Type cast the data to access friendship_id
+          const notificationData = notification.data as any;
+          if (notificationData?.friendship_id) {
+            console.log('Checking friendship status for notification:', notification.id, 'friendship:', notificationData.friendship_id);
+            
+            const { data: friendship, error: friendshipError } = await supabase
               .from('friendships')
               .select('status')
-              .eq('id', notification.data.friendship_id)
+              .eq('id', notificationData.friendship_id)
               .maybeSingle();
             
-            // Only keep the notification if the friendship is still pending
-            if (friendship?.status !== 'pending') {
-              return null;
+            if (friendshipError) {
+              console.error('Error checking friendship status:', friendshipError);
+              // If there's an error, keep the notification to be safe
+              validNotifications.push(notification);
+              continue;
             }
+            
+            console.log('Friendship status:', friendship?.status);
+            
+            // Only keep the notification if the friendship is still pending
+            if (friendship?.status === 'pending') {
+              console.log('Keeping pending friend request notification');
+              validNotifications.push(notification);
+            } else {
+              console.log('Filtering out non-pending friend request notification');
+            }
+          } else {
+            // If no friendship_id, keep the notification
+            validNotifications.push(notification);
           }
-          return notification;
-        })
-      );
+        } else {
+          // Keep all non-friend-request notifications
+          validNotifications.push(notification);
+        }
+      }
 
-      // Filter out null values (declined/accepted friend requests)
-      const finalNotifications = notificationsWithStatus.filter(Boolean);
-
-      console.log(`Notifications fetched and filtered: ${finalNotifications?.length || 0}`);
+      console.log(`Final notifications after filtering: ${validNotifications.length}`);
       
-      return finalNotifications as Notification[];
+      return validNotifications as Notification[];
     },
     enabled: !!user?.id,
     staleTime: 1 * 60 * 1000,
@@ -84,7 +97,10 @@ export const useNotifications = () => {
         return 0;
       }
 
-      // Get all notifications first
+      console.log('Calculating unread count for user:', user.id);
+
+      // Use the same filtering logic as the main notifications query
+      // Get all unread notifications first
       const { data: allNotifications, error } = await supabase
         .from('notifications')
         .select('*')
@@ -96,10 +112,17 @@ export const useNotifications = () => {
         throw error;
       }
 
-      // Filter out friend request notifications that are no longer pending
+      if (!allNotifications || allNotifications.length === 0) {
+        console.log('No unread notifications found');
+        return 0;
+      }
+
+      console.log('Raw unread notifications:', allNotifications.length);
+
+      // Apply the same filtering logic as the main query
       let unreadCount = 0;
       
-      for (const notification of allNotifications || []) {
+      for (const notification of allNotifications) {
         if (notification.type === 'new_friend_request') {
           // Type cast the data to access friendship_id
           const notificationData = notification.data as any;
@@ -114,6 +137,9 @@ export const useNotifications = () => {
             if (friendship?.status === 'pending') {
               unreadCount++;
             }
+          } else {
+            // If no friendship_id, count the notification
+            unreadCount++;
           }
         } else {
           // Count all other notification types
@@ -121,6 +147,7 @@ export const useNotifications = () => {
         }
       }
 
+      console.log('Final unread count:', unreadCount);
       return unreadCount;
     },
     enabled: !!user?.id,
