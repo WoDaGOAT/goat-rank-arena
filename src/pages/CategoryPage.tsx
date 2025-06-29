@@ -1,6 +1,7 @@
+
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +12,7 @@ import CategoryPageHeader from "@/components/category/CategoryPageHeader";
 import CategoryPageContent from "@/components/category/CategoryPageContent";
 import FloatingActionButton from "@/components/category/FloatingActionButton";
 import CategoryNotFound from "@/components/category/CategoryNotFound";
+import CategoryNetworkError from "@/components/category/CategoryNetworkError";
 
 type DbCategory = {
   id: string;
@@ -23,6 +25,7 @@ type DbCategory = {
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   console.log('CategoryPage - URL categoryId from params:', categoryId);
   console.log('CategoryPage - Current user:', user?.id);
@@ -34,7 +37,7 @@ const CategoryPage = () => {
   }
   
   // Check if user has existing ranking for this category
-  const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(categoryId);
+  const { data: userRanking, isLoading: isLoadingUserRanking, error: userRankingError } = useUserRankingForCategory(categoryId);
   
   console.log('CategoryPage - User ranking for this category:', {
     userRanking,
@@ -43,7 +46,7 @@ const CategoryPage = () => {
   });
 
   // Fetch category data from Supabase
-  const { data: dbCategory, isLoading: isLoadingCategory, error: categoryError } = useQuery<DbCategory | null>({
+  const { data: dbCategory, isLoading: isLoadingCategory, error: categoryError, refetch: refetchCategory } = useQuery<DbCategory | null>({
     queryKey: ['category', categoryId],
     queryFn: async () => {
       console.log('CategoryPage - Fetching category data for ID:', categoryId);
@@ -63,10 +66,18 @@ const CategoryPage = () => {
       return data;
     },
     enabled: !!categoryId,
+    retry: (failureCount, error) => {
+      // Only retry network errors, not data-not-found errors
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        return failureCount < 2;
+      }
+      return false;
+    },
   });
 
   // Fetch submitted rankings count for this category
-  const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount } = useQuery({
+  const { data: submittedRankingsCount, isLoading: isLoadingRankingsCount, error: rankingsCountError } = useQuery({
     queryKey: ['categoryRankingsCount', categoryId],
     queryFn: async () => {
       if (!categoryId) return 0;
@@ -85,16 +96,48 @@ const CategoryPage = () => {
     },
     enabled: !!categoryId,
     staleTime: 1000 * 60 * 2, // 2 minutes
-    retry: 2,
+    retry: (failureCount, error) => {
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        return failureCount < 2;
+      }
+      return false;
+    },
   });
 
   // Fetch optimized leaderboard data
-  const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard, error: leaderboardError } = useLeaderboardData(categoryId || "");
+  const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard, error: leaderboardError, refetch: refetchLeaderboard } = useLeaderboardData(categoryId || "");
 
   const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount;
 
-  // Handle errors
-  if (categoryError || leaderboardError) {
+  // Check if we have network connectivity issues
+  const hasNetworkError = (error: any) => {
+    const errorMessage = error?.message || '';
+    return errorMessage.includes('Failed to fetch') || 
+           errorMessage.includes('NetworkError') || 
+           errorMessage.includes('TypeError: Failed to fetch');
+  };
+
+  const isNetworkError = hasNetworkError(categoryError) || 
+                        hasNetworkError(leaderboardError) || 
+                        hasNetworkError(userRankingError) ||
+                        hasNetworkError(rankingsCountError);
+
+  // Handle network errors with retry functionality
+  if (isNetworkError && !isLoading) {
+    const handleRetry = () => {
+      console.log('CategoryPage - Retrying all queries...');
+      refetchCategory();
+      refetchLeaderboard();
+      queryClient.invalidateQueries({ queryKey: ['categoryRankingsCount', categoryId] });
+      queryClient.invalidateQueries({ queryKey: ['userRanking', categoryId] });
+    };
+
+    return <CategoryNetworkError onRetry={handleRetry} />;
+  }
+
+  // Handle other errors
+  if ((categoryError || leaderboardError) && !isNetworkError) {
     console.error('Category page error:', { categoryError, leaderboardError });
   }
 
