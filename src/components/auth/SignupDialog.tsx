@@ -1,100 +1,136 @@
 
+import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import SocialLogins from "./SocialLogins";
+import { supabase } from "@/lib/supabase";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface SignupDialogProps {
   children: React.ReactNode;
 }
 
 const SignupDialog = ({ children }: SignupDialogProps) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { trackSignup } = useAnalytics();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setFullName("");
+    setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-    if (password.length < 6) {
-      toast.error("Password should be at least 6 characters.");
-      return;
-    }
+    if (isLoading) return;
 
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Check your email for the confirmation link!");
+      });
+
+      if (error) throw error;
+
+      // Track successful signup
+      trackSignup('email');
+
+      toast.success("Account created successfully! Please check your email to verify your account.");
       setOpen(false);
+      resetForm();
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-700">
-        <DialogHeader>
-          <DialogTitle>Sign Up</DialogTitle>
-          <DialogDescription>
-            Create an account to start ranking.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSignup}>
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" placeholder="John Doe" className="bg-gray-800 border-gray-600" value={name} onChange={e => setName(e.target.value)} required/>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Create an account</AlertDialogTitle>
+          <AlertDialogDescription>
+            Enter your email, password, and full name to create an account.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email-signup">Email</Label>
-            <Input id="email-signup" type="email" placeholder="m@example.com" className="bg-gray-800 border-gray-600" value={email} onChange={e => setEmail(e.target.value)} required/>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password-signup">Password</Label>
-            <Input id="password-signup" type="password" className="bg-gray-800 border-gray-600" value={password} onChange={e => setPassword(e.target.value)} required/>
+          <div className="grid gap-2">
+            <Label htmlFor="fullName">Full Name</Label>
+            <Input
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter your full name"
+              required
+            />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
-            <Input id="confirm-password" type="password" className="bg-gray-800 border-gray-600" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required/>
-          </div>
-        </div>
-        <Button type="submit" variant="cta" className="w-full" disabled={loading}>
-            {loading ? "Creating Account..." : "Create Account"}
-        </Button>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Create Account
+            </Button>
+          </AlertDialogFooter>
         </form>
-        <SocialLogins />
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

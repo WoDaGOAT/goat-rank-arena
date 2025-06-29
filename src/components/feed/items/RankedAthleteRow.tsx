@@ -1,6 +1,6 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { RankedAthlete } from "./NewRankingFeedItem";
+import { RankedAthlete } from "@/types/userRanking";
 
 interface RankedAthleteRowProps {
   athlete: RankedAthlete;

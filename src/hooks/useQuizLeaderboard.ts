@@ -1,11 +1,11 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 export interface QuizLeaderboardUser {
   user_id: string;
   full_name: string;
-  avatar_url: string;
+  avatar_url: string | null;
   total_score: number;
   quizzes_completed: number;
   highest_badge_id: string | null;
@@ -13,58 +13,43 @@ export interface QuizLeaderboardUser {
   highest_badge_rarity: string | null;
 }
 
-interface UseQuizLeaderboardOptions {
-  limit?: number;
-  offset?: number;
-}
-
-export const useQuizLeaderboard = (options: UseQuizLeaderboardOptions = {}) => {
-  const { limit = 50, offset = 0 } = options;
-  
+export const useQuizLeaderboard = (limit: number = 50, offset: number = 0) => {
   return useQuery({
-    queryKey: ['quiz-leaderboard', limit, offset],
+    queryKey: ['quizLeaderboard', limit, offset],
     queryFn: async (): Promise<QuizLeaderboardUser[]> => {
       console.log(`Fetching quiz leaderboard with limit: ${limit}, offset: ${offset}`);
-      
-      const { data, error } = await supabase.rpc('get_quiz_leaderboard', {
-        p_limit: limit,
-        p_offset: offset
-      });
+
+      // Use the new optimized function
+      const { data, error } = await supabase
+        .rpc('get_quiz_leaderboard_optimized', {
+          p_limit: limit,
+          p_offset: offset
+        });
 
       if (error) {
-        console.error('Error fetching quiz leaderboard:', error);
-        throw error;
+        console.error("Error fetching quiz leaderboard:", error);
+        throw new Error(error.message);
       }
 
-      console.log(`Quiz leaderboard data:`, data);
-      return data || [];
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes - leaderboard doesn't change frequently
-    gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache longer
-    refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
-  });
-};
-
-// Hook for infinite pagination
-export const useInfiniteQuizLeaderboard = () => {
-  return useQuery({
-    queryKey: ['quiz-leaderboard-infinite'],
-    queryFn: async (): Promise<QuizLeaderboardUser[]> => {
-      // Start with first 100 users for infinite scroll
-      const { data, error } = await supabase.rpc('get_quiz_leaderboard', {
-        p_limit: 100,
-        p_offset: 0
-      });
-
-      if (error) {
-        console.error('Error fetching quiz leaderboard:', error);
-        throw error;
+      if (!data) {
+        return [];
       }
 
-      return data || [];
+      // Transform data to match our interface
+      const leaderboard: QuizLeaderboardUser[] = data.map((user: any) => ({
+        user_id: user.user_id,
+        full_name: user.full_name || 'Anonymous',
+        avatar_url: user.avatar_url,
+        total_score: Number(user.total_score),
+        quizzes_completed: Number(user.quizzes_completed),
+        highest_badge_id: user.highest_badge_id,
+        highest_badge_name: user.highest_badge_name,
+        highest_badge_rarity: user.highest_badge_rarity
+      }));
+
+      console.log(`Quiz leaderboard fetched: ${leaderboard.length} users`);
+      return leaderboard;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes for infinite scroll
-    gcTime: 60 * 60 * 1000, // 1 hour
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };

@@ -9,6 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          form_step: string | null
+          id: string
+          interaction_type: string | null
+          ip_address: string | null
+          page_url: string | null
+          previous_page_url: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          time_spent_seconds: number | null
+          traffic_source: string | null
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          form_step?: string | null
+          id?: string
+          interaction_type?: string | null
+          ip_address?: string | null
+          page_url?: string | null
+          previous_page_url?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          time_spent_seconds?: number | null
+          traffic_source?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          form_step?: string | null
+          id?: string
+          interaction_type?: string | null
+          ip_address?: string | null
+          page_url?: string | null
+          previous_page_url?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          time_spent_seconds?: number | null
+          traffic_source?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: []
+      }
       athlete_clubs: {
         Row: {
           athlete_id: string | null
@@ -160,6 +229,13 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
+          },
         ]
       }
       category_comments: {
@@ -194,6 +270,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_comments_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
           },
           {
             foreignKeyName: "category_comments_parent_comment_id_fkey"
@@ -238,6 +321,13 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "category_likes_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
+          },
         ]
       }
       category_reactions: {
@@ -270,7 +360,41 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "category_reactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
+          },
         ]
+      }
+      daily_analytics: {
+        Row: {
+          breakdown: Json | null
+          created_at: string
+          date: string
+          id: string
+          metric_type: string
+          metric_value: number
+        }
+        Insert: {
+          breakdown?: Json | null
+          created_at?: string
+          date: string
+          id?: string
+          metric_type: string
+          metric_value?: number
+        }
+        Update: {
+          breakdown?: Json | null
+          created_at?: string
+          date?: string
+          id?: string
+          metric_type?: string
+          metric_value?: number
+        }
+        Relationships: []
       }
       feed_items: {
         Row: {
@@ -725,6 +849,13 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_rankings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "homepage_leaderboards"
+            referencedColumns: ["category_id"]
+          },
         ]
       }
       user_roles: {
@@ -745,9 +876,79 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          converted_to_signup: boolean | null
+          created_at: string
+          first_page_view: string
+          id: string
+          ip_address: string | null
+          page_views: number | null
+          referrer: string | null
+          session_id: string
+          signup_completed_at: string | null
+          time_on_site: number | null
+          traffic_source: string | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          converted_to_signup?: boolean | null
+          created_at?: string
+          first_page_view?: string
+          id?: string
+          ip_address?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_id: string
+          signup_completed_at?: string | null
+          time_on_site?: number | null
+          traffic_source?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          converted_to_signup?: boolean | null
+          created_at?: string
+          first_page_view?: string
+          id?: string
+          ip_address?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_id?: string
+          signup_completed_at?: string | null
+          time_on_site?: number | null
+          traffic_source?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      homepage_leaderboards: {
+        Row: {
+          category_description: string | null
+          category_id: string | null
+          category_image_url: string | null
+          category_name: string | null
+          leaderboard: Json | null
+          ranking_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_role_to_user: {
@@ -755,6 +956,10 @@ export type Database = {
           p_user_id: string
           p_role: Database["public"]["Enums"]["app_role"]
         }
+        Returns: undefined
+      }
+      aggregate_daily_analytics: {
+        Args: { target_date?: string }
         Returns: undefined
       }
       bulk_insert_athletes: {
@@ -770,6 +975,10 @@ export type Database = {
       }
       check_and_award_badges: {
         Args: { p_user_id: string }
+        Returns: undefined
+      }
+      cleanup_old_feed_items: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       create_new_ranking_feed_item: {
@@ -847,6 +1056,15 @@ export type Database = {
           roles: Database["public"]["Enums"]["app_role"][]
         }[]
       }
+      get_analytics_dashboard: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          metric_type: string
+          date_data: Json
+          total_value: number
+          breakdown_data: Json
+        }[]
+      }
       get_athlete_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -855,6 +1073,36 @@ export type Database = {
           inactive_athletes: number
           countries_count: number
           positions_count: number
+        }[]
+      }
+      get_bounce_rates: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          page_url: string
+          total_sessions: number
+          bounced_sessions: number
+          bounce_rate: number
+        }[]
+      }
+      get_category_leaderboard: {
+        Args: { p_category_id: string; p_limit?: number }
+        Returns: {
+          athlete_id: string
+          athlete_name: string
+          profile_picture_url: string
+          country_of_origin: string
+          total_points: number
+          rank: number
+          movement: string
+        }[]
+      }
+      get_conversion_funnel: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          traffic_source: string
+          total_sessions: number
+          signups: number
+          conversion_rate: number
         }[]
       }
       get_friendship_pair_key: {
@@ -874,6 +1122,39 @@ export type Database = {
           highest_badge_id: string
           highest_badge_name: string
           highest_badge_rarity: string
+        }[]
+      }
+      get_quiz_leaderboard_optimized: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          user_id: string
+          full_name: string
+          avatar_url: string
+          total_score: number
+          quizzes_completed: number
+          highest_badge_id: string
+          highest_badge_name: string
+          highest_badge_rarity: string
+        }[]
+      }
+      get_ranking_flow_analytics: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          step_name: string
+          started_count: number
+          completed_count: number
+          conversion_rate: number
+          avg_completion_time_seconds: number
+        }[]
+      }
+      get_registration_flow_analytics: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          step_name: string
+          started_count: number
+          completed_count: number
+          conversion_rate: number
+          avg_time_seconds: number
         }[]
       }
       get_todays_quiz: {
@@ -901,6 +1182,10 @@ export type Database = {
       is_moderator_or_admin: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      refresh_homepage_leaderboards: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       remove_role_from_user: {
         Args: {
@@ -958,6 +1243,7 @@ export type Database = {
         | "new_ranking"
         | "quiz_completed"
         | "badge_earned"
+        | "ranking_reaction"
       friendship_status: "pending" | "accepted" | "declined" | "blocked"
       notification_type:
         | "new_comment_reply"
@@ -1092,6 +1378,7 @@ export const Constants = {
         "new_ranking",
         "quiz_completed",
         "badge_earned",
+        "ranking_reaction",
       ],
       friendship_status: ["pending", "accepted", "declined", "blocked"],
       notification_type: [

@@ -20,10 +20,10 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground rounded-md",
         link: "text-primary underline-offset-4 hover:underline rounded-md",
         cta:
-          // Normal (enabled) style
+          // Normal (enabled) style with proper text contrast
           "bg-gradient-to-r from-fuchsia-500 to-cyan-500 font-poppins text-white rounded-lg px-6 py-2 font-semibold text-lg shadow transition-opacity hover:opacity-90 " +
-          // Disabled state override (use Figma spec) - darker text for better contrast
-          "disabled:bg-white disabled:text-[#666666] disabled:shadow-none disabled:rounded-[12px] disabled:border-0 disabled:h-[36px] disabled:min-w-[58px] disabled:font-semibold disabled:opacity-100",
+          // Disabled state with dark text on light background for better contrast
+          "disabled:bg-gray-300 disabled:text-gray-800 disabled:shadow-none disabled:rounded-[12px] disabled:border-0 disabled:h-[36px] disabled:min-w-[58px] disabled:font-semibold disabled:opacity-100 disabled:cursor-not-allowed",
       },
       size: {
         default: "h-10 px-4 py-2",

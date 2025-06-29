@@ -1,115 +1,129 @@
-
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { SelectedAthlete } from "./useRankingManager";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { useAnalytics } from './useAnalytics';
 
-interface SaveRankingParams {
-  rankingTitle: string;
-  rankingDescription: string;
-  selectedAthletes: SelectedAthlete[];
+const saveRankingSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().optional(),
+  categoryId: z.string().uuid(),
+  selectedAthletes: z.array(z.object({
+    id: z.string().min(1, "Athlete ID is required"),
+    position: z.number().int().min(1, "Position must be at least 1").max(10, "Position must be at most 10"),
+    points: z.number().int().min(1, "Points must be at least 1").max(100, "Points must be at most 100")
+  })).min(3, "Select at least 3 athletes to rank").max(10, "Maximum 10 athletes allowed")
+});
+
+type SaveRankingParams = z.infer<typeof saveRankingSchema>;
+
+interface SelectedAthleteInput {
+  id: string;
+  userPoints: number;
+  error?: string | null;
 }
 
-export const useSaveRanking = ({ categoryId }: { categoryId: string }) => {
-  const { user, openLoginDialog } = useAuth();
+export const useSaveRanking = (options?: { categoryId?: string }) => {
+  const { user, openAuthDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { trackRankingCreated } = useAnalytics();
 
-  const saveMutation = useMutation({
-    mutationFn: async ({ rankingTitle, rankingDescription, selectedAthletes }: SaveRankingParams) => {
+  const saveRanking = useMutation({
+    mutationFn: async ({ title, description, categoryId, selectedAthletes }: SaveRankingParams) => {
+      console.log('Saving ranking with data:', { title, description, categoryId, selectedAthletes });
+      
+      // Check if user is logged in first
       if (!user) {
-        throw new Error("User not authenticated");
-      }
-      if (selectedAthletes.length !== 10) {
-        toast.error("You must have exactly 10 athletes in your ranking.");
-        throw new Error("Incorrect number of athletes");
+        // Save current URL for redirect after login/signup
+        savePreLoginUrl(window.location.pathname);
+        // Open auth dialog with signup as default for new users
+        openAuthDialog('signup');
+        throw new Error("Authentication required");
       }
 
-      // Use a default title if none provided
-      const finalTitle = rankingTitle.trim() || "My Ranking";
+      // Validate the input
+      const validatedData = saveRankingSchema.parse({ title, description, categoryId, selectedAthletes });
 
+      if (!user) {
+        throw new Error("You must be logged in to save a ranking.");
+      }
+
+      // Create the ranking
       const { data: rankingData, error: rankingError } = await supabase
         .from('user_rankings')
         .insert({
-          user_id: user.id,
-          category_id: categoryId!,
-          title: finalTitle,
-          description: rankingDescription.trim(),
+          user_id: user!.id,
+          category_id: categoryId,
+          title,
+          description: description || null,
         })
-        .select('id')
+        .select()
         .single();
 
       if (rankingError) throw rankingError;
-      const rankingId = rankingData.id;
 
-      const rankingAthletes = selectedAthletes.map((athlete, index) => ({
-        ranking_id: rankingId,
+      // Insert the athletes
+      const rankingAthletes = selectedAthletes.map(athlete => ({
+        ranking_id: rankingData.id,
         athlete_id: athlete.id,
-        position: index + 1,
-        points: athlete.userPoints,
+        position: athlete.position,
+        points: athlete.points
       }));
 
       const { error: athletesError } = await supabase
         .from('ranking_athletes')
         .insert(rankingAthletes);
 
-      if (athletesError) {
-        await supabase.from('user_rankings').delete().match({ id: rankingId });
-        throw athletesError;
-      }
+      if (athletesError) throw athletesError;
 
-      const feedAthletes = selectedAthletes.map((athlete, index) => ({
-        id: athlete.id,
-        name: athlete.name,
-        imageUrl: athlete.imageUrl,
-        points: athlete.userPoints,
-        position: index + 1
-      }));
+      // Track ranking creation
+      const category = await supabase
+        .from('categories')
+        .select('name')
+        .eq('id', categoryId)
+        .single();
+      
+      trackRankingCreated(categoryId, category.data?.name || 'Unknown');
 
-      const { error: rpcError } = await supabase.rpc('create_new_ranking_feed_item', {
-        p_ranking_id: rankingId,
-        p_athletes: feedAthletes,
-        p_ranking_description: rankingDescription.trim(),
-      });
-
-      if (rpcError) {
-        // Not a critical error, just log it. The ranking is saved.
-        console.error('Failed to create feed item:', rpcError);
-      }
-
-      return rankingId;
+      return rankingData.id;
     },
     onSuccess: (rankingId) => {
       toast.success("Ranking saved successfully!");
-      queryClient.invalidateQueries({ queryKey: ['category', categoryId] });
-      queryClient.invalidateQueries({ queryKey: ['leaderboard', categoryId] });
-      queryClient.invalidateQueries({ queryKey: ['feedItems'] });
-      queryClient.invalidateQueries({ queryKey: ['userRankings', user?.id] });
-      navigate(`/category/${categoryId}`);
+      navigate(`/ranking/${rankingId}`);
     },
     onError: (error: any) => {
-      // The error from a unique constraint violation has code '23505'
-      if (error?.code === '23505') {
-        toast.error("You have already submitted a ranking for this category.");
-      } else if (error.message !== "User not authenticated" && error.message !== "Incorrect number of athletes") {
-         toast.error(error.message || "Failed to save ranking. Please try again.");
+      console.error("Failed to save ranking:", error);
+      if (error.message !== "Authentication required") {
+        toast.error("Failed to save ranking.", { description: error.message });
       }
     }
   });
 
-  const handleSaveRanking = (params: SaveRankingParams) => {
-    if (!user) {
-      openLoginDialog();
-      toast.info("Please log in or sign up to save your ranking.");
-    } else {
-      saveMutation.mutate(params);
-    }
-  };
-
-  return {
-    onSave: handleSaveRanking,
-    isSaving: saveMutation.isPending,
+  return { 
+    onSave: (params: { rankingTitle: string, rankingDescription?: string, selectedAthletes: SelectedAthleteInput[] }) => {
+      const { rankingTitle, rankingDescription, selectedAthletes } = params;
+      
+      console.log('Raw selected athletes before transformation:', selectedAthletes);
+      
+      // Transform the selectedAthletes data to match the expected schema
+      const transformedAthletes = selectedAthletes.map((athlete, index) => ({
+        id: athlete.id,
+        position: index + 1, // Calculate position based on array index
+        points: athlete.userPoints // Map userPoints to points
+      }));
+      
+      console.log('Transformed athletes:', transformedAthletes);
+      
+      return saveRanking.mutate({
+        title: rankingTitle,
+        description: rankingDescription,
+        categoryId: options?.categoryId || '',
+        selectedAthletes: transformedAthletes
+      });
+    },
+    isSaving: saveRanking.isPending,
+    saveRanking
   };
 };

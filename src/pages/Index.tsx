@@ -2,10 +2,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import HomepageHeader from "@/components/home/HomepageHeader";
 import FeaturedLeaderboard from "@/components/home/FeaturedLeaderboard";
-import CategoriesGrid from "@/components/home/CategoriesGrid";
-import LoadMoreCategories from "@/components/home/LoadMoreCategories";
-import FeedPreview from "@/components/home/FeedPreview";
 import { useHomepageCategories } from "@/hooks/useHomepageCategories";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { FileQuestion, Trophy } from "lucide-react";
 
 const Index = () => {
   const { data: categoriesData, isLoading, isError } = useHomepageCategories();
@@ -13,53 +13,99 @@ const Index = () => {
   return (
     <>
       <HomepageHeader />
+      
+      {/* Marketing Banner */}
+      <div className="py-4 sm:py-6">
+        <div className="container mx-auto px-4 text-center flex flex-col items-center justify-center min-h-[120px]">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+            Your Voice, Your Vote, Your GOAT
+          </h1>
+          <p className="text-lg sm:text-xl text-yellow-300 max-w-2xl mx-auto">
+            Your opinion shapes the ultimate football GOAT ranking
+          </p>
+        </div>
+      </div>
+
       <div
-        className="flex flex-col flex-grow"
+        className="flex flex-col flex-grow min-h-screen"
         style={{ background: "linear-gradient(135deg, rgba(25, 7, 73, 0.6) 0%, rgba(7, 2, 21, 0.6) 100%)" }}
       >
-        <div className="container mx-auto px-4 py-12 flex-grow">
+        <div className="container mx-auto px-4 py-8 flex-grow">
           {isLoading && (
-            <div className="space-y-8">
-              {/* Centered leaderboard skeleton */}
-              <div className="flex justify-center">
-                <Skeleton className="h-[600px] w-full max-w-4xl rounded-lg bg-white/5" />
+            <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-8">
+              {/* Left column skeleton */}
+              <div>
+                <Skeleton className="h-[600px] w-full rounded-lg bg-white/5" />
               </div>
-              {/* Categories grid skeleton */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-[420px] w-full rounded-lg bg-white/5" />
-                ))}
+              {/* Right column skeleton */}
+              <div>
+                <Skeleton className="h-[400px] w-full rounded-lg bg-white/5" />
               </div>
             </div>
           )}
           
           {isError && (
             <div className="text-center text-red-400 text-lg space-y-2">
-              <p>Could not load categories. Please try again later.</p>
+              <p>Could not load content. Please try again later.</p>
               <p className="text-sm text-red-300">Check the console for more details.</p>
             </div>
           )}
           
           {!isLoading && !isError && categoriesData && (
-            <>
-              {/* Centered Featured GOAT Footballer Leaderboard */}
-              <div className="flex justify-center mb-12">
-                <div className="w-full max-w-4xl">
-                  <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
+            <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-8 items-start">
+              {/* Left Column - Leaderboard with Comments (60%) */}
+              <div className="w-full">
+                <FeaturedLeaderboard goatFootballer={categoriesData.goatFootballer} />
+              </div>
+
+              {/* Right Column - Daily Quiz (40%) */}
+              <div className="w-full">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl">
+                  <div className="text-center mb-6">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-fuchsia-600 to-cyan-600 mb-4">
+                      <FileQuestion className="h-8 w-8 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Daily Quiz</h2>
+                    <p className="text-gray-300 text-sm">Test your football knowledge and earn badges!</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-white font-medium">Today's Challenge</span>
+                        <Trophy className="h-5 w-5 text-yellow-400" />
+                      </div>
+                      <p className="text-gray-300 text-sm mb-4">
+                        Answer questions about football legends and climb the leaderboard!
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
+                        <span>🎯 Earn points & badges</span>
+                        <span>⚡ Build your streak</span>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      asChild 
+                      className="w-full bg-gradient-to-r from-fuchsia-600 to-cyan-600 hover:from-fuchsia-700 hover:to-cyan-700 text-white font-semibold py-3 text-lg"
+                    >
+                      <Link to="/quiz">
+                        <FileQuestion className="h-5 w-5 mr-2" />
+                        Start Quiz
+                      </Link>
+                    </Button>
+                    
+                    <div className="text-center">
+                      <Link 
+                        to="/quiz" 
+                        className="text-sm text-gray-400 hover:text-white transition-colors"
+                      >
+                        View Leaderboard →
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Full Width Category Cards Section */}
-              <div className="mb-12">
-                <CategoriesGrid categories={categoriesData.otherCategories} />
-              </div>
-
-              {/* Load More Categories Section */}
-              <LoadMoreCategories />
-
-              {/* Feed Preview Section */}
-              <FeedPreview />
-            </>
+            </div>
           )}
         </div>
       </div>

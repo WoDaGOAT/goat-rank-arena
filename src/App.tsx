@@ -1,6 +1,7 @@
+
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
@@ -10,6 +11,7 @@ import CommentManagementPage from "./pages/admin/CommentManagementPage";
 import AthleteManagementPage from "@/pages/admin/AthleteManagementPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AuthDialog from "./components/auth/AuthDialog";
 
 console.log('App.tsx: Starting to load');
 console.log('App.tsx: Supabase configured?', isSupabaseConfigured);
@@ -59,6 +61,7 @@ const NotFound = lazy(() => import("./pages/NotFound").catch(() => ({ default: (
 const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const CreateQuizPage = lazy(() => import("./pages/admin/CreateQuizPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage").catch(() => ({ default: () => <div>Error loading page</div> })));
+const AnalyticsDashboardPage = lazy(() => import("./pages/admin/AnalyticsDashboardPage").catch(() => ({ default: () => <div>Error loading page</div> })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +74,19 @@ const queryClient = new QueryClient({
 });
 
 console.log('App.tsx: QueryClient created');
+
+// Component to handle global auth dialog
+const GlobalAuthDialog = () => {
+  const { authDialogOpen, closeAuthDialog, authDialogMode } = useAuth();
+  
+  return (
+    <AuthDialog 
+      open={authDialogOpen} 
+      onOpenChange={closeAuthDialog}
+      defaultMode={authDialogMode}
+    />
+  );
+};
 
 function App() {
   console.log('App.tsx: App component rendering');
@@ -95,34 +111,41 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Router>
             <AuthProvider>
-              <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+              <div className="min-h-screen bg-gray-900">
                 <Navbar />
                 <main className="flex-1">
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/category/:categoryId" element={<CategoryPage />} />
-                      <Route path="/category/:categoryId/rank" element={<CreateRankingPage />} />
-                      <Route path="/ranking/:rankingId" element={<UserRankingPage />} />
+                      <Route path="/create-ranking/:categoryId" element={<CreateRankingPage />} />
+                      <Route path="/ranking/:id" element={<UserRankingPage />} />
                       <Route path="/profile" element={<UserProfilePage />} />
                       <Route path="/users/:userId" element={<PublicProfilePage />} />
-                      <Route path="/feed" element={<FeedPage />} />
                       <Route path="/quiz" element={<QuizPage />} />
+                      <Route path="/feed" element={<FeedPage />} />
                       <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/contact" element={<ContactPage />} />
-                      <Route path="/gdpr" element={<GdprPage />} />
                       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/gdpr" element={<GdprPage />} />
+                      
+                      {/* Admin Routes */}
                       <Route path="/admin/users" element={<UserManagementPage />} />
-                      <Route path="/admin/quizzes/new" element={<CreateQuizPage />} />
-                      <Route path="/admin/create-quiz" element={<Navigate to="/admin/quizzes/new" replace />} />
-                      <Route path="/admin/comments" element={<CommentManagementPage />} />
                       <Route path="/admin/athletes" element={<AthleteManagementPage />} />
+                      <Route path="/admin/comments" element={<CommentManagementPage />} />
+                      <Route path="/admin/create-quiz" element={<CreateQuizPage />} />
+                      <Route path="/admin/analytics" element={<AnalyticsDashboardPage />} />
+                      
+                      {/* Redirect old quiz creation URL to new one */}
+                      <Route path="/admin/quizzes/new" element={<Navigate to="/admin/create-quiz" replace />} />
+                      
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>
                 </main>
                 <Footer />
               </div>
+              <GlobalAuthDialog />
               <SonnerToaster />
             </AuthProvider>
           </Router>

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,7 +8,8 @@ import type { AuthContextType } from '@/types/auth';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [authDialogMode, setAuthDialogMode] = useState<'login' | 'signup'>('login');
   const [preLoginUrl, setPreLoginUrl] = useState<string | null>(null);
   
   const {
@@ -35,8 +35,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user, profile]);
 
-  const signUp = async (credentials: { email: string; password: string }) => {
-    const { data, error } = await supabase.auth.signUp(credentials);
+  // Close auth dialog when user successfully logs in
+  useEffect(() => {
+    if (user && authDialogOpen) {
+      setAuthDialogOpen(false);
+    }
+  }, [user, authDialogOpen]);
+
+  const signUp = async (credentials: { email: string; password: string; options?: any }) => {
+    const { data, error } = await supabase.auth.signUp({
+      email: credentials.email,
+      password: credentials.password,
+      options: credentials.options
+    });
     if (error) throw error;
     return data;
   };
@@ -62,8 +73,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await signOut();
   };
 
+  const openAuthDialog = (mode: 'login' | 'signup' = 'login') => {
+    console.log('Opening auth dialog in mode:', mode);
+    setAuthDialogMode(mode);
+    setAuthDialogOpen(true);
+  };
+
+  const closeAuthDialog = () => {
+    console.log('Closing auth dialog');
+    setAuthDialogOpen(false);
+  };
+
+  // Legacy support for existing openLoginDialog calls
   const openLoginDialog = () => {
-    setLoginDialogOpen(true);
+    openAuthDialog('login');
+  };
+
+  const closeLoginDialog = () => {
+    closeAuthDialog();
   };
 
   const savePreLoginUrl = (url: string) => {
@@ -89,6 +116,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     logout,
     openLoginDialog,
+    closeLoginDialog,
+    loginDialogOpen: authDialogOpen, // For backward compatibility
+    openAuthDialog,
+    closeAuthDialog,
+    authDialogOpen,
+    authDialogMode,
     savePreLoginUrl,
     getAndClearPreLoginUrl,
     refetchUser,

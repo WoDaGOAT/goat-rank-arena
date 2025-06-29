@@ -1,128 +1,92 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import footballPlayers from '@/data/footballPlayers';
-import { RankedAthlete } from '@/components/feed/items/NewRankingFeedItem';
-
-export interface UserRankingDetails {
-    id: string;
-    created_at: string;
-    title: string;
-    description: string | null;
-    user_id: string;
-    category_id: string;
-    profiles: {
-        full_name: string | null;
-        avatar_url: string | null;
-    } | null;
-    categories: {
-        name: string | null;
-    } | null;
-    athletes: RankedAthlete[];
-}
+import { UserRankingDetails } from '@/types/userRanking';
+import {
+  fetchRankingData,
+  fetchProfileData,
+  fetchCategoryData,
+  fetchRankingAthletes,
+  fetchDatabaseAthletes
+} from '@/services/userRankingService';
+import { hydrateAthleteData } from '@/utils/athleteDataProcessor';
 
 export const useUserRanking = (rankingId?: string) => {
   return useQuery({
     queryKey: ['userRankingDetails', rankingId],
     queryFn: async (): Promise<UserRankingDetails | null> => {
-      if (!rankingId) return null;
-
-      // 1. Fetch the core ranking data
-      const { data: rankingData, error: rankingError } = await supabase
-        .from('user_rankings')
-        .select('*')
-        .eq('id', rankingId)
-        .maybeSingle();
-
-      if (rankingError) {
-        console.error("Error fetching ranking:", rankingError);
-        throw rankingError;
-      }
-      
-      if (!rankingData) {
-        console.warn(`No ranking found for ID ${rankingId}`);
+      if (!rankingId || rankingId.trim() === '') {
+        console.warn('useUserRanking: No valid ranking ID provided');
         return null;
       }
 
-      // 2. Fetch related data in separate queries
-      const [
-        { data: profileData, error: profileError },
-        { data: categoryData, error: categoryError },
-        { data: athletesData, error: athletesError }
-      ] = await Promise.all([
-        supabase.from('profiles').select('full_name, avatar_url').eq('id', rankingData.user_id).maybeSingle(),
-        supabase.from('categories').select('name').eq('id', rankingData.category_id).maybeSingle(),
-        supabase.from('ranking_athletes').select('athlete_id, position, points').eq('ranking_id', rankingId).order('position', { ascending: true })
-      ]);
+      console.log('useUserRanking: Starting fetch for ranking ID:', rankingId);
 
-      if (profileError) console.error(`Error fetching profile for user ${rankingData.user_id}:`, profileError);
-      if (categoryError) console.error(`Error fetching category ${rankingData.category_id}:`, categoryError);
-      if (athletesError) {
-          console.error("Error fetching ranking athletes:", athletesError);
-          throw athletesError;
-      }
-      
-      // 3. Get all unique athlete IDs from the ranking
-      const athleteIds = (athletesData || []).map(athlete => athlete.athlete_id);
-      
-      // 4. Fetch athlete data from database
-      const { data: dbAthletes, error: dbAthletesError } = await supabase
-        .from('athletes')
-        .select('id, name, profile_picture_url')
-        .in('id', athleteIds);
-      
-      if (dbAthletesError) {
-        console.error("Error fetching database athletes:", dbAthletesError);
-      }
-      
-      // 5. Hydrate athlete data with database first, then fallback to footballPlayers
-      const hydratedAthletes: RankedAthlete[] = (athletesData || []).map(athlete => {
-        // First try to find athlete in database
-        const dbAthlete = dbAthletes?.find(db => db.id === athlete.athlete_id);
+      try {
+        // 1. Fetch the core ranking data
+        const rankingData = await fetchRankingData(rankingId);
+        if (!rankingData) return null;
+
+        // 2. Fetch related data in parallel for better performance
+        console.log('useUserRanking: Fetching related data');
+        const [profileData, categoryData, athletesData] = await Promise.all([
+          fetchProfileData(rankingData.user_id),
+          fetchCategoryData(rankingData.category_id),
+          fetchRankingAthletes(rankingId)
+        ]);
         
-        if (dbAthlete) {
-          return {
-            id: athlete.athlete_id,
-            name: dbAthlete.name,
-            imageUrl: dbAthlete.profile_picture_url || "/placeholder.svg",
-            position: athlete.position,
-            points: athlete.points
+        // 3. Get all unique athlete IDs from the ranking
+        console.log('useUserRanking: Processing athlete IDs');
+        const athleteIds = athletesData.map(athlete => athlete.athlete_id);
+        console.log('useUserRanking: Athlete IDs to fetch:', athleteIds);
+        
+        if (athleteIds.length === 0) {
+          console.warn('useUserRanking: No athletes found for this ranking');
+          // Return ranking data even without athletes
+          const finalRanking = {
+            ...rankingData,
+            profiles: profileData,
+            categories: categoryData,
+            athletes: [],
           };
+          console.log('useUserRanking: Returning ranking with no athletes:', finalRanking);
+          return finalRanking as UserRankingDetails;
         }
         
-        // Fallback to footballPlayers array for backward compatibility
-        const footballPlayer = footballPlayers.find(p => String(p.id) === athlete.athlete_id);
+        // 4. Fetch athlete data from database
+        console.log('useUserRanking: Fetching athlete data from database');
+        const dbAthletes = await fetchDatabaseAthletes(athleteIds);
         
-        if (footballPlayer) {
-          return {
-            id: athlete.athlete_id,
-            name: footballPlayer.name,
-            imageUrl: footballPlayer.imageUrl,
-            position: athlete.position,
-            points: athlete.points
-          };
-        }
+        // 5. Hydrate athlete data with fallback logic
+        console.log('useUserRanking: Hydrating athlete data');
+        const hydratedAthletes = hydrateAthleteData(athletesData, dbAthletes);
         
-        // Last resort - return with unknown athlete info
-        return {
-          id: athlete.athlete_id,
-          name: 'Unknown Athlete',
-          imageUrl: "/placeholder.svg",
-          position: athlete.position,
-          points: athlete.points
-        };
-      });
-      
-      // 6. Combine all data into a single object
-      const finalRanking = {
+        // 6. Combine all data into a single object
+        console.log('useUserRanking: Combining final data');
+        const finalRanking = {
           ...rankingData,
           profiles: profileData,
           categories: categoryData,
           athletes: hydratedAthletes,
-      }
+        };
 
-      return finalRanking as UserRankingDetails;
+        console.log('useUserRanking: SUCCESS - Final ranking with all data:', {
+          id: finalRanking.id,
+          title: finalRanking.title,
+          athleteCount: finalRanking.athletes.length,
+          hasProfile: !!finalRanking.profiles,
+          hasCategory: !!finalRanking.categories
+        });
+        return finalRanking as UserRankingDetails;
+        
+      } catch (error) {
+        console.error('useUserRanking: Complete failure:', error);
+        throw error;
+      }
     },
-    enabled: !!rankingId,
+    enabled: !!rankingId && rankingId.trim() !== '',
+    retry: (failureCount, error) => {
+      console.error(`useUserRanking: Query failed (attempt ${failureCount + 1}):`, error);
+      return failureCount < 2; // Retry up to 2 times
+    },
   });
 };

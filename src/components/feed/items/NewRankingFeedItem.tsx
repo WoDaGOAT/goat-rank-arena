@@ -8,6 +8,7 @@ import { Trophy, ChevronDown, ChevronUp, Share } from "lucide-react";
 import RankedAthleteRow from "./RankedAthleteRow";
 import { ShareDialog } from "@/components/category/ShareDialog";
 import { useState } from "react";
+import { RankedAthlete } from "@/types/userRanking";
 
 export interface ProfileInfo {
   id?: string;
@@ -18,13 +19,6 @@ export interface ProfileInfo {
 export interface CategoryInfo {
   id: string;
   name: string;
-}
-
-export interface RankedAthlete {
-  id: string;
-  name: string;
-  position: number;
-  imageUrl?: string;
 }
 
 // Updated interface to match actual database structure
@@ -94,8 +88,9 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
   const athletesToShow = isExpanded ? athletesArray : athletesArray?.slice(0, 3);
   const hasMoreAthletes = athletesArray && athletesArray.length > 3;
 
-  // Share functionality
-  const shareUrl = data.ranking_id ? `${window.location.origin}/ranking/${data.ranking_id}` : window.location.href;
+  // Ensure we have a valid ranking ID for sharing and linking
+  const hasValidRankingId = data.ranking_id && data.ranking_id.trim() !== '';
+  const shareUrl = hasValidRankingId ? `${window.location.origin}/ranking/${data.ranking_id}` : window.location.href;
   const shareTitle = `${data.ranking_title} - WoDaGOAT Ranking`;
   const shareDescription = `Check out ${sanitizedUserName}'s ${categoryName} GOAT ranking on WoDaGOAT!`;
   const topAthletes = athletesArray?.slice(0, 5).map(athlete => athlete.name) || [];
@@ -139,7 +134,7 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
               </p>
             </div>
             
-            {data.ranking_id && (
+            {hasValidRankingId && (
               <Button
                 onClick={() => setShareDialogOpen(true)}
                 variant="ghost"
@@ -157,13 +152,17 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
               {data.ranking_title && data.ranking_title.trim() && data.ranking_title !== "My Ranking" && (
                 <h4 className="font-semibold text-blue-300">{sanitize(data.ranking_title)}</h4>
               )}
-              {data.ranking_id && (
+              {hasValidRankingId ? (
                 <Link 
                   to={`/ranking/${data.ranking_id}`}
                   className="text-xs text-blue-300 hover:text-blue-200 hover:underline"
                 >
                   View full ranking
                 </Link>
+              ) : (
+                <span className="text-xs text-gray-500">
+                  Ranking details unavailable
+                </span>
               )}
             </div>
             
@@ -203,7 +202,7 @@ const NewRankingFeedItem = ({ data, createdAt }: NewRankingFeedItemProps) => {
         </CardContent>
       </Card>
 
-      {data.ranking_id && (
+      {hasValidRankingId && (
         <ShareDialog
           open={shareDialogOpen}
           onOpenChange={setShareDialogOpen}
