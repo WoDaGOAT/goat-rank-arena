@@ -7,7 +7,7 @@ export const useLeaderboardData = (categoryId: string) => {
   return useQuery({
     queryKey: ['leaderboardData', categoryId],
     queryFn: async () => {
-      console.log(`Fetching leaderboard data for category: ${categoryId}`);
+      console.log(`🔍 DEBUGGING: Fetching leaderboard data for category: ${categoryId}`);
 
       try {
         // Use the optimized database function
@@ -18,22 +18,24 @@ export const useLeaderboardData = (categoryId: string) => {
           });
 
         if (error) {
-          console.error("Error fetching leaderboard:", error);
+          console.error("🔍 DEBUGGING: Error fetching leaderboard:", error);
           throw new Error(error.message);
         }
 
-        console.log('Raw leaderboard data from database:', leaderboardData);
+        console.log('🔍 DEBUGGING: Raw leaderboard data from database:', leaderboardData);
 
         if (!leaderboardData || leaderboardData.length === 0) {
-          console.log(`No leaderboard data found for category ${categoryId}`);
+          console.log(`🔍 DEBUGGING: No leaderboard data found for category ${categoryId}`);
           return [];
         }
 
-        console.log(`Processing leaderboard for category ${categoryId}, found ${leaderboardData.length} athletes`);
+        console.log(`🔍 DEBUGGING: Processing leaderboard for category ${categoryId}, found ${leaderboardData.length} athletes`);
 
         // Map the database response to UI format with proper error handling
         const leaderboard: Athlete[] = leaderboardData.map((athlete: any, index: number) => {
           try {
+            console.log(`🔍 DEBUGGING: Processing athlete ${index + 1}:`, athlete);
+            
             return {
               id: athlete.athlete_id || `athlete-${index}`,
               name: athlete.athlete_name || 'Unknown Athlete',
@@ -44,7 +46,7 @@ export const useLeaderboardData = (categoryId: string) => {
               movement: (athlete.movement as "up" | "down" | "neutral") || "neutral"
             };
           } catch (mapError) {
-            console.error('Error mapping athlete data:', mapError, athlete);
+            console.error('🔍 DEBUGGING: Error mapping athlete data:', mapError, athlete);
             return {
               id: `athlete-${index}`,
               name: 'Unknown Athlete',
@@ -57,12 +59,12 @@ export const useLeaderboardData = (categoryId: string) => {
           }
         });
 
-        console.log(`Final leaderboard for category ${categoryId}:`, leaderboard.length, "athletes");
-        console.log('Final leaderboard data:', leaderboard);
+        console.log(`🔍 DEBUGGING: Final leaderboard for category ${categoryId}:`, leaderboard.length, "athletes");
+        console.log('🔍 DEBUGGING: Final leaderboard data:', leaderboard);
         
         return leaderboard;
       } catch (error) {
-        console.error('Fatal error in leaderboard fetch:', error);
+        console.error('🔍 DEBUGGING: Fatal error in leaderboard fetch:', error);
         // Return empty array instead of throwing to prevent UI crashes
         return [];
       }
@@ -70,7 +72,7 @@ export const useLeaderboardData = (categoryId: string) => {
     enabled: !!categoryId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: (failureCount, error) => {
-      console.log(`Leaderboard fetch retry ${failureCount}:`, error);
+      console.log(`🔍 DEBUGGING: Leaderboard fetch retry ${failureCount}:`, error);
       return failureCount < 2;
     },
   });

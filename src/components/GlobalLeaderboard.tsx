@@ -37,21 +37,22 @@ const GlobalLeaderboard = ({
   // Show fewer athletes in compact mode
   const displayAthletes = compact ? athletes.slice(0, 5) : athletes.slice(0, 10);
   
-  // Check if we have insufficient data for a meaningful leaderboard
-  // Fixed logic: Only show insufficient message if we truly have less than 3 rankings AND no athlete data
+  // FIXED LOGIC: Only show insufficient message if we truly have less than 3 rankings AND no athlete data
   const hasInsufficientData = submittedRankingsCount < 3 && (!athletes || athletes.length === 0);
 
   // Use custom title and subtitle if provided, otherwise fallback to categoryName
   const displayTitle = customTitle || sanitize(categoryName);
   const displaySubtitle = customSubtitle || "";
 
-  console.log('GlobalLeaderboard - Debug info:', {
+  console.log('🔍 DEBUGGING: GlobalLeaderboard - Render decision:', {
     hasInsufficientData,
     submittedRankingsCount,
     athletesLength: athletes.length,
     categoryName,
     categoryId,
-    displayAthletes: displayAthletes.length
+    displayAthletes: displayAthletes.length,
+    willShowInsufficientMessage: hasInsufficientData,
+    willShowLeaderboard: !hasInsufficientData
   });
 
   return (
