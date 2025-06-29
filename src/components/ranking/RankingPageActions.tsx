@@ -9,23 +9,27 @@ interface RankingPageActionsProps {
 
 const RankingPageActions = ({ onShareClick }: RankingPageActionsProps) => {
   return (
-    <div className="mb-6 flex justify-start items-center gap-2 sm:gap-4">
-      <Button asChild variant="outline" className="border-white/10 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white text-sm sm:text-base">
+    <div className="mb-6 flex justify-start items-center gap-1 xs:gap-2 sm:gap-4">
+      <Button 
+        asChild 
+        variant="outline" 
+        className="border-white/10 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white text-xs xs:text-sm sm:text-base px-2 xs:px-3 sm:px-4 py-1 xs:py-2 h-8 xs:h-9 sm:h-10"
+      >
         <Link to={`/feed`}>
-          <ChevronLeft className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Back to Feed</span>
+          <ChevronLeft className="h-3 w-3 xs:h-4 xs:w-4 xs:mr-1 sm:mr-2" />
+          <span className="hidden xs:inline text-xs xs:text-sm sm:text-base">Back</span>
+          <span className="hidden sm:inline"> to Feed</span>
         </Link>
       </Button>
       
       <Button 
         onClick={onShareClick}
         variant="outline" 
-        className="border-blue-500/20 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 hover:text-blue-200 text-sm sm:text-base px-2 sm:px-4"
-        size="sm"
+        className="border-blue-500/20 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 hover:text-blue-200 text-xs xs:text-sm sm:text-base px-2 xs:px-3 sm:px-4 py-1 xs:py-2 h-8 xs:h-9 sm:h-10"
       >
-        <Share className="h-4 w-4 sm:mr-2" />
-        <span className="hidden sm:inline">Share Ranking</span>
-        <span className="sm:hidden">Share</span>
+        <Share className="h-3 w-3 xs:h-4 xs:w-4 xs:mr-1 sm:mr-2" />
+        <span className="hidden xs:inline text-xs xs:text-sm sm:text-base">Share</span>
+        <span className="hidden sm:inline"> Ranking</span>
       </Button>
     </div>
   );
