@@ -16,6 +16,8 @@ interface GlobalLeaderboardProps {
   socialActions?: React.ReactNode;
   compact?: boolean;
   categoryId?: string;
+  customTitle?: string;
+  customSubtitle?: string;
 }
 
 const GlobalLeaderboard = ({ 
@@ -24,7 +26,9 @@ const GlobalLeaderboard = ({
   submittedRankingsCount = 0, 
   socialActions,
   compact = false,
-  categoryId
+  categoryId,
+  customTitle,
+  customSubtitle
 }: GlobalLeaderboardProps) => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const currentUrl = window.location.href;
@@ -36,6 +40,10 @@ const GlobalLeaderboard = ({
   // Check if we have insufficient data for a meaningful leaderboard
   const hasInsufficientData = submittedRankingsCount < 3;
 
+  // Use custom title and subtitle if provided, otherwise fallback to categoryName
+  const displayTitle = customTitle || sanitize(categoryName);
+  const displaySubtitle = customSubtitle || "";
+
   return (
     <Card className="shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20 w-full">
       <CardHeader className={`border-b border-white/30 bg-white/5 relative overflow-hidden ${compact ? 'p-3 sm:p-4' : 'p-3 sm:p-4 md:p-6'}`}>
@@ -44,8 +52,13 @@ const GlobalLeaderboard = ({
           {/* Centered title and count */}
           <div className="text-center">
             <h1 className={`font-bold text-white mb-1 ${compact ? 'text-lg sm:text-xl' : 'text-lg sm:text-xl md:text-2xl'}`}>
-              {sanitize(categoryName)}
+              {displayTitle}
             </h1>
+            {displaySubtitle && (
+              <h2 className={`font-medium text-gray-300 mb-2 ${compact ? 'text-sm' : 'text-sm sm:text-base'}`}>
+                {displaySubtitle}
+              </h2>
+            )}
             <p className="text-xs sm:text-sm text-gray-300 font-medium">
               ✅ {submittedRankingsCount.toLocaleString()} Submitted Rankings
             </p>

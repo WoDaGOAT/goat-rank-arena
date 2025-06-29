@@ -26,11 +26,13 @@ const CategoryPageContent = ({
 
   return (
     <>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto mt-2 sm:mt-4">
         <div className="mb-6 sm:mb-8">
           <GlobalLeaderboard 
             athletes={leaderboardAthletes} 
-            categoryName="Global Leaderboard" 
+            categoryName={categoryName}
+            customTitle="GOAT Goalkeeper"
+            customSubtitle="Greatest goalkeeper of all time"
             submittedRankingsCount={submittedRankingsCount}
             socialActions={socialActions}
           />
