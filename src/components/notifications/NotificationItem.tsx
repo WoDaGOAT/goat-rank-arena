@@ -50,6 +50,11 @@ const NotificationItem = ({
     }
   };
 
+  const isValidUUID = (id: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  };
+
   const getNotificationContent = () => {
     const data = notification.data as any;
     
@@ -93,14 +98,14 @@ const NotificationItem = ({
         return {
           title: 'Friend Request Accepted',
           message: `${data?.receiver_name || 'Someone'} accepted your friend request`,
-          link: data?.receiver_id ? `/profile/${data.receiver_id}` : undefined
+          link: data?.receiver_id && isValidUUID(data.receiver_id) ? `/users/${data.receiver_id}` : undefined
         };
         
       case 'new_comment_reply':
         return {
           title: 'New Comment Reply',
           message: `${data?.commenter_name || 'Someone'} replied to your comment`,
-          link: data?.ranking_id ? `/ranking/${data.ranking_id}` : undefined
+          link: data?.ranking_id && isValidUUID(data.ranking_id) ? `/ranking/${data.ranking_id}` : undefined
         };
         
       case 'badge_earned':
@@ -114,14 +119,14 @@ const NotificationItem = ({
         return {
           title: 'Ranking Reaction',
           message: `${data?.user_name || 'Someone'} ${data?.reaction_type || 'reacted to'} your ranking "${data?.ranking_title || 'your ranking'}"`,
-          link: data?.ranking_id ? `/ranking/${data.ranking_id}` : undefined
+          link: data?.ranking_id && isValidUUID(data.ranking_id) ? `/ranking/${data.ranking_id}` : undefined
         };
 
       case 'new_category':
         return {
           title: 'New Category Available',
           message: `New category "${data?.category_name || 'category'}" is now available for ranking`,
-          link: data?.category_id ? `/category/${data.category_id}` : undefined
+          link: data?.category_id && isValidUUID(data.category_id) ? `/category/${data.category_id}` : undefined
         };
         
       default:
@@ -167,6 +172,7 @@ const NotificationItem = ({
     </div>
   );
   
+  // Only make clickable if we have a valid link
   if (content.link) {
     return (
       <Link
@@ -179,6 +185,7 @@ const NotificationItem = ({
     );
   }
 
+  // For notifications without links (like friend requests with actions), just mark as read on click
   return (
     <div
       onClick={handleNotificationClick}
