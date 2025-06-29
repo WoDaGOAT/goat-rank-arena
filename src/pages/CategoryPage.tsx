@@ -7,7 +7,7 @@ import CategoryPageContent from "@/components/category/CategoryPageContent";
 import FloatingActionButton from "@/components/category/FloatingActionButton";
 import CategoryNotFound from "@/components/category/CategoryNotFound";
 import CategoryPageLoading from "@/components/category/CategoryPageLoading";
-import CategoryPageErrorHandler from "@/components/category/CategoryPageErrorHandler";
+import CategoryNetworkError from "@/components/category/CategoryNetworkError";
 import CategoryPageDataFetcher from "@/components/category/CategoryPageDataFetcher";
 
 const CategoryPage = () => {
@@ -24,6 +24,37 @@ const CategoryPage = () => {
     console.error('❌ CategoryPage - No categoryId found in URL params');
     return <CategoryNotFound />;
   }
+
+  // Helper function to check if an error is critical
+  const isCriticalError = (error: any) => {
+    if (!error) return false;
+    
+    const errorMessage = error?.message || '';
+    const criticalPatterns = [
+      'JWT expired',
+      'Unauthorized', 
+      'Authentication failed',
+      'Invalid category',
+      'Category not found',
+      'Database connection failed'
+    ];
+    
+    return criticalPatterns.some(pattern => 
+      errorMessage.toLowerCase().includes(pattern.toLowerCase())
+    );
+  };
+
+  // Helper function to check for persistent network errors
+  const isPersistentNetworkError = (error: any) => {
+    if (!error) return false;
+    
+    const errorMessage = error?.message || '';
+    return (errorMessage.includes('Failed to fetch') || 
+           errorMessage.includes('NetworkError') ||
+           error?.code === 'NETWORK_ERROR') &&
+           !errorMessage.includes('ad blocker') &&
+           !errorMessage.includes('extension');
+  };
 
   return (
     <CategoryPageDataFetcher categoryId={categoryId}>
@@ -59,22 +90,25 @@ const CategoryPage = () => {
           return <CategoryPageLoading />;
         }
 
-        // Check for CRITICAL errors only - this should return null for non-critical errors
-        const errorHandler = (
-          <CategoryPageErrorHandler
-            categoryError={categoryError}
-            leaderboardError={leaderboardError}
-            userRankingError={userRankingError}
-            rankingsCountError={rankingsCountError}
-            isLoading={isLoading}
-            onRetry={refetch.refetchLeaderboard}
-          />
-        );
+        // Check for CRITICAL category errors that should block the page
+        if (categoryError && isCriticalError(categoryError)) {
+          console.log('🚨 CRITICAL: Category error detected:', categoryError);
+          return <CategoryNotFound />;
+        }
 
-        // Only block the page if there's an actual error component returned
-        if (errorHandler !== null && React.isValidElement(errorHandler)) {
-          console.log('🚀 CategoryPage - SHOWING CRITICAL ERROR');
-          return errorHandler;
+        // Check for persistent network errors that affect category loading
+        if (categoryError && isPersistentNetworkError(categoryError)) {
+          console.log('🌐 PERSISTENT NETWORK ERROR:', categoryError);
+          return <CategoryNetworkError onRetry={refetch.refetchLeaderboard} />;
+        }
+
+        // Log other errors but don't block the UI - they're not critical
+        if (leaderboardError || userRankingError || rankingsCountError) {
+          console.log('⚠️ NON-CRITICAL ERRORS (not blocking UI):', {
+            leaderboardError: leaderboardError?.message,
+            userRankingError: userRankingError?.message,
+            rankingsCountError: rankingsCountError?.message
+          });
         }
 
         // If no category data, show not found
