@@ -20,9 +20,26 @@ const UserRankingPage = () => {
   // Only proceed with the query if we have a valid ranking ID
   const { data: ranking, isLoading, error } = useUserRanking(isValidUUID ? rankingId : undefined);
 
-  // Scroll to top when component mounts or when ranking data loads
+  // Immediate scroll to top on component mount
   useEffect(() => {
+    console.log('UserRankingPage: Immediate scroll to top on mount');
     window.scrollTo(0, 0);
+    
+    // Prevent browser's automatic scroll restoration
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  // Additional scroll when ranking data loads (with delay for DOM rendering)
+  useEffect(() => {
+    if (ranking) {
+      console.log('UserRankingPage: Ranking data loaded, ensuring scroll to top');
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
   }, [ranking]);
 
   console.log('UserRankingPage - Query results:', { ranking, isLoading, error });
