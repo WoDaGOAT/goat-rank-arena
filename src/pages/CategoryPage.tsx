@@ -20,7 +20,6 @@ const CategoryPage = () => {
     currentUrl: window.location.href
   });
   
-  // Ensure we have a valid categoryId before proceeding
   if (!categoryId) {
     console.error('❌ CategoryPage - No categoryId found in URL params');
     return <CategoryNotFound />;
@@ -47,7 +46,12 @@ const CategoryPage = () => {
           submittedRankingsCount,
           leaderboardAthletesCount: leaderboardAthletes?.length || 0,
           isLoading,
-          hasErrors: !!(categoryError || leaderboardError || userRankingError || rankingsCountError)
+          errorSummary: {
+            categoryError: !!categoryError,
+            leaderboardError: !!leaderboardError,
+            userRankingError: !!userRankingError,
+            rankingsCountError: !!rankingsCountError
+          }
         });
 
         if (isLoading) {
@@ -55,7 +59,7 @@ const CategoryPage = () => {
           return <CategoryPageLoading />;
         }
 
-        // Handle errors
+        // Check for critical errors that should block the page
         const errorComponent = (
           <CategoryPageErrorHandler
             categoryError={categoryError}
@@ -67,31 +71,34 @@ const CategoryPage = () => {
           />
         );
 
-        if (errorComponent) {
-          const errorResult = React.isValidElement(errorComponent) ? errorComponent : null;
-          if (errorResult) {
-            console.log('🚀 CategoryPage - SHOWING ERROR COMPONENT');
-            return errorResult;
-          }
+        // Only block the page if there's a critical error component returned
+        if (React.isValidElement(errorComponent)) {
+          console.log('🚀 CategoryPage - SHOWING CRITICAL ERROR');
+          return errorComponent;
         }
 
-        if (!dbCategory) {
-          console.log('🚀 CategoryPage - NO CATEGORY FOUND');
+        // If no category data and there was an error, show not found
+        if (!dbCategory && categoryError) {
+          console.log('🚀 CategoryPage - NO CATEGORY DATA + ERROR');
           return <CategoryNotFound />;
         }
 
-        // Determine button state based on user authentication and existing ranking
+        // If we somehow still don't have category data, show not found
+        if (!dbCategory) {
+          console.log('🚀 CategoryPage - NO CATEGORY DATA (fallback)');
+          return <CategoryNotFound />;
+        }
+
+        // At this point we have a valid category - always show the page
         const hasExistingRanking = Boolean(user && userRanking);
         
-        console.log('🚀 CategoryPage - FLOATING ACTION BUTTON PROPS:', {
+        console.log('🚀 CategoryPage - RENDERING MAIN CONTENT:', {
+          categoryName: dbCategory.name,
           hasExistingRanking,
           userRankingId: userRanking?.id,
-          categoryId: categoryId,
-          isLoadingUserRanking: false,
-          userAuthenticated: !!user
+          submittedRankingsCount,
+          leaderboardCount: leaderboardAthletes?.length || 0
         });
-
-        console.log('🚀 CategoryPage - RENDERING MAIN CONTENT');
 
         return (
           <>
