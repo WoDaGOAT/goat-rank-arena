@@ -38,7 +38,8 @@ const GlobalLeaderboard = ({
   const displayAthletes = compact ? athletes.slice(0, 5) : athletes.slice(0, 10);
   
   // Check if we have insufficient data for a meaningful leaderboard
-  const hasInsufficientData = submittedRankingsCount < 3;
+  // Fixed logic: Only show insufficient message if we truly have less than 3 rankings AND no athlete data
+  const hasInsufficientData = submittedRankingsCount < 3 && (!athletes || athletes.length === 0);
 
   // Use custom title and subtitle if provided, otherwise fallback to categoryName
   const displayTitle = customTitle || sanitize(categoryName);
@@ -49,7 +50,8 @@ const GlobalLeaderboard = ({
     submittedRankingsCount,
     athletesLength: athletes.length,
     categoryName,
-    categoryId
+    categoryId,
+    displayAthletes: displayAthletes.length
   });
 
   return (

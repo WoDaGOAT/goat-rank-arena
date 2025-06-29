@@ -54,19 +54,24 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
     queryFn: async () => {
       console.log('CategoryPageDataFetcher - Fetching category data for ID:', categoryId);
       
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('id', categoryId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('id', categoryId)
+          .single();
+          
+        if (error && error.code !== 'PGRST116') {
+          console.error('CategoryPageDataFetcher - Error fetching category:', error);
+          throw error;
+        }
         
-      if (error && error.code !== 'PGRST116') {
-        console.error('CategoryPageDataFetcher - Error fetching category:', error);
+        console.log('CategoryPageDataFetcher - Category data fetched:', data);
+        return data;
+      } catch (error) {
+        console.error('CategoryPageDataFetcher - Fatal category fetch error:', error);
         throw error;
       }
-      
-      console.log('CategoryPageDataFetcher - Category data fetched:', data);
-      return data;
     },
     enabled: !!categoryId,
     retry: (failureCount, error) => {
@@ -85,17 +90,23 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
     queryFn: async () => {
       if (!categoryId) return 0;
       
-      const { count, error } = await supabase
-        .from('user_rankings')
-        .select('*', { count: 'exact', head: true })
-        .eq('category_id', categoryId);
-      
-      if (error) {
-        console.error('Error fetching rankings count:', error);
+      try {
+        const { count, error } = await supabase
+          .from('user_rankings')
+          .select('*', { count: 'exact', head: true })
+          .eq('category_id', categoryId);
+        
+        if (error) {
+          console.error('Error fetching rankings count:', error);
+          return 0;
+        }
+        
+        console.log('CategoryPageDataFetcher - Rankings count:', count);
+        return count || 0;
+      } catch (error) {
+        console.error('CategoryPageDataFetcher - Fatal rankings count error:', error);
         return 0;
       }
-      
-      return count || 0;
     },
     enabled: !!categoryId,
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -112,6 +123,14 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
   const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard, error: leaderboardError, refetch: refetchLeaderboard } = useLeaderboardData(categoryId || "");
 
   const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount;
+
+  console.log('CategoryPageDataFetcher - Final data state:', {
+    isLoading,
+    dbCategory: !!dbCategory,
+    submittedRankingsCount,
+    leaderboardAthletesCount: leaderboardAthletes?.length || 0,
+    hasErrors: !!(categoryError || leaderboardError || userRankingError || rankingsCountError)
+  });
 
   const handleRetry = () => {
     console.log('CategoryPageDataFetcher - Retrying all queries...');
