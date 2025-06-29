@@ -20,16 +20,16 @@ const CategoryPageErrorHandler = ({
   isLoading,
   onRetry
 }: CategoryPageErrorHandlerProps) => {
-  // CRITICAL ERROR detection - only errors that prevent the page from functioning
+  // Only show critical errors that actually prevent the page from functioning
   const isCriticalError = (error: any) => {
     if (!error) return false;
     
     const errorMessage = error?.message || '';
     
-    // These are CRITICAL errors that prevent the page from working
+    // Only these are truly critical - category must exist for page to work
     const criticalPatterns = [
       'JWT expired',
-      'Unauthorized',
+      'Unauthorized', 
       'Authentication failed',
       'Invalid category',
       'Category not found',
@@ -41,35 +41,31 @@ const CategoryPageErrorHandler = ({
     );
   };
 
-  // NETWORK ERROR detection - but only show if it's a persistent issue
+  // Network errors that are persistent and affect category loading
   const isPersistentNetworkError = (error: any) => {
     if (!error) return false;
     
     const errorMessage = error?.message || '';
-    return errorMessage.includes('Failed to fetch') || 
+    return (errorMessage.includes('Failed to fetch') || 
            errorMessage.includes('NetworkError') ||
-           error?.code === 'NETWORK_ERROR';
+           error?.code === 'NETWORK_ERROR') &&
+           !errorMessage.includes('ad blocker') &&
+           !errorMessage.includes('extension');
   };
 
-  // Check for critical errors first
-  const hasCriticalCategoryError = isCriticalError(categoryError);
-  const hasCriticalLeaderboardError = isCriticalError(leaderboardError);
-  
-  // Only show "not found" for actual category errors, not leaderboard issues
-  if (hasCriticalCategoryError && !isLoading) {
+  // ONLY show error for category-related critical failures
+  if (categoryError && isCriticalError(categoryError) && !isLoading) {
     console.log('🚨 CRITICAL: Category error detected:', categoryError);
     return <CategoryNotFound />;
   }
 
-  // Check for persistent network errors (only category-related)
-  const hasPersistentNetworkError = isPersistentNetworkError(categoryError);
-  
-  if (hasPersistentNetworkError && !isLoading) {
+  // ONLY show network error for category-related persistent network issues
+  if (categoryError && isPersistentNetworkError(categoryError) && !isLoading) {
     console.log('🌐 PERSISTENT NETWORK ERROR:', categoryError);
     return <CategoryNetworkError onRetry={onRetry} />;
   }
 
-  // Log non-critical errors but don't block the UI
+  // Log other errors but don't block the UI - they're not critical
   if (leaderboardError || userRankingError || rankingsCountError) {
     console.log('⚠️ NON-CRITICAL ERRORS (not blocking UI):', {
       leaderboardError: leaderboardError?.message,
@@ -78,7 +74,7 @@ const CategoryPageErrorHandler = ({
     });
   }
 
-  // Return null - let the main content render
+  // Return null - no critical errors found, let main content render
   return null;
 };
 

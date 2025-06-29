@@ -59,8 +59,8 @@ const CategoryPage = () => {
           return <CategoryPageLoading />;
         }
 
-        // Check for critical errors that should block the page
-        const errorComponent = (
+        // Check for CRITICAL errors only - this should return null for non-critical errors
+        const errorHandler = (
           <CategoryPageErrorHandler
             categoryError={categoryError}
             leaderboardError={leaderboardError}
@@ -71,25 +71,19 @@ const CategoryPage = () => {
           />
         );
 
-        // Only block the page if there's a critical error component returned
-        if (React.isValidElement(errorComponent)) {
+        // Only block the page if there's an actual error component returned
+        if (errorHandler !== null && React.isValidElement(errorHandler)) {
           console.log('🚀 CategoryPage - SHOWING CRITICAL ERROR');
-          return errorComponent;
+          return errorHandler;
         }
 
-        // If no category data and there was an error, show not found
-        if (!dbCategory && categoryError) {
-          console.log('🚀 CategoryPage - NO CATEGORY DATA + ERROR');
-          return <CategoryNotFound />;
-        }
-
-        // If we somehow still don't have category data, show not found
+        // If no category data, show not found
         if (!dbCategory) {
-          console.log('🚀 CategoryPage - NO CATEGORY DATA (fallback)');
+          console.log('🚀 CategoryPage - NO CATEGORY DATA');
           return <CategoryNotFound />;
         }
 
-        // At this point we have a valid category - always show the page
+        // We have valid category data - render the page
         const hasExistingRanking = Boolean(user && userRanking);
         
         console.log('🚀 CategoryPage - RENDERING MAIN CONTENT:', {
