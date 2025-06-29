@@ -44,6 +44,14 @@ const GlobalLeaderboard = ({
   const displayTitle = customTitle || sanitize(categoryName);
   const displaySubtitle = customSubtitle || "";
 
+  console.log('GlobalLeaderboard - Debug info:', {
+    hasInsufficientData,
+    submittedRankingsCount,
+    athletesLength: athletes.length,
+    categoryName,
+    categoryId
+  });
+
   return (
     <Card className="shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20 w-full">
       <CardHeader className={`border-b border-white/30 bg-white/5 relative overflow-hidden ${compact ? 'p-3 sm:p-4' : 'p-3 sm:p-4 md:p-6'}`}>
@@ -93,27 +101,30 @@ const GlobalLeaderboard = ({
       </CardHeader>
       <CardContent className="p-0">
         {hasInsufficientData ? (
-          // Show message when insufficient data
-          <div className="flex flex-col items-center justify-center py-8 px-6 text-center">
-            <div className="mb-4">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                <Plus className="h-8 w-8 text-white/60" />
+          // Enhanced insufficient data message with better visibility
+          <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 text-center min-h-[300px] bg-white/5">
+            <div className="w-full max-w-md mx-auto">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
+                <Plus className="h-10 w-10 text-white/80" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">
                 Not Enough Rankings Yet
               </h3>
-              <p className="text-sm text-gray-300 mb-4 max-w-md">
-                We need at least 3 rankings to show a meaningful leaderboard. Be one of the first to rank the greatest {sanitize(categoryName.toLowerCase())}!
+              <p className="text-sm sm:text-base text-gray-300 mb-6 leading-relaxed">
+                We need at least 3 rankings to show a meaningful leaderboard. Be one of the first to rank the greatest {sanitize(categoryName.toLowerCase().replace('goat ', ''))}!
               </p>
+              <div className="text-xs text-gray-400 mb-6">
+                Current rankings: {submittedRankingsCount} / 3 needed
+              </div>
+              {categoryId && (
+                <Button asChild variant="default" size="lg" className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-full px-8 py-3 font-semibold">
+                  <Link to={`/create-ranking/${categoryId}`}>
+                    <Plus className="h-5 w-5 mr-2" />
+                    Create Your Ranking
+                  </Link>
+                </Button>
+              )}
             </div>
-            {categoryId && (
-              <Button asChild variant="cta" className="rounded-full">
-                <Link to={`/create-ranking/${categoryId}`}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your Ranking
-                </Link>
-              </Button>
-            )}
           </div>
         ) : (
           <>
