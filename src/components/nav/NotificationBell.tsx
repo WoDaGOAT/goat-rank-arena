@@ -8,14 +8,12 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
 const NotificationBell = () => {
-    const { unreadCount, markAllAsRead } = useNotifications();
+    const { unreadCount } = useNotifications();
     const [isOpen, setIsOpen] = useState(false);
     
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
-        if (open && unreadCount > 0) {
-            markAllAsRead();
-        }
+        // Removed automatic markAllAsRead() - notifications should only be marked as read when actually viewed
     };
 
     const handleViewAllClick = () => {

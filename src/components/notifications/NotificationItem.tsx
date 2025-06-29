@@ -1,270 +1,159 @@
 
-import { Link } from 'react-router-dom';
-import { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageCircle, FolderPlus, Users, Handshake, Trophy, Flame, ThumbsUp, Frown, Award, Star, Target } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
+import { Check, X, MessageSquare, Trophy, Clock } from 'lucide-react';
+import { Notification } from '@/types/index';
+import { Link } from 'react-router-dom';
+import { useMarkNotificationAsRead } from '@/hooks/useNotifications';
+import { cn } from '@/lib/utils';
 
 interface NotificationItemProps {
-    notification: Notification;
-    acceptFriendRequest: (friendshipId: string) => void;
-    declineFriendRequest: (friendshipId: string) => void;
-    isAccepting: boolean;
-    isDeclining: boolean;
+  notification: Notification;
+  acceptFriendRequest: (friendshipId: string) => void;
+  declineFriendRequest: (friendshipId: string) => void;
+  isAccepting: boolean;
+  isDeclining: boolean;
 }
 
-const NotificationItem = ({ notification, acceptFriendRequest, declineFriendRequest, isAccepting, isDeclining }: NotificationItemProps) => {
-    const renderContent = () => {
-        switch (notification.type) {
-            case 'new_comment_reply':
-                return (
-                    <p>
-                        <span className="font-semibold">{notification.data.replying_user_name || 'Someone'}</span> replied to your comment on{' '}
-                        <span className="font-semibold">{notification.data.category_name}</span>.
-                    </p>
-                );
-            case 'new_category':
-                return (
-                    <p>
-                        A new leaderboard has been added:{' '}
-                        <span className="font-semibold">{notification.data.category_name}</span>.
-                    </p>
-                );
-            case 'new_friend_request':
-                return (
-                    <p>
-                        <span className="font-semibold">{notification.data.requester_name || 'Someone'}</span> sent you a friend request.
-                    </p>
-                );
-            case 'friend_request_accepted':
-                 return (
-                    <p>
-                        You and <span className="font-semibold">{notification.data.receiver_name || 'Someone'}</span> are now friends.
-                    </p>
-                );
-            case 'ranking_reaction':
-                const reactionEmoji = notification.data.reaction_type === 'thumbs-up' ? '👍' 
-                    : notification.data.reaction_type === 'trophy' ? '🏆'
-                    : notification.data.reaction_type === 'flame' ? '🔥'
-                    : notification.data.reaction_type === 'frown' ? '😔'
-                    : '👍';
-                
-                return (
-                    <p>
-                        <span className="font-semibold">{notification.data.reacting_user_name || 'Someone'}</span> reacted {reactionEmoji} to your ranking{' '}
-                        <span className="font-semibold">"{notification.data.ranking_title}"</span>.
-                    </p>
-                );
-            case 'category_reaction':
-                return (
-                    <p>
-                        <span className="font-semibold">{notification.data.reacting_user_name || 'Someone'}</span> reacted to the category{' '}
-                        <span className="font-semibold">{notification.data.category_name}</span>.
-                    </p>
-                );
-            case 'quiz_completed':
-                const score = notification.data.score || 0;
-                const totalQuestions = notification.data.total_questions || 5;
-                const accuracy = Math.round((score / totalQuestions) * 100);
-                
-                return (
-                    <p>
-                        You completed <span className="font-semibold">{notification.data.quiz_title}</span>{' '}
-                        with a score of <span className="font-semibold">{score}/{totalQuestions}</span>{' '}
-                        ({accuracy}% accuracy).
-                    </p>
-                );
-            case 'badge_earned':
-                return (
-                    <p>
-                        Congratulations! You earned the{' '}
-                        <span className="font-semibold">{notification.data.badge_name}</span> badge.{' '}
-                        <span className="text-gray-400">{notification.data.badge_description}</span>
-                    </p>
-                );
-            default:
-                const _exhaustiveCheck: never = notification;
-                return <p>You have a new notification.</p>;
-        }
-    };
+const NotificationItem = ({
+  notification,
+  acceptFriendRequest,
+  declineFriendRequest,
+  isAccepting,
+  isDeclining
+}: NotificationItemProps) => {
+  const markAsRead = useMarkNotificationAsRead();
+
+  const handleNotificationClick = () => {
+    if (!notification.is_read) {
+      markAsRead.mutate(notification.id);
+    }
+  };
+
+  const getNotificationIcon = () => {
+    switch (notification.type) {
+      case 'new_friend_request':
+        return <Check className="h-4 w-4 text-green-400" />;
+      case 'friend_request_accepted':
+        return <Check className="h-4 w-4 text-green-400" />;
+      case 'new_comment_reply':
+        return <MessageSquare className="h-4 w-4 text-blue-400" />;
+      case 'badge_earned':
+        return <Trophy className="h-4 w-4 text-yellow-400" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-400" />;
+    }
+  };
+
+  const getNotificationContent = () => {
+    const data = notification.data as any;
     
-    const getReactionIcon = (reactionType: string) => {
-        switch (reactionType) {
-            case 'thumbs-up':
-                return <ThumbsUp className="w-5 h-5 text-blue-400" />;
-            case 'trophy':
-                return <Trophy className="w-5 h-5 text-yellow-400" />;
-            case 'flame':
-                return <Flame className="w-5 h-5 text-orange-400" />;
-            case 'frown':
-                return <Frown className="w-5 h-5 text-red-400" />;
-            default:
-                return <ThumbsUp className="w-5 h-5 text-blue-400" />;
-        }
-    };
+    switch (notification.type) {
+      case 'new_friend_request':
+        return {
+          title: 'New Friend Request',
+          message: `${data?.requester_name || 'Someone'} sent you a friend request`,
+          actions: (
+            <div className="flex gap-2 mt-2">
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  acceptFriendRequest(data?.friendship_id);
+                  handleNotificationClick();
+                }}
+                disabled={isAccepting}
+                className="bg-green-600 hover:bg-green-700 h-7 px-3 text-xs"
+              >
+                Accept
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  declineFriendRequest(data?.friendship_id);
+                  handleNotificationClick();
+                }}
+                disabled={isDeclining}
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 h-7 px-3 text-xs"
+              >
+                Decline
+              </Button>
+            </div>
+          )
+        };
+        
+      case 'friend_request_accepted':
+        return {
+          title: 'Friend Request Accepted',
+          message: `${data?.receiver_name || 'Someone'} accepted your friend request`,
+          link: data?.receiver_id ? `/profile/${data.receiver_id}` : undefined
+        };
+        
+      case 'new_comment_reply':
+        return {
+          title: 'New Comment Reply',
+          message: `${data?.commenter_name || 'Someone'} replied to your comment`,
+          link: data?.ranking_id ? `/ranking/${data.ranking_id}` : undefined
+        };
+        
+      case 'badge_earned':
+        return {
+          title: 'Badge Earned!',
+          message: `You earned the "${data?.badge_name || 'Achievement'}" badge`,
+          link: '/profile'
+        };
+        
+      default:
+        return {
+          title: 'Notification',
+          message: 'You have a new notification'
+        };
+    }
+  };
 
-    const getQuizIcon = (accuracy: number) => {
-        if (accuracy === 100) {
-            return (
-                <div className="relative">
-                    <Star className="w-5 h-5 text-yellow-400" />
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full opacity-80"></div>
-                </div>
-            );
-        }
-        if (accuracy >= 80) return <Trophy className="w-5 h-5 text-yellow-500" />;
-        if (accuracy >= 60) return <Award className="w-5 h-5 text-blue-400" />;
-        return <Target className="w-5 h-5 text-gray-400" />;
-    };
-
-    const getBadgeIcon = (badgeRarity: string) => {
-        switch (badgeRarity) {
-            case 'legendary': return <Star className="w-5 h-5 text-yellow-400" />;
-            case 'epic': return <Trophy className="w-5 h-5 text-purple-400" />;
-            case 'rare': return <Award className="w-5 h-5 text-blue-400" />;
-            default: return <Award className="w-5 h-5 text-green-400" />;
-        }
-    };
-    
-    const getNotificationIcon = () => {
-        switch (notification.type) {
-            case 'new_comment_reply':
-                return (
-                    <div className="relative">
-                        <MessageCircle className="w-5 h-5 text-blue-400" />
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-300 rounded-full"></div>
-                    </div>
-                );
-            case 'new_category':
-                return (
-                    <div className="relative">
-                        <FolderPlus className="w-5 h-5 text-purple-400" />
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-300 rounded-full opacity-80"></div>
-                    </div>
-                );
-            case 'new_friend_request':
-                return (
-                    <div className="relative">
-                        <Users className="w-5 h-5 text-teal-400" />
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-teal-300 rounded-full"></div>
-                    </div>
-                );
-            case 'friend_request_accepted':
-                return (
-                    <div className="relative">
-                        <Handshake className="w-5 h-5 text-green-400" />
-                        <div className="absolute top-0 right-0 w-2 h-2 bg-green-300 rounded-full opacity-80"></div>
-                    </div>
-                );
-            case 'ranking_reaction':
-                return getReactionIcon(notification.data.reaction_type);
-            case 'category_reaction':
-                return getReactionIcon(notification.data.reaction_type);
-            case 'quiz_completed':
-                const accuracy = Math.round(((notification.data.score || 0) / (notification.data.total_questions || 5)) * 100);
-                return getQuizIcon(accuracy);
-            case 'badge_earned':
-                return getBadgeIcon(notification.data.badge_rarity || 'common');
-            default:
-                return <MessageCircle className="w-5 h-5 text-gray-400" />;
-        }
-    };
-
-    const handleAccept = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (notification.type === 'new_friend_request') {
-            acceptFriendRequest(notification.data.friendship_id);
-        }
-    };
-
-    const handleDecline = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (notification.type === 'new_friend_request') {
-            declineFriendRequest(notification.data.friendship_id);
-        }
-    };
-
-    const content = (
-        <div className="flex items-start gap-3 relative">
+  const content = getNotificationContent();
+  const NotificationWrapper = content.link ? Link : 'div';
+  
+  return (
+    <NotificationWrapper
+      {...(content.link ? { to: content.link } : {})}
+      onClick={handleNotificationClick}
+      className={cn(
+        "block p-3 border-b border-gray-700/50 hover:bg-gray-800/50 transition-colors cursor-pointer",
+        !notification.is_read && "bg-blue-900/20 border-l-4 border-l-blue-500"
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 mt-1">
+          {getNotificationIcon()}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-white truncate">
+              {content.title}
+            </h4>
             {!notification.is_read && (
-                <div className="w-2 h-2 rounded-full bg-blue-500 absolute top-2 left-[-4px]"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2" />
             )}
-            <div className="flex-shrink-0 pt-1">
-                {getNotificationIcon()}
-            </div>
-            <div className="flex-1">
-                <div className={cn("text-sm", notification.is_read ? "text-gray-400" : "text-white")}>
-                    {renderContent()}
-                </div>
-                 {notification.type === 'new_friend_request' && (
-                    <div className="flex items-center gap-2 mt-2">
-                        <Button 
-                            size="sm" 
-                            onClick={handleAccept} 
-                            disabled={isAccepting || isDeclining}
-                            className="bg-green-600 hover:bg-green-700"
-                        >
-                            {isAccepting ? "Accepting..." : "Accept"}
-                        </Button>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={handleDecline} 
-                            disabled={isAccepting || isDeclining}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                        >
-                            {isDeclining ? "Declining..." : "Decline"}
-                        </Button>
-                    </div>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                    {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                </p>
-            </div>
+          </div>
+          
+          <p className="text-sm text-gray-400 mt-1 break-words">
+            {content.message}
+          </p>
+          
+          <p className="text-xs text-gray-500 mt-1">
+            {formatDistanceToNow(new Date(notification.created_at))} ago
+          </p>
+          
+          {content.actions && content.actions}
         </div>
-    );
-
-    if (notification.type === 'new_comment_reply' || notification.type === 'new_category') {
-        return (
-            <Link 
-                to={`/category/${notification.data.category_id}`} 
-                className="block p-3 hover:bg-white/10 rounded-md transition-colors"
-            >
-                {content}
-            </Link>
-        );
-    }
-
-    if (notification.type === 'ranking_reaction') {
-        return (
-            <Link 
-                to={`/user-ranking/${notification.data.ranking_id}`} 
-                className="block p-3 hover:bg-white/10 rounded-md transition-colors"
-            >
-                {content}
-            </Link>
-        );
-    }
-
-    if (notification.type === 'category_reaction') {
-        return (
-            <Link 
-                to={`/category/${notification.data.category_id}`} 
-                className="block p-3 hover:bg-white/10 rounded-md transition-colors"
-            >
-                {content}
-            </Link>
-        );
-    }
-
-    return (
-        <div className="block p-3 hover:bg-white/10 rounded-md transition-colors cursor-default">
-            {content}
-        </div>
-    );
+      </div>
+    </NotificationWrapper>
+  );
 };
 
 export default NotificationItem;
