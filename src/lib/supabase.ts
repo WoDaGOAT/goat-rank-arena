@@ -24,8 +24,5 @@ if (!isSupabaseConfigured) {
       } else {
         console.log("Supabase connection test successful");
       }
-    })
-    .catch((err) => {
-      console.error("Supabase connection test error:", err);
     });
 }

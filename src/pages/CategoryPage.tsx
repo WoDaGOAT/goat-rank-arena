@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRankingForCategory } from "@/hooks/useUserRankingForCategory";
 import { useLeaderboardData } from "@/hooks/useLeaderboardData";
 import { Helmet } from "react-helmet-async";
-import CategoryPageHeader from "@/components/category/CategoryPageHeader";
 import CategoryPageContent from "@/components/category/CategoryPageContent";
 import FloatingActionButton from "@/components/category/FloatingActionButton";
 import CategoryNotFound from "@/components/category/CategoryNotFound";
@@ -185,11 +184,6 @@ const CategoryPage = () => {
       </Helmet>
       <div className="flex flex-col flex-grow min-h-screen px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <div className="container mx-auto py-4 sm:py-6 md:py-8 flex-grow">
-          <CategoryPageHeader 
-            categoryName={dbCategory.name}
-            categoryDescription={dbCategory.description}
-          />
-
           <CategoryPageContent
             categoryId={categoryId}
             leaderboardAthletes={leaderboardAthletes || []}
