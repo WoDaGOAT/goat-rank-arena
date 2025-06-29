@@ -115,44 +115,59 @@ const NotificationItem = ({
   };
 
   const content = getNotificationContent();
-  const NotificationWrapper = content.link ? Link : 'div';
-  
-  return (
-    <NotificationWrapper
-      {...(content.link ? { to: content.link } : {})}
-      onClick={handleNotificationClick}
-      className={cn(
-        "block p-3 border-b border-gray-700/50 hover:bg-gray-800/50 transition-colors cursor-pointer",
-        !notification.is_read && "bg-blue-900/20 border-l-4 border-l-blue-500"
-      )}
-    >
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 mt-1">
-          {getNotificationIcon()}
+  const baseClassName = cn(
+    "block p-3 border-b border-gray-700/50 hover:bg-gray-800/50 transition-colors cursor-pointer",
+    !notification.is_read && "bg-blue-900/20 border-l-4 border-l-blue-500"
+  );
+
+  const notificationContent = (
+    <div className="flex items-start gap-3">
+      <div className="flex-shrink-0 mt-1">
+        {getNotificationIcon()}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-medium text-white truncate">
+            {content.title}
+          </h4>
+          {!notification.is_read && (
+            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2" />
+          )}
         </div>
         
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-white truncate">
-              {content.title}
-            </h4>
-            {!notification.is_read && (
-              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2" />
-            )}
-          </div>
-          
-          <p className="text-sm text-gray-400 mt-1 break-words">
-            {content.message}
-          </p>
-          
-          <p className="text-xs text-gray-500 mt-1">
-            {formatDistanceToNow(new Date(notification.created_at))} ago
-          </p>
-          
-          {content.actions && content.actions}
-        </div>
+        <p className="text-sm text-gray-400 mt-1 break-words">
+          {content.message}
+        </p>
+        
+        <p className="text-xs text-gray-500 mt-1">
+          {formatDistanceToNow(new Date(notification.created_at))} ago
+        </p>
+        
+        {content.actions && content.actions}
       </div>
-    </NotificationWrapper>
+    </div>
+  );
+  
+  if (content.link) {
+    return (
+      <Link
+        to={content.link}
+        onClick={handleNotificationClick}
+        className={baseClassName}
+      >
+        {notificationContent}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      onClick={handleNotificationClick}
+      className={baseClassName}
+    >
+      {notificationContent}
+    </div>
   );
 };
 
