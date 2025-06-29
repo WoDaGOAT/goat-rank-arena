@@ -189,6 +189,7 @@ const CategoryPage = () => {
             leaderboardAthletes={leaderboardAthletes || []}
             submittedRankingsCount={submittedRankingsCount || 0}
             categoryName={dbCategory.name}
+            categoryDescription={dbCategory.description}
           />
 
           <FloatingActionButton

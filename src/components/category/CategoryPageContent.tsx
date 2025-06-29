@@ -10,13 +10,15 @@ interface CategoryPageContentProps {
   leaderboardAthletes: Athlete[];
   submittedRankingsCount: number;
   categoryName: string;
+  categoryDescription?: string | null;
 }
 
 const CategoryPageContent = ({ 
   categoryId, 
   leaderboardAthletes, 
   submittedRankingsCount, 
-  categoryName 
+  categoryName,
+  categoryDescription
 }: CategoryPageContentProps) => {
   const socialActions = (
     <SocialActions 
@@ -31,8 +33,8 @@ const CategoryPageContent = ({
           <GlobalLeaderboard 
             athletes={leaderboardAthletes} 
             categoryName={categoryName}
-            customTitle="GOAT Goalkeeper"
-            customSubtitle="Greatest goalkeeper of all time"
+            customTitle={categoryName}
+            customSubtitle={categoryDescription || `Greatest ${categoryName.toLowerCase().replace('goat ', '')} of all time`}
             submittedRankingsCount={submittedRankingsCount}
             socialActions={socialActions}
           />
