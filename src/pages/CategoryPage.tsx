@@ -27,6 +27,12 @@ const CategoryPage = () => {
   console.log('CategoryPage - URL categoryId from params:', categoryId);
   console.log('CategoryPage - Current user:', user?.id);
   
+  // Ensure we have a valid categoryId before proceeding
+  if (!categoryId) {
+    console.error('CategoryPage - No categoryId found in URL params');
+    return <CategoryNotFound />;
+  }
+  
   // Check if user has existing ranking for this category
   const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(categoryId);
   
@@ -40,7 +46,7 @@ const CategoryPage = () => {
   const { data: dbCategory, isLoading: isLoadingCategory, error: categoryError } = useQuery<DbCategory | null>({
     queryKey: ['category', categoryId],
     queryFn: async () => {
-      if (!categoryId) return null;
+      console.log('CategoryPage - Fetching category data for ID:', categoryId);
       
       const { data, error } = await supabase
         .from('categories')
@@ -49,8 +55,11 @@ const CategoryPage = () => {
         .single();
         
       if (error && error.code !== 'PGRST116') {
+        console.error('CategoryPage - Error fetching category:', error);
         throw error;
       }
+      
+      console.log('CategoryPage - Category data fetched:', data);
       return data;
     },
     enabled: !!categoryId,
@@ -121,7 +130,7 @@ const CategoryPage = () => {
   console.log('CategoryPage - FloatingActionButton props being passed:', {
     hasExistingRanking,
     userRankingId: userRanking?.id,
-    categoryId: categoryId!,
+    categoryId: categoryId, // Make sure we're passing the current categoryId
     isLoadingUserRanking
   });
 
@@ -139,7 +148,7 @@ const CategoryPage = () => {
           />
 
           <CategoryPageContent
-            categoryId={categoryId!}
+            categoryId={categoryId}
             leaderboardAthletes={leaderboardAthletes || []}
             submittedRankingsCount={submittedRankingsCount || 0}
             categoryName={dbCategory.name}
@@ -148,7 +157,7 @@ const CategoryPage = () => {
           <FloatingActionButton
             hasExistingRanking={hasExistingRanking}
             userRankingId={userRanking?.id}
-            categoryId={categoryId!}
+            categoryId={categoryId} // Ensure we pass the current categoryId
             isLoadingUserRanking={isLoadingUserRanking}
           />
         </div>

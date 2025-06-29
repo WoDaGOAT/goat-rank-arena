@@ -30,6 +30,7 @@ const FloatingActionButton = ({
   const buttonTitle = hasExistingRanking ? "View Your Ranking" : "Create Your Ranking";
 
   console.log('FloatingActionButton - Generated link:', buttonLink);
+  console.log('FloatingActionButton - Using categoryId for create ranking:', categoryId);
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-50">
