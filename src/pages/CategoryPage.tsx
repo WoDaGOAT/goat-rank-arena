@@ -21,7 +21,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="pb-4 lg:pb-20">
+    <div className="min-h-screen px-4 pb-36 pt-4 lg:px-0 lg:pb-20">
       <CategoryPageDataFetcher categoryId={categoryId}>
         {({ 
           dbCategory, 
@@ -43,43 +43,23 @@ const CategoryPage = () => {
 
           // Show loading state
           if (isLoading) {
-            return (
-              <>
-                <CategoryPageLoading />
-                <FloatingActionButton {...fabProps} />
-              </>
-            );
+            return <CategoryPageLoading />;
           }
 
           // Handle critical errors (category not found or network issues)
           if (errors.categoryError) {
             const errorMessage = errors.categoryError?.message || '';
             if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-              return (
-                <>
-                  <CategoryNetworkError onRetry={refetch.refetchCategory} />
-                  <FloatingActionButton {...fabProps} />
-                </>
-              );
+              return <CategoryNetworkError onRetry={refetch.refetchCategory} />;
             }
-            return (
-              <>
-                <CategoryNotFound />
-                <FloatingActionButton {...fabProps} />
-              </>
-            );
+            return <CategoryNotFound />;
           }
 
           // Handle leaderboard errors
           if (errors.leaderboardError) {
             const errorMessage = errors.leaderboardError?.message || '';
             if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-              return (
-                <>
-                  <CategoryNetworkError onRetry={refetch.refetchLeaderboard} />
-                  <FloatingActionButton {...fabProps} />
-                </>
-              );
+              return <CategoryNetworkError onRetry={refetch.refetchLeaderboard} />;
             }
           }
 
@@ -94,7 +74,6 @@ const CategoryPage = () => {
                   categoryName={dbCategory.name}
                   categoryDescription={dbCategory.description}
                 />
-                <FloatingActionButton {...fabProps} />
                 <CategoryPageErrorHandler
                   categoryError={errors.categoryError}
                   leaderboardError={errors.leaderboardError}
@@ -103,17 +82,14 @@ const CategoryPage = () => {
                   isLoading={isLoading}
                   onRetry={refetch.refetchLeaderboard}
                 />
+                {/* Render FAB once at page level */}
+                <FloatingActionButton {...fabProps} />
               </>
             );
           }
 
           // Fallback for unknown state
-          return (
-            <>
-              <CategoryNotFound />
-              <FloatingActionButton {...fabProps} />
-            </>
-          );
+          return <CategoryNotFound />;
         }}
       </CategoryPageDataFetcher>
     </div>

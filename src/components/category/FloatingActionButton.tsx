@@ -49,12 +49,12 @@ const FloatingActionButton = ({
     buttonContent.action();
   };
 
-  // Always render the container to prevent layout shifts
+  // Always render both containers to prevent layout shifts
   return (
     <>
       {/* Desktop floating button (1024px and up) */}
       <div 
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999] transition-all duration-300 ease-in-out hidden lg:block"
+        className="fixed bottom-4 right-4 z-50 hidden lg:block transition-all duration-300 ease-in-out"
         style={{
           opacity: shouldShow && !isLoading ? 1 : 0,
           visibility: shouldShow && !isLoading ? 'visible' : 'hidden',
@@ -76,32 +76,28 @@ const FloatingActionButton = ({
         </Button>
       </div>
 
-      {/* Mobile static button (below 1024px) */}
-      <div className="lg:hidden px-4 pb-6">
-        <div 
-          className="transition-all duration-300 ease-in-out"
-          style={{
-            opacity: shouldShow && !isLoading ? 1 : 0,
-            visibility: shouldShow && !isLoading ? 'visible' : 'hidden',
-            pointerEvents: shouldShow && !isLoading ? 'auto' : 'none',
-            height: shouldShow && !isLoading ? 'auto' : '0',
-            overflow: 'hidden'
-          }}
+      {/* Mobile fixed button (below 1024px) */}
+      <div 
+        className="fixed bottom-4 left-4 right-4 z-50 lg:hidden transition-all duration-300 ease-in-out"
+        style={{
+          opacity: shouldShow && !isLoading ? 1 : 0,
+          visibility: shouldShow && !isLoading ? 'visible' : 'hidden',
+          pointerEvents: shouldShow && !isLoading ? 'auto' : 'none'
+        }}
+      >
+        <Button 
+          variant="cta" 
+          className="w-full rounded-lg shadow-lg bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 font-semibold py-4"
+          onClick={handleClick}
+          disabled={isLoading}
         >
-          <Button 
-            variant="cta" 
-            className="w-full rounded-lg shadow-lg bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 font-semibold py-4"
-            onClick={handleClick}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
-            ) : (
-              <ButtonIcon className="h-5 w-5 mr-2 shrink-0" />
-            )}
-            <span className="font-semibold">{buttonContent.text}</span>
-          </Button>
-        </div>
+          {isLoading ? (
+            <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+          ) : (
+            <ButtonIcon className="h-5 w-5 mr-2 shrink-0" />
+          )}
+          <span className="font-semibold">{buttonContent.text}</span>
+        </Button>
       </div>
     </>
   );
