@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Category } from "@/types";
@@ -17,6 +16,18 @@ const CreateRankingPage = () => {
   const [hasRedirected, setHasRedirected] = useState(false);
   
   console.log('🔍 CreateRankingPage - Rendering with:', { categoryId, userId: user?.id, hasRedirected });
+  
+  // Clear localStorage on unmount to prevent interference
+  useEffect(() => {
+    return () => {
+      try {
+        localStorage.removeItem('wodagoat_athlete_selection');
+        console.log('🔍 CreateRankingPage - Cleared localStorage on unmount');
+      } catch (error) {
+        console.warn('🔍 CreateRankingPage - Failed to clear localStorage on unmount:', error);
+      }
+    };
+  }, []);
   
   // Don't check for existing ranking if we don't have a user yet
   const { data: userRanking, isLoading: isLoadingUserRanking, error: userRankingError } = useUserRankingForCategory(

@@ -27,10 +27,7 @@ const FloatingActionButton = ({
     currentUrl: window.location.href
   });
 
-  // Defensive validation with fallback logic
-  const hasValidRanking = hasExistingRanking && userRankingId && userRankingId.trim() !== '';
-  
-  // If we're loading, show loading state
+  // Show loading state if still fetching data
   if (isLoadingUserRanking) {
     console.log('🔍 FloatingActionButton - Showing loading state');
     return (
@@ -46,15 +43,20 @@ const FloatingActionButton = ({
     );
   }
 
-  // Determine button state based on ranking validity
+  // Defensive validation: only consider it valid if we have both hasExistingRanking AND a valid userRankingId
+  const hasValidRanking = hasExistingRanking && userRankingId && userRankingId.trim() !== '';
+  
+  // If no valid ranking, always show "Create Ranking"
   const buttonText = hasValidRanking ? "View My Ranking" : "Create Ranking";
   const buttonIcon = hasValidRanking ? Eye : Plus;
   const buttonTitle = hasValidRanking ? "View Your Ranking" : "Create Your Ranking";
 
-  console.log('🔍 FloatingActionButton - Button state:', {
-    buttonText,
+  console.log('🔍 FloatingActionButton - Button decision:', {
+    hasExistingRanking,
+    userRankingId,
     hasValidRanking,
-    userRankingId
+    buttonText,
+    buttonIcon: buttonIcon.name
   });
 
   const handleClick = (e: React.MouseEvent) => {

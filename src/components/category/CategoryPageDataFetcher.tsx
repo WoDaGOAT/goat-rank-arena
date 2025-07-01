@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRankingForCategory } from "@/hooks/useUserRankingForCategory";
 import { useLeaderboardData } from "@/hooks/useLeaderboardData";
+import { useEffect } from "react";
 
 type DbCategory = {
   id: string;
@@ -38,14 +39,45 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
   
   console.log('🔧 CategoryPageDataFetcher - START:', { categoryId });
   
+  // Force invalidation of user ranking queries when category changes or component mounts
+  useEffect(() => {
+    if (categoryId) {
+      console.log('🔧 CategoryPageDataFetcher - Force invalidating queries for category:', categoryId);
+      
+      // Invalidate user ranking query to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['userRanking', categoryId] });
+      
+      // Also invalidate rankings count to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['categoryRankingsCount', categoryId] });
+      
+      // Clear any stale localStorage that might interfere
+      try {
+        const storageKey = 'wodagoat_athlete_selection';
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const selectionData = JSON.parse(saved);
+          // Clear if it's for a different category or expired
+          if (selectionData.categoryId !== categoryId || 
+              (selectionData.expiresAt && Date.now() > selectionData.expiresAt)) {
+            localStorage.removeItem(storageKey);
+            console.log('🔧 CategoryPageDataFetcher - Cleared stale localStorage selection');
+          }
+        }
+      } catch (error) {
+        console.warn('🔧 CategoryPageDataFetcher - Failed to check localStorage:', error);
+      }
+    }
+  }, [categoryId, queryClient]);
+  
   // Check if user has existing ranking for this category
-  const { data: userRanking, isLoading: isLoadingUserRanking, error: userRankingError } = useUserRankingForCategory(categoryId);
+  const { data: userRanking, isLoading: isLoadingUserRanking, isFetching: isFetchingUserRanking, error: userRankingError } = useUserRankingForCategory(categoryId);
   
   console.log('🔧 CategoryPageDataFetcher - User ranking result:', {
     userRanking: userRanking ? { id: userRanking.id } : null,
     categoryId,
     hasRanking: Boolean(userRanking),
-    isLoadingUserRanking
+    isLoadingUserRanking,
+    isFetchingUserRanking
   });
 
   // Fetch category data from Supabase
@@ -123,7 +155,7 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
   // Fetch optimized leaderboard data
   const { data: leaderboardAthletes, isLoading: isLoadingLeaderboard, error: leaderboardError, refetch: refetchLeaderboard } = useLeaderboardData(categoryId || "");
 
-  const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount || isLoadingUserRanking;
+  const isLoading = isLoadingCategory || isLoadingLeaderboard || isLoadingRankingsCount || isLoadingUserRanking || isFetchingUserRanking;
 
   console.log('🔧 CategoryPageDataFetcher - FINAL STATE:', {
     isLoading,

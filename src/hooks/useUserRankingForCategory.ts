@@ -1,13 +1,16 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 
 export const useUserRankingForCategory = (categoryId?: string) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const queryKey = ['userRanking', categoryId, user?.id];
 
-  return useQuery({
-    queryKey: ['userRanking', categoryId, user?.id],
+  const query = useQuery({
+    queryKey,
     queryFn: async () => {
       console.log('🔍 useUserRankingForCategory - Fetching user ranking:', { categoryId, userId: user?.id });
       
@@ -53,7 +56,8 @@ export const useUserRankingForCategory = (categoryId?: string) => {
 
         console.log('🔍 useUserRankingForCategory - Found complete ranking:', {
           id: ranking.id,
-          athleteCount
+          athleteCount,
+          title: ranking.title
         });
         
         return {
@@ -67,9 +71,24 @@ export const useUserRankingForCategory = (categoryId?: string) => {
       }
     },
     enabled: !!user?.id && !!categoryId,
-    staleTime: 1000 * 30, // Reduced to 30 seconds for fresher data
-    refetchOnMount: 'always', // Always refetch on mount for accurate state
+    staleTime: 1000 * 30, // 30 seconds - fresh data for better UX
+    refetchOnMount: 'always', // Always refetch when component mounts
     refetchOnWindowFocus: false, // Disable to reduce unnecessary requests
     retry: 1,
   });
+
+  // Add logging to track query state changes
+  useEffect(() => {
+    console.log('🔍 useUserRankingForCategory - Query state changed:', {
+      categoryId,
+      userId: user?.id,
+      hasData: !!query.data,
+      isLoading: query.isLoading,
+      isFetching: query.isFetching,
+      isStale: queryClient.getQueryState(queryKey)?.isInvalidated,
+      data: query.data
+    });
+  }, [query.data, query.isLoading, query.isFetching, categoryId, user?.id, queryClient, queryKey]);
+
+  return query;
 };

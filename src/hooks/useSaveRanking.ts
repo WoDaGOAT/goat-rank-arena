@@ -118,12 +118,22 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
         console.warn('🔍 useSaveRanking - Failed to clear localStorage:', error);
       }
       
-      // Invalidate relevant queries to ensure fresh data
+      // Force invalidation of relevant queries to ensure fresh data everywhere
       if (options?.categoryId) {
-        queryClient.invalidateQueries({ queryKey: ['userRanking', options.categoryId] });
-        queryClient.invalidateQueries({ queryKey: ['categoryRankingsCount', options.categoryId] });
+        // Remove queries entirely to force fresh fetch
+        queryClient.removeQueries({ queryKey: ['userRanking', options.categoryId] });
+        queryClient.removeQueries({ queryKey: ['categoryRankingsCount', options.categoryId] });
+        
+        // Also invalidate leaderboard data
         queryClient.invalidateQueries({ queryKey: ['leaderboard', options.categoryId] });
+        
+        console.log('🔍 useSaveRanking - Removed stale queries for category:', options.categoryId);
       }
+      
+      // Invalidate all user ranking queries to be extra safe
+      queryClient.invalidateQueries({ 
+        predicate: (query) => query.queryKey[0] === 'userRanking'
+      });
       
       toast.success("Ranking saved successfully!");
       
