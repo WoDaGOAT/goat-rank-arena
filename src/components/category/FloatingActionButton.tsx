@@ -30,21 +30,10 @@ const FloatingActionButton = ({
     currentUrl: window.location.href
   });
 
-  // Show loading state if still fetching data
-  if (isLoadingUserRanking || isFetchingUserRanking) {
-    console.log('🔍 FloatingActionButton - Showing loading state');
-    return (
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999]">
-        <Button 
-          variant="cta" 
-          className="rounded-full shadow-2xl w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12 opacity-75"
-          disabled
-        >
-          <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
-        </Button>
-      </div>
-    );
-  }
+  // Determine if button should be visible
+  const isLoading = isLoadingUserRanking || isFetchingUserRanking;
+  const shouldShow = userRankingStatus === 'empty' || userRankingStatus === 'incomplete' || userRankingStatus === 'complete';
+  const isVisible = shouldShow && !isLoading;
 
   // Determine button content based on ranking status
   const getButtonContent = () => {
@@ -75,7 +64,9 @@ const FloatingActionButton = ({
     userRankingStatus,
     userRankingId,
     buttonText: buttonContent.text,
-    buttonIcon: ButtonIcon.name
+    buttonIcon: ButtonIcon.name,
+    isVisible,
+    isLoading
   });
 
   const handleClick = (e: React.MouseEvent) => {
@@ -90,18 +81,33 @@ const FloatingActionButton = ({
     buttonContent.action();
   };
 
+  // Always render the container but control visibility
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999]">
+    <div 
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999] transition-opacity duration-200 ease-in-out"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        visibility: isVisible ? 'visible' : 'hidden',
+        pointerEvents: isVisible ? 'auto' : 'none'
+      }}
+    >
       <Button 
         variant="cta" 
         className="rounded-full shadow-2xl hover:scale-105 transition-transform w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12 bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 font-semibold"
         onClick={handleClick}
         title={buttonContent.title}
+        disabled={isLoading}
       >
-        {React.createElement(ButtonIcon, { 
-          className: "h-6 w-6 sm:h-7 sm:w-7 md:h-6 md:w-6 md:mr-2 shrink-0" 
-        })}
-        <span className="hidden md:inline font-semibold">{buttonContent.text}</span>
+        {isLoading ? (
+          <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full" />
+        ) : (
+          <>
+            {React.createElement(ButtonIcon, { 
+              className: "h-6 w-6 sm:h-7 sm:w-7 md:h-6 md:w-6 md:mr-2 shrink-0" 
+            })}
+            <span className="hidden md:inline font-semibold">{buttonContent.text}</span>
+          </>
+        )}
       </Button>
     </div>
   );

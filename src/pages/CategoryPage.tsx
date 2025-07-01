@@ -31,25 +31,56 @@ const CategoryPage = () => {
         errors, 
         refetch 
       }) => {
+        // Always render FloatingActionButton to prevent layout shifts
+        const floatingButton = (
+          <FloatingActionButton
+            userRankingStatus={userRankingStatus}
+            userRankingId={userRanking?.id}
+            categoryId={categoryId}
+            isLoadingUserRanking={isLoading}
+            isFetchingUserRanking={false}
+          />
+        );
+
         // Show loading state
         if (isLoading) {
-          return <CategoryPageLoading />;
+          return (
+            <>
+              <CategoryPageLoading />
+              {floatingButton}
+            </>
+          );
         }
 
         // Handle critical errors (category not found or network issues)
         if (errors.categoryError) {
           const errorMessage = errors.categoryError?.message || '';
           if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-            return <CategoryNetworkError onRetry={refetch.refetchCategory} />;
+            return (
+              <>
+                <CategoryNetworkError onRetry={refetch.refetchCategory} />
+                {floatingButton}
+              </>
+            );
           }
-          return <CategoryNotFound />;
+          return (
+            <>
+              <CategoryNotFound />
+              {floatingButton}
+            </>
+          );
         }
 
         // Handle leaderboard errors
         if (errors.leaderboardError) {
           const errorMessage = errors.leaderboardError?.message || '';
           if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-            return <CategoryNetworkError onRetry={refetch.refetchLeaderboard} />;
+            return (
+              <>
+                <CategoryNetworkError onRetry={refetch.refetchLeaderboard} />
+                {floatingButton}
+              </>
+            );
           }
         }
 
@@ -64,13 +95,7 @@ const CategoryPage = () => {
                 categoryName={dbCategory.name}
                 categoryDescription={dbCategory.description}
               />
-              <FloatingActionButton
-                userRankingStatus={userRankingStatus}
-                userRankingId={userRanking?.id}
-                categoryId={categoryId}
-                isLoadingUserRanking={isLoading}
-                isFetchingUserRanking={false}
-              />
+              {floatingButton}
               <CategoryPageErrorHandler
                 categoryError={errors.categoryError}
                 leaderboardError={errors.leaderboardError}
@@ -84,7 +109,12 @@ const CategoryPage = () => {
         }
 
         // Fallback for unknown state
-        return <CategoryNotFound />;
+        return (
+          <>
+            <CategoryNotFound />
+            {floatingButton}
+          </>
+        );
       }}
     </CategoryPageDataFetcher>
   );
