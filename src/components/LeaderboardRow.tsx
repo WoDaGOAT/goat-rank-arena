@@ -15,19 +15,19 @@ const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowPr
   const getTrendIcon = () => {
     switch (athlete.movement) {
       case "up":
-        return <TrendingUp className="h-4 w-4 text-green-400" />;
+        return <TrendingUp className="h-3 w-3 min-[425px]:h-4 min-[425px]:w-4 text-green-400" />;
       case "down":
-        return <TrendingDown className="h-4 w-4 text-red-400" />;
+        return <TrendingDown className="h-3 w-3 min-[425px]:h-4 min-[425px]:w-4 text-red-400" />;
       default:
-        return <Minus className="h-4 w-4 text-gray-400" />;
+        return <Minus className="h-3 w-3 min-[425px]:h-4 min-[425px]:w-4 text-gray-400" />;
     }
   };
 
   const getRankStyle = () => {
-    if (position === 1) return "text-yellow-400 font-bold text-xl";
-    if (position === 2) return "text-gray-300 font-bold text-lg";
-    if (position === 3) return "text-orange-400 font-bold text-lg";
-    return "text-gray-400 font-semibold";
+    if (position === 1) return "text-yellow-400 font-bold text-lg min-[425px]:text-xl";
+    if (position === 2) return "text-gray-300 font-bold text-base min-[425px]:text-lg";
+    if (position === 3) return "text-orange-400 font-bold text-base min-[425px]:text-lg";
+    return "text-gray-400 font-semibold text-sm min-[425px]:text-base";
   };
 
   const getRankBadge = () => {
@@ -37,25 +37,27 @@ const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowPr
     return null;
   };
 
-  const paddingClass = compact ? "px-3 py-2 sm:px-4 sm:py-3" : "px-4 py-3 sm:px-6 sm:py-4";
+  const paddingClass = compact 
+    ? "px-2 py-2 min-[375px]:px-3 min-[425px]:px-4 min-[425px]:py-3" 
+    : "px-2 py-2 min-[375px]:px-3 min-[375px]:py-3 min-[425px]:px-4 min-[425px]:py-4 sm:px-6";
 
   return (
     <div className={`${paddingClass} hover:bg-white/5 transition-colors duration-200`}>
       {/* Mobile layout */}
-      <div className="md:hidden flex items-center gap-3">
-        <div className={`w-8 text-center ${getRankStyle()}`}>
+      <div className="md:hidden flex items-center gap-2 min-[375px]:gap-3">
+        <div className={`w-6 min-[375px]:w-8 text-center ${getRankStyle()}`}>
           {getRankBadge() || position}
         </div>
-        <Avatar className={`border-2 border-white/20 ${compact ? 'h-10 w-10' : 'h-12 w-12'}`}>
+        <Avatar className={`border-2 border-white/20 ${compact ? 'h-8 w-8 min-[375px]:h-10 min-[375px]:w-10' : 'h-10 w-10 min-[375px]:h-12 min-[375px]:w-12'}`}>
           <AvatarImage src={athlete.imageUrl} alt={sanitize(athlete.name)} />
-          <AvatarFallback>{sanitize(athlete.name).charAt(0)}</AvatarFallback>
+          <AvatarFallback className="text-xs min-[375px]:text-sm">{sanitize(athlete.name).charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <h3 className={`font-semibold text-white truncate ${compact ? 'text-sm' : 'text-base'}`}>
+          <h3 className={`font-semibold text-white truncate ${compact ? 'text-xs min-[375px]:text-sm' : 'text-sm min-[375px]:text-base'}`}>
             {sanitize(athlete.name)}
           </h3>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className={`${compact ? 'text-xs px-2 py-0.5' : 'text-sm'}`}>
+          <div className="flex items-center gap-1 min-[375px]:gap-2 flex-wrap">
+            <Badge variant="secondary" className={`${compact ? 'text-xs px-1.5 py-0.5 min-[375px]:px-2' : 'text-xs min-[375px]:text-sm px-1.5 py-0.5 min-[375px]:px-2'}`}>
               {athlete.points.toLocaleString()}
             </Badge>
             {getTrendIcon()}
