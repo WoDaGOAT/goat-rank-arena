@@ -1,4 +1,3 @@
-
 import DOMPurify from 'dompurify';
 
 // Enhanced sanitization with strict configuration
@@ -9,7 +8,6 @@ export const sanitizeHtml = (html: string): string => {
     KEEP_CONTENT: true,
     RETURN_DOM: false,
     RETURN_DOM_FRAGMENT: false,
-    RETURN_DOM_IMPORT: false,
     SANITIZE_DOM: true,
     SANITIZE_NAMED_PROPS: true,
     FORBID_SCRIPT: true,

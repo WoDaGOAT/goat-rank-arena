@@ -42,6 +42,16 @@ export interface Category {
   leaderboard: Athlete[];
 }
 
+// Add the missing Comment type
+export interface Comment {
+  id: string;
+  comment: string;
+  user_id: string;
+  category_id: string;
+  parent_comment_id?: string;
+  created_at: string;
+}
+
 // New type for user comments on their profile
 export interface UserComment {
   id: string;
@@ -63,6 +73,12 @@ export interface CommentWithUser {
     full_name: string | null;
     avatar_url: string | null;
   } | null;
+}
+
+// Enhanced CommentWithUserData interface
+export interface CommentWithUserData extends Comment {
+  user_full_name: string | null;
+  user_avatar_url: string | null;
 }
 
 // New type for the admin comment management view

@@ -1,21 +1,17 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Comment } from "@/types";
+import { CommentWithUserData } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { sanitizeHtml } from "@/lib/sanitize";
+import { sanitize } from "@/lib/sanitize";
 import EnhancedCommentForm from "./EnhancedCommentForm";
 import { useSecurity } from "@/contexts/SecurityContext";
 
 interface CommentSectionProps {
   categoryId: string;
-}
-
-interface CommentWithUserData extends Comment {
-  user_full_name: string | null;
-  user_avatar_url: string | null;
 }
 
 const CommentSection = ({ categoryId }: CommentSectionProps) => {
@@ -107,18 +103,18 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
           <li key={comment.id} className="bg-white/5 rounded-lg p-4">
             <div className="flex items-start space-x-3">
               <Avatar>
-                <AvatarImage src={comment.user_full_name || undefined} />
+                <AvatarImage src={comment.user_avatar_url || undefined} />
                 <AvatarFallback>{comment.user_full_name?.charAt(0) || 'A'}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <div className="font-medium text-white">{sanitizeHtml(comment.user_full_name || 'Anonymous')}</div>
+                  <div className="font-medium text-white">{sanitize(comment.user_full_name || 'Anonymous')}</div>
                   <div className="text-xs text-gray-400">
                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                   </div>
                 </div>
                 <p className="text-sm text-gray-300 mt-1" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {sanitizeHtml(comment.comment)}
+                  {sanitize(comment.comment)}
                 </p>
                 <div className="mt-2 flex items-center space-x-2">
                   <Button variant="ghost" size="sm" onClick={() => startReply(comment.id)}>
