@@ -1,9 +1,9 @@
-
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SecurityProvider } from "@/contexts/SecurityContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AppRoutes from "@/components/app/AppRoutes";
@@ -31,13 +31,15 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <Toaster />
             <AuthProvider>
-              <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f172a] text-white">
-                <Navbar />
-                <main className="flex-grow">
-                  <AppRoutes />
-                </main>
-                <Footer />
-              </div>
+              <SecurityProvider>
+                <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f172a] text-white">
+                  <Navbar />
+                  <main className="flex-grow">
+                    <AppRoutes />
+                  </main>
+                  <Footer />
+                </div>
+              </SecurityProvider>
             </AuthProvider>
           </QueryClientProvider>
         </HelmetProvider>
