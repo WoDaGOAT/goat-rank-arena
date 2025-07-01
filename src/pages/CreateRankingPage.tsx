@@ -1,8 +1,9 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Category } from "@/types";
 import { ChevronLeft } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRankingForCategory } from "@/hooks/useUserRankingForCategory";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,42 +14,64 @@ const CreateRankingPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [hasRedirected, setHasRedirected] = useState(false);
   
   console.log('🔍 CreateRankingPage - Rendering with:', { categoryId, userId: user?.id, hasRedirected });
   
-  // Clear localStorage on unmount to prevent interference
+  // Clear localStorage and invalidate queries on mount and unmount
   useEffect(() => {
+    if (categoryId) {
+      // Clear localStorage and force fresh queries when entering create page
+      try {
+        localStorage.removeItem('wodagoat_athlete_selection');
+        console.log('🔍 CreateRankingPage - Cleared localStorage on mount');
+      } catch (error) {
+        console.warn('🔍 CreateRankingPage - Failed to clear localStorage on mount:', error);
+      }
+
+      // Force fresh user ranking query
+      queryClient.invalidateQueries({ queryKey: ['userRanking', categoryId] });
+    }
+
     return () => {
+      // Cleanup on unmount
       try {
         localStorage.removeItem('wodagoat_athlete_selection');
         console.log('🔍 CreateRankingPage - Cleared localStorage on unmount');
       } catch (error) {
         console.warn('🔍 CreateRankingPage - Failed to clear localStorage on unmount:', error);
       }
+
+      // Invalidate queries to ensure fresh data when navigating back
+      if (categoryId) {
+        queryClient.invalidateQueries({ queryKey: ['userRanking', categoryId] });
+        queryClient.invalidateQueries({ queryKey: ['categoryRankingsCount', categoryId] });
+      }
     };
-  }, []);
+  }, [categoryId, queryClient]);
   
-  // Don't check for existing ranking if we don't have a user yet
-  const { data: userRanking, isLoading: isLoadingUserRanking, error: userRankingError } = useUserRankingForCategory(
+  // Check user ranking status - only redirect for complete rankings
+  const { status: userRankingStatus, ranking: userRanking, isLoading: isLoadingUserRanking, error: userRankingError } = useUserRankingForCategory(
     user ? categoryId : undefined
   );
   
   console.log('🔍 CreateRankingPage - User ranking check:', {
+    userRankingStatus,
     userRanking,
     isLoadingUserRanking,
     userRankingError,
     hasUser: !!user
   });
 
-  // Only redirect once to prevent loops
+  // Only redirect if user has a COMPLETE ranking and we haven't redirected yet
   useEffect(() => {
-    if (userRanking && userRanking.id && !hasRedirected && user) {
-      console.log('🔍 CreateRankingPage - Redirecting to existing ranking:', userRanking.id);
+    if (userRankingStatus === 'complete' && userRanking?.id && !hasRedirected && user) {
+      console.log('🔍 CreateRankingPage - Redirecting to complete ranking:', userRanking.id);
       setHasRedirected(true);
       navigate(`/ranking/${userRanking.id}`, { replace: true });
     }
-  }, [userRanking, hasRedirected, navigate, user]);
+  }, [userRankingStatus, userRanking, hasRedirected, navigate, user]);
 
   const { data: category, isLoading: isLoadingCategory, error: categoryError } = useQuery<Category | null>({
     queryKey: ['category', categoryId],
@@ -122,19 +145,19 @@ const CreateRankingPage = () => {
     );
   }
 
-  // If user has ranking and we're redirecting, show redirect message
-  if (userRanking && user && !hasRedirected) {
+  // If user has complete ranking and we're redirecting, show redirect message
+  if (userRankingStatus === 'complete' && user && !hasRedirected) {
     console.log('🔍 CreateRankingPage - Showing redirect message');
     return (
       <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
         <main className="flex-grow flex items-center justify-center container mx-auto py-4 sm:py-6 md:py-8 text-center">
           <div className="max-w-md mx-auto">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Redirecting...</h1>
-            <p className="text-gray-300 mb-6 text-sm sm:text-base">You already have a ranking for {category?.name}. Taking you there now.</p>
+            <p className="text-gray-300 mb-6 text-sm sm:text-base">You already have a complete ranking for {category?.name}. Taking you there now.</p>
             <Button 
               onClick={() => {
                 setHasRedirected(true);
-                navigate(`/ranking/${userRanking.id}`, { replace: true });
+                navigate(`/ranking/${userRanking!.id}`, { replace: true });
               }}
               size="lg" 
               className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 border-0 shadow-lg transition-all duration-200 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2"
@@ -167,8 +190,8 @@ const CreateRankingPage = () => {
     );
   }
 
-  // Render the ranking editor
-  console.log('🔍 CreateRankingPage - Rendering RankingEditor with category:', category);
+  // Allow creation for empty or incomplete rankings
+  console.log('🔍 CreateRankingPage - Rendering RankingEditor with category:', category, 'and status:', userRankingStatus);
   return (
     <div className="min-h-screen flex flex-col mb-0" style={{ background: 'linear-gradient(135deg, #190749 0%, #070215 100%)' }}>
       <main className="container mx-auto flex-grow">

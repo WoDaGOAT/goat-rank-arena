@@ -15,16 +15,14 @@ interface FeaturedLeaderboardProps {
 
 const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
   const { user } = useAuth();
-  const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(goatFootballer?.id);
+  const { status: userRankingStatus, ranking: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(goatFootballer?.id);
 
   console.log('🔍 FeaturedLeaderboard - User ranking state:', {
+    userRankingStatus,
     userRanking,
     isLoadingUserRanking,
     categoryId: goatFootballer?.id
   });
-
-  // Only consider it a valid ranking if we have a ranking object with valid ID
-  const hasValidRanking = !!(userRanking && userRanking.id);
 
   // Determine button content based on auth status and existing ranking
   const getButtonContent = () => {
@@ -44,8 +42,8 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
       };
     }
     
-    if (hasValidRanking) {
-      console.log('🔍 FeaturedLeaderboard - Valid ranking found, showing View button');
+    if (userRankingStatus === 'complete' && userRanking?.id) {
+      console.log('🔍 FeaturedLeaderboard - Complete ranking found, showing View button');
       return {
         text: "View My Ranking",
         icon: Eye,
@@ -53,9 +51,9 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
       };
     }
     
-    console.log('🔍 FeaturedLeaderboard - No valid ranking, showing Create button');
+    console.log('🔍 FeaturedLeaderboard - No complete ranking, showing Create button for status:', userRankingStatus);
     return {
-      text: "Create Your Ranking",
+      text: userRankingStatus === 'incomplete' ? "Continue Your Ranking" : "Create Your Ranking",
       icon: Plus,
       href: `/create-ranking/${goatFootballer?.id}`
     };

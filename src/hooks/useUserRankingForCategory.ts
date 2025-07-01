@@ -4,6 +4,20 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 
+type RankingStatus = 'empty' | 'incomplete' | 'complete';
+
+interface RankingData {
+  id: string;
+  title?: string;
+  created_at?: string;
+  athleteCount?: number;
+}
+
+interface UserRankingResult {
+  status: RankingStatus;
+  ranking: RankingData | null;
+}
+
 export const useUserRankingForCategory = (categoryId?: string) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -11,12 +25,12 @@ export const useUserRankingForCategory = (categoryId?: string) => {
 
   const query = useQuery({
     queryKey,
-    queryFn: async () => {
+    queryFn: async (): Promise<UserRankingResult> => {
       console.log('🔍 useUserRankingForCategory - Fetching user ranking:', { categoryId, userId: user?.id });
       
       if (!user?.id || !categoryId) {
-        console.log('🔍 useUserRankingForCategory - No user or categoryId, returning null');
-        return null;
+        console.log('🔍 useUserRankingForCategory - No user or categoryId, returning empty');
+        return { status: 'empty', ranking: null };
       }
 
       try {
@@ -39,35 +53,53 @@ export const useUserRankingForCategory = (categoryId?: string) => {
           throw error;
         }
 
-        // Check if we have a ranking AND it has athletes
+        // Check if we have a ranking
         if (!data || data.length === 0) {
-          console.log('🔍 useUserRankingForCategory - No ranking found');
-          return null;
+          console.log('🔍 useUserRankingForCategory - No ranking found, returning empty');
+          return { status: 'empty', ranking: null };
         }
 
         const ranking = data[0];
         const athleteCount = ranking.ranking_athletes?.length || 0;
         
-        // Only consider it a valid ranking if it has at least 3 athletes (minimum requirement)
-        if (athleteCount < 3) {
-          console.log('🔍 useUserRankingForCategory - Ranking incomplete, only has', athleteCount, 'athletes');
-          return null;
-        }
-
-        console.log('🔍 useUserRankingForCategory - Found complete ranking:', {
+        console.log('🔍 useUserRankingForCategory - Found ranking:', {
           id: ranking.id,
           athleteCount,
           title: ranking.title
         });
-        
-        return {
-          id: ranking.id,
-          title: ranking.title,
-          created_at: ranking.created_at
+
+        // Return different states based on completeness
+        if (athleteCount === 0) {
+          console.log('🔍 useUserRankingForCategory - Ranking has no athletes, returning empty');
+          return { status: 'empty', ranking: null };
+        }
+
+        if (athleteCount < 3) {
+          console.log('🔍 useUserRankingForCategory - Ranking incomplete, only has', athleteCount, 'athletes');
+          return { 
+            status: 'incomplete', 
+            ranking: { 
+              id: ranking.id, 
+              athleteCount,
+              title: ranking.title,
+              created_at: ranking.created_at
+            } 
+          };
+        }
+
+        console.log('🔍 useUserRankingForCategory - Found complete ranking');
+        return { 
+          status: 'complete', 
+          ranking: { 
+            id: ranking.id, 
+            title: ranking.title, 
+            created_at: ranking.created_at,
+            athleteCount
+          } 
         };
       } catch (error) {
         console.error('🔍 useUserRankingForCategory - Fatal error:', error);
-        return null;
+        return { status: 'empty', ranking: null };
       }
     },
     enabled: !!user?.id && !!categoryId,
@@ -79,16 +111,23 @@ export const useUserRankingForCategory = (categoryId?: string) => {
 
   // Add logging to track query state changes
   useEffect(() => {
+    const result = query.data;
     console.log('🔍 useUserRankingForCategory - Query state changed:', {
       categoryId,
       userId: user?.id,
-      hasData: !!query.data,
+      status: result?.status || 'loading',
+      hasRanking: !!result?.ranking,
+      rankingId: result?.ranking?.id,
+      athleteCount: result?.ranking?.athleteCount,
       isLoading: query.isLoading,
       isFetching: query.isFetching,
       isStale: queryClient.getQueryState(queryKey)?.isInvalidated,
-      data: query.data
     });
   }, [query.data, query.isLoading, query.isFetching, categoryId, user?.id, queryClient, queryKey]);
 
-  return query;
+  return {
+    ...query,
+    status: query.data?.status || 'empty',
+    ranking: query.data?.ranking || null
+  };
 };

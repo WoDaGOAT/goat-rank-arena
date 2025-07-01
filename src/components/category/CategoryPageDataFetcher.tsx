@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +18,7 @@ interface CategoryPageDataFetcherProps {
   categoryId: string;
   children: (data: {
     dbCategory: DbCategory | null;
+    userRankingStatus: 'empty' | 'incomplete' | 'complete';
     userRanking: any;
     submittedRankingsCount: number;
     leaderboardAthletes: any[];
@@ -44,11 +46,9 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
     if (categoryId) {
       console.log('🔧 CategoryPageDataFetcher - Force invalidating queries for category:', categoryId);
       
-      // Invalidate user ranking query to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: ['userRanking', categoryId] });
-      
-      // Also invalidate rankings count to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['categoryRankingsCount', categoryId] });
+      // Nuclear option: remove queries entirely to force fresh fetch
+      queryClient.removeQueries({ queryKey: ['userRanking', categoryId] });
+      queryClient.removeQueries({ queryKey: ['categoryRankingsCount', categoryId] });
       
       // Clear any stale localStorage that might interfere
       try {
@@ -70,12 +70,12 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
   }, [categoryId, queryClient]);
   
   // Check if user has existing ranking for this category
-  const { data: userRanking, isLoading: isLoadingUserRanking, isFetching: isFetchingUserRanking, error: userRankingError } = useUserRankingForCategory(categoryId);
+  const { status: userRankingStatus, ranking: userRanking, isLoading: isLoadingUserRanking, isFetching: isFetchingUserRanking, error: userRankingError } = useUserRankingForCategory(categoryId);
   
   console.log('🔧 CategoryPageDataFetcher - User ranking result:', {
-    userRanking: userRanking ? { id: userRanking.id } : null,
+    userRankingStatus,
+    userRanking: userRanking ? { id: userRanking.id, athleteCount: userRanking.athleteCount } : null,
     categoryId,
-    hasRanking: Boolean(userRanking),
     isLoadingUserRanking,
     isFetchingUserRanking
   });
@@ -161,7 +161,8 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
     isLoading,
     dbCategory: !!dbCategory,
     categoryName: dbCategory?.name,
-    userRanking: userRanking ? { id: userRanking.id } : null,
+    userRankingStatus,
+    userRanking: userRanking ? { id: userRanking.id, athleteCount: userRanking.athleteCount } : null,
     submittedRankingsCount,
     leaderboardAthletesCount: leaderboardAthletes?.length || 0,
     hasErrors: !!(categoryError || leaderboardError || userRankingError || rankingsCountError)
@@ -179,6 +180,7 @@ const CategoryPageDataFetcher = ({ categoryId, children }: CategoryPageDataFetch
     <>
       {children({
         dbCategory,
+        userRankingStatus,
         userRanking,
         submittedRankingsCount: submittedRankingsCount || 0,
         leaderboardAthletes: leaderboardAthletes || [],
