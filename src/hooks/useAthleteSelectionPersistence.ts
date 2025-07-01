@@ -1,71 +1,95 @@
 
 import { useCallback } from 'react';
-import { SelectedAthlete } from '@/hooks/useRankingManager';
 
-const STORAGE_KEY = 'pending_athlete_selection';
+interface SelectedAthleteData {
+  id: string;
+  userPoints: number;
+  error?: string | null;
+}
+
+const STORAGE_KEY = 'wodagoat_athlete_selection';
 
 export const useAthleteSelectionPersistence = () => {
-  const saveSelection = useCallback((athletes: SelectedAthlete[], categoryId: string) => {
-    console.log('Saving athlete selection to localStorage:', athletes.length, 'athletes for category:', categoryId);
-    const selectionData = {
-      athletes,
-      categoryId,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(selectionData));
+  const saveSelection = useCallback((athletes: SelectedAthleteData[], categoryId: string) => {
+    try {
+      const selectionData = {
+        categoryId,
+        athletes,
+        timestamp: Date.now(),
+        // Add expiration time (24 hours)
+        expiresAt: Date.now() + (24 * 60 * 60 * 1000)
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(selectionData));
+      console.log('🔍 useAthleteSelectionPersistence - Saved selection:', athletes.length, 'athletes');
+    } catch (error) {
+      console.warn('🔍 useAthleteSelectionPersistence - Failed to save selection:', error);
+    }
   }, []);
 
-  const loadSelection = useCallback((currentCategoryId: string) => {
+  const loadSelection = useCallback((categoryId: string): SelectedAthleteData[] | null => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
-        console.log('No stored athlete selection found');
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) {
+        console.log('🔍 useAthleteSelectionPersistence - No saved selection found');
         return null;
       }
 
-      const selectionData = JSON.parse(stored);
-      console.log('Found stored selection:', selectionData);
+      const selectionData = JSON.parse(saved);
       
-      // Check if the selection is for the current category and not too old (24 hours)
-      if (
-        selectionData.categoryId === currentCategoryId &&
-        Date.now() - selectionData.timestamp < 24 * 60 * 60 * 1000
-      ) {
-        console.log('Loading athlete selection from localStorage:', selectionData.athletes.length, 'athletes');
-        return selectionData.athletes;
-      } else {
-        console.log('Stored selection is for different category or too old, clearing');
+      // Check if data has expired
+      if (selectionData.expiresAt && Date.now() > selectionData.expiresAt) {
+        console.log('🔍 useAthleteSelectionPersistence - Saved selection expired, clearing');
         localStorage.removeItem(STORAGE_KEY);
+        return null;
       }
+
+      // Check if it's for the same category
+      if (selectionData.categoryId !== categoryId) {
+        console.log('🔍 useAthleteSelectionPersistence - Selection for different category, ignoring');
+        return null;
+      }
+
+      console.log('🔍 useAthleteSelectionPersistence - Loaded selection:', selectionData.athletes?.length || 0, 'athletes');
+      return selectionData.athletes || null;
     } catch (error) {
-      console.error('Error loading athlete selection:', error);
+      console.warn('🔍 useAthleteSelectionPersistence - Failed to load selection:', error);
       localStorage.removeItem(STORAGE_KEY);
+      return null;
     }
-    return null;
   }, []);
 
   const clearSelection = useCallback(() => {
-    console.log('Clearing stored athlete selection from localStorage');
-    localStorage.removeItem(STORAGE_KEY);
-  }, []);
-
-  const hasStoredSelection = useCallback((currentCategoryId: string) => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return false;
-
-      const selectionData = JSON.parse(stored);
-      return selectionData.categoryId === currentCategoryId &&
-             Date.now() - selectionData.timestamp < 24 * 60 * 60 * 1000;
-    } catch {
-      return false;
+      localStorage.removeItem(STORAGE_KEY);
+      console.log('🔍 useAthleteSelectionPersistence - Cleared saved selection');
+    } catch (error) {
+      console.warn('🔍 useAthleteSelectionPersistence - Failed to clear selection:', error);
     }
   }, []);
+
+  // Clear expired selections on hook initialization
+  const clearExpiredSelections = useCallback(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const selectionData = JSON.parse(saved);
+        if (selectionData.expiresAt && Date.now() > selectionData.expiresAt) {
+          localStorage.removeItem(STORAGE_KEY);
+          console.log('🔍 useAthleteSelectionPersistence - Cleared expired selection on init');
+        }
+      }
+    } catch (error) {
+      console.warn('🔍 useAthleteSelectionPersistence - Failed to clear expired selections:', error);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  // Clear expired selections on hook initialization
+  clearExpiredSelections();
 
   return {
     saveSelection,
     loadSelection,
-    clearSelection,
-    hasStoredSelection,
+    clearSelection
   };
 };

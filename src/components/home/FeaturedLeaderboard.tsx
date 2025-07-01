@@ -17,32 +17,39 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
   const { user } = useAuth();
   const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(goatFootballer?.id);
 
-  // Determine button text and icon based on auth status and existing ranking
+  // More strict validation for existing ranking
+  const hasValidRanking = !!(userRanking && userRanking.id && userRanking.id.trim() !== '');
+
+  // Determine button content based on auth status and existing ranking
   const getButtonContent = () => {
     if (!user) {
       return {
         text: "Create Your Ranking",
-        icon: Plus
+        icon: Plus,
+        href: `/create-ranking/${goatFootballer?.id}`
       };
     }
     
     if (isLoadingUserRanking) {
       return {
         text: "Loading...",
-        icon: Plus
+        icon: Plus,
+        href: `/create-ranking/${goatFootballer?.id}`
       };
     }
     
-    if (userRanking) {
+    if (hasValidRanking) {
       return {
         text: "View My Ranking",
-        icon: Eye
+        icon: Eye,
+        href: `/ranking/${userRanking.id}`
       };
     }
     
     return {
       text: "Create Your Ranking",
-      icon: Plus
+      icon: Plus,
+      href: `/create-ranking/${goatFootballer?.id}`
     };
   };
 
@@ -73,7 +80,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
               className="rounded-full"
               disabled={isLoadingUserRanking}
             >
-              <Link to={`/create-ranking/${goatFootballer.id}`}>
+              <Link to={buttonContent.href}>
                 <ButtonIcon className="h-5 w-5 mr-2" />
                 {buttonContent.text}
               </Link>

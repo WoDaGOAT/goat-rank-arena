@@ -27,21 +27,22 @@ const FloatingActionButton = ({
     currentUrl: window.location.href
   });
 
-  const buttonText = hasExistingRanking ? "View My Ranking" : "Create Ranking";
-  const buttonIcon = hasExistingRanking ? Eye : Plus;
-  const buttonLink = hasExistingRanking ? `/ranking/${userRankingId}` : `/create-ranking/${categoryId}`;
-  const buttonTitle = hasExistingRanking ? "View Your Ranking" : "Create Your Ranking";
+  // More strict validation for existing ranking
+  const hasValidRanking = hasExistingRanking && userRankingId && userRankingId.trim() !== '';
+  const buttonText = hasValidRanking ? "View My Ranking" : "Create Ranking";
+  const buttonIcon = hasValidRanking ? Eye : Plus;
+  const buttonTitle = hasValidRanking ? "View Your Ranking" : "Create Your Ranking";
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log('🔍 FloatingActionButton - BUTTON CLICKED!', {
       hasExistingRanking,
+      hasValidRanking,
       userRankingId,
       categoryId,
-      targetUrl: buttonLink
     });
     
-    if (hasExistingRanking && userRankingId) {
+    if (hasValidRanking && userRankingId) {
       console.log('🔍 FloatingActionButton - Navigating to existing ranking:', userRankingId);
       navigate(`/ranking/${userRankingId}`, { replace: true });
     } else {
