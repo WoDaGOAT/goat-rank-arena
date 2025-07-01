@@ -1,8 +1,4 @@
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -24,34 +18,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { X, Plus } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FOOTBALL_POSITIONS } from "@/constants/positions";
-
-const athleteSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  country_of_origin: z.string().optional(),
-  nationality: z.string().optional(),
-  year_of_birth: z.number().min(1800).max(new Date().getFullYear()).optional(),
-  date_of_death: z.string().optional(),
-  is_active: z.boolean(),
-  profile_picture_url: z.string().optional(),
-  career_start_year: z.number().min(1800).max(new Date().getFullYear()).optional(),
-  career_end_year: z.number().min(1800).max(new Date().getFullYear()).optional(),
-}).refine((data) => {
-  if (data.career_start_year && data.career_end_year) {
-    return data.career_end_year >= data.career_start_year;
-  }
-  return true;
-}, {
-  message: "Career end year must be greater than or equal to career start year",
-  path: ["career_end_year"],
-});
-
-type AthleteFormData = z.infer<typeof athleteSchema>;
+import { useEditAthleteForm } from "./editAthlete/useEditAthleteForm";
+import { BasicInfoFields } from "./editAthlete/BasicInfoFields";
+import { CareerInfoFields } from "./editAthlete/CareerInfoFields";
+import { PositionsManager } from "./editAthlete/PositionsManager";
 
 interface EditAthleteDialogProps {
   athlete: any;
@@ -61,119 +31,14 @@ interface EditAthleteDialogProps {
 }
 
 const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: EditAthleteDialogProps) => {
-  const [positions, setPositions] = useState<string[]>([]);
-  const [selectedPosition, setSelectedPosition] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const queryClient = useQueryClient();
-
-  const form = useForm<AthleteFormData>({
-    resolver: zodResolver(athleteSchema),
-    defaultValues: {
-      name: "",
-      country_of_origin: "",
-      nationality: "",
-      year_of_birth: undefined,
-      date_of_death: "",
-      is_active: true,
-      profile_picture_url: "",
-      career_start_year: undefined,
-      career_end_year: undefined,
-    },
-  });
-
-  // Reset form and positions when athlete changes or dialog opens
-  useEffect(() => {
-    if (athlete && open) {
-      console.log('Resetting form with athlete data:', athlete);
-      
-      const formData = {
-        name: athlete.name || "",
-        country_of_origin: athlete.country_of_origin || "",
-        nationality: athlete.nationality || "",
-        year_of_birth: athlete.year_of_birth || undefined,
-        date_of_death: athlete.date_of_death || "",
-        is_active: athlete.is_active ?? true,
-        profile_picture_url: athlete.profile_picture_url || "",
-        career_start_year: athlete.career_start_year || undefined,
-        career_end_year: athlete.career_end_year || undefined,
-      };
-      
-      form.reset(formData);
-      setPositions(athlete.positions || []);
-      setSelectedPosition("");
-    }
-  }, [athlete, open, form]);
-
-  // Clear form when dialog closes
-  useEffect(() => {
-    if (!open) {
-      form.reset();
-      setPositions([]);
-      setSelectedPosition("");
-      setIsSubmitting(false);
-    }
-  }, [open, form]);
-
-  const addPosition = () => {
-    if (selectedPosition && !positions.includes(selectedPosition)) {
-      setPositions([...positions, selectedPosition]);
-      setSelectedPosition("");
-    }
-  };
-
-  const removePosition = (position: string) => {
-    setPositions(positions.filter(p => p !== position));
-  };
-
-  const onSubmit = async (data: AthleteFormData) => {
-    if (!athlete?.id) {
-      toast.error("No athlete selected for editing");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      console.log('Submitting athlete update:', data);
-
-      const updates = {
-        name: data.name,
-        country_of_origin: data.country_of_origin || null,
-        nationality: data.nationality || null,
-        year_of_birth: data.year_of_birth || null,
-        date_of_death: data.date_of_death || null,
-        is_active: data.is_active,
-        positions: positions.length > 0 ? positions : null,
-        profile_picture_url: data.profile_picture_url || null,
-        career_start_year: data.career_start_year || null,
-        career_end_year: data.career_end_year || null,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase
-        .from("athletes")
-        .update(updates)
-        .eq("id", athlete.id);
-
-      if (error) throw error;
-
-      toast.success("Athlete updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["athletesAdmin"] });
-      queryClient.invalidateQueries({ queryKey: ["athletes"] });
-      onAthleteUpdated();
-      onOpenChange(false);
-    } catch (error: any) {
-      console.error("Error updating athlete:", error);
-      toast.error(error.message || "Failed to update athlete");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleClose = () => {
-    if (!isSubmitting) {
-      onOpenChange(false);
-    }
-  };
+  const {
+    form,
+    positions,
+    setPositions,
+    isSubmitting,
+    onSubmit,
+    handleClose,
+  } = useEditAthleteForm({ athlete, open, onAthleteUpdated, onOpenChange });
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -187,156 +52,9 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Athlete full name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <BasicInfoFields control={form.control} />
 
-              <FormField
-                control={form.control}
-                name="country_of_origin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Country of Origin</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Birth country" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="nationality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nationality</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nationality" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="year_of_birth"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Year of Birth</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="YYYY" 
-                        min="1800" 
-                        max={new Date().getFullYear()}
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="career_start_year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Career Start Year</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="YYYY" 
-                        min="1800" 
-                        max={new Date().getFullYear()}
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Year the professional career started
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="career_end_year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Career End Year</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="YYYY" 
-                        min="1800" 
-                        max={new Date().getFullYear()}
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Year the professional career ended (leave empty if active)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="date_of_death"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date of Death</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Only fill if the athlete is deceased
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel>Active Status</FormLabel>
-                      <FormDescription>
-                        Is this athlete currently active?
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
+            <CareerInfoFields control={form.control} />
 
             <FormField
               control={form.control}
@@ -355,42 +73,10 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
               )}
             />
 
-            <div className="space-y-3">
-              <FormLabel>Positions</FormLabel>
-              <div className="flex gap-2">
-                <Select value={selectedPosition} onValueChange={setSelectedPosition}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select a position" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-300 shadow-lg z-50">
-                    {FOOTBALL_POSITIONS.map((position) => (
-                      <SelectItem key={position} value={position} className="hover:bg-gray-100">
-                        {position}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button 
-                  type="button" 
-                  onClick={addPosition} 
-                  size="sm"
-                  disabled={!selectedPosition || positions.includes(selectedPosition)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {positions.map((position) => (
-                  <Badge key={position} variant="secondary" className="flex items-center gap-1">
-                    {position}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => removePosition(position)}
-                    />
-                  </Badge>
-                ))}
-              </div>
-            </div>
+            <PositionsManager 
+              positions={positions} 
+              onPositionsChange={setPositions} 
+            />
 
             <DialogFooter>
               <Button
