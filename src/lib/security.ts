@@ -6,13 +6,8 @@ export const sanitizeHtml = (html: string): string => {
     ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u'],
     ALLOWED_ATTR: [],
     KEEP_CONTENT: true,
-    RETURN_DOM: false,
-    RETURN_DOM_FRAGMENT: false,
-    SANITIZE_DOM: true,
-    SANITIZE_NAMED_PROPS: true,
-    FORBID_SCRIPT: true,
     FORBID_TAGS: ['script', 'object', 'embed', 'form', 'input', 'textarea', 'button'],
-    FORBID_ATTR: ['onclick', 'onload', 'onerror', 'onmouseover', 'onfocus', 'onblur', 'javascript:']
+    FORBID_ATTR: ['onclick', 'onload', 'onerror', 'onmouseover', 'onfocus', 'onblur']
   });
 };
 
