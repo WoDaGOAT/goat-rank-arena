@@ -61,7 +61,7 @@ export interface UserComment {
   categories: { name: string | null } | null;
 }
 
-// New type for comments with user profile information
+// New type for comments with user profile information - FIXED
 export interface CommentWithUser {
   id: string;
   comment: string;
@@ -75,10 +75,14 @@ export interface CommentWithUser {
   } | null;
 }
 
-// Enhanced CommentWithUserData interface
+// Enhanced CommentWithUserData interface - FIXED
 export interface CommentWithUserData extends Comment {
   user_full_name: string | null;
   user_avatar_url: string | null;
+  profiles?: {
+    full_name: string | null;
+    avatar_url: string | null;
+  };
 }
 
 // New type for the admin comment management view

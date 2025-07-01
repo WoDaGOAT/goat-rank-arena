@@ -30,7 +30,7 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
       try {
         const { data, error } = await supabase
           .from('category_comments')
-          .select('*, user_profiles(full_name, avatar_url)')
+          .select('*, profiles(full_name, avatar_url)')
           .eq('category_id', categoryId)
           .order('created_at', { ascending: false });
 
@@ -46,8 +46,8 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
 
         const enrichedComments = data.map(comment => ({
           ...comment,
-          user_full_name: comment.user_profiles?.full_name || 'Anonymous',
-          user_avatar_url: comment.user_profiles?.avatar_url || null,
+          user_full_name: comment.profiles?.full_name || 'Anonymous',
+          user_avatar_url: comment.profiles?.avatar_url || null,
         })) as CommentWithUserData[];
 
         setComments(enrichedComments);
