@@ -44,29 +44,34 @@ export const useAnalytics = () => {
   const detectTrafficSource = (referrer: string): string => {
     if (!referrer) return 'direct';
     
-    const hostname = new URL(referrer).hostname.toLowerCase();
-    
-    // Social media sources
-    if (hostname.includes('facebook.com') || hostname.includes('fb.com')) return 'facebook';
-    if (hostname.includes('twitter.com') || hostname.includes('t.co')) return 'twitter';
-    if (hostname.includes('instagram.com')) return 'instagram';
-    if (hostname.includes('linkedin.com')) return 'linkedin';
-    if (hostname.includes('tiktok.com')) return 'tiktok';
-    if (hostname.includes('youtube.com')) return 'youtube';
-    
-    // Search engines
-    if (hostname.includes('google.com')) return 'google';
-    if (hostname.includes('bing.com')) return 'bing';
-    if (hostname.includes('yahoo.com')) return 'yahoo';
-    
-    // Ad networks
-    if (hostname.includes('googleads.g.doubleclick.net')) return 'google_ads';
-    if (hostname.includes('facebook.com')) return 'facebook_ads';
-    
-    return 'referral';
+    try {
+      const hostname = new URL(referrer).hostname.toLowerCase();
+      
+      // Social media sources
+      if (hostname.includes('facebook.com') || hostname.includes('fb.com')) return 'facebook';
+      if (hostname.includes('twitter.com') || hostname.includes('t.co')) return 'twitter';
+      if (hostname.includes('instagram.com')) return 'instagram';
+      if (hostname.includes('linkedin.com')) return 'linkedin';
+      if (hostname.includes('tiktok.com')) return 'tiktok';
+      if (hostname.includes('youtube.com')) return 'youtube';
+      
+      // Search engines
+      if (hostname.includes('google.com')) return 'google';
+      if (hostname.includes('bing.com')) return 'bing';
+      if (hostname.includes('yahoo.com')) return 'yahoo';
+      
+      // Ad networks
+      if (hostname.includes('googleads.g.doubleclick.net')) return 'google_ads';
+      if (hostname.includes('facebook.com')) return 'facebook_ads';
+      
+      return 'referral';
+    } catch (error) {
+      console.warn('Error parsing referrer URL:', error);
+      return 'unknown';
+    }
   };
 
-  // Track analytics event
+  // Track analytics event with error handling
   const trackEvent = useCallback(async (
     eventType: string, 
     properties: Record<string, any> = {},
@@ -78,11 +83,11 @@ export const useAnalytics = () => {
       timeSpentSeconds?: number;
     }
   ) => {
-    const sessionId = getSessionId();
-    const trafficSource = getTrafficSource();
-    
     try {
-      await supabase.from('analytics_events').insert({
+      const sessionId = getSessionId();
+      const trafficSource = getTrafficSource();
+      
+      const eventData = {
         event_type: eventType,
         user_id: user?.id || null,
         session_id: sessionId,
@@ -101,10 +106,20 @@ export const useAnalytics = () => {
         interaction_type: additionalData?.interactionType || null,
         form_step: additionalData?.formStep || null,
         time_spent_seconds: additionalData?.timeSpentSeconds || null,
-      });
+      };
 
-      // Update or create user session
-      await supabase.from('user_sessions').upsert({
+      // Insert analytics event with retry logic
+      const { error: analyticsError } = await supabase
+        .from('analytics_events')
+        .insert(eventData);
+
+      if (analyticsError) {
+        console.warn('Analytics event tracking failed:', analyticsError);
+        return; // Fail silently, don't break the app
+      }
+
+      // Update or create user session with error handling
+      const sessionData = {
         session_id: sessionId,
         user_id: user?.id || null,
         traffic_source: trafficSource.source,
@@ -115,64 +130,106 @@ export const useAnalytics = () => {
         page_views: 1, // This will be handled by database triggers
         user_agent: navigator.userAgent,
         updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'session_id',
-      });
+      };
+
+      const { error: sessionError } = await supabase
+        .from('user_sessions')
+        .upsert(sessionData, {
+          onConflict: 'session_id',
+        });
+
+      if (sessionError) {
+        console.warn('User session update failed:', sessionError);
+        // Continue anyway, session tracking is not critical
+      }
     } catch (error) {
-      console.error('Analytics tracking error:', error);
+      console.warn('Analytics tracking error:', error);
+      // Fail silently to not break the user experience
     }
   }, [user, getSessionId, getTrafficSource]);
 
-  // Track page view
+  // Track page view with error handling
   const trackPageView = useCallback((page: string, additionalData?: Record<string, any>) => {
-    trackEvent('page_view', { page, ...additionalData }, {
-      pageUrl: page,
-      previousPageUrl: sessionStorage.getItem('previous_page_url') || undefined,
-    });
-    
-    // Store current page as previous for next page view
-    sessionStorage.setItem('previous_page_url', page);
+    try {
+      trackEvent('page_view', { page, ...additionalData }, {
+        pageUrl: page,
+        previousPageUrl: sessionStorage.getItem('previous_page_url') || undefined,
+      });
+      
+      // Store current page as previous for next page view
+      sessionStorage.setItem('previous_page_url', page);
+    } catch (error) {
+      console.warn('Page view tracking error:', error);
+    }
   }, [trackEvent]);
 
-  // Track signup
+  // Track signup with error handling
   const trackSignup = useCallback((method?: string) => {
-    trackEvent('signup', { method });
+    try {
+      trackEvent('signup', { method });
+    } catch (error) {
+      console.warn('Signup tracking error:', error);
+    }
   }, [trackEvent]);
 
-  // Track ranking created
+  // Track ranking created with error handling
   const trackRankingCreated = useCallback((categoryId: string, categoryName: string) => {
-    trackEvent('ranking_created', { categoryId, categoryName });
+    try {
+      trackEvent('ranking_created', { categoryId, categoryName });
+    } catch (error) {
+      console.warn('Ranking created tracking error:', error);
+    }
   }, [trackEvent]);
 
-  // Track comment posted
+  // Track comment posted with error handling
   const trackCommentPosted = useCallback((categoryId: string, rankingId?: string) => {
-    trackEvent('comment_posted', { categoryId, rankingId });
+    try {
+      trackEvent('comment_posted', { categoryId, rankingId });
+    } catch (error) {
+      console.warn('Comment posted tracking error:', error);
+    }
   }, [trackEvent]);
 
-  // Track quiz completed
+  // Track quiz completed with error handling
   const trackQuizCompleted = useCallback((quizId: string, score: number) => {
-    trackEvent('quiz_completed', { quizId, score });
+    try {
+      trackEvent('quiz_completed', { quizId, score });
+    } catch (error) {
+      console.warn('Quiz completed tracking error:', error);
+    }
   }, [trackEvent]);
 
-  // Track form step interactions
+  // Track form step interactions with error handling
   const trackFormStep = useCallback((stepName: string, action: 'start' | 'complete', timeSpent?: number) => {
-    trackEvent(`form_step_${action}`, { step: stepName }, {
-      formStep: stepName,
-      timeSpentSeconds: timeSpent,
-    });
+    try {
+      trackEvent(`form_step_${action}`, { step: stepName }, {
+        formStep: stepName,
+        timeSpentSeconds: timeSpent,
+      });
+    } catch (error) {
+      console.warn('Form step tracking error:', error);
+    }
   }, [trackEvent]);
 
-  // Track ranking flow interactions
+  // Track ranking flow interactions with error handling
   const trackRankingFlow = useCallback((stepName: string, action: 'start' | 'complete', timeSpent?: number) => {
-    trackEvent(`ranking_${action}`, { step: stepName }, {
-      interactionType: 'ranking_flow',
-      timeSpentSeconds: timeSpent,
-    });
+    try {
+      trackEvent(`ranking_${action}`, { step: stepName }, {
+        interactionType: 'ranking_flow',
+        timeSpentSeconds: timeSpent,
+      });
+    } catch (error) {
+      console.warn('Ranking flow tracking error:', error);
+    }
   }, [trackEvent]);
 
-  // Auto-track page views on route changes
+  // Auto-track page views on route changes with error handling
   useEffect(() => {
-    trackPageView(window.location.pathname + window.location.search);
+    try {
+      trackPageView(window.location.pathname + window.location.search);
+    } catch (error) {
+      console.warn('Initial page view tracking error:', error);
+    }
   }, [trackPageView]);
 
   return {
