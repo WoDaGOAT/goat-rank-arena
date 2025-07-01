@@ -1,7 +1,7 @@
 
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { QueryClient as QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
@@ -18,19 +18,11 @@ const queryClient = new QueryClient({
   },
 });
 
-function QueryClient({ children }: { children: React.ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-}
-
 function App() {
   return (
     <BrowserRouter>
       <HelmetProvider>
-        <QueryClient>
+        <QueryClientProvider client={queryClient}>
           <Toaster />
           <AuthProvider>
             <AnalyticsErrorBoundary>
@@ -43,7 +35,7 @@ function App() {
               </div>
             </AnalyticsErrorBoundary>
           </AuthProvider>
-        </QueryClient>
+        </QueryClientProvider>
       </HelmetProvider>
     </BrowserRouter>
   );
