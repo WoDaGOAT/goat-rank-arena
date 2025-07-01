@@ -33,9 +33,9 @@ function App() {
             <Toaster />
             <AuthProvider>
               <SecurityProvider>
-                <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f172a] text-white">
+                <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f172a] text-white">
                   <Navbar />
-                  <main className="flex-grow w-full max-w-screen-xl px-4 mx-auto">
+                  <main className="flex-grow pt-20 w-full max-w-screen-xl px-4 mx-auto">
                     <AppRoutes />
                   </main>
                   <Footer />
