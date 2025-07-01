@@ -28,7 +28,7 @@ const CategoryPageContent = ({
 
   return (
     <>
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full max-w-4xl px-4 mx-auto">
         <div className="mb-6 sm:mb-8">
           <GlobalLeaderboard 
             athletes={leaderboardAthletes} 
@@ -41,7 +41,6 @@ const CategoryPageContent = ({
         </div>
       </div>
       
-      {/* Comment Section */}
       <div className="mt-6 sm:mt-8">
         <CommentSection categoryId={categoryId} />
       </div>

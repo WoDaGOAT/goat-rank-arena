@@ -21,7 +21,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 pb-36 pt-4 lg:px-0 lg:pb-20">
+    <div key={categoryId} className="flex flex-col w-full min-h-screen px-4 pb-4 lg:pb-20">
       <CategoryPageDataFetcher categoryId={categoryId}>
         {({ 
           dbCategory, 
