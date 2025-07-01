@@ -21,7 +21,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="pb-20 sm:pb-24 md:pb-28">
+    <div className="pb-4 lg:pb-20">
       <CategoryPageDataFetcher categoryId={categoryId}>
         {({ 
           dbCategory, 

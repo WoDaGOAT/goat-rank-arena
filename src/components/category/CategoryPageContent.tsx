@@ -41,8 +41,8 @@ const CategoryPageContent = ({
         </div>
       </div>
       
-      {/* Full-width Comment Section with bottom padding for FAB */}
-      <div className="mt-6 sm:mt-8 pb-4 sm:pb-6">
+      {/* Comment Section */}
+      <div className="mt-6 sm:mt-8">
         <CommentSection categoryId={categoryId} />
       </div>
     </>
