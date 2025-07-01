@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, Eye } from "lucide-react";
 
@@ -8,16 +8,14 @@ interface FloatingActionButtonProps {
   userRankingStatus: 'empty' | 'incomplete' | 'complete';
   userRankingId?: string;
   categoryId: string;
-  isLoadingUserRanking: boolean;
-  isFetchingUserRanking: boolean;
+  isLoading: boolean;
 }
 
 const FloatingActionButton = ({ 
   userRankingStatus,
   userRankingId, 
   categoryId, 
-  isLoadingUserRanking,
-  isFetchingUserRanking 
+  isLoading
 }: FloatingActionButtonProps) => {
   const navigate = useNavigate();
   
@@ -25,20 +23,12 @@ const FloatingActionButton = ({
     userRankingStatus,
     userRankingId,
     categoryId,
-    isLoadingUserRanking,
-    isFetchingUserRanking,
-    currentUrl: window.location.href
+    isLoading
   });
-
-  // Determine if button should be visible
-  const isLoading = isLoadingUserRanking || isFetchingUserRanking;
-  const shouldShow = userRankingStatus === 'empty' || userRankingStatus === 'incomplete' || userRankingStatus === 'complete';
-  const isVisible = shouldShow && !isLoading;
 
   // Determine button content based on ranking status
   const getButtonContent = () => {
     if (userRankingStatus === 'complete' && userRankingId) {
-      console.log('🔍 FloatingActionButton - Complete ranking found, showing View button');
       return {
         text: "View My Ranking",
         icon: Eye,
@@ -47,8 +37,6 @@ const FloatingActionButton = ({
       };
     }
     
-    // For empty or incomplete rankings, show Create button
-    console.log('🔍 FloatingActionButton - No complete ranking, showing Create button for status:', userRankingStatus);
     return {
       text: "Create Ranking",
       icon: Plus,
@@ -60,14 +48,8 @@ const FloatingActionButton = ({
   const buttonContent = getButtonContent();
   const ButtonIcon = buttonContent.icon;
 
-  console.log('🔍 FloatingActionButton - Button decision:', {
-    userRankingStatus,
-    userRankingId,
-    buttonText: buttonContent.text,
-    buttonIcon: ButtonIcon.name,
-    isVisible,
-    isLoading
-  });
+  // Show button for empty, incomplete, or complete rankings
+  const shouldShow = userRankingStatus === 'empty' || userRankingStatus === 'incomplete' || userRankingStatus === 'complete';
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -81,14 +63,13 @@ const FloatingActionButton = ({
     buttonContent.action();
   };
 
-  // Always render the container but control visibility
   return (
     <div 
-      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999] transition-opacity duration-200 ease-in-out"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999] transition-opacity duration-300 ease-in-out"
       style={{
-        opacity: isVisible ? 1 : 0,
-        visibility: isVisible ? 'visible' : 'hidden',
-        pointerEvents: isVisible ? 'auto' : 'none'
+        opacity: shouldShow && !isLoading ? 1 : 0,
+        visibility: shouldShow && !isLoading ? 'visible' : 'hidden',
+        pointerEvents: shouldShow && !isLoading ? 'auto' : 'none'
       }}
     >
       <Button 
