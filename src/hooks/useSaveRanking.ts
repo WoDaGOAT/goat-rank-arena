@@ -1,5 +1,5 @@
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -29,6 +29,7 @@ interface SelectedAthleteInput {
 export const useSaveRanking = (options?: { categoryId?: string }) => {
   const { user, openAuthDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   // Initialize analytics with error handling
   let trackRankingCreated = (categoryId: string, categoryName: string) => {};
@@ -107,7 +108,23 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
       return rankingData.id;
     },
     onSuccess: (rankingId) => {
-      console.log('🔍 useSaveRanking - Success callback, navigating to ranking:', rankingId);
+      console.log('🔍 useSaveRanking - Success callback, invalidating queries and navigating');
+      
+      // Clear localStorage to prevent interference
+      try {
+        localStorage.removeItem('wodagoat_athlete_selection');
+        console.log('🔍 useSaveRanking - Cleared localStorage selection');
+      } catch (error) {
+        console.warn('🔍 useSaveRanking - Failed to clear localStorage:', error);
+      }
+      
+      // Invalidate relevant queries to ensure fresh data
+      if (options?.categoryId) {
+        queryClient.invalidateQueries({ queryKey: ['userRanking', options.categoryId] });
+        queryClient.invalidateQueries({ queryKey: ['categoryRankingsCount', options.categoryId] });
+        queryClient.invalidateQueries({ queryKey: ['leaderboard', options.categoryId] });
+      }
+      
       toast.success("Ranking saved successfully!");
       
       // Use replace: true to ensure clean navigation

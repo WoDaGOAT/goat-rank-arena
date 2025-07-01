@@ -19,7 +19,7 @@ const FloatingActionButton = ({
 }: FloatingActionButtonProps) => {
   const navigate = useNavigate();
   
-  console.log('🔍 FloatingActionButton - DETAILED PROPS:', {
+  console.log('🔍 FloatingActionButton - Props:', {
     hasExistingRanking,
     userRankingId,
     categoryId,
@@ -27,15 +27,39 @@ const FloatingActionButton = ({
     currentUrl: window.location.href
   });
 
-  // More strict validation for existing ranking
+  // Defensive validation with fallback logic
   const hasValidRanking = hasExistingRanking && userRankingId && userRankingId.trim() !== '';
+  
+  // If we're loading, show loading state
+  if (isLoadingUserRanking) {
+    console.log('🔍 FloatingActionButton - Showing loading state');
+    return (
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999]">
+        <Button 
+          variant="cta" 
+          className="rounded-full shadow-2xl w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12 opacity-75"
+          disabled
+        >
+          <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+        </Button>
+      </div>
+    );
+  }
+
+  // Determine button state based on ranking validity
   const buttonText = hasValidRanking ? "View My Ranking" : "Create Ranking";
   const buttonIcon = hasValidRanking ? Eye : Plus;
   const buttonTitle = hasValidRanking ? "View Your Ranking" : "Create Your Ranking";
 
+  console.log('🔍 FloatingActionButton - Button state:', {
+    buttonText,
+    hasValidRanking,
+    userRankingId
+  });
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('🔍 FloatingActionButton - BUTTON CLICKED!', {
+    console.log('🔍 FloatingActionButton - Button clicked:', {
       hasExistingRanking,
       hasValidRanking,
       userRankingId,
@@ -50,24 +74,6 @@ const FloatingActionButton = ({
       navigate(`/create-ranking/${categoryId}`);
     }
   };
-
-  // Show loading state while checking for existing ranking
-  if (isLoadingUserRanking) {
-    console.log('🔍 FloatingActionButton - SHOWING LOADING STATE');
-    return (
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999]">
-        <Button 
-          variant="cta" 
-          className="rounded-full shadow-2xl w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center md:w-auto md:px-6 md:py-3 md:h-12 opacity-75"
-          disabled
-        >
-          <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
-        </Button>
-      </div>
-    );
-  }
-
-  console.log('🔍 FloatingActionButton - RENDERING MAIN BUTTON');
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-[9999]">

@@ -17,8 +17,14 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
   const { user } = useAuth();
   const { data: userRanking, isLoading: isLoadingUserRanking } = useUserRankingForCategory(goatFootballer?.id);
 
-  // More strict validation for existing ranking
-  const hasValidRanking = !!(userRanking && userRanking.id && userRanking.id.trim() !== '');
+  console.log('🔍 FeaturedLeaderboard - User ranking state:', {
+    userRanking,
+    isLoadingUserRanking,
+    categoryId: goatFootballer?.id
+  });
+
+  // Only consider it a valid ranking if we have a ranking object with valid ID
+  const hasValidRanking = !!(userRanking && userRanking.id);
 
   // Determine button content based on auth status and existing ranking
   const getButtonContent = () => {
@@ -39,6 +45,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
     }
     
     if (hasValidRanking) {
+      console.log('🔍 FeaturedLeaderboard - Valid ranking found, showing View button');
       return {
         text: "View My Ranking",
         icon: Eye,
@@ -46,6 +53,7 @@ const FeaturedLeaderboard = ({ goatFootballer }: FeaturedLeaderboardProps) => {
       };
     }
     
+    console.log('🔍 FeaturedLeaderboard - No valid ranking, showing Create button');
     return {
       text: "Create Your Ranking",
       icon: Plus,

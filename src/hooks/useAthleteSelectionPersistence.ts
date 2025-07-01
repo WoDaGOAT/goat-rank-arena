@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 interface SelectedAthleteData {
   id: string;
@@ -10,14 +10,19 @@ interface SelectedAthleteData {
 const STORAGE_KEY = 'wodagoat_athlete_selection';
 
 export const useAthleteSelectionPersistence = () => {
+  // Clear expired selections on hook initialization
+  useEffect(() => {
+    clearExpiredSelections();
+  }, []);
+
   const saveSelection = useCallback((athletes: SelectedAthleteData[], categoryId: string) => {
     try {
       const selectionData = {
         categoryId,
         athletes,
         timestamp: Date.now(),
-        // Add expiration time (24 hours)
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000)
+        // Reduced expiration time to 1 hour to prevent stale data interference
+        expiresAt: Date.now() + (60 * 60 * 1000)
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(selectionData));
       console.log('🔍 useAthleteSelectionPersistence - Saved selection:', athletes.length, 'athletes');
@@ -45,7 +50,8 @@ export const useAthleteSelectionPersistence = () => {
 
       // Check if it's for the same category
       if (selectionData.categoryId !== categoryId) {
-        console.log('🔍 useAthleteSelectionPersistence - Selection for different category, ignoring');
+        console.log('🔍 useAthleteSelectionPersistence - Selection for different category, clearing');
+        localStorage.removeItem(STORAGE_KEY);
         return null;
       }
 
@@ -67,7 +73,7 @@ export const useAthleteSelectionPersistence = () => {
     }
   }, []);
 
-  // Clear expired selections on hook initialization
+  // Clear expired selections
   const clearExpiredSelections = useCallback(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -83,9 +89,6 @@ export const useAthleteSelectionPersistence = () => {
       localStorage.removeItem(STORAGE_KEY);
     }
   }, []);
-
-  // Clear expired selections on hook initialization
-  clearExpiredSelections();
 
   return {
     saveSelection,
