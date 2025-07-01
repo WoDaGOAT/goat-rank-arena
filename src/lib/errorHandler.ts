@@ -1,6 +1,7 @@
 
 import { toast } from 'sonner';
 import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
+import React from 'react';
 
 interface ErrorContext {
   component?: string;
@@ -42,8 +43,8 @@ export const handleSecureError = (
 
   // Log security-relevant errors
   if (isSecurityRelevant(error)) {
-    const { logSuspiciousActivity } = useSecurityMonitoring();
-    logSuspiciousActivity({
+    // Note: This would need to be called from a component context
+    console.warn('Security-relevant error detected:', {
       action: 'security_error_detected',
       error_type: error.name,
       error_code: (error as SecureError).code,
@@ -95,23 +96,22 @@ const isSecurityRelevant = (error: Error): boolean => {
 export const withSecurityErrorBoundary = <T extends React.ComponentType<any>>(
   Component: T,
   fallbackComponent?: React.ComponentType
-): T => {
-  const WrappedComponent = (props: any) => {
+): React.ComponentType<React.ComponentProps<T>> => {
+  const WrappedComponent: React.ComponentType<React.ComponentProps<T>> = (props) => {
     try {
-      return <Component {...props} />;
+      return React.createElement(Component, props);
     } catch (error) {
       handleSecureError(error as Error, {
         component: Component.name
       });
       
       if (fallbackComponent) {
-        const FallbackComponent = fallbackComponent;
-        return <FallbackComponent />;
+        return React.createElement(fallbackComponent);
       }
       
-      return <div>Something went wrong. Please refresh the page.</div>;
+      return React.createElement('div', {}, 'Something went wrong. Please refresh the page.');
     }
   };
 
-  return WrappedComponent as T;
+  return WrappedComponent;
 };
