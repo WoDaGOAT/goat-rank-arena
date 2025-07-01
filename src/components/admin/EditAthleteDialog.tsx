@@ -81,22 +81,38 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
     },
   });
 
+  // Reset form and positions when athlete changes or dialog opens
   useEffect(() => {
-    if (athlete) {
-      form.reset({
+    if (athlete && open) {
+      console.log('Resetting form with athlete data:', athlete);
+      
+      const formData = {
         name: athlete.name || "",
         country_of_origin: athlete.country_of_origin || "",
         nationality: athlete.nationality || "",
         year_of_birth: athlete.year_of_birth || undefined,
         date_of_death: athlete.date_of_death || "",
-        is_active: athlete.is_active,
+        is_active: athlete.is_active ?? true,
         profile_picture_url: athlete.profile_picture_url || "",
         career_start_year: athlete.career_start_year || undefined,
         career_end_year: athlete.career_end_year || undefined,
-      });
+      };
+      
+      form.reset(formData);
       setPositions(athlete.positions || []);
+      setSelectedPosition("");
     }
-  }, [athlete, form]);
+  }, [athlete, open, form]);
+
+  // Clear form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+      setPositions([]);
+      setSelectedPosition("");
+      setIsSubmitting(false);
+    }
+  }, [open, form]);
 
   const addPosition = () => {
     if (selectedPosition && !positions.includes(selectedPosition)) {
@@ -110,8 +126,14 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
   };
 
   const onSubmit = async (data: AthleteFormData) => {
+    if (!athlete?.id) {
+      toast.error("No athlete selected for editing");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      console.log('Submitting athlete update:', data);
 
       const updates = {
         name: data.name,
@@ -138,6 +160,7 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
       queryClient.invalidateQueries({ queryKey: ["athletesAdmin"] });
       queryClient.invalidateQueries({ queryKey: ["athletes"] });
       onAthleteUpdated();
+      onOpenChange(false);
     } catch (error: any) {
       console.error("Error updating athlete:", error);
       toast.error(error.message || "Failed to update athlete");
@@ -146,11 +169,17 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
     }
   };
 
+  const handleClose = () => {
+    if (!isSubmitting) {
+      onOpenChange(false);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Athlete</DialogTitle>
+          <DialogTitle>Edit Athlete: {athlete?.name || 'Unknown'}</DialogTitle>
           <DialogDescription>
             Update athlete information. All changes will be saved to the database.
           </DialogDescription>
@@ -367,7 +396,7 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={handleClose}
                 disabled={isSubmitting}
               >
                 Cancel
