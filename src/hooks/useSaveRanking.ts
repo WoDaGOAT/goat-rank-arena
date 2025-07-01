@@ -29,7 +29,15 @@ interface SelectedAthleteInput {
 export const useSaveRanking = (options?: { categoryId?: string }) => {
   const { user, openAuthDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
-  const { trackRankingCreated } = useAnalytics();
+  
+  // Initialize analytics with error handling
+  let trackRankingCreated = (categoryId: string, categoryName: string) => {};
+  try {
+    const analytics = useAnalytics();
+    trackRankingCreated = analytics.trackRankingCreated;
+  } catch (error) {
+    console.warn('🔍 useSaveRanking - Failed to initialize analytics:', error);
+  }
 
   const saveRanking = useMutation({
     mutationFn: async ({ title, description, categoryId, selectedAthletes }: SaveRankingParams) => {
@@ -47,15 +55,11 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
       // Validate the input
       const validatedData = saveRankingSchema.parse({ title, description, categoryId, selectedAthletes });
 
-      if (!user) {
-        throw new Error("You must be logged in to save a ranking.");
-      }
-
       // Create the ranking
       const { data: rankingData, error: rankingError } = await supabase
         .from('user_rankings')
         .insert({
-          user_id: user!.id,
+          user_id: user.id,
           category_id: categoryId,
           title,
           description: description || null,
@@ -63,7 +67,10 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
         .select()
         .single();
 
-      if (rankingError) throw rankingError;
+      if (rankingError) {
+        console.error('🔍 useSaveRanking - Ranking creation error:', rankingError);
+        throw rankingError;
+      }
 
       // Insert the athletes
       const rankingAthletes = selectedAthletes.map(athlete => ({
@@ -77,16 +84,24 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
         .from('ranking_athletes')
         .insert(rankingAthletes);
 
-      if (athletesError) throw athletesError;
+      if (athletesError) {
+        console.error('🔍 useSaveRanking - Athletes insertion error:', athletesError);
+        throw athletesError;
+      }
 
-      // Track ranking creation
-      const category = await supabase
-        .from('categories')
-        .select('name')
-        .eq('id', categoryId)
-        .single();
-      
-      trackRankingCreated(categoryId, category.data?.name || 'Unknown');
+      // Track ranking creation (with error handling)
+      try {
+        const category = await supabase
+          .from('categories')
+          .select('name')
+          .eq('id', categoryId)
+          .single();
+        
+        trackRankingCreated(categoryId, category.data?.name || 'Unknown');
+      } catch (analyticsError) {
+        console.warn('🔍 useSaveRanking - Analytics tracking failed:', analyticsError);
+        // Don't throw here, analytics failure shouldn't break the save
+      }
 
       console.log('🔍 useSaveRanking - Ranking saved successfully with ID:', rankingData.id);
       return rankingData.id;
@@ -109,7 +124,8 @@ export const useSaveRanking = (options?: { categoryId?: string }) => {
       if (error.message !== "Authentication required") {
         toast.error("Failed to save ranking.", { description: error.message });
       }
-    }
+    },
+    retry: 0, // Don't retry save operations
   });
 
   return { 

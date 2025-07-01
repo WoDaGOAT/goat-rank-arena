@@ -22,12 +22,28 @@ interface RankingEditorProps {
 const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
   const [rankingTitle, setRankingTitle] = useState("");
   const [rankingDescription, setRankingDescription] = useState("");
-  const { user, openLoginDialog, savePreLoginUrl } = useAuth();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { user, openAuthDialog, savePreLoginUrl } = useAuth();
   const navigate = useNavigate();
-  const { loadSelection, saveSelection, clearSelection } = useAthleteSelectionPersistence();
+  
+  console.log('🔍 RankingEditor - Rendering with category:', category);
+
+  // Initialize persistence hooks with error handling
+  let loadSelection: (categoryId: string) => any = () => null;
+  let saveSelection: (athletes: any[], categoryId: string) => void = () => {};
+  let clearSelection: () => void = () => {};
+
+  try {
+    const persistence = useAthleteSelectionPersistence();
+    loadSelection = persistence.loadSelection;
+    saveSelection = persistence.saveSelection;
+    clearSelection = persistence.clearSelection;
+  } catch (error) {
+    console.warn('🔍 RankingEditor - Failed to initialize persistence:', error);
+  }
 
   // Load any saved selection first
-  const savedSelection = loadSelection(category.id!);
+  const savedSelection = category?.id ? loadSelection(category.id) : null;
 
   const {
     selectedAthletes,
@@ -41,24 +57,51 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
 
   // Show restoration message and clear saved data if we restored a selection
   useEffect(() => {
-    if (savedSelection && savedSelection.length > 0) {
-      console.log('Restoring athlete selection:', savedSelection.length, 'athletes');
+    if (!isInitialized && savedSelection && savedSelection.length > 0) {
+      console.log('🔍 RankingEditor - Restoring athlete selection:', savedSelection.length, 'athletes');
       toast.success(`Your athlete selection has been restored! (${savedSelection.length} athletes)`);
-      // Clear the saved selection after successful restoration
       clearSelection();
+      setIsInitialized(true);
+    } else if (!isInitialized) {
+      setIsInitialized(true);
     }
-  }, []); // Only run once on mount
+  }, [savedSelection, clearSelection, isInitialized]);
 
   // Auto-save selection whenever selectedAthletes changes
   useEffect(() => {
-    if (selectedAthletes.length > 0) {
-      console.log('Auto-saving athlete selection:', selectedAthletes.length, 'athletes');
-      saveSelection(selectedAthletes, category.id!);
-    } else if (selectedAthletes.length === 0) {
-      // Clear saved selection if user removes all athletes
-      clearSelection();
+    if (!isInitialized || !category?.id) return;
+    
+    try {
+      if (selectedAthletes.length > 0) {
+        console.log('🔍 RankingEditor - Auto-saving athlete selection:', selectedAthletes.length, 'athletes');
+        saveSelection(selectedAthletes, category.id);
+      } else if (selectedAthletes.length === 0) {
+        clearSelection();
+      }
+    } catch (error) {
+      console.warn('🔍 RankingEditor - Failed to save selection:', error);
     }
-  }, [selectedAthletes, saveSelection, clearSelection, category.id]);
+  }, [selectedAthletes, saveSelection, clearSelection, category?.id, isInitialized]);
+
+  // Initialize search hooks with error handling
+  let searchProps;
+  try {
+    searchProps = useAthleteSearch({ 
+      excludedAthletes: selectedAthletes,
+      categoryId: category?.id,
+      categoryName: category?.name
+    });
+  } catch (error) {
+    console.error('🔍 RankingEditor - Failed to initialize athlete search:', error);
+    searchProps = {
+      searchTerm: "",
+      setSearchTerm: () => {},
+      selectedLetter: "",
+      setSelectedLetter: () => {},
+      filteredAthletes: [],
+      resetSearch: () => {}
+    };
+  }
 
   const {
     searchTerm,
@@ -67,50 +110,85 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     setSelectedLetter,
     filteredAthletes,
     resetSearch
-  } = useAthleteSearch({ 
-    excludedAthletes: selectedAthletes,
-    categoryId: category.id,
-    categoryName: category.name
-  });
+  } = searchProps;
 
-  const { onSave, isSaving } = useSaveRanking({ categoryId: category.id! });
+  // Initialize save ranking hook with error handling
+  let saveRankingProps;
+  try {
+    saveRankingProps = useSaveRanking({ categoryId: category?.id });
+  } catch (error) {
+    console.error('🔍 RankingEditor - Failed to initialize save ranking:', error);
+    saveRankingProps = {
+      onSave: () => {},
+      isSaving: false
+    };
+  }
+
+  const { onSave, isSaving } = saveRankingProps;
 
   const handleAddAthlete = (athlete: Athlete) => {
-    if (addAthlete(athlete)) {
-      resetSearch();
+    try {
+      if (addAthlete(athlete)) {
+        resetSearch();
+      }
+    } catch (error) {
+      console.error('🔍 RankingEditor - Failed to add athlete:', error);
+      toast.error('Failed to add athlete. Please try again.');
     }
   };
 
   const handleSave = () => {
-    if (!user) {
-      // The selection is already auto-saved, just need to save URL and redirect to login
-      console.log('Redirecting to login, selection already saved');
-      savePreLoginUrl(window.location.pathname);
-      openLoginDialog();
-      return;
-    }
+    try {
+      if (!user) {
+        console.log('🔍 RankingEditor - Redirecting to login, selection already saved');
+        savePreLoginUrl(window.location.pathname);
+        openAuthDialog('signup');
+        return;
+      }
 
-    console.log('Preparing to save ranking with athletes:', selectedAthletes);
-    
-    // Validate that we have exactly 10 athletes with valid points
-    const validAthletes = selectedAthletes.filter(athlete => 
-      athlete.userPoints > 0 && athlete.userPoints <= 100 && !athlete.error
-    );
-    
-    if (validAthletes.length !== 10) {
-      toast.error("Please select exactly 10 athletes with valid points (1-100)");
-      return;
-    }
+      console.log('🔍 RankingEditor - Preparing to save ranking with athletes:', selectedAthletes);
+      
+      // Validate that we have exactly 10 athletes with valid points
+      const validAthletes = selectedAthletes.filter(athlete => 
+        athlete.userPoints > 0 && athlete.userPoints <= 100 && !athlete.error
+      );
+      
+      if (validAthletes.length !== 10) {
+        toast.error("Please select exactly 10 athletes with valid points (1-100)");
+        return;
+      }
 
-    onSave({
-      rankingTitle: rankingTitle.trim() || "My Ranking", // Use default title if empty
-      rankingDescription,
-      selectedAthletes: validAthletes,
-    });
+      onSave({
+        rankingTitle: rankingTitle.trim() || "My Ranking",
+        rankingDescription,
+        selectedAthletes: validAthletes,
+      });
+    } catch (error) {
+      console.error('🔍 RankingEditor - Failed to save ranking:', error);
+      toast.error('Failed to save ranking. Please try again.');
+    }
   };
 
   const hasErrors = selectedAthletes.some(a => !!a.error);
   const hasInvalidPoints = selectedAthletes.some(a => a.userPoints <= 0 || a.userPoints > 100);
+
+  // Safety check for category
+  if (!category || !category.id) {
+    console.error('🔍 RankingEditor - No valid category provided');
+    return (
+      <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8 py-4 md:py-8">
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-white mb-4">Category Error</h1>
+            <p className="text-gray-300 mb-6">Invalid category data. Please try again.</p>
+            <Button asChild>
+              <Link to="/">Go Back to Categories</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8 py-4 md:py-8">
@@ -167,7 +245,7 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
         </div>
 
         <RankingActions
-          categoryId={category.id!}
+          categoryId={category.id}
           disabled={selectedAthletes.length !== 10 || hasErrors || hasInvalidPoints}
           saveLabel={isSaving ? "Saving..." : `Save Ranking (${selectedAthletes.length}/10)`}
           onSave={handleSave}
