@@ -185,6 +185,7 @@ export type Database = {
         Row: {
           career_end_year: number | null
           career_start_year: number | null
+          clubs: string[] | null
           country_of_origin: string | null
           created_at: string
           date_of_death: string | null
@@ -200,6 +201,7 @@ export type Database = {
         Insert: {
           career_end_year?: number | null
           career_start_year?: number | null
+          clubs?: string[] | null
           country_of_origin?: string | null
           created_at?: string
           date_of_death?: string | null
@@ -215,6 +217,7 @@ export type Database = {
         Update: {
           career_end_year?: number | null
           career_start_year?: number | null
+          clubs?: string[] | null
           country_of_origin?: string | null
           created_at?: string
           date_of_death?: string | null
@@ -401,6 +404,33 @@ export type Database = {
             referencedColumns: ["category_id"]
           },
         ]
+      }
+      clubs: {
+        Row: {
+          country: string | null
+          created_at: string
+          id: string
+          league: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          league?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          league?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       daily_analytics: {
         Row: {

@@ -16,6 +16,7 @@ interface UseEditAthleteFormProps {
 
 export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChange }: UseEditAthleteFormProps) => {
   const [positions, setPositions] = useState<string[]>([]);
+  const [clubs, setClubs] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
 
@@ -53,6 +54,7 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
       
       form.reset(formData);
       setPositions(athlete.positions || []);
+      setClubs(athlete.clubs || []);
     }
   }, [athlete, open, form]);
 
@@ -61,6 +63,7 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
     if (!open) {
       form.reset();
       setPositions([]);
+      setClubs([]);
       setIsSubmitting(false);
     }
   }, [open, form]);
@@ -83,6 +86,7 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
         date_of_death: data.date_of_death || null,
         is_active: data.is_active,
         positions: positions.length > 0 ? positions : null,
+        clubs: clubs.length > 0 ? clubs : null,
         profile_picture_url: data.profile_picture_url || null,
         career_start_year: data.career_start_year || null,
         career_end_year: data.career_end_year || null,
@@ -119,6 +123,8 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
     form,
     positions,
     setPositions,
+    clubs,
+    setClubs,
     isSubmitting,
     onSubmit,
     handleClose,

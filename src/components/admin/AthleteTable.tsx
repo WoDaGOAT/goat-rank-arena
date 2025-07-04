@@ -154,6 +154,7 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                 <TableHead>Country</TableHead>
                 <TableHead>Nationality</TableHead>
                 <TableHead>Positions</TableHead>
+                <TableHead>Clubs</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Birth Year</TableHead>
                 <TableHead>Career Span</TableHead>
@@ -163,7 +164,7 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
             <TableBody>
               {athletes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={10} className="text-center py-8">
                     No athletes found matching your criteria.
                   </TableCell>
                 </TableRow>
@@ -200,6 +201,23 @@ const AthleteTable = ({ searchTerm, countryFilter, activeFilter }: AthleteTableP
                           </Badge>
                         )}
                         {(!athlete.positions || athlete.positions.length === 0) && (
+                          <span className="text-gray-400 text-sm">N/A</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {athlete.clubs?.slice(0, 2).map((club: string, index: number) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {club}
+                          </Badge>
+                        ))}
+                        {athlete.clubs?.length > 2 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{athlete.clubs.length - 2}
+                          </Badge>
+                        )}
+                        {(!athlete.clubs || athlete.clubs.length === 0) && (
                           <span className="text-gray-400 text-sm">N/A</span>
                         )}
                       </div>

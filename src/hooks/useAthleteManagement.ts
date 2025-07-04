@@ -13,6 +13,7 @@ interface AthleteData {
   date_of_death?: string;
   is_active: boolean;
   positions?: string[];
+  clubs?: string[];
   profile_picture_url?: string;
   career_start_year?: number;
   career_end_year?: number;
@@ -34,6 +35,7 @@ export const useAthleteManagement = () => {
           date_of_death: athleteData.date_of_death || null,
           is_active: athleteData.is_active,
           positions: athleteData.positions || null,
+          clubs: athleteData.clubs || null,
           profile_picture_url: athleteData.profile_picture_url || null,
           career_start_year: athleteData.career_start_year || null,
           career_end_year: athleteData.career_end_year || null,
@@ -67,6 +69,7 @@ export const useAthleteManagement = () => {
           date_of_death: athleteData.date_of_death || null,
           is_active: athleteData.is_active,
           positions: athleteData.positions || null,
+          clubs: athleteData.clubs || null,
           profile_picture_url: athleteData.profile_picture_url || null,
           career_start_year: athleteData.career_start_year || null,
           career_end_year: athleteData.career_end_year || null,

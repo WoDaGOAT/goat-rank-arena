@@ -22,6 +22,7 @@ import { useEditAthleteForm } from "./editAthlete/useEditAthleteForm";
 import { BasicInfoFields } from "./editAthlete/BasicInfoFields";
 import { CareerInfoFields } from "./editAthlete/CareerInfoFields";
 import { PositionsManager } from "./editAthlete/PositionsManager";
+import ClubsField from "./editAthlete/ClubsField";
 
 interface EditAthleteDialogProps {
   athlete: any;
@@ -35,6 +36,8 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
     form,
     positions,
     setPositions,
+    clubs,
+    setClubs,
     isSubmitting,
     onSubmit,
     handleClose,
@@ -76,6 +79,12 @@ const EditAthleteDialog = ({ athlete, open, onOpenChange, onAthleteUpdated }: Ed
             <PositionsManager 
               positions={positions} 
               onPositionsChange={setPositions} 
+            />
+
+            <ClubsField
+              control={form.control}
+              clubs={clubs}
+              onClubsChange={setClubs}
             />
 
             <DialogFooter>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,6 +29,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FOOTBALL_POSITIONS } from "@/constants/positions";
+import ClubsMultiSelect from "./ClubsMultiSelect";
 
 const athleteSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -61,6 +60,7 @@ interface AddAthleteDialogProps {
 
 const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
   const [positions, setPositions] = useState<string[]>([]);
+  const [clubs, setClubs] = useState<string[]>([]);
   const [selectedPosition, setSelectedPosition] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
@@ -104,6 +104,7 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
         date_of_death: data.date_of_death || null,
         is_active: data.is_active,
         positions: positions.length > 0 ? positions : null,
+        clubs: clubs.length > 0 ? clubs : null,
         profile_picture_url: data.profile_picture_url || null,
         career_start_year: data.career_start_year || null,
         career_end_year: data.career_end_year || null,
@@ -122,6 +123,7 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
       
       form.reset();
       setPositions([]);
+      setClubs([]);
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error adding athlete:", error);
@@ -346,6 +348,18 @@ const AddAthleteDialog = ({ open, onOpenChange }: AddAthleteDialogProps) => {
                   </Badge>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-3">
+              <FormLabel>Clubs</FormLabel>
+              <FormDescription>
+                Select clubs that this athlete has played for
+              </FormDescription>
+              <ClubsMultiSelect
+                selectedClubs={clubs}
+                onClubsChange={setClubs}
+                placeholder="Select clubs..."
+              />
             </div>
 
             <DialogFooter>
