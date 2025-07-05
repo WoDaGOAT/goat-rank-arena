@@ -3,7 +3,7 @@ import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, ExternalLink, Plus } from "lucide-react";
+import { Share2, ExternalLink } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
 import { ShareDialog } from "./category/ShareDialog";
 import { useState } from "react";
@@ -107,21 +107,15 @@ const GlobalLeaderboard = ({
       </CardHeader>
       <CardContent className="p-0">
         {shouldShowInsufficientMessage ? (
-          // Show "Not Enough Rankings Yet" message WITHOUT the blue CTA button
+          // Show "Not Enough Rankings Yet" message WITHOUT the plus icon
           <div className="flex flex-col items-center justify-center py-8 min-[425px]:py-12 px-3 min-[375px]:px-4 min-[425px]:px-6 text-center min-h-[250px] min-[425px]:min-h-[300px] bg-gradient-to-b from-white/5 to-white/10">
             <div className="w-full max-w-md mx-auto">
-              <div className="w-16 h-16 min-[425px]:w-20 min-[425px]:h-20 mx-auto mb-4 min-[425px]:mb-6 rounded-full bg-gradient-to-r from-blue-500/30 to-purple-500/30 border-2 border-white/20 flex items-center justify-center shadow-lg">
-                <Plus className="h-8 w-8 min-[425px]:h-10 min-[425px]:w-10 text-white" />
-              </div>
               <h3 className="text-lg min-[375px]:text-xl min-[425px]:text-2xl font-bold text-white mb-3 min-[425px]:mb-4 drop-shadow-sm">
-                Not Enough Rankings Yet
+                Be one of the first to shape the {sanitize(categoryName)} ranking!
               </h3>
               <p className="text-sm min-[425px]:text-base text-gray-200 mb-4 min-[425px]:mb-6 leading-relaxed drop-shadow-sm">
-                We need at least 3 rankings to show a meaningful leaderboard. Be one of the first to rank the greatest {sanitize(categoryName.toLowerCase().replace('goat ', ''))}!
+                We need at least 3 submissions to display a leaderboard.
               </p>
-              <div className="text-xs text-gray-300 bg-white/10 rounded-full px-3 py-2 min-[425px]:px-4 inline-block">
-                Current rankings: <span className="font-bold">{submittedRankingsCount}</span> / <span className="font-bold">3</span> needed
-              </div>
             </div>
           </div>
         ) : hasValidAthletes ? (
