@@ -22,6 +22,7 @@ import {
   Settings,
   Trophy,
   Users,
+  Rss,
 } from "lucide-react";
 
 const MobileMenuNavigation = () => {
@@ -94,8 +95,12 @@ const MobileMenuNavigation = () => {
             <span>Home</span>
           </Link>
           <Link to="/feed" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
-            <ListChecks className="h-5 w-5" />
+            <Rss className="h-5 w-5" />
             <span>Feed</span>
+          </Link>
+          <Link to="/quiz" className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors" onClick={onItemClick}>
+            <FileQuestion className="h-5 w-5 text-fuchsia-400" />
+            <span className="font-bold text-transparent bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text">Quiz</span>
           </Link>
         </div>
 
