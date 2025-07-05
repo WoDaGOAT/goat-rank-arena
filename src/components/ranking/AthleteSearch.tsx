@@ -1,11 +1,10 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Info } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import React from "react";
 import { Athlete } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { getCategoryPositionMapping } from "@/utils/categoryPositionMapping";
 
 interface AthleteSearchProps {
   allAthletes: Athlete[];
@@ -32,27 +31,11 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
   numSelectedAthletes,
   categoryName,
 }) => {
-  // Get position filtering info for display
-  const positionMapping = categoryName ? getCategoryPositionMapping(categoryName) : null;
-  
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 p-3 sm:p-4 md:p-6">
       <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">
         Search Athletes ({filteredAthletes.length} available)
       </h2>
-
-      {/* Position filtering info */}
-      {positionMapping && (
-        <div className="mb-3 sm:mb-4 p-3 bg-blue-500/20 rounded-lg border border-blue-400/30">
-          <div className="flex items-center gap-2 text-blue-200">
-            <Info className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              Filtered for: {positionMapping.positions.join(", ")}
-              {positionMapping.activeOnly && " (Active players only)"}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Search Input */}
       <div className="relative mb-3 sm:mb-4">
@@ -145,11 +128,6 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
         {selectedLetter && !searchTerm && filteredAthletes.length === 0 && (
           <div className="text-center py-6 sm:py-8 text-gray-400 text-sm sm:text-base">
             No athletes found starting with "{selectedLetter}"
-          </div>
-        )}
-        {!searchTerm && !selectedLetter && filteredAthletes.length === 0 && positionMapping && (
-          <div className="text-center py-6 sm:py-8 text-gray-400 text-sm sm:text-base">
-            No {positionMapping.activeOnly ? 'active ' : ''}{positionMapping.positions.join(' or ')} athletes found
           </div>
         )}
       </div>
