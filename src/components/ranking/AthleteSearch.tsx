@@ -76,9 +76,8 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
               className="ml-2 shrink-0 h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
               disabled={numSelectedAthletes >= 10}
             >
-              <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> 
-              <span className="hidden sm:inline">Add</span>
-              <span className="sm:hidden">+</span>
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 hidden xs:block" /> 
+              <span>Add</span>
             </Button>
           </div>
         ))}
