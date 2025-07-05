@@ -3,7 +3,7 @@ import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, ExternalLink } from "lucide-react";
+import { Share2, ExternalLink, Plus } from "lucide-react";
 import { sanitize } from "@/lib/sanitize";
 import { ShareDialog } from "./category/ShareDialog";
 import { useState } from "react";
@@ -107,7 +107,7 @@ const GlobalLeaderboard = ({
       </CardHeader>
       <CardContent className="p-0">
         {shouldShowInsufficientMessage ? (
-          // Show "Not Enough Rankings Yet" message WITHOUT the plus icon
+          // Show "Not Enough Rankings Yet" message with Create Your Ranking button
           <div className="flex flex-col items-center justify-center py-8 min-[425px]:py-12 px-3 min-[375px]:px-4 min-[425px]:px-6 text-center min-h-[250px] min-[425px]:min-h-[300px] bg-gradient-to-b from-white/5 to-white/10">
             <div className="w-full max-w-md mx-auto">
               <h3 className="text-lg min-[375px]:text-xl min-[425px]:text-2xl font-bold text-white mb-3 min-[425px]:mb-4 drop-shadow-sm">
@@ -116,6 +116,28 @@ const GlobalLeaderboard = ({
               <p className="text-sm min-[425px]:text-base text-gray-200 mb-4 min-[425px]:mb-6 leading-relaxed drop-shadow-sm">
                 We need at least 3 submissions to display a leaderboard.
               </p>
+              {categoryId && (
+                <Button 
+                  asChild 
+                  variant="cta" 
+                  size="lg" 
+                  className="
+                    w-full sm:w-auto
+                    py-4 px-6 sm:py-3 sm:px-8
+                    text-base sm:text-lg
+                    rounded-full
+                    bg-gradient-to-r from-fuchsia-500 to-cyan-500 
+                    hover:opacity-90 
+                    transition-all duration-200 
+                    shadow-lg hover:shadow-xl
+                  "
+                >
+                  <Link to={`/create-ranking/${categoryId}`}>
+                    <Plus className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                    <span className="font-semibold">Create Your Ranking</span>
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         ) : hasValidAthletes ? (
