@@ -8,6 +8,7 @@ import { SecurityProvider } from "@/contexts/SecurityContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AppRoutes from "@/components/app/AppRoutes";
+import GlobalAuthDialog from "@/components/app/GlobalAuthDialog";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient({
@@ -39,6 +40,7 @@ function App() {
                     <AppRoutes />
                   </main>
                   <Footer />
+                  <GlobalAuthDialog />
                 </div>
               </SecurityProvider>
             </AuthProvider>
