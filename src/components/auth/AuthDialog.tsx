@@ -109,7 +109,7 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-gray-900 border-gray-700">
+      <DialogContent className="max-w-[95vw] mx-4 sm:max-w-md bg-gray-900 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold text-white">
             {mode === 'login' ? 'Welcome back to WoDaGOAT!' : 'Join WoDaGOAT!'}
