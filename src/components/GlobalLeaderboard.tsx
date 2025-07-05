@@ -107,7 +107,7 @@ const GlobalLeaderboard = ({
       </CardHeader>
       <CardContent className="p-0">
         {shouldShowInsufficientMessage ? (
-          // Show "Not Enough Rankings Yet" message
+          // Show "Not Enough Rankings Yet" message WITHOUT the blue CTA button
           <div className="flex flex-col items-center justify-center py-8 min-[425px]:py-12 px-3 min-[375px]:px-4 min-[425px]:px-6 text-center min-h-[250px] min-[425px]:min-h-[300px] bg-gradient-to-b from-white/5 to-white/10">
             <div className="w-full max-w-md mx-auto">
               <div className="w-16 h-16 min-[425px]:w-20 min-[425px]:h-20 mx-auto mb-4 min-[425px]:mb-6 rounded-full bg-gradient-to-r from-blue-500/30 to-purple-500/30 border-2 border-white/20 flex items-center justify-center shadow-lg">
@@ -119,17 +119,9 @@ const GlobalLeaderboard = ({
               <p className="text-sm min-[425px]:text-base text-gray-200 mb-4 min-[425px]:mb-6 leading-relaxed drop-shadow-sm">
                 We need at least 3 rankings to show a meaningful leaderboard. Be one of the first to rank the greatest {sanitize(categoryName.toLowerCase().replace('goat ', ''))}!
               </p>
-              <div className="text-xs text-gray-300 mb-4 min-[425px]:mb-6 bg-white/10 rounded-full px-3 py-2 min-[425px]:px-4 inline-block">
+              <div className="text-xs text-gray-300 bg-white/10 rounded-full px-3 py-2 min-[425px]:px-4 inline-block">
                 Current rankings: <span className="font-bold">{submittedRankingsCount}</span> / <span className="font-bold">3</span> needed
               </div>
-              {categoryId && (
-                <Button asChild variant="default" size="lg" className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-full px-6 py-2 min-[425px]:px-8 min-[425px]:py-3 font-semibold shadow-lg hover:shadow-xl transition-all text-sm min-[425px]:text-base">
-                  <Link to={`/create-ranking/${categoryId}`}>
-                    <Plus className="h-4 w-4 min-[425px]:h-5 min-[425px]:w-5 mr-2" />
-                    Create Your Ranking
-                  </Link>
-                </Button>
-              )}
             </div>
           </div>
         ) : hasValidAthletes ? (
