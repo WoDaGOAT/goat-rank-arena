@@ -48,11 +48,21 @@ export const useLeaderboardData = (categoryId: string) => {
             const mappedAthlete = {
               id: athlete.athlete_id || `athlete-${index}`,
               name: athlete.athlete_name || 'Unknown Athlete',
-              profile_picture_url: athlete.profile_picture_url || '/placeholder.svg',
-              country_of_origin: athlete.country_of_origin || '',
+              imageUrl: athlete.profile_picture_url || '/placeholder.svg', // Fix: Map to imageUrl instead of profile_picture_url
+              countryOfOrigin: athlete.country_of_origin || '',
               points: Number(athlete.total_points) || 0,
               rank: Number(athlete.rank) || index + 1,
-              movement: (athlete.movement as "up" | "down" | "neutral") || "neutral"
+              movement: (athlete.movement as "up" | "down" | "neutral") || "neutral",
+              // Add other required fields for Athlete interface consistency
+              dateOfBirth: athlete.year_of_birth ? athlete.year_of_birth.toString() : "",
+              dateOfDeath: athlete.date_of_death || undefined,
+              isActive: athlete.is_active !== false, // Default to true if not specified
+              clubs: [],
+              competitions: [],
+              positions: athlete.positions || [],
+              nationality: athlete.nationality || "",
+              careerStartYear: athlete.career_start_year || undefined,
+              careerEndYear: athlete.career_end_year || undefined,
             };
             
             console.log(`✨ ENHANCED: Mapped athlete:`, mappedAthlete);
@@ -62,11 +72,17 @@ export const useLeaderboardData = (categoryId: string) => {
             return {
               id: `athlete-${index}`,
               name: 'Unknown Athlete',
-              profile_picture_url: '/placeholder.svg',
-              country_of_origin: '',
+              imageUrl: '/placeholder.svg', // Use imageUrl for consistency
+              countryOfOrigin: '',
               points: 0,
               rank: index + 1,
-              movement: "neutral" as const
+              movement: "neutral" as const,
+              dateOfBirth: "",
+              isActive: true,
+              clubs: [],
+              competitions: [],
+              positions: [],
+              nationality: "",
             };
           }
         });

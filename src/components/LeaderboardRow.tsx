@@ -44,12 +44,14 @@ const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowPr
     ? "px-2 py-2 min-[375px]:px-3 min-[425px]:px-4 min-[425px]:py-3" 
     : "px-2 py-2 min-[375px]:px-3 min-[375px]:py-3 min-[425px]:px-4 min-[425px]:py-4 sm:px-6";
 
-  // Check if image URL is valid and not a broken base64 data URL
+  // Improved image URL validation - less restrictive to allow valid base64 and HTTPS URLs
   const isValidImageUrl = (url: string | undefined | null) => {
     if (!url) return false;
-    if (url.startsWith('data:image') && url.length < 100) return false; // Likely broken base64
-    if (url.includes('data:image/jpeg;base64,/9j/') && url.length < 500) return false; // Common broken pattern
-    return true;
+    // Allow HTTPS URLs
+    if (url.startsWith('https://')) return true;
+    // Allow base64 data URLs (be less restrictive than before)
+    if (url.startsWith('data:image/')) return true;
+    return false;
   };
 
   const getImageSrc = () => {
@@ -60,6 +62,7 @@ const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowPr
   };
 
   const handleImageError = () => {
+    console.log(`🖼️ Image failed to load for athlete: ${athlete.name}, URL: ${athlete.imageUrl}`);
     setImageError(true);
   };
 
