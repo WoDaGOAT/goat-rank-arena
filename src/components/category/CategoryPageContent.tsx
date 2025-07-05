@@ -20,7 +20,7 @@ const CategoryPageContent = ({
   categoryDescription
 }: CategoryPageContentProps) => {
   return (
-    <div className="w-full max-w-4xl px-4 mx-auto">
+    <div className="w-full">
       <UnifiedLeaderboardLayout
         categoryId={categoryId}
         categoryName={categoryName}

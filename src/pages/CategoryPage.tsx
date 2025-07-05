@@ -19,10 +19,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div 
-      key={`category-${categoryId}`} 
-      className="flex flex-col w-full min-h-screen px-4 pb-4 lg:pb-20"
-    >
+    <div key={`category-${categoryId}`}>
       <CategoryPageDataFetcher categoryId={categoryId}>
         {({ 
           dbCategory, 
@@ -59,23 +56,28 @@ const CategoryPage = () => {
           // Show content if we have category data
           if (dbCategory) {
             return (
-              <>
-                <CategoryPageContent
-                  categoryId={categoryId}
-                  leaderboardAthletes={leaderboardAthletes}
-                  submittedRankingsCount={submittedRankingsCount}
-                  categoryName={dbCategory.name}
-                  categoryDescription={dbCategory.description}
-                />
-                <CategoryPageErrorHandler
-                  categoryError={errors.categoryError}
-                  leaderboardError={errors.leaderboardError}
-                  userRankingError={errors.userRankingError}
-                  rankingsCountError={errors.rankingsCountError}
-                  isLoading={isLoading}
-                  onRetry={refetch.refetchLeaderboard}
-                />
-              </>
+              <div
+                className="flex flex-col flex-grow min-h-screen"
+                style={{ background: "linear-gradient(135deg, rgba(25, 7, 73, 0.6) 0%, rgba(7, 2, 21, 0.6) 100%)" }}
+              >
+                <div className="container mx-auto px-4 py-8 flex-grow">
+                  <CategoryPageContent
+                    categoryId={categoryId}
+                    leaderboardAthletes={leaderboardAthletes}
+                    submittedRankingsCount={submittedRankingsCount}
+                    categoryName={dbCategory.name}
+                    categoryDescription={dbCategory.description}
+                  />
+                  <CategoryPageErrorHandler
+                    categoryError={errors.categoryError}
+                    leaderboardError={errors.leaderboardError}
+                    userRankingError={errors.userRankingError}
+                    rankingsCountError={errors.rankingsCountError}
+                    isLoading={isLoading}
+                    onRetry={refetch.refetchLeaderboard}
+                  />
+                </div>
+              </div>
             );
           }
 
