@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,14 +109,14 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] mx-4 sm:max-w-md md:max-w-lg bg-gray-900 border-gray-700">
+      <DialogContent className="max-w-[90vw] p-4 sm:max-w-md md:max-w-lg sm:p-6 bg-gray-900 border-gray-700">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-bold text-white">
+          <DialogTitle className="text-center text-lg sm:text-xl font-bold text-white">
             {mode === 'login' ? 'Welcome back to WoDaGOAT!' : 'Join WoDaGOAT!'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <SocialLogins />
           
           <div className="relative">
@@ -129,9 +130,9 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-200">Email</Label>
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="email" className="text-gray-200 text-sm">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -140,12 +141,12 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500"
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500 text-sm h-10"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-200">Password</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="password" className="text-gray-200 text-sm">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -155,13 +156,13 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
                 required
                 disabled={isLoading}
                 minLength={6}
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500"
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500 text-sm h-10"
               />
             </div>
 
             {mode === 'signup' && (
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-gray-200">Confirm Password</Label>
+              <div className="space-y-1 sm:space-y-2">
+                <Label htmlFor="confirmPassword" className="text-gray-200 text-sm">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -171,14 +172,14 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
                   required
                   disabled={isLoading}
                   minLength={6}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500"
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500 text-sm h-10"
                 />
               </div>
             )}
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-fuchsia-500 to-cyan-500 hover:opacity-90" 
+              className="w-full bg-gradient-to-r from-fuchsia-500 to-cyan-500 hover:opacity-90 h-10 text-sm sm:text-base" 
               disabled={isLoading}
             >
               {isLoading 
@@ -192,7 +193,7 @@ const AuthDialog = ({ open, onOpenChange, defaultMode = 'login' }: AuthDialogPro
             <button
               type="button"
               onClick={toggleMode}
-              className="text-sm text-gray-400 hover:text-cyan-400 underline"
+              className="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 underline"
               disabled={isLoading}
             >
               {mode === 'login' 
