@@ -39,6 +39,7 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
   useEffect(() => {
     if (athlete && open) {
       console.log('Resetting form with athlete data:', athlete);
+      console.log('Athlete clubs data:', athlete.clubs);
       
       const formData = {
         name: athlete.name || "",
@@ -54,7 +55,9 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
       
       form.reset(formData);
       setPositions(athlete.positions || []);
+      // Ensure clubs are properly loaded from the athlete data
       setClubs(athlete.clubs || []);
+      console.log('Set clubs to:', athlete.clubs || []);
     }
   }, [athlete, open, form]);
 
@@ -77,6 +80,7 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
     try {
       setIsSubmitting(true);
       console.log('Submitting athlete update:', data);
+      console.log('Submitting clubs:', clubs);
 
       const updates = {
         name: data.name,
@@ -92,6 +96,8 @@ export const useEditAthleteForm = ({ athlete, open, onAthleteUpdated, onOpenChan
         career_end_year: data.career_end_year || null,
         updated_at: new Date().toISOString(),
       };
+
+      console.log('Final update object:', updates);
 
       const { error } = await supabase
         .from("athletes")
