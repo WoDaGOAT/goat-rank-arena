@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Athlete } from "@/types";
 import { sanitize } from "@/lib/sanitize";
+import { useState } from "react";
 
 interface LeaderboardRowProps {
   athlete: Athlete;
@@ -12,6 +13,8 @@ interface LeaderboardRowProps {
 }
 
 const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowProps) => {
+  const [imageError, setImageError] = useState(false);
+
   const getTrendIcon = () => {
     switch (athlete.movement) {
       case "up":
@@ -41,6 +44,25 @@ const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowPr
     ? "px-2 py-2 min-[375px]:px-3 min-[425px]:px-4 min-[425px]:py-3" 
     : "px-2 py-2 min-[375px]:px-3 min-[375px]:py-3 min-[425px]:px-4 min-[425px]:py-4 sm:px-6";
 
+  // Check if image URL is valid and not a broken base64 data URL
+  const isValidImageUrl = (url: string | undefined | null) => {
+    if (!url) return false;
+    if (url.startsWith('data:image') && url.length < 100) return false; // Likely broken base64
+    if (url.includes('data:image/jpeg;base64,/9j/') && url.length < 500) return false; // Common broken pattern
+    return true;
+  };
+
+  const getImageSrc = () => {
+    if (imageError || !isValidImageUrl(athlete.imageUrl)) {
+      return "/placeholder.svg";
+    }
+    return athlete.imageUrl;
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <div className={`${paddingClass} hover:bg-white/5 transition-colors duration-200`}>
       {/* Mobile layout */}
@@ -49,7 +71,11 @@ const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowPr
           {getRankBadge() || position}
         </div>
         <Avatar className={`border-2 border-white/20 ${compact ? 'h-8 w-8 min-[375px]:h-10 min-[375px]:w-10' : 'h-10 w-10 min-[375px]:h-12 min-[375px]:w-12'}`}>
-          <AvatarImage src={athlete.imageUrl} alt={sanitize(athlete.name)} />
+          <AvatarImage 
+            src={getImageSrc()} 
+            alt={sanitize(athlete.name)}
+            onError={handleImageError}
+          />
           <AvatarFallback className="text-xs min-[375px]:text-sm">{sanitize(athlete.name).charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
@@ -71,7 +97,11 @@ const LeaderboardRow = ({ athlete, position, compact = false }: LeaderboardRowPr
           {getRankBadge() || position}
         </div>
         <Avatar className={`border-2 border-white/20 ${compact ? 'h-10 w-10' : 'h-12 w-12'}`}>
-          <AvatarImage src={athlete.imageUrl} alt={sanitize(athlete.name)} />
+          <AvatarImage 
+            src={getImageSrc()} 
+            alt={sanitize(athlete.name)}
+            onError={handleImageError}
+          />
           <AvatarFallback>{sanitize(athlete.name).charAt(0)}</AvatarFallback>
         </Avatar>
         <div>

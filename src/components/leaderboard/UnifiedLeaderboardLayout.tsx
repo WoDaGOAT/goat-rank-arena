@@ -85,7 +85,7 @@ const UnifiedLeaderboardLayout = ({
       <div className="container mx-auto px-4 py-8 flex-grow">
         <div className="w-full space-y-6 sm:space-y-8">
           {/* Leaderboard */}
-          <div className="relative">
+          <div className="relative max-w-4xl mx-auto">
             <GlobalLeaderboard
               athletes={athletes}
               categoryName={categoryName}
@@ -125,9 +125,7 @@ const UnifiedLeaderboardLayout = ({
 
           {/* Comments Section */}
           {showComments && (
-            <div className="mt-6 sm:mt-8">
-              <CommentSection categoryId={categoryId} />
-            </div>
+            <CommentSection categoryId={categoryId} />
           )}
         </div>
       </div>

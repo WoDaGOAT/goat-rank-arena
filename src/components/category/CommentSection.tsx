@@ -86,66 +86,72 @@ const CommentSection = ({ categoryId }: CommentSectionProps) => {
   };
 
   return (
-    <div className="w-full">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold text-white">Comments</h2>
-      </div>
+    <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg shadow-2xl">
+        {/* Header */}
+        <div className="p-4 sm:p-6 border-b border-white/20 bg-white/5">
+          <h2 className="text-xl font-semibold text-white">Comments</h2>
+        </div>
 
-      {loading && <p className="text-gray-400">Loading comments...</p>}
-      {error && <p className="text-red-400">Error: {error}</p>}
+        {/* Content */}
+        <div className="p-4 sm:p-6">
+          {loading && <p className="text-gray-400">Loading comments...</p>}
+          {error && <p className="text-red-400">Error: {error}</p>}
 
-      {comments.length === 0 && !loading && (
-        <p className="text-gray-400">No comments yet. Be the first to share your thoughts!</p>
-      )}
+          {comments.length === 0 && !loading && (
+            <p className="text-gray-400">No comments yet. Be the first to share your thoughts!</p>
+          )}
 
-      <ul className="space-y-4">
-        {comments.map((comment) => (
-          <li key={comment.id} className="bg-white/5 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <Avatar>
-                <AvatarImage src={comment.user_avatar_url || undefined} />
-                <AvatarFallback>{comment.user_full_name?.charAt(0) || 'A'}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium text-white">{sanitize(comment.user_full_name || 'Anonymous')}</div>
-                  <div className="text-xs text-gray-400">
-                    {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+          <ul className="space-y-4">
+            {comments.map((comment) => (
+              <li key={comment.id} className="bg-white/5 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <Avatar>
+                    <AvatarImage src={comment.user_avatar_url || undefined} />
+                    <AvatarFallback>{comment.user_full_name?.charAt(0) || 'A'}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-white">{sanitize(comment.user_full_name || 'Anonymous')}</div>
+                      <div className="text-xs text-gray-400">
+                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-300 mt-1" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {sanitize(comment.comment)}
+                    </p>
+                    <div className="mt-2 flex items-center space-x-2">
+                      <Button variant="ghost" size="sm" onClick={() => startReply(comment.id)}>
+                        Reply
+                      </Button>
+                    </div>
+                    {replyingTo === comment.id && (
+                      <div className="mt-4">
+                        <EnhancedCommentForm
+                          categoryId={categoryId}
+                          onCommentAdded={handleCommentAdded}
+                          parentCommentId={comment.id}
+                          placeholder="Write your reply..."
+                        />
+                        <Button variant="secondary" size="sm" onClick={cancelReply} className="mt-2">
+                          Cancel Reply
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <p className="text-sm text-gray-300 mt-1" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {sanitize(comment.comment)}
-                </p>
-                <div className="mt-2 flex items-center space-x-2">
-                  <Button variant="ghost" size="sm" onClick={() => startReply(comment.id)}>
-                    Reply
-                  </Button>
-                </div>
-                {replyingTo === comment.id && (
-                  <div className="mt-4">
-                    <EnhancedCommentForm
-                      categoryId={categoryId}
-                      onCommentAdded={handleCommentAdded}
-                      parentCommentId={comment.id}
-                      placeholder="Write your reply..."
-                    />
-                    <Button variant="secondary" size="sm" onClick={cancelReply} className="mt-2">
-                      Cancel Reply
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      
-      <div className="mt-6">
-        <EnhancedCommentForm
-          categoryId={categoryId}
-          onCommentAdded={handleCommentAdded}
-          placeholder="Share your thoughts about this ranking..."
-        />
+              </li>
+            ))}
+          </ul>
+          
+          <div className="mt-6">
+            <EnhancedCommentForm
+              categoryId={categoryId}
+              onCommentAdded={handleCommentAdded}
+              placeholder="Share your thoughts about this ranking..."
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
