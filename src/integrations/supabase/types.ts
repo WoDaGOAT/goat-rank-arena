@@ -1304,6 +1304,7 @@ export type Database = {
           date_of_death: string
           is_active: boolean
           positions: string[]
+          clubs: string[]
           profile_picture_url: string
           career_start_year: number
           career_end_year: number
