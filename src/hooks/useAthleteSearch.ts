@@ -17,7 +17,6 @@ export const useAthleteSearch = ({
   categoryName 
 }: UseAthleteSearchParams = {}) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLetter, setSelectedLetter] = useState<string>("");
   const { data: athletes = [], isLoading } = useAthletes();
 
   const filteredAthletes = useMemo(() => {
@@ -68,15 +67,6 @@ export const useAthleteSearch = ({
       console.log(`After search filtering: ${beforeSearch} -> ${filtered.length} athletes`);
     }
 
-    // Filter by selected letter
-    if (selectedLetter) {
-      const beforeLetter = filtered.length;
-      filtered = filtered.filter(athlete => 
-        athlete.name.charAt(0).toLowerCase() === selectedLetter.toLowerCase()
-      );
-      console.log(`After letter filtering: ${beforeLetter} -> ${filtered.length} athletes`);
-    }
-
     // Log a few example athletes for debugging
     if (filtered.length > 0) {
       console.log('Sample filtered athletes:', filtered.slice(0, 3).map(a => ({ 
@@ -87,18 +77,17 @@ export const useAthleteSearch = ({
     }
 
     return filtered;
-  }, [athletes, searchTerm, selectedLetter, excludedAthletes, categoryName]);
+  }, [athletes, searchTerm, excludedAthletes, categoryName]);
 
   const resetSearch = () => {
     setSearchTerm("");
-    setSelectedLetter("");
   };
 
   return {
     searchTerm,
     setSearchTerm,
-    selectedLetter,
-    setSelectedLetter,
+    selectedLetter: "", // Keep for compatibility but always empty
+    setSelectedLetter: () => {}, // Keep for compatibility but do nothing
     athletes: filteredAthletes,
     filteredAthletes,
     isLoading,

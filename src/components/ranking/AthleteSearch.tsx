@@ -18,8 +18,6 @@ interface AthleteSearchProps {
   categoryName?: string;
 }
 
-const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
 const AthleteSearch: React.FC<AthleteSearchProps> = ({
   allAthletes,
   filteredAthletes,
@@ -46,42 +44,6 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
           placeholder="Search for athletes..."
           className="pl-10 bg-white/10 border-white/30 text-white placeholder:text-gray-400 text-sm sm:text-base"
         />
-      </div>
-
-      {/* Alphabetical Filter */}
-      <div className="mb-3 sm:mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-white text-xs sm:text-sm font-medium">Filter by letter:</span>
-          <Button
-            onClick={() => setSelectedLetter("")}
-            size="sm"
-            variant="outline"
-            className={
-              selectedLetter === ""
-                ? "bg-white/20 border-white text-white hover:bg-white/30 h-7 sm:h-8 px-2 text-xs sm:text-sm"
-                : "bg-transparent border-white text-white hover:bg-white/10 h-7 sm:h-8 px-2 text-xs sm:text-sm"
-            }
-          >
-            All
-          </Button>
-        </div>
-        <div className="grid grid-cols-9 sm:grid-cols-13 gap-1">
-          {alphabet.map((letter) => (
-            <Button
-              key={letter}
-              onClick={() => setSelectedLetter(letter)}
-              size="sm"
-              variant="outline"
-              className={
-                selectedLetter === letter
-                  ? "bg-white/20 border-white text-white hover:bg-white/30 h-7 sm:h-8 w-full p-0 text-xs min-w-[28px] sm:min-w-[32px]"
-                  : "bg-transparent border-white text-white hover:bg-white/10 h-7 sm:h-8 w-full p-0 text-xs min-w-[28px] sm:min-w-[32px]"
-              }
-            >
-              {letter}
-            </Button>
-          ))}
-        </div>
       </div>
 
       {/* Search Results */}
@@ -123,11 +85,6 @@ const AthleteSearch: React.FC<AthleteSearchProps> = ({
         {searchTerm && filteredAthletes.length === 0 && (
           <div className="text-center py-6 sm:py-8 text-gray-400 text-sm sm:text-base">
             No athletes found matching "{searchTerm}"
-          </div>
-        )}
-        {selectedLetter && !searchTerm && filteredAthletes.length === 0 && (
-          <div className="text-center py-6 sm:py-8 text-gray-400 text-sm sm:text-base">
-            No athletes found starting with "{selectedLetter}"
           </div>
         )}
       </div>
