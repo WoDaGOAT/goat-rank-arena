@@ -1,13 +1,11 @@
 
 import { useParams } from "react-router-dom";
-import { useMemo } from "react";
 import CategoryPageDataFetcher from "@/components/category/CategoryPageDataFetcher";
 import CategoryPageContent from "@/components/category/CategoryPageContent";
 import CategoryPageLoading from "@/components/category/CategoryPageLoading";
 import CategoryPageErrorHandler from "@/components/category/CategoryPageErrorHandler";
 import CategoryNetworkError from "@/components/category/CategoryNetworkError";
 import CategoryNotFound from "@/components/category/CategoryNotFound";
-import FloatingActionButton from "@/components/category/FloatingActionButton";
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -21,7 +19,10 @@ const CategoryPage = () => {
   }
 
   return (
-    <div key={categoryId} className="flex flex-col w-full min-h-screen px-4 pb-4 lg:pb-20">
+    <div 
+      key={`category-${categoryId}`} 
+      className="flex flex-col w-full min-h-screen px-4 pb-4 lg:pb-20"
+    >
       <CategoryPageDataFetcher categoryId={categoryId}>
         {({ 
           dbCategory, 
@@ -33,14 +34,6 @@ const CategoryPage = () => {
           errors, 
           refetch 
         }) => {
-          // Memoize FAB props to prevent unnecessary re-renders
-          const fabProps = useMemo(() => ({
-            userRankingStatus,
-            userRankingId: userRanking?.id,
-            categoryId,
-            isLoading
-          }), [userRankingStatus, userRanking?.id, categoryId, isLoading]);
-
           // Show loading state
           if (isLoading) {
             return <CategoryPageLoading />;
@@ -82,8 +75,6 @@ const CategoryPage = () => {
                   isLoading={isLoading}
                   onRetry={refetch.refetchLeaderboard}
                 />
-                {/* Render FAB once at page level */}
-                <FloatingActionButton {...fabProps} />
               </>
             );
           }

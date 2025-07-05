@@ -1,7 +1,6 @@
 
 import React from "react";
-import GlobalLeaderboard from "@/components/GlobalLeaderboard";
-import CommentSection from "@/components/category/CommentSection";
+import UnifiedLeaderboardLayout from "@/components/leaderboard/UnifiedLeaderboardLayout";
 import { SocialActions } from "@/components/category/SocialActions";
 import { Athlete } from "@/types";
 
@@ -20,31 +19,19 @@ const CategoryPageContent = ({
   categoryName,
   categoryDescription
 }: CategoryPageContentProps) => {
-  const socialActions = (
-    <SocialActions 
-      categoryId={categoryId} 
-    />
-  );
-
   return (
-    <>
-      <div className="w-full max-w-4xl px-4 mx-auto">
-        <div className="mb-6 sm:mb-8">
-          <GlobalLeaderboard 
-            athletes={leaderboardAthletes} 
-            categoryName={categoryName}
-            customTitle={categoryName}
-            customSubtitle={categoryDescription || `Greatest ${categoryName.toLowerCase().replace('goat ', '')} of all time`}
-            submittedRankingsCount={submittedRankingsCount}
-            socialActions={socialActions}
-          />
-        </div>
-      </div>
-      
-      <div className="mt-6 sm:mt-8">
-        <CommentSection categoryId={categoryId} />
-      </div>
-    </>
+    <div className="w-full max-w-4xl px-4 mx-auto">
+      <UnifiedLeaderboardLayout
+        categoryId={categoryId}
+        categoryName={categoryName}
+        categoryDescription={categoryDescription}
+        athletes={leaderboardAthletes}
+        submittedRankingsCount={submittedRankingsCount}
+        socialActions={<SocialActions categoryId={categoryId} />}
+        compact={false}
+        showComments={true}
+      />
+    </div>
   );
 };
 

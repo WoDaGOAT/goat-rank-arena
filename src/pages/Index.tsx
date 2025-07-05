@@ -11,7 +11,7 @@ const Index = () => {
   const { data: categoriesData, isLoading, isError } = useHomepageCategories();
 
   return (
-    <>
+    <div key="homepage">
       <HomepageHeader />
       
       {/* Marketing Banner */}
@@ -109,7 +109,7 @@ const Index = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
