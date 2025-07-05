@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -130,6 +129,8 @@ const RankingEditor: React.FC<RankingEditorProps> = ({ category }) => {
     try {
       if (addAthlete(athlete)) {
         resetSearch();
+        // Scroll to top so user can see their ranking update
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
       console.error('🔍 RankingEditor - Failed to add athlete:', error);
