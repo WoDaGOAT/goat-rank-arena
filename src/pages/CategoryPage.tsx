@@ -1,11 +1,12 @@
 
 import { useParams } from "react-router-dom";
 import CategoryPageDataFetcher from "@/components/category/CategoryPageDataFetcher";
-import CategoryPageContent from "@/components/category/CategoryPageContent";
 import CategoryPageLoading from "@/components/category/CategoryPageLoading";
 import CategoryPageErrorHandler from "@/components/category/CategoryPageErrorHandler";
 import CategoryNetworkError from "@/components/category/CategoryNetworkError";
 import CategoryNotFound from "@/components/category/CategoryNotFound";
+import UnifiedLeaderboardLayout from "@/components/leaderboard/UnifiedLeaderboardLayout";
+import { SocialActions } from "@/components/category/SocialActions";
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -56,28 +57,28 @@ const CategoryPage = () => {
           // Show content if we have category data
           if (dbCategory) {
             return (
-              <div
-                className="flex flex-col flex-grow min-h-screen"
-                style={{ background: "linear-gradient(135deg, rgba(25, 7, 73, 0.6) 0%, rgba(7, 2, 21, 0.6) 100%)" }}
-              >
-                <div className="container mx-auto px-4 py-8 flex-grow">
-                  <CategoryPageContent
-                    categoryId={categoryId}
-                    leaderboardAthletes={leaderboardAthletes}
-                    submittedRankingsCount={submittedRankingsCount}
-                    categoryName={dbCategory.name}
-                    categoryDescription={dbCategory.description}
-                  />
-                  <CategoryPageErrorHandler
-                    categoryError={errors.categoryError}
-                    leaderboardError={errors.leaderboardError}
-                    userRankingError={errors.userRankingError}
-                    rankingsCountError={errors.rankingsCountError}
-                    isLoading={isLoading}
-                    onRetry={refetch.refetchLeaderboard}
-                  />
-                </div>
-              </div>
+              <>
+                <UnifiedLeaderboardLayout
+                  categoryId={categoryId}
+                  categoryName={dbCategory.name}
+                  categoryDescription={dbCategory.description}
+                  athletes={leaderboardAthletes}
+                  submittedRankingsCount={submittedRankingsCount}
+                  socialActions={<SocialActions categoryId={categoryId} />}
+                  compact={false}
+                  showComments={true}
+                  userRankingStatus={userRankingStatus}
+                  userRankingId={userRanking?.id}
+                />
+                <CategoryPageErrorHandler
+                  categoryError={errors.categoryError}
+                  leaderboardError={errors.leaderboardError}
+                  userRankingError={errors.userRankingError}
+                  rankingsCountError={errors.rankingsCountError}
+                  isLoading={isLoading}
+                  onRetry={refetch.refetchLeaderboard}
+                />
+              </>
             );
           }
 
