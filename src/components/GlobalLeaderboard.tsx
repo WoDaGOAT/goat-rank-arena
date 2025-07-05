@@ -1,4 +1,3 @@
-
 import { Athlete } from "@/types";
 import LeaderboardRow from "./LeaderboardRow";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -162,6 +161,40 @@ const GlobalLeaderboard = ({
                 />
               ))}
             </div>
+
+            {/* Persistent CTA Section - Always show when leaderboard exists */}
+            {categoryId && (
+              <div className="border-t border-white/20 bg-white/5 p-4 md:p-6 text-center">
+                <div className="max-w-md mx-auto">
+                  <h3 className="text-base md:text-lg font-semibold text-white mb-2">
+                    Join the Debate
+                  </h3>
+                  <p className="text-sm text-gray-300 mb-4">
+                    What's your take on the greatest {sanitize(categoryName)}? Share your ranking!
+                  </p>
+                  <Button 
+                    asChild 
+                    variant="cta" 
+                    size="lg" 
+                    className="
+                      w-full sm:w-auto
+                      py-3 px-6 sm:py-3 sm:px-8
+                      text-sm sm:text-base
+                      rounded-full
+                      bg-gradient-to-r from-fuchsia-500 to-cyan-500 
+                      hover:opacity-90 
+                      transition-all duration-200 
+                      shadow-lg hover:shadow-xl
+                    "
+                  >
+                    <Link to={`/create-ranking/${categoryId}`}>
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                      <span className="font-semibold">Add Your Ranking</span>
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           // Fallback for when we have 3+ rankings but no athlete data (data loading issue)
